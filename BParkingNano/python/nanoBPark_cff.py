@@ -20,6 +20,7 @@ from PhysicsTools.BParkingNano.electronsBPark_cff import *
 from PhysicsTools.BParkingNano.tracksBPark_cff import *
 
 ## B collections
+from PhysicsTools.BParkingNano.BToMuMuPi_cff import BToMuMuPi, BToMuMuPiTable, BToMuMuPiSequence, CountBToMuMuPi
 from PhysicsTools.BParkingNano.BToKLL_cff import *
 from PhysicsTools.BParkingNano.BToKstarLL_cff import *
 
@@ -51,6 +52,10 @@ def nanoAOD_customizeElectronFilteredBPark(process):
 
 def nanoAOD_customizeTriggerBitsBPark(process):
     process.nanoSequence = cms.Sequence( process.nanoSequence + trgTables)
+    return process
+
+def nanoAOD_customizeBToMuMuPi(process):
+    process.nanoBMuMuPiSequence = cms.Sequence( BToMuMuPiSequence + BToMuMuPiTable )
     return process
 
 def nanoAOD_customizeBToKLL(process):

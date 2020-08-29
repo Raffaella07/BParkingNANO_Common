@@ -12,6 +12,8 @@
 #include <memory>
 #include <map>
 #include <string>
+#include "DataFormats/Candidate/interface/ShallowCloneCandidate.h"
+#include "DataFormats/Common/interface/RefToPtr.h"
 #include "DataFormats/PatCandidates/interface/PackedCandidate.h"
 #include "CommonTools/Utils/interface/StringCutObjectSelector.h"
 #include "DataFormats/PatCandidates/interface/CompositeCandidate.h"
@@ -123,7 +125,7 @@ void BToMuMuPiBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup c
       edm::Ptr<pat::CompositeCandidate> pi_ptr(pions, pi_idx);
       if( !pi_selection_(*pi_ptr) ) continue;
       
-      math::PtEtaPhiMLorentzVector k_p4(
+      math::PtEtaPhiMLorentzVector pi_p4(
         pi_ptr->pt(), 
         pi_ptr->eta(),
         pi_ptr->phi(),
@@ -140,17 +142,20 @@ void BToMuMuPiBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup c
 
         // HNL candidate
         pat::CompositeCandidate hnl_cand;
-        hnl_cand.setP4(sel_mu_ptr->p4() + k_p4);
+        hnl_cand.setP4(sel_mu_ptr->p4() + pi_p4);
         hnl_cand.setCharge(sel_mu_ptr->charge() + pi_ptr->charge());
 
         hnl_cand.addUserCand("mu", sel_mu_ptr);
         hnl_cand.addUserCand("pi", pi_ptr);
 
+        // check if pass pre vertex cut
+        if( !pre_vtx_selection_(hnl_cand) ) continue;
+
         // fit the mu-pi vertex
         KinVtxFitter fitter(
           {sel_muons_ttracks->at(sel_mu_idx), pions_ttracks->at(pi_idx)},
-          {sel_mu_ptr->mass(), PI_MASS},
-          {LEP_SIGMA, PI_SIGMA} //some small sigma for the lepton mass
+          {sel_mu_ptr->mass()               , PI_MASS                  },
+          {LEP_SIGMA                        , PI_SIGMA                 } //some small sigma for the lepton mass
         );
         if(!fitter.success()) continue; // hardcoded, but do we need otherwise?
         hnl_cand.setVertex( 
@@ -161,54 +166,57 @@ void BToMuMuPiBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup c
           )  
         );
 
-        hnl_cand.addUserInt("sv_OK" , fitter.success());
-        hnl_cand.addUserFloat("sv_chi2", fitter.chi2());
-        hnl_cand.addUserFloat("sv_ndof", fitter.dof()); // float??
-        hnl_cand.addUserFloat("sv_prob", fitter.prob());
-        hnl_cand.addUserFloat("fitted_mll" , (fitter.daughter_p4(0) + fitter.daughter_p4(1)).mass());
         auto fit_p4 = fitter.fitted_p4();
-        hnl_cand.addUserFloat("fitted_pt"  , fit_p4.pt()); 
-        hnl_cand.addUserFloat("fitted_eta" , fit_p4.eta());
-        hnl_cand.addUserFloat("fitted_phi" , fit_p4.phi());
-        hnl_cand.addUserFloat("fitted_mass", fitter.fitted_candidate().mass());      
-        hnl_cand.addUserFloat("fitted_massErr", sqrt(fitter.fitted_candidate().kinematicParametersError().matrix()(6,6)));      
-        hnl_cand.addUserFloat(
-          "cos_theta_2D", 
-          cos_theta_2D(fitter, *beamspot, hnl_cand.p4())
-          );
-        hnl_cand.addUserFloat(
-          "fitted_cos_theta_2D", 
-          cos_theta_2D(fitter, *beamspot, fit_p4)
-          );
-        auto lxy = l_xy(fitter, *beamspot);
-        hnl_cand.addUserFloat("l_xy", lxy.value());
-        hnl_cand.addUserFloat("l_xy_unc", lxy.error());
-        hnl_cand.addUserFloat("vtx_x", hnl_cand.vx());
-        hnl_cand.addUserFloat("vtx_y", hnl_cand.vy());
-        hnl_cand.addUserFloat("vtx_z", hnl_cand.vz());
-        hnl_cand.addUserFloat("vtx_ex", sqrt(fitter.fitted_vtx_uncertainty().cxx()));
-        hnl_cand.addUserFloat("vtx_ey", sqrt(fitter.fitted_vtx_uncertainty().cyy()));
-        hnl_cand.addUserFloat("vtx_ez", sqrt(fitter.fitted_vtx_uncertainty().czz()));
-  
-        hnl_cand.addUserFloat("fitted_l1_pt" , fitter.daughter_p4(0).pt()); 
-        hnl_cand.addUserFloat("fitted_l1_eta", fitter.daughter_p4(0).eta());
-        hnl_cand.addUserFloat("fitted_l1_phi", fitter.daughter_p4(0).phi());
-        hnl_cand.addUserFloat("fitted_l2_pt" , fitter.daughter_p4(1).pt()); 
-        hnl_cand.addUserFloat("fitted_l2_eta", fitter.daughter_p4(1).eta());
-        hnl_cand.addUserFloat("fitted_l2_phi", fitter.daughter_p4(1).phi());
-        hnl_cand.addUserFloat("fitted_k_pt"  , fitter.daughter_p4(2).pt()); 
-        hnl_cand.addUserFloat("fitted_k_eta" , fitter.daughter_p4(2).eta());
-        hnl_cand.addUserFloat("fitted_k_phi" , fitter.daughter_p4(2).phi());
+        auto lxy    = l_xy(fitter, *beamspot);
 
         // B candidate
         pat::CompositeCandidate b_cand;
         b_cand.setP4(hnl_cand.p4() + trg_mu_ptr->p4());
         b_cand.setCharge(hnl_cand.charge() + trg_mu_ptr->charge());
 
-        b_cand.addUserCand("trg_mu", trg_mu_ptr);
-// https://cmssdt.cern.ch/lxr/source/DataFormats/Candidate/interface/Candidate.h
-//         sourceCandidatePtr()
-        b_cand.addUserCand("hnl", hnl_cand.masterClonePtr());
+//         b_cand.addUserCand("trg_mu", trg_mu_ptr);
+        // https://cmssdt.cern.ch/lxr/source/DataFormats/Candidate/interface/Candidate.h
+        
+//         std::cout << __LINE__ << "]\t" << hnl_cand.pt() << std::endl;
+//         std::cout << __LINE__ << "]\t" << hnl_cand.originalObjectRef().isNull() << std::endl;
+//         edm::Ptr<pat::CompositeCandidate> hnl_cand_ptr = edm::refToPtr(hnl_cand.originalObjectRef());
+//         b_cand.addUserCand("hnl", hnl_cand.originalObjectRef());
+//         b_cand.addUserCand("hnl", hnl_cand.sourceCandidatePtr(0));
+
+
+        b_cand.addDaughter(*trg_mu_ptr, "trg_mu");
+        b_cand.addDaughter( hnl_cand  , "hnl"   );
+
+        b_cand.addUserInt  ("hnl_vtx_OK"             , fitter.success()                                                        );
+        b_cand.addUserFloat("hnl_vtx_chi2"           , fitter.chi2()                                                           );
+        b_cand.addUserFloat("hnl_vtx_ndof"           , fitter.dof()                                                            ); // float??
+        b_cand.addUserFloat("hnl_vtx_prob"           , fitter.prob()                                                           );
+        b_cand.addUserFloat("hnl_fitted_pt"          , fit_p4.pt()                                                             ); 
+        b_cand.addUserFloat("hnl_fitted_eta"         , fit_p4.eta()                                                            );
+        b_cand.addUserFloat("hnl_fitted_phi"         , fit_p4.phi()                                                            );
+        b_cand.addUserFloat("hnl_fitted_mass"        , fitter.fitted_candidate().mass()                                        );      
+        b_cand.addUserFloat("hnl_fitted_massErr"     , sqrt(fitter.fitted_candidate().kinematicParametersError().matrix()(6,6)));      
+        b_cand.addUserFloat("hnl_cos_theta_2D"       , cos_theta_2D(fitter, *beamspot, hnl_cand.p4())                          );
+        b_cand.addUserFloat("hnl_fitted_cos_theta_2D", cos_theta_2D(fitter, *beamspot, fit_p4)                                 );
+        b_cand.addUserFloat("hnl_l_xy"               , lxy.value()                                                             );
+        b_cand.addUserFloat("hnl_l_xy_unc"           , lxy.error()                                                             );
+        b_cand.addUserFloat("hnl_vtx_x"              , hnl_cand.vx()                                                           );
+        b_cand.addUserFloat("hnl_vtx_y"              , hnl_cand.vy()                                                           );
+        b_cand.addUserFloat("hnl_vtx_z"              , hnl_cand.vz()                                                           );
+        b_cand.addUserFloat("hnl_vtx_ex"             , sqrt(fitter.fitted_vtx_uncertainty().cxx())                             );
+        b_cand.addUserFloat("hnl_vtx_ey"             , sqrt(fitter.fitted_vtx_uncertainty().cyy())                             );
+        b_cand.addUserFloat("hnl_vtx_ez"             , sqrt(fitter.fitted_vtx_uncertainty().czz())                             );
+        b_cand.addUserFloat("hnl_fitted_mu_pt"       , fitter.daughter_p4(0).pt()                                              ); 
+        b_cand.addUserFloat("hnl_fitted_mu_eta"      , fitter.daughter_p4(0).eta()                                             );
+        b_cand.addUserFloat("hnl_fitted_mu_phi"      , fitter.daughter_p4(0).phi()                                             );
+        b_cand.addUserFloat("hnl_fitted_pi_pt"       , fitter.daughter_p4(1).pt()                                              ); 
+        b_cand.addUserFloat("hnl_fitted_pi_eta"      , fitter.daughter_p4(1).eta()                                             );
+        b_cand.addUserFloat("hnl_fitted_pi_phi"      , fitter.daughter_p4(1).phi()                                             );
+
+        // post fit selection
+        if( !post_vtx_selection_(b_cand) ) continue;        
+
+        ret_val->push_back(b_cand);
               
       } // for(size_t sel_mu_idx = 0; sel_mu_idx < sel_muons->size(); ++sel_mu_idx)
       
