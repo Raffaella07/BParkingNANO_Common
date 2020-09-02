@@ -1,5 +1,6 @@
 import FWCore.ParameterSet.Config as cms
-from  PhysicsTools.NanoAOD.genparticles_cff import *
+from  PhysicsTools.NanoAOD.genparticles_cff import finalGenParticles, genParticleTable
+from PhysicsTools.BParkingNano.common_cff import Var
 
 
 # for BPHPark start with merged particles (pruned + packed),
@@ -10,7 +11,6 @@ finalGenParticlesBPark = finalGenParticles.clone(
   src = cms.InputTag("mergedGenParticles"),
   select = cms.vstring(
 	"drop *",
-        "keep++ (abs(pdgId) == 511 || abs(pdgId) == 521)",  #keep all B0(=511) and B+/-(521) + their daughters and granddaughters
    )
 )
 
@@ -23,8 +23,6 @@ genParticleBParkTable = genParticleTable.clone(
       vz = Var("vz()", float, doc="z coordinate of the production vertex position, in cm", precision=10),
   )
 )
-
-
 
 genParticleBParkSequence = cms.Sequence(finalGenParticlesBPark)
 genParticleBParkTables = cms.Sequence(genParticleBParkTable)
