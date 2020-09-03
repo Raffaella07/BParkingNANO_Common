@@ -5,41 +5,13 @@ from glob import glob
 
 options = VarParsing('python')
 
-options.register('isMC', False,
-    VarParsing.multiplicity.singleton,
-    VarParsing.varType.bool,
-    "Run this on real data"
-)
-options.register('skipDuplicated', True,
-    VarParsing.multiplicity.singleton,
-    VarParsing.varType.bool,
-#     "Skip duplicated events. True by default"
-)
-options.register('globalTag', 'NOTSET',
-    VarParsing.multiplicity.singleton,
-    VarParsing.varType.string,
-    "Set global tag"
-)
-options.register('wantSummary', True,
-    VarParsing.multiplicity.singleton,
-    VarParsing.varType.bool,
-    "Run this on real data"
-)
-options.register('wantFullRECO', False,
-    VarParsing.multiplicity.singleton,
-    VarParsing.varType.bool,
-    "Run this on real data"
-)
-options.register('reportEvery', 10,
-    VarParsing.multiplicity.singleton,
-    VarParsing.varType.int,
-    "report every N events"
-)
-options.register('skip', 0,
-    VarParsing.multiplicity.singleton,
-    VarParsing.varType.int,
-    "skip first N events"
-)
+options.register('isMC'          ,    False, VarParsing.multiplicity.singleton, VarParsing.varType.bool  , "Run this on real data"                  )
+options.register('skipDuplicated',     True, VarParsing.multiplicity.singleton, VarParsing.varType.bool  , "Skip duplicated events. True by default")
+options.register('globalTag'     , 'NOTSET', VarParsing.multiplicity.singleton, VarParsing.varType.string, "Set global tag"                         )
+options.register('wantSummary'   ,     True, VarParsing.multiplicity.singleton, VarParsing.varType.bool  , "Run this on real data"                  )
+options.register('wantFullRECO'  ,    False, VarParsing.multiplicity.singleton, VarParsing.varType.bool  , "Run this on real data"                  )
+options.register('reportEvery'   ,       10, VarParsing.multiplicity.singleton, VarParsing.varType.int   , "report every N events"                  )
+options.register('skip'          ,        0, VarParsing.multiplicity.singleton, VarParsing.varType.int   , "skip first N events"                    )
 
 options.setDefault('maxEvents', 100)
 options.setDefault('tag', '10215')
@@ -119,143 +91,27 @@ process.NANOAODoutput = cms.OutputModule("NanoAODOutputModule",
     ),
     fileName = outputFileNANO,
     outputCommands = cms.untracked.vstring(
-      'drop *',
-      "keep nanoaodFlatTable_*Table_*_*",     # event data
-      "keep nanoaodUniqueString_nanoMetadata_*_*",   # basic metadata
+        'drop *',
+        "keep nanoaodFlatTable_*Table_*_*",     # event data
+        "keep nanoaodUniqueString_nanoMetadata_*_*",   # basic metadata
     )
 
 )
-
 
 # Additional output definition
 
 # Other statements
 from Configuration.AlCa.GlobalTag import GlobalTag
 process.GlobalTag = GlobalTag(process.GlobalTag, globaltag, '')
-# this is for the LowPt energy regression
-# process.GlobalTag.toGet = cms.VPSet(
-# cms.PSet(record = cms.string("GBRDWrapperRcd"),
-#          label = cms.untracked.string("lowPtElectron_eb_ecalOnly_05To20_mean"),
-#          tag = cms.string("lowPtElectron_eb_ecalOnly_05To20_mean_2018V1"),
-#          connect = cms.string("sqlite_file:lowPtEleReg_2018_02062020_nv.db")),
-# cms.PSet(record = cms.string("GBRDWrapperRcd"),
-#          label = cms.untracked.string("lowPtElectron_ee_ecalOnly_05To20_mean"),
-#          tag = cms.string("lowPtElectron_ee_ecalOnly_05To20_mean_2018V1"),
-#          connect = cms.string("sqlite_file:lowPtEleReg_2018_02062020_nv.db")),
-# cms.PSet(record = cms.string("GBRDWrapperRcd"),
-#          label = cms.untracked.string("lowPtElectron_eb_ecalOnly_05To20_sigma"),
-#          tag = cms.string("lowPtElectron_eb_ecalOnly_05To20_sigma_2018V1"),
-#          connect = cms.string("sqlite_file:lowPtEleReg_2018_02062020_nv.db")),
-# cms.PSet(record = cms.string("GBRDWrapperRcd"),
-#          label = cms.untracked.string("lowPtElectron_ee_ecalOnly_05To20_sigma"),
-#          tag = cms.string("lowPtElectron_ee_ecalOnly_05To20_sigma_2018V1"),
-#          connect = cms.string("sqlite_file:lowPtEleReg_2018_02062020_nv.db")),
-# cms.PSet(record = cms.string("GBRDWrapperRcd"),
-#          label = cms.untracked.string("lowPtElectron_eb_ecalTrk_05To20_mean"),
-#          tag = cms.string("lowPtElectron_eb_ecalTrk_05To20_mean_2018V1"),
-#          connect = cms.string("sqlite_file:lowPtEleReg_2018_02062020_nv.db")),
-# cms.PSet(record = cms.string("GBRDWrapperRcd"),
-#          label = cms.untracked.string("lowPtElectron_ee_ecalTrk_05To20_mean"),
-#          tag = cms.string("lowPtElectron_ee_ecalTrk_05To20_mean_2018V1"),
-#          connect = cms.string("sqlite_file:lowPtEleReg_2018_02062020_nv.db")),
-# cms.PSet(record = cms.string("GBRDWrapperRcd"),
-#          label = cms.untracked.string("lowPtElectron_eb_ecalTrk_05To20_sigma"),
-#          tag = cms.string("lowPtElectron_eb_ecalTrk_05To20_sigma_2018V1"),
-#          connect = cms.string("sqlite_file:lowPtEleReg_2018_02062020_nv.db")),
-# cms.PSet(record = cms.string("GBRDWrapperRcd"),
-#          label = cms.untracked.string("lowPtElectron_ee_ecalTrk_05To20_sigma"),
-#          tag = cms.string("lowPtElectron_ee_ecalTrk_05To20_sigma_2018V1"),
-#          connect = cms.string("sqlite_file:lowPtEleReg_2018_02062020_nv.db")),
-# cms.PSet(record = cms.string("GBRDWrapperRcd"),
-#          label = cms.untracked.string("lowPtElectron_eb_ecalOnly_20To50_mean"),
-#          tag = cms.string("lowPtElectron_eb_ecalOnly_20To50_mean_2018V1"),
-#          connect = cms.string("sqlite_file:lowPtEleReg_2018_02062020_nv.db")),
-# cms.PSet(record = cms.string("GBRDWrapperRcd"),
-#          label = cms.untracked.string("lowPtElectron_ee_ecalOnly_20To50_mean"),
-#          tag = cms.string("lowPtElectron_ee_ecalOnly_20To50_mean_2018V1"),
-#          connect = cms.string("sqlite_file:lowPtEleReg_2018_02062020_nv.db")),
-# cms.PSet(record = cms.string("GBRDWrapperRcd"),
-#          label = cms.untracked.string("lowPtElectron_eb_ecalOnly_20To50_sigma"),
-#          tag = cms.string("lowPtElectron_eb_ecalOnly_20To50_sigma_2018V1"),
-#          connect = cms.string("sqlite_file:lowPtEleReg_2018_02062020_nv.db")),
-# cms.PSet(record = cms.string("GBRDWrapperRcd"),
-#          label = cms.untracked.string("lowPtElectron_ee_ecalOnly_20To50_sigma"),
-#          tag = cms.string("lowPtElectron_ee_ecalOnly_20To50_sigma_2018V1"),
-#          connect = cms.string("sqlite_file:lowPtEleReg_2018_02062020_nv.db")),
-# cms.PSet(record = cms.string("GBRDWrapperRcd"),
-#          label = cms.untracked.string("lowPtElectron_eb_ecalTrk_20To50_mean"),
-#          tag = cms.string("lowPtElectron_eb_ecalTrk_20To50_mean_2018V1"),
-#          connect = cms.string("sqlite_file:lowPtEleReg_2018_02062020_nv.db")),
-# cms.PSet(record = cms.string("GBRDWrapperRcd"),
-#          label = cms.untracked.string("lowPtElectron_ee_ecalTrk_20To50_mean"),
-#          tag = cms.string("lowPtElectron_ee_ecalTrk_20To50_mean_2018V1"),
-#          connect = cms.string("sqlite_file:lowPtEleReg_2018_02062020_nv.db")),
-# cms.PSet(record = cms.string("GBRDWrapperRcd"),
-#          label = cms.untracked.string("lowPtElectron_eb_ecalTrk_20To50_sigma"),
-#          tag = cms.string("lowPtElectron_eb_ecalTrk_20To50_sigma_2018V1"),
-#          connect = cms.string("sqlite_file:lowPtEleReg_2018_02062020_nv.db")),
-# cms.PSet(record = cms.string("GBRDWrapperRcd"),
-#          label = cms.untracked.string("lowPtElectron_ee_ecalTrk_20To50_sigma"),
-#          tag = cms.string("lowPtElectron_ee_ecalTrk_20To50_sigma_2018V1"),
-#          connect = cms.string("sqlite_file:lowPtEleReg_2018_02062020_nv.db")),
-# cms.PSet(record = cms.string("GBRDWrapperRcd"),
-#          label = cms.untracked.string("gsfElectron_eb_ecalOnly_05To50_mean"),
-#          tag = cms.string("gsfElectron_eb_ecalOnly_05To50_mean_2018V1"),
-#          connect = cms.string("sqlite_file:lowPtEleReg_2018_02062020_nv.db")),
-# cms.PSet(record = cms.string("GBRDWrapperRcd"),
-#          label = cms.untracked.string("gsfElectron_ee_ecalOnly_05To50_mean"),
-#          tag = cms.string("gsfElectron_ee_ecalOnly_05To50_mean_2018V1"),
-#          connect = cms.string("sqlite_file:lowPtEleReg_2018_02062020_nv.db")),
-# cms.PSet(record = cms.string("GBRDWrapperRcd"),
-#          label = cms.untracked.string("gsfElectron_eb_ecalOnly_05To50_sigma"),
-#          tag = cms.string("gsfElectron_eb_ecalOnly_05To50_sigma_2018V1"),
-#          connect = cms.string("sqlite_file:lowPtEleReg_2018_02062020_nv.db")),
-# cms.PSet(record = cms.string("GBRDWrapperRcd"),
-#          label = cms.untracked.string("gsfElectron_ee_ecalOnly_05To50_sigma"),
-#          tag = cms.string("gsfElectron_ee_ecalOnly_05To50_sigma_2018V1"),
-#          connect = cms.string("sqlite_file:lowPtEleReg_2018_02062020_nv.db")),
-# cms.PSet(record = cms.string("GBRDWrapperRcd"),
-#          label = cms.untracked.string("gsfElectron_eb_ecalTrk_05To50_mean"),
-#          tag = cms.string("gsfElectron_eb_ecalTrk_05To50_mean_2018V1"),
-#          connect = cms.string("sqlite_file:lowPtEleReg_2018_02062020_nv.db")),
-# cms.PSet(record = cms.string("GBRDWrapperRcd"),
-#          label = cms.untracked.string("gsfElectron_ee_ecalTrk_05To50_mean"),
-#          tag = cms.string("gsfElectron_ee_ecalTrk_05To50_mean_2018V1"),
-#          connect = cms.string("sqlite_file:lowPtEleReg_2018_02062020_nv.db")),
-# cms.PSet(record = cms.string("GBRDWrapperRcd"),
-#          label = cms.untracked.string("gsfElectron_eb_ecalTrk_05To50_sigma"),
-#          tag = cms.string("gsfElectron_eb_ecalTrk_05To50_sigma_2018V1"),
-#          connect = cms.string("sqlite_file:lowPtEleReg_2018_02062020_nv.db")),
-# cms.PSet(record = cms.string("GBRDWrapperRcd"),
-#          label = cms.untracked.string("gsfElectron_ee_ecalTrk_05To50_sigma"),
-#          tag = cms.string("gsfElectron_ee_ecalTrk_05To50_sigma_2018V1"),
-#          connect = cms.string("sqlite_file:lowPtEleReg_2018_02062020_nv.db")))
-# 
-# 
-# 
-# 
-
-
 
 from PhysicsTools.BParkingNano.nanoBPark_cff import *
-process = nanoAOD_customizeMuonTriggerBPark     (process)
-# process = nanoAOD_customizeElectronFilteredBPark(process)
-process = nanoAOD_customizeTrackFilteredBPark   (process)
-process = nanoAOD_customizeBToMuMuPi            (process)
-# process = nanoAOD_customizeBToKLL               (process)
-# process = nanoAOD_customizeBToKstarEE           (process)
-# process = nanoAOD_customizeBToKstarMuMu         (process)
-process = nanoAOD_customizeTriggerBitsBPark     (process)
-
-
-
+process = nanoAOD_customizeMuonTriggerBPark  (process)
+process = nanoAOD_customizeTrackFilteredBPark(process)
+process = nanoAOD_customizeBToMuMuPi         (process)
+process = nanoAOD_customizeTriggerBitsBPark  (process)
 
 # Path and EndPath definitions
-process.nanoAOD_MuMuPi_step     = cms.Path(process.nanoSequence + process.nanoBMuMuPiSequence + CountBToMuMuPi )
-# process.nanoAOD_KMuMu_step     = cms.Path(process.nanoSequence + process.nanoBKMuMuSequence + CountBToKmumu )
-# process.nanoAOD_Kee_step       = cms.Path(process.nanoSequence + process.nanoBKeeSequence   + CountBToKee   )
-# process.nanoAOD_KstarMuMu_step = cms.Path(process.nanoSequence + process.KstarToKPiSequence + process.nanoBKstarMuMuSequence + CountBToKstarMuMu )
-# process.nanoAOD_KstarEE_step   = cms.Path(process.nanoSequence + process.KstarToKPiSequence + process.nanoBKstarEESequence   + CountBToKstarEE   )
+process.nanoAOD_MuMuPi_step = cms.Path(process.nanoSequence + process.nanoBMuMuPiSequence + CountBToMuMuPi )
 
 # customisation of the process.
 if options.isMC:
@@ -268,36 +124,23 @@ process.NANOAODoutput_step = cms.EndPath(process.NANOAODoutput)
 
 # Schedule definition
 process.schedule = cms.Schedule(
-                                process.nanoAOD_MuMuPi_step,
-#                                 process.nanoAOD_KMuMu_step,
-#                                 process.nanoAOD_Kee_step, 
-#                                 process.nanoAOD_KstarMuMu_step,
-#                                 process.nanoAOD_KstarEE_step,
-                                process.endjob_step, 
-                                process.NANOAODoutput_step
-                               )
+    process.nanoAOD_MuMuPi_step,
+    process.endjob_step, 
+    process.NANOAODoutput_step
+)
+    
 if options.wantFullRECO:
     process.schedule = cms.Schedule(
-                                    process.nanoAOD_MuMuPi_step,
-#                                     process.nanoAOD_KMuMu_step,
-#                                     process.nanoAOD_Kee_step, 
-#                                     process.nanoAOD_KstarMuMu_step,
-#                                     process.nanoAOD_KstarEE_step,
-                                    process.endjob_step, 
-                                    process.FEVTDEBUGHLToutput_step, 
-                                    process.NANOAODoutput_step
-                                    )
+        process.nanoAOD_MuMuPi_step,
+        process.endjob_step, 
+        process.FEVTDEBUGHLToutput_step, 
+        process.NANOAODoutput_step
+    )
 from PhysicsTools.PatAlgos.tools.helpers import associatePatAlgosToolsTask
 associatePatAlgosToolsTask(process)
 
 process.NANOAODoutput.SelectEvents = cms.untracked.PSet(
-        SelectEvents = cms.vstring(
-                                   'nanoAOD_MuMuPi_step', 
-#                                    'nanoAOD_KMuMu_step', 
-#                                    'nanoAOD_Kee_step',
-#                                    'nanoAOD_KstarMuMu_step',
-#                                    'nanoAOD_KstarEE_step',
-                                   )
+    SelectEvents = cms.vstring('nanoAOD_MuMuPi_step', )
 )
 
 

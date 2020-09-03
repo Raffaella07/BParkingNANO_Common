@@ -119,6 +119,8 @@ void BToMuMuPiBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup c
 
   for(size_t trg_mu_idx = 0; trg_mu_idx < trg_muons->size(); ++trg_mu_idx) {
 
+    size_t trg_mu_position = sel_muons->size(); // make it point to just beyond the size of the collection
+    
     edm::Ptr<pat::Muon> trg_mu_ptr(trg_muons, trg_mu_idx);
     
     for(size_t pi_idx = 0; pi_idx < pions->size(); ++pi_idx) {
@@ -137,8 +139,23 @@ void BToMuMuPiBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup c
       for(size_t sel_mu_idx = 0; sel_mu_idx < sel_muons->size(); ++sel_mu_idx) {
         edm::Ptr<pat::Muon> sel_mu_ptr(sel_muons, sel_mu_idx);
         
+
         // the second muon must be _other_ than the trigger muon
-        if(sel_mu_ptr==trg_mu_ptr) continue;
+        if(sel_mu_ptr->pt()==trg_mu_ptr->pt()) { // lacking of any better idea for a comparison by pointer... 
+            // save anyways the position in the collection
+            // trigger muons are a subset of selected muons and selected muons are those that 
+            // are saved in the tress eventually (see muonsBPark_cff.py), so
+            // find the position of the trigger muon in the collection of selected muons
+            trg_mu_position = sel_mu_idx;
+//             std::cout << __LINE__ << "]\t selected muon pt\t"     << sel_mu_ptr->pt()  << std::endl
+//                                   << "    \t trigger  muon pt\t"  << trg_mu_ptr->pt()  << std::endl
+//                                   << "    \t selected muon eta\t" << sel_mu_ptr->eta() << std::endl
+//                                   << "    \t trigger  muon eta\t" << trg_mu_ptr->eta() << std::endl
+//                                   << "    \t selected muon phi\t" << sel_mu_ptr->phi() << std::endl
+//                                   << "    \t trigger  muon phi\t" << trg_mu_ptr->phi() << std::endl
+//                                   << std::endl;
+            continue;
+        }
 
         // HNL candidate
         pat::CompositeCandidate hnl_cand;
@@ -200,6 +217,7 @@ void BToMuMuPiBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup c
         b_cand.addUserFloat("hnl_fitted_cos_theta_2D", cos_theta_2D(fitter, *beamspot, fit_p4)                                 );
         b_cand.addUserFloat("hnl_l_xy"               , lxy.value()                                                             );
         b_cand.addUserFloat("hnl_l_xy_unc"           , lxy.error()                                                             );
+        b_cand.addUserFloat("hnl_ls_xy"              , lxy.value()/lxy.error()                                                 );
         b_cand.addUserFloat("hnl_vtx_x"              , hnl_cand.vx()                                                           );
         b_cand.addUserFloat("hnl_vtx_y"              , hnl_cand.vy()                                                           );
         b_cand.addUserFloat("hnl_vtx_z"              , hnl_cand.vz()                                                           );
@@ -212,6 +230,11 @@ void BToMuMuPiBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup c
         b_cand.addUserFloat("hnl_fitted_pi_pt"       , fitter.daughter_p4(1).pt()                                              ); 
         b_cand.addUserFloat("hnl_fitted_pi_eta"      , fitter.daughter_p4(1).eta()                                             );
         b_cand.addUserFloat("hnl_fitted_pi_phi"      , fitter.daughter_p4(1).phi()                                             );
+        
+        // position of the muons / tracks in their own collections
+        b_cand.addUserInt("trg_mu_idx", trg_mu_position);
+        b_cand.addUserInt("sel_mu_idx", sel_mu_idx);
+        b_cand.addUserInt("pi_idx"    , pi_idx    );
 
         // post fit selection
         if( !post_vtx_selection_(b_cand) ) continue;        
@@ -224,11 +247,6 @@ void BToMuMuPiBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup c
 
   } // for(size_t trg_mu_idx = 0; trg_mu_idx < trg_muons->size(); ++trg_mu_idx)
   
-//   for (auto & b_cand: *ret_val){
-//     b_cand.addUserInt("n_pi_used", std::count(used_trk_id.begin() , used_trk_id.end() , cand.userInt("pi_idx")));
-//     b_cand.addUserInt("n_l1_used", std::count(used_lep1_id.begin(), used_lep1_id.end(), cand.userInt("l1_idx"))+std::count(used_lep2_id.begin(),used_lep2_id.end(),cand.userInt("l1_idx")));
-//   }
-
   evt.put(std::move(ret_val));
 }
 
