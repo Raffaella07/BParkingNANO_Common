@@ -6,19 +6,27 @@
 # stuff that I've read while developing this
 # https://medium.com/@mgarod/dynamically-add-a-method-to-a-class-in-python-c49204b85bd6
 
-
-
 import hashlib
 import awkward1 as ak
 import numpy as np
 import uproot
 import uproot4
 import ROOT
+from array import array
+from collections import OrderedDict
+from flat_tree_branches import branches as flat_tree_branches
 
 base_branches = ['pt', 'eta', 'phi', 'mass', 'pdgId']
 extra_branches = ['charge', 'dxy', 'dz']
+muid_branches = ['isGlobal', 'isPFcand', 'isTracker', 'mediumId', 'pfIsoId', 'softId', 'tightId', 'tkIsoId', 'triggerIdLoose']
 gen_branches = ['status', 'statusFlags', 'genPartIdxMother']
 bcand_branches = ['pt', 'eta', 'phi', 'mass', 'sv_chi2', 'sv_prob', 'sv_lxy', 'sv_lxye', 'sv_lxy_sig', 'sv_x', 'sv_y', 'sv_z', 'sv_xe', 'sv_ye', 'sv_ze', 'hnl_cos2D', 'hnl_fit_cos2D', 'hnl_fit_mass', 'hnl_fit_masse', 'hnl_fit_pt', 'hnl_fit_eta', 'hnl_fit_phi', 'hnl_charge']
+
+class Event(object):
+    '''
+    use this as a sort of container
+    '''
+    pass
 
 class Particle(object):
 
@@ -142,7 +150,6 @@ class BCandidate(Particle):
         if any([getattr(pp, 'genp', lambda : None)() is None for pp in [self.trg_mu(), self.mu(), self.pi()]]):
             return False
         
-        
         fully_matched = self.checkFirstAncestor(self.trg_mu().genp(), b_pdgid  ) + \
                         self.checkFirstAncestor(self.mu().genp()    , b_pdgid  ) + \
                         self.checkFirstAncestor(self.pi().genp()    , b_pdgid  ) + \
@@ -168,11 +175,26 @@ if __name__ == '__main__':
     tree = fin["Events"]
     # tree.show()
 
-    for iev in range(10):
+    fout = ROOT.TFile('flat_tree.root', 'recreate')
+    ntuple = ROOT.TNtuple('tree', 'tree', ':'.join(flat_tree_branches.keys()))
+    tofill = OrderedDict(zip(flat_tree_branches.keys(), [np.nan]*len(flat_tree_branches.keys()))) # initialise all branches to unphysical -99       
+
+    for iev in range(4):
+        
+        print '='*50
+        print 'event %d' %(iev)
+
+        event = Event()
+        event.run   = tree['run'].array()[iev]
+        event.lumi  = tree['luminosityBlock'].array()[iev]
+        event.event = tree['event'].array()[iev]
+
+        bcands = []
+        
         for icand in range(tree['nb'].array()[iev]):
             
-            print '='*50
-            print 'event %d, candidate %d' %(iev, icand)
+#             print '='*50
+#             print 'event %d, candidate %d' %(iev, icand)
                         
             pi_idx      = tree['b_pi_idx'].array()[iev][icand]
             pi          = RecoParticle(tree, 'ProbeTracks', iev, pi_idx)
@@ -181,23 +203,53 @@ if __name__ == '__main__':
             pi.set_genp(pi_genp)
 
             trg_mu_idx      = tree['b_trg_mu_idx'].array()[iev][icand]
-            trg_mu          = RecoParticle(tree, 'Muon', iev, trg_mu_idx)
+            trg_mu          = RecoParticle(tree, 'Muon', iev, trg_mu_idx, branches=base_branches+extra_branches+muid_branches)
             trg_mu_genp_idx = tree['Muon_genPartIdx'].array()[iev][trg_mu_idx]
             trg_mu_genp     = GenParticle(tree, 'GenPart', iev, trg_mu_genp_idx)
             trg_mu.set_genp(trg_mu_genp)
 
             sel_mu_idx      = tree['b_sel_mu_idx'].array()[iev][icand]
-            sel_mu          = RecoParticle(tree, 'Muon', iev, sel_mu_idx)
+            sel_mu          = RecoParticle(tree, 'Muon', iev, sel_mu_idx, branches=base_branches+extra_branches+muid_branches)
             sel_mu_genp_idx = tree['Muon_genPartIdx'].array()[iev][sel_mu_idx]
             sel_mu_genp     = GenParticle(tree, 'GenPart', iev, sel_mu_genp_idx)
             sel_mu.set_genp(sel_mu_genp) 
 
             candidate = BCandidate(tree, 'b', iev, icand, trg_mu, sel_mu, pi)
+            bcands.append(candidate)
                         
-            print  'pion\n', pi, '\n'
-            print  'trigger muon\n', trg_mu, '\n'
-            print  'selected muon\n', sel_mu, '\n'
-            print  'B candidate muon\n', candidate, '\n'
+#             print  'pion\n', pi, '\n'
+#             print  'trigger muon\n', trg_mu, '\n'
+#             print  'selected muon\n', sel_mu, '\n'
+#             print  'B candidate \n', candidate, '\n'
 
-#             import ipdb ; ipdb.set_trace()        
+        # sort the candidates
+        bcands.sort(key = lambda x : x.hnl_fit_pt(), reverse=True)
+
+        for ii, ib in enumerate(bcands):
+            print ii, ib.sv_lxy()
+
+
+        print 'fetched all %d cands' %(len(bcands))
+        list_of_matches = [ib.isMatched() for ib in bcands]
+        is_there_a_match = any(list_of_matches)
+        match_index = list_of_matches.index(True) if any(list_of_matches) else None
+        print 'the gen-matched candidate position is ', match_index
+        
+        if not match_index: continue
+
+        print '\t this is the matched'
+        print bcands[match_index]
+        
+        event.b = bcands[match_index]
+        
+        for k, v in tofill.iteritems(): 
+            tofill[k] = flat_tree_branches[k](event)
+            
+        ntuple.Fill(array('f', tofill.values()))
+
+#         import ipdb ; ipdb.set_trace()        
 #             raw_input("Press any key to continue")
+
+    fout.cd()
+    ntuple .Write()
+    fout.Close()
