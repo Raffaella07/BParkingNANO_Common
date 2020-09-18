@@ -36,49 +36,50 @@ BToMuMuPiTable = cms.EDProducer(
     'SimpleCompositeCandidateFlatTableProducer',
     src = cms.InputTag("BToMuMuPi"),
     cut = cms.string(""),
-    name = cms.string("b"),
-    doc = cms.string("HNL Variable"),
+    name = cms.string("Bcand"),
+    doc = cms.string("B candidate from trigger muon, and muon+pion from vertex"),
     singleton=cms.bool(False),
     extension=cms.bool(False),
     variables=cms.PSet(
-        # pre-fit quantities
-        CandVars,
-        trg_mu_idx = uint('trg_mu_idx'),
-        sel_mu_idx = uint('sel_mu_idx'),
-        pi_idx     = uint('pi_idx'    ),
+        # pre-fit quantities related to the B
+        CandVars,  # pt, eta, phi, mass, charge, pdgId
+        # 
+        triggerMuonIdx = uint('triggerMuonIdx'), # naming convention of NanoAODs: <collection_name_starting_with_non_capital>Idx
+        muonIdx = uint('muonIdx'),
+        probeTracksIdx = uint('probeTracksIdx' ), # bad convention in BParkinNanoAOD, it should be ProbeTrack, not ProbeTracks
         # mu-pi fit and vtx info
-        sv_chi2    = ufloat('hnl_vtx_chi2' ),
-        sv_prob    = ufloat('hnl_vtx_prob' ),
-        sv_lxy     = ufloat('hnl_l_xy'     ),
-        sv_lxye    = ufloat('hnl_l_xy_unc' ),
-        sv_lxy_sig = ufloat('hnl_ls_xy'    ),
-        sv_x       = ufloat('hnl_vtx_x'    ),
-        sv_y       = ufloat('hnl_vtx_y'    ),
-        sv_z       = ufloat('hnl_vtx_z'    ),
-        sv_xe      = ufloat('hnl_vtx_ex'   ), ## only saving diagonal elements of the cov matrix
-        sv_ye      = ufloat('hnl_vtx_ey'   ),
-        sv_ze      = ufloat('hnl_vtx_ez'   ),
-        # HNL 
-        hnl_mass   = Var('daughter("hnl").mass()', float),
-        hnl_pt     = Var('daughter("hnl").pt()'  , float),
-        hnl_eta    = Var('daughter("hnl").eta()' , float),
-        hnl_phi    = Var('daughter("hnl").phi()' , float),
-        hnl_charge = Var('daughter("hnl").charge()', int),
+        hnlVtxChi2    = ufloat('hnlVtxChi2' ),  # naming convention of NanoAODs: use "_" only for variable of a collection
+        hnlVtxProb    = ufloat('hnlVtxProb' ),  #                                use "firstSecondThird" where each is a distinct entity
+        hnlLxy     = ufloat('hnlLxy'     ),
+        hnlLxyE    = ufloat('hnlLxyE'    ),
+        hnlLsxy = ufloat('hnlLsxy'    ),
+        hnlVtxX       = ufloat('hnlVtxX'    ),
+        hnlVtxY       = ufloat('hnlVtxY'    ),
+        hnlVtxZ       = ufloat('hnlVtxZ'    ),
+        hnlVtxXE      = ufloat('hnlVtxXE'   ),  # only saving diagonal elements of the cov matrix
+        hnlVtxYE      = ufloat('hnlVtxYE'   ),
+        hnlVtxZE      = ufloat('hnlVtxZE'   ),
+        # HNL: what is the difference between this and the fitted quantities ?
+        hnlMass   = Var('daughter("hnl").mass()', float),
+        hnlPt     = Var('daughter("hnl").pt()'  , float),
+        hnlEta    = Var('daughter("hnl").eta()' , float),
+        hnlPhi    = Var('daughter("hnl").phi()' , float),
+        hnlCharge = Var('daughter("hnl").charge()', int),
         # Cos(theta)
-        hnl_cos2D     = ufloat('hnl_cos_theta_2D'       ),
-        hnl_fit_cos2D = ufloat('hnl_fitted_cos_theta_2D'),
+        hnlCosTheta2D     = ufloat('hnlCosTheta2D'       ),
+        hnlFittedCosTheta2D = ufloat('hnlFittedCosTheta2D'),
         # post-fit momentum
-        hnl_fit_mass   = ufloat('hnl_fitted_mass'   ),
-        hnl_fit_masse = ufloat('hnl_fitted_massErr'),
-        hnl_fit_pt    = ufloat('hnl_fitted_pt'     ),
-        hnl_fit_eta   = ufloat('hnl_fitted_eta'    ),
-        hnl_fit_phi   = ufloat('hnl_fitted_phi'    ),
-        fit_mu_pt     = ufloat('hnl_fitted_mu_pt'  ),
-        fit_mu_eta    = ufloat('hnl_fitted_mu_eta' ),
-        fit_mu_phi    = ufloat('hnl_fitted_mu_phi' ),
-        fit_pi_pt     = ufloat('hnl_fitted_pi_pt'  ),
-        fit_pi_eta    = ufloat('hnl_fitted_pi_eta' ),
-        fit_pi_phi    = ufloat('hnl_fitted_pi_phi' ),
+        hnlFittedMass  = ufloat('hnlFittedMass'   ), 
+        hnlFittedMassErr = ufloat('hnlFittedMassErr'),
+        hnlFittedPt    = ufloat('hnlFittedPt'     ),
+        hnlFittedEta   = ufloat('hnlFittedEta'    ),
+        hnlFittedPhi   = ufloat('hnlFittedPhi'    ),
+        hnlFittedMuPt     = ufloat('hnlFittedMuPt'  ),
+        hnlFittedMuEta    = ufloat('hnlFittedMuEta' ),
+        hnlFittedMuPhi    = ufloat('hnlFittedMuPhi' ),
+        hnlFittedPiPt     = ufloat('hnlFittedPiPt'  ),
+        hnlFittedPiEta    = ufloat('hnlFittedPiEta' ),
+        hnlFittedPiPhi    = ufloat('hnlFittedPiPhi' ),
     )
 )
 

@@ -204,37 +204,37 @@ void BToMuMuPiBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup c
         b_cand.addDaughter(*trg_mu_ptr, "trg_mu");
         b_cand.addDaughter( hnl_cand  , "hnl"   );
 
-        b_cand.addUserInt  ("hnl_vtx_OK"             , fitter.success()                                                        );
-        b_cand.addUserFloat("hnl_vtx_chi2"           , fitter.chi2()                                                           );
-        b_cand.addUserFloat("hnl_vtx_ndof"           , fitter.dof()                                                            ); // float??
-        b_cand.addUserFloat("hnl_vtx_prob"           , fitter.prob()                                                           );
-        b_cand.addUserFloat("hnl_fitted_pt"          , fit_p4.pt()                                                             ); 
-        b_cand.addUserFloat("hnl_fitted_eta"         , fit_p4.eta()                                                            );
-        b_cand.addUserFloat("hnl_fitted_phi"         , fit_p4.phi()                                                            );
-        b_cand.addUserFloat("hnl_fitted_mass"        , fitter.fitted_candidate().mass()                                        );      
-        b_cand.addUserFloat("hnl_fitted_massErr"     , sqrt(fitter.fitted_candidate().kinematicParametersError().matrix()(6,6)));      
-        b_cand.addUserFloat("hnl_cos_theta_2D"       , cos_theta_2D(fitter, *beamspot, hnl_cand.p4())                          );
-        b_cand.addUserFloat("hnl_fitted_cos_theta_2D", cos_theta_2D(fitter, *beamspot, fit_p4)                                 );
-        b_cand.addUserFloat("hnl_l_xy"               , lxy.value()                                                             );
-        b_cand.addUserFloat("hnl_l_xy_unc"           , lxy.error()                                                             );
-        b_cand.addUserFloat("hnl_ls_xy"              , lxy.value()/lxy.error()                                                 );
-        b_cand.addUserFloat("hnl_vtx_x"              , hnl_cand.vx()                                                           );
-        b_cand.addUserFloat("hnl_vtx_y"              , hnl_cand.vy()                                                           );
-        b_cand.addUserFloat("hnl_vtx_z"              , hnl_cand.vz()                                                           );
-        b_cand.addUserFloat("hnl_vtx_ex"             , sqrt(fitter.fitted_vtx_uncertainty().cxx())                             );
-        b_cand.addUserFloat("hnl_vtx_ey"             , sqrt(fitter.fitted_vtx_uncertainty().cyy())                             );
-        b_cand.addUserFloat("hnl_vtx_ez"             , sqrt(fitter.fitted_vtx_uncertainty().czz())                             );
-        b_cand.addUserFloat("hnl_fitted_mu_pt"       , fitter.daughter_p4(0).pt()                                              ); 
-        b_cand.addUserFloat("hnl_fitted_mu_eta"      , fitter.daughter_p4(0).eta()                                             );
-        b_cand.addUserFloat("hnl_fitted_mu_phi"      , fitter.daughter_p4(0).phi()                                             );
-        b_cand.addUserFloat("hnl_fitted_pi_pt"       , fitter.daughter_p4(1).pt()                                              ); 
-        b_cand.addUserFloat("hnl_fitted_pi_eta"      , fitter.daughter_p4(1).eta()                                             );
-        b_cand.addUserFloat("hnl_fitted_pi_phi"      , fitter.daughter_p4(1).phi()                                             );
+        b_cand.addUserInt  ("hnlVtxOK"             , fitter.success()                                                        );
+        b_cand.addUserFloat("hnlVtxChi2"           , fitter.chi2()                                                           );
+        b_cand.addUserFloat("hnlVtxNdof"           , fitter.dof()                                                            ); // float??
+        b_cand.addUserFloat("hnlVtxProb"           , fitter.prob()                                                           );
+        b_cand.addUserFloat("hnlFittedPt"          , fit_p4.pt()                                                             ); 
+        b_cand.addUserFloat("hnlFittedEta"         , fit_p4.eta()                                                            );
+        b_cand.addUserFloat("hnlFittedPhi"         , fit_p4.phi()                                                            );
+        b_cand.addUserFloat("hnlFittedMass"        , fitter.fitted_candidate().mass()                                        );      
+        b_cand.addUserFloat("hnlFittedMassErr"     , sqrt(fitter.fitted_candidate().kinematicParametersError().matrix()(6,6)));      
+        b_cand.addUserFloat("hnlCosTheta2D"        , cos_theta_2D(fitter, *beamspot, hnl_cand.p4())                          );
+        b_cand.addUserFloat("hnlFittedCosTheta2D"  , cos_theta_2D(fitter, *beamspot, fit_p4)                                 );
+        b_cand.addUserFloat("hnlLxy"               , lxy.value()                                                             );
+        b_cand.addUserFloat("hnlLxyUnc"            , lxy.error()                                                             );
+        b_cand.addUserFloat("hnlLlsxy"             , lxy.value()/lxy.error()                                                 );
+        b_cand.addUserFloat("hnlVtxX"              , hnl_cand.vx()                                                           );
+        b_cand.addUserFloat("hnlVtxY"              , hnl_cand.vy()                                                           );
+        b_cand.addUserFloat("hnlVtxZ"              , hnl_cand.vz()                                                           );
+        b_cand.addUserFloat("hnlVtxXE"             , sqrt(fitter.fitted_vtx_uncertainty().cxx())                             );
+        b_cand.addUserFloat("hnlVtxYE"             , sqrt(fitter.fitted_vtx_uncertainty().cyy())                             );
+        b_cand.addUserFloat("hnlVtxZE"             , sqrt(fitter.fitted_vtx_uncertainty().czz())                             );
+        b_cand.addUserFloat("hnlFittedMuPt"        , fitter.daughter_p4(0).pt()                                              ); 
+        b_cand.addUserFloat("hnlFittedMuEta"       , fitter.daughter_p4(0).eta()                                             );
+        b_cand.addUserFloat("hnlFittedMuPhi"       , fitter.daughter_p4(0).phi()                                             );
+        b_cand.addUserFloat("hnlFittedPiPt"        , fitter.daughter_p4(1).pt()                                              ); 
+        b_cand.addUserFloat("hnlFittedPiEta"       , fitter.daughter_p4(1).eta()                                             );
+        b_cand.addUserFloat("hnlFittedPiPhi"       , fitter.daughter_p4(1).phi()                                             );
         
         // position of the muons / tracks in their own collections
-        b_cand.addUserInt("trg_mu_idx", trg_mu_position);
-        b_cand.addUserInt("sel_mu_idx", sel_mu_idx);
-        b_cand.addUserInt("pi_idx"    , pi_idx    );
+        b_cand.addUserInt("triggerMuonIdx", trg_mu_position);
+        b_cand.addUserInt("muonIdx", sel_mu_idx);
+        b_cand.addUserInt("probeTracksIdx", pi_idx    );
 
         // post fit selection
         if( !post_vtx_selection_(b_cand) ) continue;        
