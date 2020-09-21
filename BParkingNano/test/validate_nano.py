@@ -1,3 +1,7 @@
+'''
+do python -m pip install awkward --user
+'''
+
 import uproot
 import pandas as pd
 import numpy as np
@@ -93,7 +97,7 @@ def byval_validation(v1, v2):
     return False
 
 noplot = args.noplot.split(',')
-def stat_validation(v1, v2, name = '', val_valid = False, nbins = 20):
+def stat_validation(v1, v2, name = '', val_valid = False, nbins = 100):
   if not np.isfinite(v1).all() or not np.isfinite(v2).all():
     log(name + '--> CONTAINS INFs/NANs!', 'orange')
     v1 = v1[np.isfinite(v1)]
@@ -111,11 +115,12 @@ def stat_validation(v1, v2, name = '', val_valid = False, nbins = 20):
   if 'int' in str(v1.dtype):
     m = int(m) - 1
     M = int(M) + 1
-    nbins = min(M - m, nbins*2)
+    nbins = min(M - m, nbins*2)*5
   plt.clf()
   h1, _, _ = plt.hist(v1, range = (m,M), bins = nbins, label = 'old', histtype = 'step')
   h2, _, _ = plt.hist(v2, range = (m,M), bins = nbins, label = 'new', histtype = 'step')
   ret_val = (h1 == h2).all()
+  plt.yscale('log')
   plt.legend(loc='best')
   skip = any(fnmatch.fnmatch(name, i) for i in noplot)
   skip = skip or (args.plot_fail_only and ret_val and val_valid)
@@ -124,7 +129,7 @@ def stat_validation(v1, v2, name = '', val_valid = False, nbins = 20):
   plt.clf()
   return ret_val
 
-def plot_branch(vals, name = '', nbins = 20):
+def plot_branch(vals, name = '', nbins = 100):
   if not np.isfinite(vals).all():
     log(name + '--> CONTAINS INFs/NANs!', 'orange')
     vals = vals[np.isfinite(vals)]
@@ -139,10 +144,11 @@ def plot_branch(vals, name = '', nbins = 20):
   if 'int' in str(vals.dtype):
     m = int(m) - 1
     M = int(M) + 1
-    nbins = min(M - m, nbins*2)
+    nbins = min(M - m, nbins*2)*5
   
   plt.clf()
   plt.hist(vals, range = (m,M), bins = nbins, label = 'new', histtype = 'step')
+  plt.yscale('log')
   plt.legend(loc='best')
   plt.savefig('validation/%s.png' % name)
   plt.clf()
