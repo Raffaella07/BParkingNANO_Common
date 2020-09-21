@@ -5,17 +5,20 @@ from glob import glob
 
 options = VarParsing('python')
 
-options.register('isMC'          ,    False, VarParsing.multiplicity.singleton, VarParsing.varType.bool  , "Run this on real data"                  )
-options.register('skipDuplicated',     True, VarParsing.multiplicity.singleton, VarParsing.varType.bool  , "Skip duplicated events. True by default")
-options.register('globalTag'     , 'NOTSET', VarParsing.multiplicity.singleton, VarParsing.varType.string, "Set global tag"                         )
-options.register('wantSummary'   ,     True, VarParsing.multiplicity.singleton, VarParsing.varType.bool  , "Run this on real data"                  )
-options.register('wantFullRECO'  ,    False, VarParsing.multiplicity.singleton, VarParsing.varType.bool  , "Run this on real data"                  )
-options.register('reportEvery'   ,       10, VarParsing.multiplicity.singleton, VarParsing.varType.int   , "report every N events"                  )
-options.register('skip'          ,        0, VarParsing.multiplicity.singleton, VarParsing.varType.int   , "skip first N events"                    )
+options.register('isMC'           ,  True       , VarParsing.multiplicity.singleton, VarParsing.varType.bool  , "Run this on real data"                  )
+options.register('skipDuplicated' ,  True       , VarParsing.multiplicity.singleton, VarParsing.varType.bool  , "Skip duplicated events. True by default")
+options.register('globalTag'      , 'NOTSET'    , VarParsing.multiplicity.singleton, VarParsing.varType.string, "Set global tag"                         )
+options.register('wantSummary'    ,  True       , VarParsing.multiplicity.singleton, VarParsing.varType.bool  , "Run this on real data"                  )
+options.register('wantFullRECO'   ,  False      , VarParsing.multiplicity.singleton, VarParsing.varType.bool  , "Run this on real data"                  )
+options.register('reportEvery'    ,  10         , VarParsing.multiplicity.singleton, VarParsing.varType.int   , "report every N events"                  )
+options.register('skip'           ,  0          , VarParsing.multiplicity.singleton, VarParsing.varType.int   , "skip first N events"                    )
+options.register('inputFile'      , None        , VarParsing.multiplicity.singleton, VarParsing.varType.string, "inputFile name"                         )
 
-options.setDefault('maxEvents', 100)
-options.setDefault('tag', '10215')
+
+options.setDefault('maxEvents', -1)
+options.setDefault('outputFile', 'bparknano.root')
 options.parseArguments()
+
 
 globaltag = '102X_dataRun2_v11' if not options.isMC else '102X_upgrade2018_realistic_v15'
 if options._beenSet['globalTag']:
@@ -24,9 +27,12 @@ if options._beenSet['globalTag']:
 extension = {False : 'data', True : 'mc'}
 outputFileNANO = cms.untracked.string('_'.join(['BParkNANO', extension[options.isMC], options.tag])+'.root')
 outputFileFEVT = cms.untracked.string('_'.join(['BParkFullEvt', extension[options.isMC], options.tag])+'.root')
+
+
 if not options.inputFiles:
     options.inputFiles = ['/store/data/Run2018B/ParkingBPH4/MINIAOD/05May2019-v2/230000/6B5A24B1-0E6E-504B-8331-BD899EB60110.root'] if not options.isMC else \
                          ['file:%s' %i for i in glob('/pnfs/psi.ch/cms/trivcat/store/user/anlyon/BHNLsGen/V01_n9000000_njt300/mass1.5_ctau51.922757246/step4*root')]
+
 annotation = '%s nevts:%d' % (outputFileNANO, options.maxEvents)
 
 from Configuration.StandardSequences.Eras import eras
@@ -51,7 +57,7 @@ process.maxEvents = cms.untracked.PSet(
 # Input source
 process.source = cms.Source(
     "PoolSource",
-    fileNames = cms.untracked.vstring(options.inputFiles),
+    fileNames = cms.untracked.vstring(options.inputFiles) if not options.inputFile else cms.untracked.vstring('file:{}'.format(options.inputFile)),
     secondaryFileNames = cms.untracked.vstring(),
     skipEvents=cms.untracked.uint32(options.skip),
     duplicateCheckMode = cms.untracked.string('checkEachFile' if options.skipDuplicated else 'noDuplicateCheck'),
@@ -89,7 +95,8 @@ process.NANOAODoutput = cms.OutputModule("NanoAODOutputModule",
         dataTier = cms.untracked.string('NANOAOD'),
         filterName = cms.untracked.string('')
     ),
-    fileName = outputFileNANO,
+    #fileName = outputFileNANO,
+    fileName = outputFileNANO if not options.outputFile else cms.untracked.string('file:{}'.format(options.outputFile)),
     outputCommands = cms.untracked.vstring(
         'drop *',
         "keep nanoaodFlatTable_*Table_*_*",     # event data
