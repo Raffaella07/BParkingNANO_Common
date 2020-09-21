@@ -12,11 +12,13 @@ branches['b_pt'  ] = lambda x : x.b.pt()
 branches['b_eta' ] = lambda x : x.b.eta()
 branches['b_phi' ] = lambda x : x.b.phi()
 branches['b_mass'] = lambda x : x.b.mass()
+branches['b_sv_chi2'] = lambda x : x.b.sv_chi2()
 
 branches['hnl_pt'  ] = lambda x : x.b.hnl_fit_pt()
 branches['hnl_eta' ] = lambda x : x.b.hnl_fit_eta()
 branches['hnl_phi' ] = lambda x : x.b.hnl_fit_phi()
 branches['hnl_mass'] = lambda x : x.b.hnl_fit_mass()
+branches['hnl_cos2D'] = lambda x : x.b.hnl_fit_cos2D()
 
 branches['mu_pt'  ] = lambda x : x.b.mu().pt()
 branches['mu_eta' ] = lambda x : x.b.mu().eta()

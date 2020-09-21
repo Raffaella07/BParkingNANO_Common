@@ -39,6 +39,14 @@ git cms-addpkg PhysicsTools/NanoAOD
 scram b
 ```
 
+### After first installation
+
+```shell
+cd CMSSW_10_2_15/src/
+cmsenv 
+```
+
+
 ### To run on a test file
 
 ```shell
@@ -47,32 +55,46 @@ cmsenv
 cmsRun run_nano_cfg.py
 ```
 
-### Contributing
-
-We use the _fork and pull_ model:
-
-fork this repository https://github.com/CMSBParking/BParkingNANO (top right _Fork button)
-
-If you haven't done so yet, clone this repository:
+## Nano samples production
 
 ```shell
-git clone git@github.com:CMSBParking/BParkingNANO.git  ./PhysicsTools
+cd PhysicsTools/BParkingNano/test/
 ```
 
-Add your fork of the repository as remote:
+### Locally
+Modify the inputFiles in run_nano_hnl_cfg.py, make sure to compile and do
 
-```shell
-git remote add mine git@github.com:`git config user.github`/BParkingNANO.git
-git checkout -b ${USER}_feature_branch origin/master
+```
+cmsRun run_nano_hnl_cfg.py 
 ```
 
-Work on your feature, `add`, `commit`, etc. and push to your own fork
+Runs by default on MC and over -1 events. The outputfile will be saved locally in the current working directory.
 
-when adding a sequence or table producer, please include it in the _python/nanoBPark_cff.py_
-and make sure it runs properly checking the output result (_test_BParkSequence_10215.py_ to give it a try)
+### On the batch
+Runs on a slurm-based engine. 
 
-```shell
-git push mine feature_branch
+Since the outputfiles will be saved on the Storage Element, do not forget to activate your proxy
+
+```
+voms-proxy-init --voms cms --valid 186:00
 ```
 
-Make a pull request on github
+Then do
+
+```
+python nanoLauncher.py --pl <prodLabel> --tag <tag>
+```
+
+The tag is optional, and would be appended to the outputfile name.
+
+Once ready, merge the different nano steps by doing
+
+```
+python nanoMerger.py --pl <prodLabel> --tag <tag>
+```
+
+
+
+Note:
+
+To make contributions to the central code, see intructions in https://github.com/CMSBParking/BParkingNANO
