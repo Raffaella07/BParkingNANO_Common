@@ -12,7 +12,7 @@ git cms-init
 ### Add energy regression and July20-depth13-700trees model for LPT electron ID
 
 ```shell
-cp /afs/cern.ch/user/c/crovelli/public/4BParking/sparse-checkout .git/info/sparse-checkout
+scp <username>@lxplus.cern.ch:/afs/cern.ch/user/c/crovelli/public/4BParking/sparse-checkout .git/info/sparse-checkout
 git remote add crovelli git@github.com:crovelli/cmssw.git
 git fetch crovelli
 git checkout -b from-CMSSW_10_2_15__ID-2020Jul26-depth13-700__WithFinalReg crovelli/from-CMSSW_10_2_15__ID-2020Jul26-depth13-700__WithFinalReg
@@ -34,9 +34,7 @@ git cms-merge-topic -u CMSBParking:fixKinParticleVtxFitter
 ### Add the BParkingNano package and build everything
 
 ```shell
-cd ./PhysicsTools
-git clone git@github.com:BParkHNLs/BParkingNANO.git 
-cd ..
+git clone git@github.com:BParkHNLs/BParkingNANO.git ./PhysicsTools
 git cms-addpkg PhysicsTools/NanoAOD
 scram b
 ```
