@@ -1,4 +1,4 @@
-# nanoAOD producer customized for BParking analysis (focus on RK/K*/phi)
+# nanoAOD producer customized for BParking analysis 
 
 ## Getting started
 
@@ -9,7 +9,7 @@ cmsenv
 git cms-init
 ```
 
-## Add energy regression and July20-depth13-700trees model for LPT electron ID
+### Add energy regression and July20-depth13-700trees model for LPT electron ID
 
 ```shell
 cp /afs/cern.ch/user/c/crovelli/public/4BParking/sparse-checkout .git/info/sparse-checkout
@@ -18,28 +18,30 @@ git fetch crovelli
 git checkout -b from-CMSSW_10_2_15__ID-2020Jul26-depth13-700__WithFinalReg crovelli/from-CMSSW_10_2_15__ID-2020Jul26-depth13-700__WithFinalReg
 ```
 
-## Add the modification needed to use post-fit quantities for electrons  
+### Add the modification needed to use post-fit quantities for electrons  
 
 ```shell
 git cms-addpkg TrackingTools/TransientTrack
 git cms-merge-topic -u CMSBParking:GsfTransientTracks
 ```
 
-## Add the modification needed to use the KinematicParticleVertexFitter  
+### Add the modification needed to use the KinematicParticleVertexFitter  
 
 ```shell
 git cms-merge-topic -u CMSBParking:fixKinParticleVtxFitter
 ```
 
-## Add the BParkingNano package and build everything
+### Add the BParkingNano package and build everything
 
 ```shell
-git clone git@github.com:CMSBParking/BParkingNANO.git  ./PhysicsTools
+cd ./PhysicsTools
+git clone git@github.com:BParkHNLs/BParkingNANO.git 
+cd ..
 git cms-addpkg PhysicsTools/NanoAOD
 scram b
 ```
 
-## To run on a test file
+### To run on a test file
 
 ```shell
 cd PhysicsTools/BParkingNano/test/
@@ -47,7 +49,7 @@ cmsenv
 cmsRun run_nano_cfg.py
 ```
 
-## Contributing
+### Contributing
 
 We use the _fork and pull_ model:
 
