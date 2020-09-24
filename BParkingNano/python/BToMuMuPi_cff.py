@@ -22,11 +22,11 @@ BToMuMuPi = cms.EDProducer(
         ])
     ),
     postVtxSelection = cms.string(' & '.join([
-        'userInt("hnl_vtx_OK") == 1',
-        'userFloat("hnl_vtx_prob") > 0.0001',
-        'userFloat("hnl_fitted_cos_theta_2D") >= 0.5',
-        'userFloat("hnl_fitted_mass") > 0.5',
-        'userFloat("hnl_fitted_mass") < 6.5',
+        'userInt("hnlVtxOK") == 1',
+        'userFloat("hnlVtxProb") > 0.0001',
+        'userFloat("hnlFittedCosTheta2D") >= 0.5',
+        'userFloat("hnlFittedMass") > 0.5',
+        'userFloat("hnlFittedMass") < 6.5',
         ])
     ),
 )
@@ -36,7 +36,7 @@ BToMuMuPiTable = cms.EDProducer(
     'SimpleCompositeCandidateFlatTableProducer',
     src = cms.InputTag("BToMuMuPi"),
     cut = cms.string(""),
-    name = cms.string("Bcand"),
+    name = cms.string("Bmeson"),
     doc = cms.string("B candidate from trigger muon, and muon+pion from vertex"),
     singleton=cms.bool(False),
     extension=cms.bool(False),
@@ -51,7 +51,7 @@ BToMuMuPiTable = cms.EDProducer(
         hnlVtxChi2    = ufloat('hnlVtxChi2' ),  # naming convention of NanoAODs: use "_" only for variable of a collection
         hnlVtxProb    = ufloat('hnlVtxProb' ),  #                                use "firstSecondThird" where each is a distinct entity
         hnlLxy     = ufloat('hnlLxy'     ),
-        hnlLxyE    = ufloat('hnlLxyE'    ),
+        hnlLxyUnc    = ufloat('hnlLxyUnc'    ),
         hnlLsxy = ufloat('hnlLsxy'    ),
         hnlVtxX       = ufloat('hnlVtxX'    ),
         hnlVtxY       = ufloat('hnlVtxY'    ),
