@@ -217,7 +217,7 @@ void BToMuMuPiBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup c
         b_cand.addUserFloat("hnlFittedCosTheta2D"  , cos_theta_2D(fitter, *beamspot, fit_p4)                                 );
         b_cand.addUserFloat("hnlLxy"               , lxy.value()                                                             );
         b_cand.addUserFloat("hnlLxyUnc"            , lxy.error()                                                             );
-        b_cand.addUserFloat("hnlLlsxy"             , lxy.value()/lxy.error()                                                 );
+        b_cand.addUserFloat("hnlLsxy"              , lxy.value()/lxy.error()                                                 );
         b_cand.addUserFloat("hnlVtxX"              , hnl_cand.vx()                                                           );
         b_cand.addUserFloat("hnlVtxY"              , hnl_cand.vy()                                                           );
         b_cand.addUserFloat("hnlVtxZ"              , hnl_cand.vz()                                                           );
