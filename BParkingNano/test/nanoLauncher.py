@@ -61,7 +61,7 @@ class NanoLauncher(object):
 
   def launchNano(self, nanofile):
     command = 'sbatch -p wn  --account=t3 --time=00:40:00 -o logs/{pl}/nanostep_nj{nj}.log -e logs/{pl}/nanostep_nj{nj}.log --job-name=nanostep_nj{nj}_{pl} submitter.sh {infile} {outfile} {usr} {pl} {step}'.format(
-      pl      = self.prodlabel,
+      pl      = self.prodlabel if self.tag == None else self.prodlabel+'_'+self.tag,
       nj      = self.getStep(nanofile),
       infile  = nanofile, 
       outfile = self.getOutputName(nanofile),
@@ -86,7 +86,7 @@ class NanoLauncher(object):
     locationSE = '/pnfs/psi.ch/cms/trivcat/store/user/{}/BHNLsGen/{}/'.format(self.user, self.prodlabel)
     
     print '\n-> Creating log directory'
-    logdir = './logs/{}'.format(self.prodlabel)
+    logdir = './logs/{}'.format(self.prodlabel) if self.tag == None else './logs/{}_{}'.format(self.prodlabel, self.tag)
     os.system('mkdir -p {}'.format(logdir))
 
     print '\n-> Getting the different mass points'
