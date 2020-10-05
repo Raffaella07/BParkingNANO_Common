@@ -5,18 +5,19 @@ from glob import glob
 
 options = VarParsing('python')
 
-options.register('isMC'           ,  True       , VarParsing.multiplicity.singleton, VarParsing.varType.bool  , "Run this on real data"                  )
-options.register('skipDuplicated' ,  True       , VarParsing.multiplicity.singleton, VarParsing.varType.bool  , "Skip duplicated events. True by default")
-options.register('globalTag'      , 'NOTSET'    , VarParsing.multiplicity.singleton, VarParsing.varType.string, "Set global tag"                         )
-options.register('wantSummary'    ,  True       , VarParsing.multiplicity.singleton, VarParsing.varType.bool  , "Run this on real data"                  )
-options.register('wantFullRECO'   ,  False      , VarParsing.multiplicity.singleton, VarParsing.varType.bool  , "Run this on real data"                  )
-options.register('reportEvery'    ,  10         , VarParsing.multiplicity.singleton, VarParsing.varType.int   , "report every N events"                  )
-options.register('skip'           ,  0          , VarParsing.multiplicity.singleton, VarParsing.varType.int   , "skip first N events"                    )
-options.register('inputFile'      , None        , VarParsing.multiplicity.singleton, VarParsing.varType.string, "inputFile name"                         )
+options.register('isMC'           ,  True           , VarParsing.multiplicity.singleton, VarParsing.varType.bool  , "Run this on real data"                  )
+options.register('skipDuplicated' ,  True           , VarParsing.multiplicity.singleton, VarParsing.varType.bool  , "Skip duplicated events. True by default")
+options.register('globalTag'      , 'NOTSET'        , VarParsing.multiplicity.singleton, VarParsing.varType.string, "Set global tag"                         )
+options.register('wantSummary'    ,  True           , VarParsing.multiplicity.singleton, VarParsing.varType.bool  , "Run this on real data"                  )
+options.register('wantFullRECO'   ,  False          , VarParsing.multiplicity.singleton, VarParsing.varType.bool  , "Run this on real data"                  )
+options.register('reportEvery'    ,  10             , VarParsing.multiplicity.singleton, VarParsing.varType.int   , "report every N events"                  )
+options.register('skip'           ,  0              , VarParsing.multiplicity.singleton, VarParsing.varType.int   , "skip first N events"                    )
+options.register('inputFile'      , None            , VarParsing.multiplicity.singleton, VarParsing.varType.string, "inputFile name"                         )
+options.register('outFile'        , 'bparknano.root', VarParsing.multiplicity.singleton, VarParsing.varType.string, "outputFile name"                         )
 
 
 options.setDefault('maxEvents', -1)
-options.setDefault('outputFile', 'bparknano.root')
+#options.setDefault('outputFile', 'bparknano.root')
 options.parseArguments()
 
 
@@ -31,7 +32,11 @@ outputFileFEVT = cms.untracked.string('_'.join(['BParkFullEvt', extension[option
 
 if not options.inputFiles:
     options.inputFiles = ['/store/data/Run2018B/ParkingBPH4/MINIAOD/05May2019-v2/230000/6B5A24B1-0E6E-504B-8331-BD899EB60110.root'] if not options.isMC else \
-                         ['file:%s' %i for i in glob('/pnfs/psi.ch/cms/trivcat/store/user/anlyon/BHNLsGen/V01_n9000000_njt300/mass1.5_ctau51.922757246/step4*root')]
+                         ['file:%s' %i for i in glob('/pnfs/psi.ch/cms/trivcat/store/user/mratti/BHNLsGen/V11_inclB_n4200000_njt200/mass3.0_ctau811.293081969/step4_nj69.root')]
+                         #['file:%s' %i for i in glob('/pnfs/psi.ch/cms/trivcat/store/user/anlyon/BHNLsGen/V03_leptonic_n900000_njt200/mass1.5_ctau17307.5857487/step4_nj95.root')]
+                         #['file:%s' %i for i in glob('/pnfs/psi.ch/cms/trivcat/store/user/anlyon/BHNLsGen/V02_testLeptonic_n450000_njt100/mass1.5_ctau51.922757246/step4_nj95.root')]
+                         #['file:%s' %i for i in glob('/pnfs/psi.ch/cms/trivcat/store/user/anlyon/BHNLsGen/V01_n9000000_njt300/mass1.5_ctau51.922757246/step4_nj95.root')]
+                         #['file:%s' %i for i in glob('/pnfs/psi.ch/cms/trivcat/store/user/anlyon/BHNLsGen/V01_n9000000_njt300/mass1.5_ctau51.922757246/step4*root')]
 
 annotation = '%s nevts:%d' % (outputFileNANO, options.maxEvents)
 
@@ -96,7 +101,7 @@ process.NANOAODoutput = cms.OutputModule("NanoAODOutputModule",
         filterName = cms.untracked.string('')
     ),
     #fileName = outputFileNANO,
-    fileName = outputFileNANO if not options.outputFile else cms.untracked.string('file:{}'.format(options.outputFile)),
+    fileName = outputFileNANO if not options.outFile else cms.untracked.string('file:{}'.format(options.outFile)),
     outputCommands = cms.untracked.vstring(
         'drop *',
         "keep nanoaodFlatTable_*Table_*_*",     # event data
