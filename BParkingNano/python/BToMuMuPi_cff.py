@@ -20,6 +20,7 @@ BToMuMuPi = cms.EDProducer(
         'pt > 1.5',
         'mass > 0.2',        
         'mass < 7.0',        
+        #'charge == 0',
         ])
     ), # applied on the HNL cand
     postVtxSelection = cms.string(' & '.join([
@@ -28,6 +29,31 @@ BToMuMuPi = cms.EDProducer(
         'userFloat("hnl_fitted_cos_theta_2D") >= 0.5',
         'userFloat("hnl_fitted_mass") > 0.5',
         'userFloat("hnl_fitted_mass") < 6.5',
+        #preselection
+        #'userFloat("hnl_charge") == 0',
+        #'mass < 6.3',
+        #'pt > 11',
+        #'abs(eta) < 1.7',
+        #'userFloat("hnl_vtx_chi2") < 9',
+        #'userFloat("trg_muon_pt") > 5',
+        #'abs(userFloat("trg_muon_eta")) < 1.5',
+        #'userFloat("trg_muon_ip3d") < 9',
+        #'userFloat("trg_muon_sip3d") < 3200',
+        #'userFloat("trg_muon_dz") < 9',
+        #'userFloat("trg_muon_dxy") < 0.15',
+        #'userFloat("hnl_fitted_mu_pt") > 1.5',
+        #'abs(userFloat("hnl_fitted_mu_eta")) < 2',
+        #'userFloat("sel_muon_ip3d") < 7',
+        #'userFloat("sel_muon_sip3d") < 3200',
+        #'userFloat("sel_muon_dz") < 8',
+        #'userFloat("sel_muon_dxy") < 0.3',
+        #'userFloat("hnl_fitted_pi_pt") > 0.55',
+        #'abs(userFloat("hnl_fitted_pi_eta")) < 2',
+        #'userFloat("muons_Lxyz") < 0.6',
+        #'userFloat("pion_muon_vzdiff") < 0.8',
+        #'userFloat("hnl_fitted_pt") > 4',
+        #'abs(userFloat("hnl_fitted_eta")) < 1.8',
+        #'userFloat("hnl_fitted_cos_theta_2D") > 0.95',
         ])
     ), # applied on the B cand
 )
@@ -84,13 +110,13 @@ BToMuMuPiTable = cms.EDProducer(
         fit_pi_mass   = ufloat('hnl_fitted_pi_mass'),
         # additional quantities
         # vertex difference between the two muons
-        mu_dz         = ufloat('muons_dz'          ),
-        mu_dx         = ufloat('muons_dx'          ),
-        mu_dy         = ufloat('muons_dy'          ),
+        mu_vxdiff     = ufloat('muons_vxdiff'      ),
+        mu_vydiff     = ufloat('muons_vydiff'      ),
+        mu_vzdiff     = ufloat('muons_vzdiff'      ),
         mu_Lxy        = ufloat('muons_Lxy'         ),
         mu_Lxyz       = ufloat('muons_Lxyz'        ),
         # vertex difference between the trigger muon and pion
-        pi_dz         = ufloat('pion_dz'           ),
+        pi_mu_vzdiff  = ufloat('pion_muon_vzdiff'  ),
         # Id WP of the selected muon
         sel_mu_isSoft   = ufloat('sel_muon_isSoft'            ),
         sel_mu_isTight  = ufloat('sel_muon_isTight'           ),
@@ -105,6 +131,9 @@ BToMuMuPiTable = cms.EDProducer(
         sel_mu_sip3d = ufloat('sel_muon_sip3d' ), 
         sel_mu_dxy   = ufloat('sel_muon_dxy'   ), 
         sel_mu_dz    = ufloat('sel_muon_dz'    ), 
+        # dR quantities
+        dr_mu_pi     = ufloat('dr_mu_pi'       ),
+        dr_trgmu_hnl = ufloat('dr_trgmu_hnl'   ),
     )
 )
 

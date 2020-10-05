@@ -250,17 +250,23 @@ void BToMuMuPiBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup c
         b_cand.addUserFloat("hnl_fitted_pi_eta"      , fitter.daughter_p4(1).eta()                                             );
         b_cand.addUserFloat("hnl_fitted_pi_phi"      , fitter.daughter_p4(1).phi()                                             );
         b_cand.addUserFloat("hnl_fitted_pi_mass"     , fitter.daughter_p4(1).mass()                                            );
-       
+      
+        // adding trigger muon information
+        b_cand.addUserFloat("trg_muon_pt"              , trg_mu_ptr->pt()                                                        );
+        b_cand.addUserFloat("trg_muon_eta"             , trg_mu_ptr->eta()                                                       );
+        b_cand.addUserFloat("trg_muon_phi"             , trg_mu_ptr->phi()                                                       );
+
+
         // difference between the z vertex position of the selected muon and tigger muon
         // computed at the prefit stage 
-        b_cand.addUserFloat("muons_dz"               , fabs(trg_mu_ptr->vz()-sel_mu_ptr->vz())                                 );
-        b_cand.addUserFloat("muons_dx"               , fabs(trg_mu_ptr->vx()-sel_mu_ptr->vx())                                 );
-        b_cand.addUserFloat("muons_dy"               , fabs(trg_mu_ptr->vy()-sel_mu_ptr->vy())                                 );
+        b_cand.addUserFloat("muons_vzdiff"           , fabs(trg_mu_ptr->vz()-sel_mu_ptr->vz())                                 );
+        b_cand.addUserFloat("muons_vxdiff"           , fabs(trg_mu_ptr->vx()-sel_mu_ptr->vx())                                 );
+        b_cand.addUserFloat("muons_vydiff"           , fabs(trg_mu_ptr->vy()-sel_mu_ptr->vy())                                 );
         b_cand.addUserFloat("muons_Lxy"              , sqrt(pow(trg_mu_ptr->vx()-sel_mu_ptr->vx(), 2) + pow(trg_mu_ptr->vy()-sel_mu_ptr->vy(), 2)));
         b_cand.addUserFloat("muons_Lxyz"             , sqrt(pow(trg_mu_ptr->vx()-sel_mu_ptr->vx(), 2) + pow(trg_mu_ptr->vy()-sel_mu_ptr->vy(), 2) + + pow(trg_mu_ptr->vz()-sel_mu_ptr->vz(), 2)));
         
         // difference between the z vertex position of the pion and tigger muon
-        b_cand.addUserFloat("pion_dz"                , fabs(trg_mu_ptr->vz()-pi_ptr->vz())                                      );
+        b_cand.addUserFloat("pion_muon_vzdiff"                , fabs(trg_mu_ptr->vz()-pi_ptr->vz())                            );
       
 
         // fetch the id of the sel muon at the secondary vertex
@@ -273,6 +279,12 @@ void BToMuMuPiBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup c
         b_cand.addUserFloat("sel_muon_isTight"      , sel_muon_isTight                           );
         b_cand.addUserFloat("sel_muon_isMedium"     , sel_muon_isMedium                          );
         b_cand.addUserFloat("sel_muon_isLoose"      , sel_muon_isLoose                           );
+
+        // adding dR quantities
+        float dR_mu_pi = sqrt(pow(fitter.daughter_p4(0).eta() - fitter.daughter_p4(0).eta(), 2) + pow(fitter.daughter_p4(0).phi() - fitter.daughter_p4(0).phi(), 2));
+        b_cand.addUserFloat("dr_mu_pi"              , dR_mu_pi                                   );
+        float dR_trgmu_hnl = sqrt(pow(trg_mu_ptr->eta() - fit_p4.eta(), 2) + pow(trg_mu_ptr->phi() - fit_p4.phi(), 2));
+        b_cand.addUserFloat("dr_trgmu_hnl"          , dR_trgmu_hnl                               );
 
 
         // test
