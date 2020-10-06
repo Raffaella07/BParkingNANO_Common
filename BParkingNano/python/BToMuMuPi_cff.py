@@ -109,6 +109,10 @@ BToMuMuPiTable = cms.EDProducer(
         fit_pi_phi    = ufloat('hnl_fitted_pi_phi' ),
         fit_pi_mass   = ufloat('hnl_fitted_pi_mass'),
         # additional quantities
+        # trigger muon
+        trg_mu_pt     = ufloat('trg_muon_pt'       ), 
+        trg_mu_eta    = ufloat('trg_muon_eta'      ), 
+        trg_mu_phi    = ufloat('trg_muon_phi'      ), 
         # vertex difference between the two muons
         mu_vxdiff     = ufloat('muons_vxdiff'      ),
         mu_vydiff     = ufloat('muons_vydiff'      ),

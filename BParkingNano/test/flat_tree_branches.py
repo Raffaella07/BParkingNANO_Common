@@ -38,6 +38,7 @@ branches['pi_pt'         ]     = lambda x : x.b.pi().pt()
 branches['pi_eta'        ]     = lambda x : x.b.pi().eta()
 branches['pi_phi'        ]     = lambda x : x.b.pi().phi()
 branches['pi_mass'       ]     = lambda x : x.b.pi().mass()
+#branches['pi_dz'         ]     = lambda x : x.ProbeTracks_dz()
 
 branches['trg_mu_pt'     ]     = lambda x : x.b.trg_mu().pt()
 branches['trg_mu_eta'    ]     = lambda x : x.b.trg_mu().eta()
@@ -49,15 +50,21 @@ branches['trg_mu_dxy'    ]     = lambda x : x.b.trg_mu_dxy()
 branches['trg_mu_dz'     ]     = lambda x : x.b.trg_mu_dz()
 
 # difference of vertex positions of the two muons
-branches['muons_dx'      ]     = lambda x : x.b.mu_dx()
-branches['muons_dy'      ]     = lambda x : x.b.mu_dy()
-branches['muons_dz'      ]     = lambda x : x.b.mu_dz()
+#branches['muons_vxdiff'  ]     = lambda x : x.b.mu_dx()
+branches['muons_vxdiff'  ]     = lambda x : x.b.mu_vxdiff()
+#branches['muons_vydiff'  ]     = lambda x : x.b.mu_dy()
+branches['muons_vydiff'  ]     = lambda x : x.b.mu_vydiff()
+#branches['muons_vzdiff'  ]     = lambda x : x.b.mu_dz()
+branches['muons_vzdiff'  ]     = lambda x : x.b.mu_vzdiff()
 branches['muons_Lxy'     ]     = lambda x : x.b.mu_Lxy()
 branches['muons_Lxyz'    ]     = lambda x : x.b.mu_Lxyz()
 
 # difference of vertex positions of the pion and trigger muon
-branches['pi_trgmu_dz'   ]     = lambda x : x.b.pi_dz()
+branches['pi_trgmu_vzdiff']    = lambda x : x.b.pi_mu_vzdiff()
 
+# dR
+branches['dr_mu_pi'      ]     = lambda x : x.b.dr_mu_pi()
+branches['dr_trgmu_hnl'  ]     = lambda x : x.b.dr_trgmu_hnl()
 
 
 
