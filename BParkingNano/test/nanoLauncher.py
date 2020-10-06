@@ -10,6 +10,7 @@ def getOptions():
   parser.add_argument('--pl'  , type=str, dest='pl'  , help='label of the sample file', default='V01_n9000000_njt300')
   parser.add_argument('--tag' , type=str, dest='tag' , help='[optional] tag to be added on the outputfile name', default=None)
   parser.add_argument('--user', type=str, dest='user', help='specify username where the miniAOD files are stored', default=os.environ["USER"])
+  parser.add_argument('--doflat', dest='doflat', help='launch the ntupliser on top of the nanofile', action='store_true', default=False)
   # add isMC, maxEvents
   return parser.parse_args()
 
@@ -19,6 +20,7 @@ class NanoLauncher(object):
     self.prodlabel = vars(opt)['pl']
     self.tag       = vars(opt)['tag']
     self.user      = vars(opt)["user"]
+    self.doflat    = vars(opt)["doflat"]
 
 
   def getPointDirs(self, location):
@@ -41,20 +43,11 @@ class NanoLauncher(object):
     outputdir = '/pnfs/psi.ch/cms/trivcat/store/user/{}/BHNLsGen/{}/{}/nanoFiles/'.format(os.environ["USER"], self.prodlabel, point)
     print 'outputdir ',outputdir
     os.system('mkdir -p {}'.format(outputdir))
+    return outputdir
 
 
   def getStep(self, nanofile):
     return nanofile[nanofile.rfind('nj')+2 :  nanofile.find('.root', 0)]
-
-
-  def getOutputName(self, nanofile):
-    outname = '/pnfs/psi.ch/cms/trivcat/store/user/{}/BHNLsGen/{}/{}/nanoFiles/bparknano'.format(os.environ["USER"],
-                                                                                                 self.prodlabel, 
-                                                                                                 nanofile[nanofile.rfind('/', 0, nanofile.rfind('/')-1)+1:nanofile.rfind('/')]
-                                                                                                 )
-    if self.tag != None:
-      outname += '_{}'.format(self.tag)
-    return outname + '_nj' + self.getStep(nanofile) + '.root'
 
 
   def compile(self):
@@ -64,14 +57,17 @@ class NanoLauncher(object):
     subprocess.call("scram b", cwd=loc, shell=True)
 
 
-  def launchNano(self, nanofile):
-    command = 'sbatch -p wn  --account=t3 --time=00:40:00 -o logs/{pl}/nanostep_nj{nj}.log -e logs/{pl}/nanostep_nj{nj}.log --job-name=nanostep_nj{nj}_{pl} submitter.sh {infile} {outfile} {usr} {pl} {step}'.format(
+  def launchNano(self, nanofile, outputdir):
+    #command = 'sbatch -p wn  --account=t3 --time=00:50:00 -o logs/{pl}/nanostep_nj{nj}.log -e logs/{pl}/nanostep_nj{nj}.log --job-name=nanostep_nj{nj}_{pl} submitter.sh {infile} {outdir} {usr} {pl} {step} {tag} {flt}'.format(
+    command = 'sbatch -p wn  --account=t3 -o logs/{pl}/nanostep_nj{nj}.log -e logs/{pl}/nanostep_nj{nj}.log --job-name=nanostep_nj{nj}_{pl} submitter.sh {infile} {outdir} {usr} {pl} {step} {tag} {flt}'.format(
       pl      = self.prodlabel if self.tag == None else self.prodlabel+'_'+self.tag,
       nj      = self.getStep(nanofile),
       infile  = nanofile, 
-      outfile = self.getOutputName(nanofile),
+      outdir  = outputdir,
       usr     = self.user, 
-      step    = self.getStep(nanofile)
+      step    = self.getStep(nanofile),
+      tag     = 0 if self.tag == None else self.tag,
+      flt     = 1 if self.doflat == True else 0
     )
 
     print '\n launching production over {}'.format(nanofile)
@@ -104,7 +100,7 @@ class NanoLauncher(object):
       print '\n-> Processing mass/ctau point: {}'.format(point)
 
       print '\n  --> Creating output directory'
-      self.createOutputDir(point)
+      outputdir = self.createOutputDir(point)
 
       print '\n  --> Fetching the files '.format(point)
       nanofiles = self.getFiles(point)
@@ -112,7 +108,7 @@ class NanoLauncher(object):
       for nanofile in nanofiles:
 
         if self.checkFile(nanofile):
-          self.launchNano(nanofile)
+          self.launchNano(nanofile, outputdir)
         else:
           print '    could not open {} --> skipping'.format(nanofile)
 
