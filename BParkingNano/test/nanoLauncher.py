@@ -58,13 +58,13 @@ class NanoLauncher(object):
 
 
   def launchNano(self, nanofile, outputdir):
-    #command = 'sbatch -p wn  --account=t3 --time=00:50:00 -o logs/{pl}/nanostep_nj{nj}.log -e logs/{pl}/nanostep_nj{nj}.log --job-name=nanostep_nj{nj}_{pl} submitter.sh {infile} {outdir} {usr} {pl} {step} {tag} {flt}'.format(
-    command = 'sbatch -p wn  --account=t3 -o logs/{pl}/nanostep_nj{nj}.log -e logs/{pl}/nanostep_nj{nj}.log --job-name=nanostep_nj{nj}_{pl} submitter.sh {infile} {outdir} {usr} {pl} {step} {tag} {flt}'.format(
+    #command = 'sbatch -p wn --account=t3 --time=00:50:00 -o logs/{pl}/nanostep_nj{nj}.log -e logs/{pl}/nanostep_nj{nj}.log --job-name=nanostep_nj{nj}_{pl} submitter.sh {infile} {outdir} {usr} {pl} {step} {tag} {flt}'.format(
+    command = 'sbatch -p quick --account=t3 -o logs/{pl}/nanostep_nj{nj}.log -e logs/{pl}/nanostep_nj{nj}.log --job-name=nanostep_nj{nj}_{pl} submitter.sh {infile} {outdir} {usr} {pl} {step} {tag} {flt}'.format(
       pl      = self.prodlabel if self.tag == None else self.prodlabel+'_'+self.tag,
       nj      = self.getStep(nanofile),
       infile  = nanofile, 
       outdir  = outputdir,
-      usr     = self.user, 
+      usr     = os.environ["USER"], 
       step    = self.getStep(nanofile),
       tag     = 0 if self.tag == None else self.tag,
       flt     = 1 if self.doflat == True else 0
