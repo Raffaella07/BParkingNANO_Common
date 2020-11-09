@@ -33,10 +33,11 @@ public:
 
   explicit BToMuMuPiBuilder(const edm::ParameterSet &cfg):
     pi_selection_      {cfg.getParameter<std::string>("pionSelection"     )},
+    isotrk_selection_  {cfg.getParameter<std::string>("isoTracksSelection")},
+    trgmu_selection_   {cfg.getParameter<std::string>("trgMuonSelection"     )},
+    selmu_selection_   {cfg.getParameter<std::string>("selMuonSelection"     )},
     pre_vtx_selection_ {cfg.getParameter<std::string>("preVtxSelection"   )},
     post_vtx_selection_{cfg.getParameter<std::string>("postVtxSelection"  )},
-    isotrk_selection_  {cfg.getParameter<std::string>("isoTracksSelection")},
-
 
     // these two collections are ideally created beforehand by MuonTriggerSelector.cc
     //    * the former are muons that pass the preselection defined there AND match one of the 
@@ -56,6 +57,7 @@ public:
       produces<pat::CompositeCandidateCollection>();
     }
 
+
     // added for fetching the PV
     //vertexSrc_         { consumes<reco::VertexCollection>          ( iConfig.getParameter<edm::InputTag>( "vertexCollection"  ) )},
     //vertexSrc_( consumes<reco::VertexCollection> ( iConfig.getParameter<edm::InputTag>( "vertexCollection" ) ) )
@@ -67,10 +69,15 @@ public:
   static void fillDescriptions(edm::ConfigurationDescriptions &descriptions) {}
   
 private:
+  // pre-fitter preselection 
   const StringCutObjectSelector<pat::CompositeCandidate> pi_selection_; 
-  const StringCutObjectSelector<pat::CompositeCandidate> pre_vtx_selection_; // cut on the di-lepton before the SV fit
-  const StringCutObjectSelector<pat::CompositeCandidate> post_vtx_selection_; // cut on the di-lepton after the SV fit
-  const StringCutObjectSelector<pat::PackedCandidate> isotrk_selection_; 
+  const StringCutObjectSelector<pat::PackedCandidate> isotrk_selection_; // not needed for the moment 
+  const StringCutObjectSelector<pat::Muon> trgmu_selection_; 
+  const StringCutObjectSelector<pat::Muon> selmu_selection_; 
+  const StringCutObjectSelector<pat::CompositeCandidate> pre_vtx_selection_; 
+  // post-fitter preselection 
+  const StringCutObjectSelector<pat::CompositeCandidate> post_vtx_selection_; 
+
 
   const edm::EDGetTokenT<pat::MuonCollection> trg_muons_;
   const edm::EDGetTokenT<pat::MuonCollection> sel_muons_;
@@ -86,6 +93,7 @@ private:
     
   // for PV
   //const edm::EDGetTokenT<reco::VertexCollection> vertexSrc_;
+  
 };
 
 void BToMuMuPiBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup const &) const {
@@ -115,8 +123,8 @@ void BToMuMuPiBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup c
   evt.getByToken(isotracksToken_, iso_tracks);
   edm::Handle<pat::PackedCandidateCollection> iso_lostTracks;
   evt.getByToken(isolostTracksToken_, iso_lostTracks);
-  unsigned int nTracks     = iso_tracks->size();
-  unsigned int totalTracks = nTracks + iso_lostTracks->size();
+  //unsigned int nTracks     = iso_tracks->size();
+  //unsigned int totalTracks = nTracks + iso_lostTracks->size();
 
   std::vector<int> used_lep1_id, used_trk_id;
 
@@ -133,12 +141,17 @@ void BToMuMuPiBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup c
     size_t trg_mu_position = sel_muons->size(); // make it point to just beyond the size of the collection
     
     edm::Ptr<pat::Muon> trg_mu_ptr(trg_muons, trg_mu_idx);
+    
+    // selection on the trigger muon
+    if( !trgmu_selection_(*trg_mu_ptr) ) continue;
 
     // test
     //std::cout << "In builder, trg muon dz: " << trg_mu_ptr->vz() << std::endl;
     
     for(size_t pi_idx = 0; pi_idx < pions->size(); ++pi_idx) {
       edm::Ptr<pat::CompositeCandidate> pi_ptr(pions, pi_idx);
+
+      // selection on the pion
       if( !pi_selection_(*pi_ptr) ) continue;
       
       math::PtEtaPhiMLorentzVector pi_p4(
@@ -170,6 +183,9 @@ void BToMuMuPiBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup c
 //                                   << std::endl;
             continue;
         }
+
+        // selection on the muon
+        if( !selmu_selection_(*sel_mu_ptr) ) continue;
 
         // test
         //std::cout << "In builder, muon dz: " << sel_mu_ptr->vz() << std::endl;
@@ -280,10 +296,11 @@ void BToMuMuPiBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup c
         b_cand.addUserFloat("sel_muon_isMedium"     , sel_muon_isMedium                          );
         b_cand.addUserFloat("sel_muon_isLoose"      , sel_muon_isLoose                           );
 
+        
         // adding dR quantities
-        float dR_mu_pi = sqrt(pow(fitter.daughter_p4(0).eta() - fitter.daughter_p4(0).eta(), 2) + pow(fitter.daughter_p4(0).phi() - fitter.daughter_p4(0).phi(), 2));
+        float dR_mu_pi = reco::deltaR(fitter.daughter_p4(0), fitter.daughter_p4(1)); 
         b_cand.addUserFloat("dr_mu_pi"              , dR_mu_pi                                   );
-        float dR_trgmu_hnl = sqrt(pow(trg_mu_ptr->eta() - fit_p4.eta(), 2) + pow(trg_mu_ptr->phi() - fit_p4.phi(), 2));
+        float dR_trgmu_hnl = reco::deltaR((*trg_mu_ptr), hnl_cand); 
         b_cand.addUserFloat("dr_trgmu_hnl"          , dR_trgmu_hnl                               );
 
 
@@ -293,13 +310,20 @@ void BToMuMuPiBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup c
 
         // impact parameter variables
         b_cand.addUserFloat("trg_muon_ip3d"   , fabs(trg_mu_ptr->dB(pat::Muon::PV3D))                                    );
+        b_cand.addUserFloat("trg_muon_sip3d"  , fabs(trg_mu_ptr->dB(pat::Muon::PV3D) / trg_mu_ptr->edB(pat::Muon::PV3D)) );
+        b_cand.addUserFloat("trg_muon_dxy"    , trg_mu_ptr->dB(pat::Muon::PV2D)                                          );
+        b_cand.addUserFloat("trg_muon_dz"     , trg_mu_ptr->dB(pat::Muon::PVDZ)                                          );
+
         b_cand.addUserFloat("sel_muon_ip3d"   , fabs(sel_mu_ptr->dB(pat::Muon::PV3D))                                    );
-        b_cand.addUserFloat("trg_muon_sip3d"  , fabs(trg_mu_ptr->dB(pat::Muon::PV3D)) / fabs(trg_mu_ptr->edB(pat::Muon::PV3D)) );
-        b_cand.addUserFloat("sel_muon_sip3d"  , fabs(sel_mu_ptr->dB(pat::Muon::PV3D)) / fabs(sel_mu_ptr->edB(pat::Muon::PV3D)) );
-        b_cand.addUserFloat("trg_muon_dxy"    , fabs(trg_mu_ptr->dB(pat::Muon::PV2D))                                    );
-        b_cand.addUserFloat("sel_muon_dxy"    , fabs(sel_mu_ptr->dB(pat::Muon::PV2D))                                    );
-        b_cand.addUserFloat("trg_muon_dz"     , fabs(trg_mu_ptr->dB(pat::Muon::PVDZ))                                    );
-        b_cand.addUserFloat("sel_muon_dz"     , fabs(sel_mu_ptr->dB(pat::Muon::PVDZ))                                    );
+        b_cand.addUserFloat("sel_muon_sip3d"  , fabs(sel_mu_ptr->dB(pat::Muon::PV3D) / sel_mu_ptr->edB(pat::Muon::PV3D)) );
+        b_cand.addUserFloat("sel_muon_dxy"    , sel_mu_ptr->dB(pat::Muon::PV2D)                                          );
+        b_cand.addUserFloat("sel_muon_dz"     , sel_mu_ptr->dB(pat::Muon::PVDZ)                                          );
+
+        b_cand.addUserFloat("pion_dz"         , pi_ptr->userFloat("dz")                                                  );
+        b_cand.addUserFloat("pion_dxy"        , pi_ptr->userFloat("dxy")                                                 );
+        b_cand.addUserFloat("pion_dzS"        , pi_ptr->userFloat("dzS")                                                 );
+        b_cand.addUserFloat("pion_dxyS"       , pi_ptr->userFloat("dxyS")                                                );
+        b_cand.addUserFloat("pion_DCASig"     , pi_ptr->userFloat("DCASig")                                              );
 
 
         // position of the muons / tracks in their own collections

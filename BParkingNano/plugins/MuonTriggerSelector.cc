@@ -60,9 +60,10 @@ class MuonTriggerSelector : public edm::EDProducer {
     //for filter wrt trigger
     const double dzTrg_cleaning_; // selects primary vertex
 
-    const double ptMin_;          // min pT in all muons for B candidates
-    const double absEtaMax_;      //max eta ""
-    const bool softMuonsOnly_;    //cuts muons without soft ID
+    // for the sel muon
+    const double selmu_ptMin_;          // min pT in all muons for B candidates
+    const double selmu_absEtaMax_;      // max eta ""
+    const bool selmu_softMuonsOnly_;    // cuts muons without soft ID
 };
 
 
@@ -74,9 +75,9 @@ MuonTriggerSelector::MuonTriggerSelector(const edm::ParameterSet &iConfig):
   vertexSrc_( consumes<reco::VertexCollection> ( iConfig.getParameter<edm::InputTag>( "vertexCollection" ) ) ), 
   maxdR_(iConfig.getParameter<double>("maxdR_matching")),
   dzTrg_cleaning_(iConfig.getParameter<double>("dzForCleaning_wrtTrgMuon")),
-  ptMin_(iConfig.getParameter<double>("ptMin")),
-  absEtaMax_(iConfig.getParameter<double>("absEtaMax")),
-  softMuonsOnly_(iConfig.getParameter<bool>("softMuonsOnly"))
+  selmu_ptMin_(iConfig.getParameter<double>("selmu_ptMin")),
+  selmu_absEtaMax_(iConfig.getParameter<double>("selmu_absEtaMax")),
+  selmu_softMuonsOnly_(iConfig.getParameter<bool>("selmu_softMuonsOnly"))
 {
   // produce 2 collections: trgMuons (tags) and SelectedMuons (probes & tags if survive preselection cuts)
   produces<pat::MuonCollection>("trgMuons"); 
@@ -132,6 +133,7 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
     }
 
     if(!isTriggerMuon) continue;
+
     triggeringMuons.push_back(obj);
     if(debug){ std::cout << "\tTrigger object:  pt " << obj.pt() << ", eta " << obj.eta() << ", phi " << obj.phi() << std::endl;
       // Print trigger object collection and type
@@ -198,11 +200,11 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
   for(unsigned int muIdx=0; muIdx<muons->size(); ++muIdx) {
     const pat::Muon& mu = (*muons)[muIdx];
     //selection cuts
-    if (mu.pt() < ptMin_) continue;
-    if (fabs(mu.eta()) > absEtaMax_) continue;
+    if (mu.pt() < selmu_ptMin_) continue;
+    if (fabs(mu.eta()) > selmu_absEtaMax_) continue;
     //following ID is needed for trigger muons not here
     // anyway it is off in the configuration
-    if (softMuonsOnly_ && !mu.isSoftMuon(PV)) continue;
+    if (selmu_softMuonsOnly_ && !mu.isSoftMuon(PV)) continue;
 
     // same PV as the tag muon, both tag and probe only dz selection
     bool SkipMuon=true;

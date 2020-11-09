@@ -14,12 +14,13 @@ muonTrgSelector = cms.EDProducer("MuonTriggerSelector",
                                  maxdR_matching = cms.double(0.1),
                                  
                                  ## for the output selected collection (tag + all compatible in dZ)
-                                 dzForCleaning_wrtTrgMuon = cms.double(1.),
-
-                                 ptMin = cms.double(0.5),
-                                 absEtaMax = cms.double(2.4),
-                                 # keeps only muons with at soft Quality flag
-                                 softMuonsOnly = cms.bool(False)
+                                 # difference of the vz of the trigger muon with selected muon
+                                 dzForCleaning_wrtTrgMuon = cms.double(1.8),
+                                 
+                                 # selection for the selected muon
+                                 selmu_ptMin = cms.double(0.5),
+                                 selmu_absEtaMax = cms.double(2.4),
+                                 selmu_softMuonsOnly = cms.bool(True)
                              )
 
 countTrgMuons = cms.EDFilter("PATCandViewCountFilter",
