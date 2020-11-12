@@ -137,6 +137,13 @@ BToMuMuPiTable = cms.EDProducer(
         # dR quantities
         dr_mu_pi        = ufloat('dr_mu_pi'       ),
         dr_trgmu_hnl    = ufloat('dr_trgmu_hnl'   ),
+        # isolation
+        trgmu_iso03     = ufloat('trgmu_iso03'    ),
+        trgmu_iso04     = ufloat('trgmu_iso04'    ),
+        selmu_iso03     = ufloat('selmu_iso03'    ),
+        selmu_iso04     = ufloat('selmu_iso04'    ),
+        pi_iso03        = ufloat('pi_iso03'       ),
+        pi_iso04        = ufloat('pi_iso04'       ),
     )
 )
 

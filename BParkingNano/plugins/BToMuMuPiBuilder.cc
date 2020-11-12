@@ -123,8 +123,9 @@ void BToMuMuPiBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup c
   evt.getByToken(isotracksToken_, iso_tracks);
   edm::Handle<pat::PackedCandidateCollection> iso_lostTracks;
   evt.getByToken(isolostTracksToken_, iso_lostTracks);
-  //unsigned int nTracks     = iso_tracks->size();
-  //unsigned int totalTracks = nTracks + iso_lostTracks->size();
+
+  unsigned int nTracks     = iso_tracks->size();
+  unsigned int totalTracks = nTracks + iso_lostTracks->size();
 
   std::vector<int> used_lep1_id, used_trk_id;
 
@@ -325,6 +326,68 @@ void BToMuMuPiBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup c
         b_cand.addUserFloat("pion_dxyS"       , pi_ptr->userFloat("dxyS")                                                );
         b_cand.addUserFloat("pion_DCASig"     , pi_ptr->userFloat("DCASig")                                              );
 
+        // post fit selection
+        if( !post_vtx_selection_(b_cand) ) continue;        
+        
+
+        // isolation
+        float trg_mu_iso03 = 0; 
+        float trg_mu_iso04 = 0;
+        float sel_mu_iso03 = 0; 
+        float sel_mu_iso04 = 0;
+        float pi_iso03  = 0; 
+        float pi_iso04  = 0;
+        
+        // nTracks     = iso_tracks->size();
+        // totalTracks = nTracks + iso_lostTracks->size();
+
+        for( unsigned int iTrk=0; iTrk<totalTracks; ++iTrk ) {
+        
+          const pat::PackedCandidate & trk = (iTrk < nTracks) ? (*iso_tracks)[iTrk] : (*iso_lostTracks)[iTrk-nTracks];
+
+          // same preselection as for tracks
+          if( !isotrk_selection_(trk) ) continue;
+
+          // check if the track is the pion
+          if (pi_ptr->userCand("b_cand") ==  edm::Ptr<reco::Candidate> ( iso_tracks, iTrk ) ) continue;
+         
+          // check if the track is one of the two leptons 
+          if (track_to_lepton_match(trg_mu_ptr, iso_tracks.id(), iTrk) || 
+              track_to_lepton_match(sel_mu_ptr, iso_tracks.id(), iTrk) ) continue;
+
+          // add to final particle iso if dR < cone
+          float dr_to_trgmu = deltaR(b_cand.userFloat("trg_muon_eta")     , b_cand.userFloat("trg_muon_phi")     , trk.eta(), trk.phi());
+          float dr_to_selmu = deltaR(b_cand.userFloat("hnl_fitted_mu_eta"), b_cand.userFloat("hnl_fitted_mu_phi"), trk.eta(), trk.phi());
+          float dr_to_pi    = deltaR(b_cand.userFloat("hnl_fitted_pi_eta"), b_cand.userFloat("hnl_fitted_pi_phi"), trk.eta(), trk.phi());
+
+          if (dr_to_trgmu < 0.4){
+            trg_mu_iso04 += trk.pt();
+            if ( dr_to_trgmu < 0.3) trg_mu_iso03 += trk.pt();
+          }
+          if (dr_to_selmu < 0.4){
+            sel_mu_iso04 += trk.pt();
+            if (dr_to_selmu < 0.3)  sel_mu_iso03 += trk.pt();
+          }
+          if (dr_to_pi < 0.4){
+            pi_iso04 += trk.pt();
+            if (dr_to_pi < 0.3) pi_iso03 += trk.pt();
+          }
+        }
+
+        trg_mu_iso03 /= trg_mu_ptr->pt();
+        trg_mu_iso04 /= trg_mu_ptr->pt();
+        sel_mu_iso03 /= fitter.daughter_p4(0).pt();
+        sel_mu_iso04 /= fitter.daughter_p4(0).pt();
+        pi_iso03 /= fitter.daughter_p4(1).pt();
+        pi_iso04 /= fitter.daughter_p4(1).pt();
+
+        b_cand.addUserFloat("trgmu_iso03", trg_mu_iso03);
+        b_cand.addUserFloat("trgmu_iso04", trg_mu_iso04);
+        b_cand.addUserFloat("selmu_iso03", sel_mu_iso03);
+        b_cand.addUserFloat("selmu_iso04", sel_mu_iso04);
+        b_cand.addUserFloat("pi_iso03" , pi_iso03 );
+        b_cand.addUserFloat("pi_iso04" , pi_iso04 );
+
 
         // position of the muons / tracks in their own collections
         b_cand.addUserInt("trg_mu_idx", trg_mu_position);
@@ -332,7 +395,7 @@ void BToMuMuPiBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup c
         b_cand.addUserInt("pi_idx"    , pi_idx    );
 
         // post fit selection
-        if( !post_vtx_selection_(b_cand) ) continue;        
+        //if( !post_vtx_selection_(b_cand) ) continue;        
 
         ret_val->push_back(b_cand);
               
