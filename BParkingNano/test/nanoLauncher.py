@@ -7,18 +7,42 @@ import ROOT
 def getOptions():
   from argparse import ArgumentParser
   parser = ArgumentParser(description='Script to launch the nanoAOD tool on top of privately produced miniAOD files', add_help=True)
-  parser.add_argument('--pl'  , type=str, dest='pl'  , help='label of the sample file', default='V01_n9000000_njt300')
-  parser.add_argument('--tag' , type=str, dest='tag' , help='[optional] tag to be added on the outputfile name', default=None)
-  parser.add_argument('--user', type=str, dest='user', help='specify username where the miniAOD files are stored', default=os.environ["USER"])
-  parser.add_argument('--doflat', dest='doflat', help='launch the ntupliser on top of the nanofile', action='store_true', default=False)
-  # add isMC, maxEvents
+  parser.add_argument('--pl'      , type=str, dest='pl'       , help='label of the sample file'                                                       , default=None)
+  parser.add_argument('--ds'      , type=str, dest='ds'       , help='[data-mccentral] name of the dataset, e.g /ParkingBPH4/Run2018B-05May2019-v2/MINIAOD', default=None)
+  parser.add_argument('--tag'     , type=str, dest='tag'      , help='[optional] tag to be added on the outputfile name'                              , default=None)
+  parser.add_argument('--maxfiles', type=str, dest='maxfiles' , help='[optional-data] maximum number of files to process'                             , default=None)
+  parser.add_argument('--user'    , type=str, dest='user'     , help='[optional-mc] specify username where the miniAOD files are stored'              , default=os.environ["USER"])
+  parser.add_argument('--mcprivate'         , dest='mcprivate', help='run the BParking nano tool on a private MC sample'         , action='store_true', default=False)
+  parser.add_argument('--mccentral'         , dest='mccentral', help='run the BParking nano tool on a central MC sample'         , action='store_true', default=False)
+  parser.add_argument('--data'              , dest='data'     , help='run the BParking nano tool on a data sample'               , action='store_true', default=False)
+  parser.add_argument('--doflat'            , dest='doflat'   , help='[optional-mc] launch the ntupliser on top of the nanofile' , action='store_true', default=False)
   return parser.parse_args()
+
+
+def checkParser(opt):
+
+  if opt.pl==None:
+    raise RuntimeError('Please indicate the production label: for --mcprivate, it has to correspond to the label of the miniAODl (eg. V01_n9000000_njt300)')
+
+  if opt.data==True and opt.ds==None:
+    raise RuntimeError('You are running on data, please indicate the dataset with --ds <dataset>')
+
+  if opt.mcprivate==False and opt.mccentral==False and opt.data==False:
+    raise RuntimeError('Please indicate if you want to run on data or MC by adding either --data or--mcprivate or --mccentral to the command line')
+
+  if opt.mcprivate + opt.mccentral + opt.data > 1:
+    raise RuntimeError('Please indicate if you want to run on data or MC by adding only --data or --mcprivate or --mccentral to the command line')
 
 
 class NanoLauncher(object):
   def __init__(self, opt):
     self.prodlabel = vars(opt)['pl']
+    self.dataset   = vars(opt)['ds']
     self.tag       = vars(opt)['tag']
+    self.maxfiles  = vars(opt)['maxfiles']
+    self.mcprivate = vars(opt)['mcprivate']
+    self.mccentral = vars(opt)['mccentral']
+    self.data      = vars(opt)['data']
     self.user      = vars(opt)["user"]
     self.doflat    = vars(opt)["doflat"]
 
@@ -27,27 +51,27 @@ class NanoLauncher(object):
     return [f for f in glob.glob(location+'/*')]
 
 
-  def getFiles(self, point):
+  def getLocalFiles(self, point):
     pointdir = '/pnfs/psi.ch/cms/trivcat/store/user/{}/BHNLsGen/{}/{}/'.format(self.user, self.prodlabel, point)
     return [f for f in glob.glob(pointdir+'/step4_nj*.root')]
 
     
-  def checkFile(self, nanofile):
+  def checkLocalFile(self, nanofile):
+    self.prodlabel = vars(opt)['pl']
     rootFile = ROOT.TNetXNGFile.Open(nanofile, 'r')
     if rootFile and rootFile.GetListOfKeys().Contains('Events'):
       return True
     else: return False
 
 
-  def createOutputDir(self, point='.'):
-    outputdir = '/pnfs/psi.ch/cms/trivcat/store/user/{}/BHNLsGen/{}/{}/nanoFiles/'.format(os.environ["USER"], self.prodlabel, point)
-    print 'outputdir ',outputdir
-    os.system('mkdir -p {}'.format(outputdir))
-    return outputdir
+  def getDataLabel(self):
+    idx = self.dataset.find('-')
+    return self.dataset.replace('/', '_')[1:idx]
+  
 
-
-  def getStep(self, nanofile):
-    return nanofile[nanofile.rfind('nj')+2 :  nanofile.find('.root', 0)]
+  def getMCLabel(self):
+    idx = self.dataset[1:].find('/')
+    return self.dataset[1:idx+1]
 
 
   def compile(self):
@@ -57,20 +81,71 @@ class NanoLauncher(object):
     subprocess.call("scram b", cwd=loc, shell=True)
 
 
-  def launchNano(self, nanofile, outputdir):
-    #command = 'sbatch -p wn --account=t3 --time=00:50:00 -o logs/{pl}/nanostep_nj{nj}.log -e logs/{pl}/nanostep_nj{nj}.log --job-name=nanostep_nj{nj}_{pl} submitter.sh {infile} {outdir} {usr} {pl} {step} {tag} {flt}'.format(
-    command = 'sbatch -p quick --account=t3 -o logs/{pl}/nanostep_nj{nj}.log -e logs/{pl}/nanostep_nj{nj}.log --job-name=nanostep_nj{nj}_{pl} submitter.sh {infile} {outdir} {usr} {pl} {step} {tag} {flt}'.format(
-      pl      = self.prodlabel if self.tag == None else self.prodlabel+'_'+self.tag,
-      nj      = self.getStep(nanofile),
-      infile  = nanofile, 
+  def getSize(self, file):
+    return sum(1 for line in open(file))
+
+
+  def writeFileList(self, point=None):
+
+    os.system('mkdir ./files')
+
+    if self.mcprivate:
+      os.system('rm ./files/filelist_{}_{}.txt'.format(self.prodlabel, point))
+
+      myfile = open("./files/filelist_{}_{}.txt".format(self.prodlabel, point), "w+")
+      
+      nanofiles = self.getLocalFiles(point)
+
+      for iNano, nanofile in enumerate(nanofiles):
+
+        if self.checkLocalFile(nanofile):
+          iNano += 1
+          myfile.write(nanofile + '\n')
+        else:
+          print '    could not open {} --> skipping'.format(nanofile)
+    
+      myfile.close()  
+      
+      if self.maxfiles!=None:
+        command_cut = 'head -n {max} ./files/filelist_{pl}_{p}.txt > ./files/tmp.txt && mv ./files/tmp.txt ./files/filelist_{pl}_{p}.txt'.format(max=self.maxfiles, pl=self.prodlabel, p=point)
+        os.system(command_cut)
+
+
+    elif self.data or self.mccentral:
+      ds_label = self.getDataLabel() if self.data else self.getMCLabel()
+
+      os.system('rm ./files/filelist_{ds}_{pl}*.txt'.format(ds=ds_label, pl=self.prodlabel))
+      
+      command = 'dasgoclient --query="file dataset={ds} | grep file.name" > ./files/filelist_{dsl}_{pl}.txt'.format(ds=self.dataset, dsl=ds_label, pl=self.prodlabel)
+      os.system(command)
+
+      if self.maxfiles!=None:
+        command_cut = 'head -n {max} ./files/filelist_{ds}_{pl}.txt > ./files/tmp.txt && mv ./files/tmp.txt ./files/filelist_{ds}_{pl}.txt'.format(max=self.maxfiles, ds=ds_label, pl=self.prodlabel)
+        os.system(command_cut)
+
+      # slurm cannot deal with too large arrays
+      # -> submit job arrays of size 1000
+      if self.getSize('./files/filelist_{}_{}.txt'.format(ds_label, self.prodlabel)) > 1000:
+        command_split = 'split -l 1000 ./files/filelist_{ds}_{pl}.txt ./files/filelist_{ds}_{pl} --additional-suffix=.txt'.format(ds=ds_label, pl=self.prodlabel)
+        os.system(command_split)
+        os.system('rm ./files/filelist_{}_{}.txt'.format(ds_label, self.prodlabel))
+      
+
+  def launchNano(self, nNano, outputdir, logdir, filelist, label):
+    #command = 'sbatch -p quick --account=t3 --time==00:50:00 -o logs/{pl}/nanostep_nj%a.log -e logs/{pl}/nanostep_nj%a.log --job-name=nanostep_nj%a_{pl} --array {ar} submitter.sh {outdir} {usr} {pl} {tag} {flt}'.format(
+    command = 'sbatch -p wn --account=t3 -o {ld}/nanostep_nj%a.log -e {ld}/nanostep_nj%a.log --job-name=nanostep_nj%a_{pl} --array {ar} submitter.sh {outdir} {usr} {pl} {tag} {isMC} {rmt} {flt} {lst}'.format(
+      ld      = logdir,
+      pl      = label,
+      ar      = '1-{}'.format(nNano),
       outdir  = outputdir,
       usr     = os.environ["USER"], 
-      step    = self.getStep(nanofile),
       tag     = 0 if self.tag == None else self.tag,
-      flt     = 1 if self.doflat == True else 0
+      isMC    = 1 if self.mcprivate or self.mccentral else 0,
+      rmt     = 0 if self.mcprivate else 1,
+      flt     = 1 if self.doflat == True else 0,
+      lst     = filelist
     )
 
-    print '\n launching production over {}'.format(nanofile)
     os.system(command)
 
 
@@ -78,39 +153,66 @@ class NanoLauncher(object):
   
     print '-> Compiling'
     self.compile()
+    
 
     print '\n------------'
-    print ' Processing NanoLauncher on production {} '.format(self.prodlabel)
+    print ' Processing NanoLauncher on production {} '.format(self.prodlabel if self.mcprivate else self.dataset)
     print ' --> on the batch'
     print '------------'
 
-    locationSE = '/pnfs/psi.ch/cms/trivcat/store/user/{}/BHNLsGen/{}/'.format(self.user, self.prodlabel)
+
+    if self.mcprivate:
+      locationSE = '/pnfs/psi.ch/cms/trivcat/store/user/{}/BHNLsGen/{}/'.format(self.user, self.prodlabel)
+
+      print '\n-> Getting the different mass points'
+      pointsdir = self.getPointDirs(locationSE)
+      points    = [point[point.rfind('/')+1:len(point)] for point in pointsdir]
+      
+      # looping over all the different points
+      for point in points:
+     
+        print '\n-> Processing mass/ctau point: {}'.format(point)
+
+        print '\n  --> Creating output directory'
+        outputdir = '/pnfs/psi.ch/cms/trivcat/store/user/{}/BHNLsGen/{}/{}/nanoFiles/'.format(os.environ["USER"], self.prodlabel, point)
+        os.system('mkdir -p {}'.format(outputdir))
+        
+        print '\n-> Creating log directory'
+        logdir = './logs/{}'.format(self.prodlabel) if self.tag == None else './logs/{}_{}'.format(self.prodlabel, self.tag)
+        os.system('mkdir -p {}'.format(logdir))
+
+        print '\n  --> Fetching the files '
+        self.writeFileList(point)
+            
+        filelist = './files/filelist_{}_{}.txt'.format(self.prodlabel, point)
+        label = self.prodlabel if self.tag == None else self.prodlabel+'_'+self.tag
+
+        self.launchNano(self.getSize(filelist), outputdir, logdir, filelist, label) 
+
     
-    print '\n-> Creating log directory'
-    logdir = './logs/{}'.format(self.prodlabel) if self.tag == None else './logs/{}_{}'.format(self.prodlabel, self.tag)
-    os.system('mkdir -p {}'.format(logdir))
+    elif self.data or self.mccentral:
+      print '\n  --> Fetching the files '
+      self.writeFileList()
 
-    print '\n-> Getting the different mass points'
-    pointsdir = self.getPointDirs(locationSE)
-    points    = [point[point.rfind('/')+1:len(point)] for point in pointsdir]
-    
-    # looping over all the different points
-    for point in points:
-   
-      print '\n-> Processing mass/ctau point: {}'.format(point)
+      ds_label = self.getDataLabel() if self.data else self.getMCLabel()
 
-      print '\n  --> Creating output directory'
-      outputdir = self.createOutputDir(point)
+      # loop on the files (containing at most 1k samples) 
+      for iFile, filelist in enumerate(glob.glob('./files/filelist_{}_{}*.txt'.format(ds_label, self.prodlabel))):
 
-      print '\n  --> Fetching the files '.format(point)
-      nanofiles = self.getFiles(point)
+        print '\n  --> Creating output directory'
+        dirname = 'data' if self.data else 'mc_central'
+        outputdir = '/pnfs/psi.ch/cms/trivcat/store/user/{}/BHNLsGen/{}/{}_{}/Chunk{}_n{}/'.format(os.environ["USER"], dirname, ds_label, self.prodlabel, iFile, self.getSize(filelist))
+        os.system('mkdir -p {}'.format(outputdir))
+        
+        print '\n-> Creating log directory'
+        logdir = './logs/{}_{}/Chunk{}_n{}'.format(ds_label, self.prodlabel, iFile, self.getSize(filelist)) if self.tag == None \
+               else './logs/{}_{}_{}/Chunk{}_n{}'.format(ds_label, self.prodlabel, self.tag, iFile, self.getSize(filelist))
+        os.system('mkdir -p {}'.format(logdir))
+          
+        label = '{}_{}_Chunk{}_n{}'.format(ds_label, self.prodlabel, iFile, self.getSize(filelist))
 
-      for nanofile in nanofiles:
+        self.launchNano(self.getSize(filelist), outputdir, logdir, filelist, label)
 
-        if self.checkFile(nanofile):
-          self.launchNano(nanofile, outputdir)
-        else:
-          print '    could not open {} --> skipping'.format(nanofile)
 
     print '\n-> Submission completed' 
 
@@ -119,6 +221,8 @@ class NanoLauncher(object):
 if __name__ == "__main__":
 
   opt = getOptions()
+
+  checkParser(opt)
 
   NanoLauncher(opt).process()
 
