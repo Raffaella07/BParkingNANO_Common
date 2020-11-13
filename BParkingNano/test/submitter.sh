@@ -24,7 +24,7 @@ echo "copying the file list to workdir"
 cp ${8} $workdir/filelist.txt
 
 # copy the ntupliser 
-if [ ${8} == 1 ] ; then
+if [ ${7} == 1 ] ; then
   echo "copying ntupliser to workdir"
   cp simple_tester.py $workdir 
   cp flat_tree_branches.py $workdir
@@ -57,7 +57,7 @@ if [ ${5} == 1 ] ; then #isMC
 
 
   # run the ntupliser on top of the nanofile
-  if [ ${8} == 1 ] ; then
+  if [ ${7} == 1 ] ; then
     echo "creating directory for flat ntuples"
     mkdir ${1}/flat
 

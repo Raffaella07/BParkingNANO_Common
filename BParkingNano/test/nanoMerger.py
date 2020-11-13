@@ -121,7 +121,7 @@ class NanoMerger(object):
         mergedName_flat = 'flat_bparknano.root' if self.tag == None else 'flat_bparknano_{}.root'.format(self.tag)
         outputdir_flat  = '/nanoFiles/flat/merged'
 
-        self.doMerging(nanoName_flat, mergedName_flat, location_SE, outputdir_flat, False)
+        self.doMerging(nanoName_flat, mergedName_flat, locationSE, outputdir_flat, False)
 
     elif self.data or self.mccentral:
       locationSE = '/pnfs/psi.ch/cms/trivcat/store/user/{}/BHNLsGen/{}/{}'.format(user, 'data' if self.data else 'mc_central', self.prodlabel)
