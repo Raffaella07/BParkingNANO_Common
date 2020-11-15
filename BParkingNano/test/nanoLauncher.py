@@ -10,12 +10,12 @@ def getOptions():
   parser.add_argument('--pl'      , type=str, dest='pl'       , help='label of the sample file'                                                       , default=None)
   parser.add_argument('--ds'      , type=str, dest='ds'       , help='[data-mccentral] name of the dataset, e.g /ParkingBPH4/Run2018B-05May2019-v2/MINIAOD', default=None)
   parser.add_argument('--tag'     , type=str, dest='tag'      , help='[optional] tag to be added on the outputfile name'                              , default=None)
-  parser.add_argument('--maxfiles', type=str, dest='maxfiles' , help='[optional-data] maximum number of files to process'                             , default=None)
-  parser.add_argument('--user'    , type=str, dest='user'     , help='[optional-mc] specify username where the miniAOD files are stored'              , default=os.environ["USER"])
+  parser.add_argument('--maxfiles', type=str, dest='maxfiles' , help='[optional] maximum number of files to process'                                  , default=None)
+  parser.add_argument('--user'    , type=str, dest='user'     , help='[optional-mcprivate] specify username where the miniAOD files are stored'       , default=os.environ["USER"])
   parser.add_argument('--mcprivate'         , dest='mcprivate', help='run the BParking nano tool on a private MC sample'         , action='store_true', default=False)
   parser.add_argument('--mccentral'         , dest='mccentral', help='run the BParking nano tool on a central MC sample'         , action='store_true', default=False)
   parser.add_argument('--data'              , dest='data'     , help='run the BParking nano tool on a data sample'               , action='store_true', default=False)
-  parser.add_argument('--doflat'            , dest='doflat'   , help='[optional-mc] launch the ntupliser on top of the nanofile' , action='store_true', default=False)
+  parser.add_argument('--doflat'            , dest='doflat'   , help='[optional-mcprivate] launch the ntupliser on top of the nanofile' , action='store_true', default=False)
   return parser.parse_args()
 
 
@@ -109,6 +109,8 @@ class NanoLauncher(object):
       if self.maxfiles!=None:
         command_cut = 'head -n {max} ./files/filelist_{pl}_{p}.txt > ./files/tmp.txt && mv ./files/tmp.txt ./files/filelist_{pl}_{p}.txt'.format(max=self.maxfiles, pl=self.prodlabel, p=point)
         os.system(command_cut)
+      
+      print '    ---> ./files/filelist_{pl}_{p}.txt created'.format(pl=self.prodlabel, p=point)
 
 
     elif self.data or self.mccentral:
@@ -129,6 +131,8 @@ class NanoLauncher(object):
         command_split = 'split -l 1000 ./files/filelist_{ds}_{pl}.txt ./files/filelist_{ds}_{pl} --additional-suffix=.txt'.format(ds=ds_label, pl=self.prodlabel)
         os.system(command_split)
         os.system('rm ./files/filelist_{}_{}.txt'.format(ds_label, self.prodlabel))
+
+      print '    ---> ./files/filelist_{ds}_{pl}.txt created'.format(ds=ds_label, pl=self.prodlabel)
       
 
   def launchNano(self, nNano, outputdir, logdir, filelist, label):
@@ -191,6 +195,10 @@ class NanoLauncher(object):
 
     
     elif self.data or self.mccentral:
+      if self.mccentral:
+        if 'ext' in self.dataset:
+          self.prodlabel += '_ext'
+      
       print '\n  --> Fetching the files '
       self.writeFileList()
 
