@@ -182,14 +182,14 @@ class NanoLauncher(object):
         os.system('mkdir -p {}'.format(outputdir))
         
         print '\n-> Creating log directory'
-        logdir = './logs/{}'.format(self.prodlabel) if self.tag == None else './logs/{}_{}'.format(self.prodlabel, self.tag)
+        logdir = './logs/{}/{}'.format(self.prodlabel, point) if self.tag == None else './logs/{}/{}_{}'.format(self.prodlabel, point, self.tag)
         os.system('mkdir -p {}'.format(logdir))
 
         print '\n  --> Fetching the files '
         self.writeFileList(point)
             
         filelist = './files/filelist_{}_{}.txt'.format(self.prodlabel, point)
-        label = self.prodlabel if self.tag == None else self.prodlabel+'_'+self.tag
+        label = self.prodlabel + '_' + point if self.tag == None else self.prodlabel + '_' + point + '_' +self.tag
 
         self.launchNano(self.getSize(filelist), outputdir, logdir, filelist, label) 
 
