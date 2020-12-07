@@ -66,9 +66,22 @@ BToMuMuPiTable = cms.EDProducer(
         # pre-fit quantities
         CandVars,
         trg_mu_idx      = uint('trg_mu_idx'),
-        sel_mu_idx      = uint('sel_mu_idx'),
-        pi_idx          = uint('pi_idx'    ),
-        # mu-pi fit and vtx info
+        sel_mu_idx      = uint('sel_mu_idx'), 
+        pi_idx          = uint('pi_idx'    ), 
+        ## trigger muon
+        trg_mu_pt       = ufloat('trg_muon_pt'       ), 
+        trg_mu_eta      = ufloat('trg_muon_eta'      ), 
+        trg_mu_phi      = ufloat('trg_muon_phi'      ), 
+        ## vertex difference between the two muons
+        dimu_vxdiff     = ufloat('dimuons_vxdiff'      ),
+        dimu_vydiff     = ufloat('dimuons_vydiff'      ),
+        dimu_vzdiff     = ufloat('dimuons_vzdiff'      ),
+        dimu_Lxy        = ufloat('dimuons_Lxy'         ),
+        dimu_Lxyz       = ufloat('dimuons_Lxyz'        ),
+        ## vertex difference between the trigger muon and pion
+        pi_mu_vzdiff    = ufloat('pion_muon_vzdiff'  ),
+        # post-fit quantities
+        ## vertex information 
         sv_chi2         = ufloat('hnl_vtx_chi2' ),
         sv_prob         = ufloat('hnl_vtx_prob' ),
         sv_lxy          = ufloat('hnl_l_xy'     ),
@@ -80,47 +93,34 @@ BToMuMuPiTable = cms.EDProducer(
         sv_xe           = ufloat('hnl_vtx_ex'   ), ## only saving diagonal elements of the cov matrix
         sv_ye           = ufloat('hnl_vtx_ey'   ),
         sv_ze           = ufloat('hnl_vtx_ez'   ),
-        # HNL 
-        hnl_mass        = Var('daughter("hnl").mass()', float),
-        hnl_pt          = Var('daughter("hnl").pt()'  , float),
-        hnl_eta         = Var('daughter("hnl").eta()' , float),
-        hnl_phi         = Var('daughter("hnl").phi()' , float),
+        ## HNL (only postfit information is saved) 
+        hnl_mass        = ufloat('hnl_fitted_mass'   ),
+        hnl_masserr     = ufloat('hnl_fitted_massErr'),
+        hnl_pt          = ufloat('hnl_fitted_pt'     ),
+        hnl_eta         = ufloat('hnl_fitted_eta'    ),
+        hnl_phi         = ufloat('hnl_fitted_phi'    ),
         hnl_charge      = Var('daughter("hnl").charge()', int),
-        # Cos(theta)
-        hnl_cos2D       = ufloat('hnl_cos_theta_2D'       ),
-        hnl_fit_cos2D   = ufloat('hnl_fitted_cos_theta_2D'),
-        # post-fit momentum
-        hnl_fit_mass    = ufloat('hnl_fitted_mass'   ),
-        hnl_fit_masserr = ufloat('hnl_fitted_massErr'),
-        hnl_fit_pt      = ufloat('hnl_fitted_pt'     ),
-        hnl_fit_eta     = ufloat('hnl_fitted_eta'    ),
-        hnl_fit_phi     = ufloat('hnl_fitted_phi'    ),
-        fit_mu_pt       = ufloat('hnl_fitted_mu_pt'  ),
+        hnl_cos2D   = ufloat('hnl_fitted_cos_theta_2D'),
+        ## daughter muon
+        fit_mu_pt       = ufloat('hnl_fitted_mu_pt'  ), 
         fit_mu_eta      = ufloat('hnl_fitted_mu_eta' ),
         fit_mu_phi      = ufloat('hnl_fitted_mu_phi' ),
         fit_mu_mass     = ufloat('hnl_fitted_mu_mass'),
+        ## daughter pion
         fit_pi_pt       = ufloat('hnl_fitted_pi_pt'  ),
         fit_pi_eta      = ufloat('hnl_fitted_pi_eta' ),
         fit_pi_phi      = ufloat('hnl_fitted_pi_phi' ),
         fit_pi_mass     = ufloat('hnl_fitted_pi_mass'),
-        # trigger muon
-        trg_mu_pt       = ufloat('trg_muon_pt'       ), 
-        trg_mu_eta      = ufloat('trg_muon_eta'      ), 
-        trg_mu_phi      = ufloat('trg_muon_phi'      ), 
-        # vertex difference between the two muons
-        mu_vxdiff       = ufloat('muons_vxdiff'      ),
-        mu_vydiff       = ufloat('muons_vydiff'      ),
-        mu_vzdiff       = ufloat('muons_vzdiff'      ),
-        mu_Lxy          = ufloat('muons_Lxy'         ),
-        mu_Lxyz         = ufloat('muons_Lxyz'        ),
-        # vertex difference between the trigger muon and pion
-        pi_mu_vzdiff    = ufloat('pion_muon_vzdiff'  ),
-        # Id WP of the selected muon
+        ## dR quantities
+        dr_mu_pi        = ufloat('dr_mu_pi'       ),
+        dr_trgmu_hnl    = ufloat('dr_trgmu_hnl'   ),
+        # Other quantities
+        ## ID WP of the selected muon 
         sel_mu_isSoft   = ufloat('sel_muon_isSoft'   ),
         sel_mu_isTight  = ufloat('sel_muon_isTight'  ),
         sel_mu_isMedium = ufloat('sel_muon_isMedium' ),
         sel_mu_isLoose  = ufloat('sel_muon_isLoose'  ),
-        # impact paramaters
+        ## impact paramaters
         trg_mu_ip3d     = ufloat('trg_muon_ip3d'  ), 
         trg_mu_sip3d    = ufloat('trg_muon_sip3d' ), 
         trg_mu_dxy      = ufloat('trg_muon_dxy'   ), 
@@ -134,14 +134,11 @@ BToMuMuPiTable = cms.EDProducer(
         pi_dzS          = ufloat('pion_dzS'       ), 
         pi_dxyS         = ufloat('pion_dxyS'      ), 
         pi_DCASig       = ufloat('pion_DCASig'    ), 
-        # dR quantities
-        dr_mu_pi        = ufloat('dr_mu_pi'       ),
-        dr_trgmu_hnl    = ufloat('dr_trgmu_hnl'   ),
-        # isolation
-        trgmu_iso03     = ufloat('trgmu_iso03'    ),
-        trgmu_iso04     = ufloat('trgmu_iso04'    ),
-        selmu_iso03     = ufloat('selmu_iso03'    ),
-        selmu_iso04     = ufloat('selmu_iso04'    ),
+        ## isolation
+        trg_mu_iso03    = ufloat('trg_mu_iso03'    ), 
+        trg_mu_iso04    = ufloat('trg_mu_iso04'    ),
+        sel_mu_iso03    = ufloat('sel_mu_iso03'    ),
+        sel_mu_iso04    = ufloat('sel_mu_iso04'    ),
         pi_iso03        = ufloat('pi_iso03'       ),
         pi_iso04        = ufloat('pi_iso04'       ),
     )
