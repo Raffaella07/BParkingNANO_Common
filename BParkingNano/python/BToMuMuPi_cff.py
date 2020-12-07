@@ -73,11 +73,11 @@ BToMuMuPiTable = cms.EDProducer(
         trg_mu_eta      = ufloat('trg_muon_eta'      ), 
         trg_mu_phi      = ufloat('trg_muon_phi'      ), 
         ## vertex difference between the two muons
-        dimu_vxdiff     = ufloat('dimuons_vxdiff'      ),
-        dimu_vydiff     = ufloat('dimuons_vydiff'      ),
-        dimu_vzdiff     = ufloat('dimuons_vzdiff'      ),
-        dimu_Lxy        = ufloat('dimuons_Lxy'         ),
-        dimu_Lxyz       = ufloat('dimuons_Lxyz'        ),
+        dimu_vxdiff     = ufloat('dimuon_vxdiff'      ),
+        dimu_vydiff     = ufloat('dimuon_vydiff'      ),
+        dimu_vzdiff     = ufloat('dimuon_vzdiff'      ),
+        dimu_Lxy        = ufloat('dimuon_Lxy'         ),
+        dimu_Lxyz       = ufloat('dimuon_Lxyz'        ),
         ## vertex difference between the trigger muon and pion
         pi_mu_vzdiff    = ufloat('pion_muon_vzdiff'  ),
         # post-fit quantities
