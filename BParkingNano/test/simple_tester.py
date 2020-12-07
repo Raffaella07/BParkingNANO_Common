@@ -20,7 +20,7 @@ base_branches = ['pt', 'eta', 'phi', 'mass', 'pdgId']
 extra_branches = ['charge', 'dxy', 'dz']
 muid_branches = ['isGlobal', 'isPFcand', 'isTracker', 'mediumId', 'pfIsoId', 'softId', 'tightId', 'tkIsoId', 'triggerIdLoose']
 gen_branches = ['status', 'statusFlags', 'genPartIdxMother']
-bcand_branches = ['pt', 'eta', 'phi', 'mass', 'sv_chi2', 'sv_prob', 'sv_lxy', 'sv_lxye', 'sv_lxy_sig', 'sv_x', 'sv_y', 'sv_z', 'sv_xe', 'sv_ye', 'sv_ze', 'hnl_cos2D', 'hnl_fit_cos2D', 'hnl_fit_mass', 'hnl_fit_masse', 'hnl_fit_pt', 'hnl_fit_eta', 'hnl_fit_phi', 'hnl_charge']
+bcand_branches = ['pt', 'eta', 'phi', 'mass', 'sv_chi2', 'sv_prob', 'sv_lxy', 'sv_lxye', 'sv_lxy_sig', 'sv_x', 'sv_y', 'sv_z', 'sv_xe', 'sv_ye', 'sv_ze', 'hnl_charge', 'hnl_cos2D', 'hnl_mass', 'hnl_masserr', 'hnl_pt', 'hnl_eta', 'hnl_phi', 'dimu_vzdiff', 'dimu_vxdiff', 'dimu_vydiff', 'dimu_Lxy', 'dimu_Lxyz', 'pi_mu_vzdiff', 'sel_mu_isSoft', 'sel_mu_isTight', 'sel_mu_isMedium', 'sel_mu_isLoose', 'sel_mu_ip3d', 'sel_mu_sip3d', 'sel_mu_dxy', 'sel_mu_dz', 'trg_mu_ip3d', 'trg_mu_sip3d', 'trg_mu_dxy', 'trg_mu_dz', 'pi_dz', 'pi_dxy', 'pi_dzS', 'pi_dxyS', 'pi_DCASig', 'dr_mu_pi', 'dr_trgmu_hnl', 'fit_mu_pt', 'fit_mu_eta', 'fit_mu_phi', 'fit_mu_mass', 'fit_pi_pt', 'fit_pi_eta', 'fit_pi_phi', 'fit_pi_mass', 'trg_mu_pt', 'trg_mu_eta', 'trg_mu_phi']
 
 class Event(object):
     '''
@@ -134,6 +134,9 @@ class BCandidate(Particle):
 
     def pi(self):
         return self.__pi    
+    
+    def mass(self):
+        return self.__mass    
 
     def checkFirstAncestor(self, pp, target_pdgid):
         if pp is None:
@@ -147,23 +150,25 @@ class BCandidate(Particle):
         return False
 
     def isMatched(self, b_pdgid=521, hnl_pdgid=9900015):
-        if any([getattr(pp, 'genp', lambda : None)() is None for pp in [self.trg_mu(), self.mu(), self.pi()]]):
-            return False
+        #if any([getattr(pp, 'genp', lambda : None)() is None for pp in [self.trg_mu(), self.mu(), self.pi()]]):
+        #    return False
         
         fully_matched = self.checkFirstAncestor(self.trg_mu().genp(), b_pdgid  ) + \
                         self.checkFirstAncestor(self.mu().genp()    , b_pdgid  ) + \
                         self.checkFirstAncestor(self.pi().genp()    , b_pdgid  ) + \
                         self.checkFirstAncestor(self.mu().genp()    , hnl_pdgid) + \
                         self.checkFirstAncestor(self.pi().genp()    , hnl_pdgid)
-        
+       
+
         return fully_matched==5
+
         
     def __str__(self):
         toprint = super(BCandidate, self).__str__()
         toprint += '\n'
-        toprint += '\thnl fitted mass %.2f  pt %.2f  eta %.2f  phi %.2f  charge %d' %(self.hnl_fit_mass(), self.hnl_fit_pt(), self.hnl_fit_eta(), self.hnl_fit_phi(), self.hnl_charge())
+        toprint += '\thnl fitted mass %.2f  pt %.2f  eta %.2f  phi %.2f  charge %d' %(self.hnl_mass(), self.hnl_pt(), self.hnl_eta(), self.hnl_phi(), self.hnl_charge())
         toprint += '\n'
-        toprint += '\t    cosine %.4f  vtx prob %.4f  Lxy %.2f  Lxy sig %.2f \tisMatched? %r' %(self.hnl_fit_cos2D(), self.sv_prob(), self.sv_lxy(), self.sv_lxy_sig(), self.isMatched())
+        toprint += '\t    cosine %.4f  vtx prob %.4f  Lxy %.2f  Lxy sig %.2f \tisMatched? %r' %(self.hnl_cos2D(), self.sv_prob(), self.sv_lxy(), self.sv_lxy_sig(), self.isMatched())
         return toprint
 
 ##########################################################################################
@@ -171,18 +176,24 @@ class BCandidate(Particle):
            
 if __name__ == '__main__': 
 
-    fin = uproot4.open("BParkNANO_mc_10215.root")
+    filename = 'bparknano.root'
+
+    fin = uproot4.open(filename)
     tree = fin["Events"]
     # tree.show()
 
-    fout = ROOT.TFile('flat_tree.root', 'recreate')
+    fout = ROOT.TFile('flat_{}'.format(filename), 'recreate')
     ntuple = ROOT.TNtuple('tree', 'tree', ':'.join(flat_tree_branches.keys()))
     tofill = OrderedDict(zip(flat_tree_branches.keys(), [np.nan]*len(flat_tree_branches.keys()))) # initialise all branches to unphysical -99       
 
-    for iev in range(4):
+    sizetree = len(tree['event'].array())
+    for iev in range(sizetree): 
+        if iev%500==0:
+          percentage = float(iev)/sizetree*100.
+          print '\t===> processing event %d / %d  \t completed %.1f%s' %(iev, sizetree, percentage, '%')
         
-        print '='*50
-        print 'event %d' %(iev)
+        #print '='*50
+        #print 'event %d' %(iev)
 
         event = Event()
         event.run   = tree['run'].array()[iev]
@@ -190,12 +201,9 @@ if __name__ == '__main__':
         event.event = tree['event'].array()[iev]
 
         bcands = []
-        
+       
         for icand in range(tree['nb'].array()[iev]):
             
-#             print '='*50
-#             print 'event %d, candidate %d' %(iev, icand)
-                        
             pi_idx      = tree['b_pi_idx'].array()[iev][icand]
             pi          = RecoParticle(tree, 'ProbeTracks', iev, pi_idx)
             pi_genp_idx = tree['ProbeTracks_genPartIdx'].array()[iev][pi_idx]
@@ -203,7 +211,12 @@ if __name__ == '__main__':
             pi.set_genp(pi_genp)
 
             trg_mu_idx      = tree['b_trg_mu_idx'].array()[iev][icand]
-            trg_mu          = RecoParticle(tree, 'Muon', iev, trg_mu_idx, branches=base_branches+extra_branches+muid_branches)
+            try:
+              trg_mu          = RecoParticle(tree, 'Muon', iev, trg_mu_idx, branches=base_branches+extra_branches+muid_branches)
+            except:
+              print 'trg_muon index out of range --> to be investigated'
+              print 'skip event'
+              continue
             trg_mu_genp_idx = tree['Muon_genPartIdx'].array()[iev][trg_mu_idx]
             trg_mu_genp     = GenParticle(tree, 'GenPart', iev, trg_mu_genp_idx)
             trg_mu.set_genp(trg_mu_genp)
@@ -216,30 +229,18 @@ if __name__ == '__main__':
 
             candidate = BCandidate(tree, 'b', iev, icand, trg_mu, sel_mu, pi)
             bcands.append(candidate)
-                        
-#             print  'pion\n', pi, '\n'
-#             print  'trigger muon\n', trg_mu, '\n'
-#             print  'selected muon\n', sel_mu, '\n'
-#             print  'B candidate \n', candidate, '\n'
 
         # sort the candidates
-        bcands.sort(key = lambda x : x.hnl_fit_pt(), reverse=True)
+        bcands.sort(key = lambda x : x.hnl_pt(), reverse=True)
 
-        for ii, ib in enumerate(bcands):
-            print ii, ib.sv_lxy()
-
-
-        print 'fetched all %d cands' %(len(bcands))
+        #print 'fetched all %d cands' %(len(bcands))
         list_of_matches = [ib.isMatched() for ib in bcands]
         is_there_a_match = any(list_of_matches)
         match_index = list_of_matches.index(True) if any(list_of_matches) else None
-        print 'the gen-matched candidate position is ', match_index
-        
-        if not match_index: continue
+        #print 'the gen-matched candidate position is ', match_index
+       
+        if match_index == None: continue
 
-        print '\t this is the matched'
-        print bcands[match_index]
-        
         event.b = bcands[match_index]
         
         for k, v in tofill.iteritems(): 
