@@ -142,7 +142,7 @@ void BToMuMuPiBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup c
     size_t trg_mu_position = sel_muons->size(); // make it point to just beyond the size of the collection
     
     edm::Ptr<pat::Muon> trg_mu_ptr(trg_muons, trg_mu_idx);
-    
+
     // selection on the trigger muon
     if( !trgmu_selection_(*trg_mu_ptr) ) continue;
 
@@ -390,8 +390,15 @@ void BToMuMuPiBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup c
         b_cand.addUserInt("sel_mu_idx", sel_mu_idx);
         b_cand.addUserInt("pi_idx"    , pi_idx    );
 
+
+        // di-lepton (for control channel)
+        float dilepton_mass = (fitter.daughter_p4(0) + trg_mu_ptr->p4()).mass();
+        b_cand.addUserFloat("dilepton_mass", dilepton_mass);
+
+
         // post fit selection
         if( !post_vtx_selection_(b_cand) ) continue;        
+
 
         ret_val->push_back(b_cand);
               

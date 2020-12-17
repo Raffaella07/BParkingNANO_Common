@@ -135,12 +135,14 @@ BToMuMuPiTable = cms.EDProducer(
         pi_dxyS         = ufloat('pion_dxyS'      ), 
         pi_DCASig       = ufloat('pion_DCASig'    ), 
         ## isolation
-        trg_mu_iso03    = ufloat('trg_mu_iso03'    ), 
-        trg_mu_iso04    = ufloat('trg_mu_iso04'    ),
-        sel_mu_iso03    = ufloat('sel_mu_iso03'    ),
-        sel_mu_iso04    = ufloat('sel_mu_iso04'    ),
+        trg_mu_iso03    = ufloat('trg_mu_iso03'   ), 
+        trg_mu_iso04    = ufloat('trg_mu_iso04'   ),
+        sel_mu_iso03    = ufloat('sel_mu_iso03'   ),
+        sel_mu_iso04    = ufloat('sel_mu_iso04'   ),
         pi_iso03        = ufloat('pi_iso03'       ),
         pi_iso04        = ufloat('pi_iso04'       ),
+        #dilepton mass
+        dilepton_mass   = ufloat('dilepton_mass' ),
     )
 )
 
