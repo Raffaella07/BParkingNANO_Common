@@ -145,6 +145,7 @@ BToMuMuPiTable = cms.EDProducer(
         pi_iso04        = ufloat('pi_iso04'       ),
         ## dilepton mass
         dilepton_mass   = ufloat('dilepton_mass'  ),
+        dilepton_pt     = ufloat('dilepton_pt'    ),
         ## gen-matching
         isMatched                   = Var("userInt('isMatched')"                  , int, mcOnly=True),
         matching_sel_mu_genIdx      = Var("userInt('matching_sel_mu_genIdx')"     , int, mcOnly=True),

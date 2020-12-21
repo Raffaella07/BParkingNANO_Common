@@ -391,6 +391,9 @@ void BToMuMuPiBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup c
         float dilepton_mass = (fitter.daughter_p4(0) + trg_mu_ptr->p4()).mass();
         b_cand.addUserFloat("dilepton_mass", dilepton_mass);
 
+        float dilepton_pt = (fitter.daughter_p4(0) + trg_mu_ptr->p4()).pt();
+        b_cand.addUserFloat("dilepton_pt", dilepton_pt);
+
 
         // post fit selection
         if( !post_vtx_selection_(b_cand) ) continue;        
