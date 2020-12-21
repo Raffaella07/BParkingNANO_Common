@@ -50,6 +50,7 @@ private:
 template< typename PATOBJ >
 void MatchEmbedder<PATOBJ>::produce(edm::StreamID, edm::Event &evt, edm::EventSetup const & iSetup) const {
 
+
   //input
   edm::Handle<PATOBJCollection> src;
   evt.getByToken(src_, src);
@@ -78,6 +79,7 @@ void MatchEmbedder<PATOBJ>::produce(edm::StreamID, edm::Event &evt, edm::EventSe
 
 #include "DataFormats/PatCandidates/interface/Muon.h"
 typedef MatchEmbedder<pat::Muon> MuonMatchEmbedder;
+typedef MatchEmbedder<pat::Muon> TriggerMuonMatchEmbedder;
 
 #include "DataFormats/PatCandidates/interface/Electron.h"
 typedef MatchEmbedder<pat::Electron> ElectronMatchEmbedder;
@@ -87,5 +89,6 @@ typedef MatchEmbedder<pat::CompositeCandidate> CompositeCandidateMatchEmbedder;
 
 #include "FWCore/Framework/interface/MakerMacros.h"
 DEFINE_FWK_MODULE(MuonMatchEmbedder);
+DEFINE_FWK_MODULE(TriggerMuonMatchEmbedder);
 DEFINE_FWK_MODULE(ElectronMatchEmbedder);
 DEFINE_FWK_MODULE(CompositeCandidateMatchEmbedder);

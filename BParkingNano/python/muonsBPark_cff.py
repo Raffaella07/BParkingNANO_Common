@@ -103,7 +103,7 @@ selectedMuonsMCMatchEmbedded = cms.EDProducer(
     matching = cms.InputTag('muonsBParkMCMatchForTable')
 )
 
-muonTriggerMatchedTable = muonBParkTable.clone(
+muonTriggerBParkTable = muonBParkTable.clone(
     src = cms.InputTag("muonTrgSelector:trgMuons"),
     name = cms.string("TriggerMuon"),
     doc  = cms.string("reco muon matched to triggering muon"),
@@ -115,7 +115,36 @@ muonTriggerMatchedTable = muonBParkTable.clone(
    )
 )
 
+
+muonsTriggerBParkMCMatchForTable = cms.EDProducer("MCMatcher",            # cut on deltaR, deltaPt/Pt; pick best by deltaR
+    src         = muonTriggerBParkTable.src,                         # final reco collection
+    matched     = cms.InputTag("finalGenParticlesBPark"),     # final mc-truth particle collection
+    mcPdgId     = cms.vint32(13),                             # one or more PDG ID (13 = mu); absolute values (see below)
+    checkCharge = cms.bool(False),                            # True = require RECO and MC objects to have the same charge
+    mcStatus    = cms.vint32(1),                              # PYTHIA status code (1 = stable, 2 = shower, 3 = hard scattering)
+    maxDeltaR   = cms.double(0.03),                           # Minimum deltaR for the match
+    maxDPtRel   = cms.double(0.5),                            # Minimum deltaPt/Pt for the match
+    resolveAmbiguities    = cms.bool(True),                   # Forbid two RECO objects to match to the same GEN object
+    resolveByMatchQuality = cms.bool(True),                   # False = just match input in order; True = pick lowest deltaR pair first
+)
+
+muonTriggerBParkMCTable = cms.EDProducer("CandMCMatchTableProducerBPark",
+    src     = muonTriggerBParkTable.src,
+    mcMap   = cms.InputTag("muonsTriggerBParkMCMatchForTable"),
+    objName = muonTriggerBParkTable.name,
+    objType = muonTriggerBParkTable.name, 
+    branchName = cms.string("genPart"),
+    docString = cms.string("MC matching to status==1 muons"),
+)
+
+triggerMuonsMCMatchEmbedded = cms.EDProducer(
+    'TriggerMuonMatchEmbedder',
+    src = cms.InputTag('muonTrgSelector', 'trgMuons'),
+    matching = cms.InputTag('muonsTriggerBParkMCMatchForTable')
+)
+
+
 muonBParkSequence = cms.Sequence(muonTrgSelector * countTrgMuons)
-muonBParkMC = cms.Sequence(muonBParkSequence + muonsBParkMCMatchForTable + selectedMuonsMCMatchEmbedded + muonBParkMCTable)
+muonBParkMC = cms.Sequence(muonTrgSelector + muonsBParkMCMatchForTable + selectedMuonsMCMatchEmbedded + muonBParkMCTable + muonsTriggerBParkMCMatchForTable + triggerMuonsMCMatchEmbedded + muonTriggerBParkMCTable* countTrgMuons)
 muonBParkTables = cms.Sequence(muonBParkTable)
-muonTriggerMatchedTables = cms.Sequence(muonTriggerMatchedTable)
+muonTriggerMatchedTables = cms.Sequence(muonTriggerBParkTable)

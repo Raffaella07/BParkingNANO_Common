@@ -23,7 +23,7 @@ class CandMCMatchTableProducerBPark : public edm::global::EDProducer<> {
   {
     produces<nanoaod::FlatTable>();
     const std::string & type = params.getParameter<std::string>("objType");
-    if (type == "Muon") type_ = MMuon;
+    if (type == "Muon" || type == "TriggerMuon") type_ = MMuon;
     else if (type == "Electron") type_ = MElectron;
     else if (type == "Tau") type_ = MTau;
     else if (type == "Photon") type_ = MPhoton;
@@ -107,6 +107,7 @@ class CandMCMatchTableProducerBPark : public edm::global::EDProducer<> {
           default:
             flav[i] = match->statusFlags().fromHardProcess();
         };
+
       }    
 
       tab->addColumn<int>(branchName_+"Idx",  key, "Index into genParticle list for "+doc_, nanoaod::FlatTable::IntColumn);

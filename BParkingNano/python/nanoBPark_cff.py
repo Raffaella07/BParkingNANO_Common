@@ -81,10 +81,11 @@ def nanoAOD_customizeBToKstarMuMu(process):
     return process
 
 from FWCore.ParameterSet.MassReplace import massSearchReplaceAnyInputTag
-def nanoAOD_customizeMC(process, ancestor_particles=[511, 521]):
+def nanoAOD_customizeMC(process, ancestor_particles=[511, 521]):  
     for name, path in process.paths.iteritems():
         # replace all the non-match embedded inputs with the matched ones
         massSearchReplaceAnyInputTag(path, 'muonTrgSelector:SelectedMuons', 'selectedMuonsMCMatchEmbedded')
+        massSearchReplaceAnyInputTag(path, 'muonTrgSelector:trgMuons', 'triggerMuonsMCMatchEmbedded')
         massSearchReplaceAnyInputTag(path, 'electronsForAnalysis:SelectedElectrons', 'selectedElectronsMCMatchEmbedded')
         massSearchReplaceAnyInputTag(path, 'tracksBPark:SelectedTracks', 'tracksBParkMCMatchEmbedded')
 
