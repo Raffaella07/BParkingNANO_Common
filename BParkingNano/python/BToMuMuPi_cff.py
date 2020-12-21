@@ -9,8 +9,10 @@ BToMuMuPi = cms.EDProducer(
     pions                   = cms.InputTag('tracksBPark', 'SelectedTracks'),
     pionsTransientTracks    = cms.InputTag('tracksBPark', 'SelectedTransientTracks'),
     tracks                  = cms.InputTag("packedPFCandidates"), 
-    lostTracks              = cms.InputTag("lostTracks")        , 
-    beamSpot                = cms.InputTag("offlineBeamSpot")   , 
+    lostTracks              = cms.InputTag("lostTracks"), 
+    genParticles            = cms.InputTag("finalGenParticlesBPark"),
+    beamSpot                = cms.InputTag('offlineBeamSpot'), 
+
 
     # pre-fitter preselection
     pionSelection           = cms.string('pt > 0.55 && abs(eta)<2'), # pion preselection to be modified here 
@@ -69,15 +71,15 @@ BToMuMuPiTable = cms.EDProducer(
         sel_mu_idx      = uint('sel_mu_idx'), 
         pi_idx          = uint('pi_idx'    ), 
         ## trigger muon
-        trg_mu_pt       = ufloat('trg_muon_pt'       ), 
-        trg_mu_eta      = ufloat('trg_muon_eta'      ), 
-        trg_mu_phi      = ufloat('trg_muon_phi'      ), 
+        trg_mu_pt       = ufloat('trg_muon_pt'   ), 
+        trg_mu_eta      = ufloat('trg_muon_eta'  ), 
+        trg_mu_phi      = ufloat('trg_muon_phi'  ), 
         ## vertex difference between the two muons
-        dimu_vxdiff     = ufloat('dimuon_vxdiff'      ),
-        dimu_vydiff     = ufloat('dimuon_vydiff'      ),
-        dimu_vzdiff     = ufloat('dimuon_vzdiff'      ),
-        dimu_Lxy        = ufloat('dimuon_Lxy'         ),
-        dimu_Lxyz       = ufloat('dimuon_Lxyz'        ),
+        dimu_vxdiff     = ufloat('dimuon_vxdiff' ),
+        dimu_vydiff     = ufloat('dimuon_vydiff' ),
+        dimu_vzdiff     = ufloat('dimuon_vzdiff' ),
+        dimu_Lxy        = ufloat('dimuon_Lxy'    ),
+        dimu_Lxyz       = ufloat('dimuon_Lxyz'   ),
         ## vertex difference between the trigger muon and pion
         pi_mu_vzdiff    = ufloat('pion_muon_vzdiff'  ),
         # post-fit quantities
@@ -100,7 +102,7 @@ BToMuMuPiTable = cms.EDProducer(
         hnl_eta         = ufloat('hnl_fitted_eta'    ),
         hnl_phi         = ufloat('hnl_fitted_phi'    ),
         hnl_charge      = Var('daughter("hnl").charge()', int),
-        hnl_cos2D   = ufloat('hnl_fitted_cos_theta_2D'),
+        hnl_cos2D       = ufloat('hnl_fitted_cos_theta_2D'   ),
         ## daughter muon
         fit_mu_pt       = ufloat('hnl_fitted_mu_pt'  ), 
         fit_mu_eta      = ufloat('hnl_fitted_mu_eta' ),
@@ -112,8 +114,8 @@ BToMuMuPiTable = cms.EDProducer(
         fit_pi_phi      = ufloat('hnl_fitted_pi_phi' ),
         fit_pi_mass     = ufloat('hnl_fitted_pi_mass'),
         ## dR quantities
-        dr_mu_pi        = ufloat('dr_mu_pi'       ),
-        dr_trgmu_hnl    = ufloat('dr_trgmu_hnl'   ),
+        dr_mu_pi        = ufloat('dr_mu_pi'     ),
+        dr_trgmu_hnl    = ufloat('dr_trgmu_hnl' ),
         # Other quantities
         ## ID WP of the selected muon 
         sel_mu_isSoft   = ufloat('sel_muon_isSoft'   ),
@@ -141,10 +143,26 @@ BToMuMuPiTable = cms.EDProducer(
         sel_mu_iso04    = ufloat('sel_mu_iso04'   ),
         pi_iso03        = ufloat('pi_iso03'       ),
         pi_iso04        = ufloat('pi_iso04'       ),
-        #dilepton mass
-        dilepton_mass   = ufloat('dilepton_mass' ),
+        ## dilepton mass
+        dilepton_mass   = ufloat('dilepton_mass'  ),
+        ## gen-matching
+        isMatched                   = Var("userInt('isMatched')"                  , int, mcOnly=True),
+        matching_sel_mu_genIdx      = Var("userInt('matching_sel_mu_genIdx')"     , int, mcOnly=True),
+        matching_trg_mu_genIdx      = Var("userInt('matching_trg_mu_genIdx')"     , int, mcOnly=True),
+        matching_pi_genIdx          = Var("userInt('matching_pi_genIdx')"         , int, mcOnly=True),
+        matching_sel_mu_motherPdgId = Var("userInt('matching_sel_mu_motherPdgId')", int, mcOnly=True),
+        matching_trg_mu_motherPdgId = Var("userInt('matching_trg_mu_motherPdgId')", int, mcOnly=True),
+        matching_pi_motherPdgId     = Var("userInt('matching_pi_motherPdgId')"    , int, mcOnly=True),
+        #matching_matched_sel_mu_genIdx      = Var("userInt('matching_matched_sel_mu_genIdx')"     , int, mcOnly=True),
+        #matching_matched_trg_mu_genIdx      = Var("userInt('matching_matched_trg_mu_genIdx')"     , int, mcOnly=True),
+        #matching_matched_pi_genIdx          = Var("userInt('matching_matched_pi_genIdx')"         , int, mcOnly=True),
+        matching_matched_sel_mu_motherPdgId = Var("userInt('matching_matched_sel_mu_motherPdgId')", int, mcOnly=True),
+        matching_matched_trg_mu_motherPdgId = Var("userInt('matching_matched_trg_mu_motherPdgId')", int, mcOnly=True),
+        matching_matched_pi_motherPdgId     = Var("userInt('matching_matched_pi_motherPdgId')"    , int, mcOnly=True),
+
     )
 )
+
 
 CountBToMuMuPi = cms.EDFilter("PATCandViewCountFilter",
     minNumber = cms.uint32(1),

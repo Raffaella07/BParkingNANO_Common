@@ -6,6 +6,7 @@
 #include "FWCore/Utilities/interface/InputTag.h"
 #include "DataFormats/BeamSpot/interface/BeamSpot.h"
 #include "TrackingTools/TransientTrack/interface/TransientTrack.h"
+#include "DataFormats/HepMCCandidate/interface/GenParticle.h" 
 
 
 #include <vector>
@@ -47,16 +48,15 @@ public:
     trg_muons_         {consumes<pat::MuonCollection>              ( cfg.getParameter<edm::InputTag>("trgMuons"               ) )},
     sel_muons_         {consumes<pat::MuonCollection>              ( cfg.getParameter<edm::InputTag>("selMuons"               ) )},
     sel_muons_ttracks_ {consumes<TransientTrackCollection>         ( cfg.getParameter<edm::InputTag>("selMuonsTransientTracks") )},
-    
     pions_             {consumes<pat::CompositeCandidateCollection>( cfg.getParameter<edm::InputTag>("pions"                  ) )},
     pions_ttracks_     {consumes<TransientTrackCollection>         ( cfg.getParameter<edm::InputTag>("pionsTransientTracks"   ) )},
     isotracksToken_    {consumes<pat::PackedCandidateCollection>   ( cfg.getParameter<edm::InputTag>("tracks"                 ) )},
     isolostTracksToken_{consumes<pat::PackedCandidateCollection>   ( cfg.getParameter<edm::InputTag>("lostTracks"             ) )},
+    genParticles_      {consumes<reco::GenParticleCollection>      ( cfg.getParameter<edm::InputTag>("genParticles"           ) )}, 
     beamspot_          {consumes<reco::BeamSpot>                   ( cfg.getParameter<edm::InputTag>("beamSpot"               ) )} 
     {
       produces<pat::CompositeCandidateCollection>();
     }
-
 
     // added for fetching the PV
     //vertexSrc_         { consumes<reco::VertexCollection>          ( iConfig.getParameter<edm::InputTag>( "vertexCollection"  ) )},
@@ -89,8 +89,10 @@ private:
   const edm::EDGetTokenT<pat::PackedCandidateCollection> isotracksToken_;
   const edm::EDGetTokenT<pat::PackedCandidateCollection> isolostTracksToken_;
 
+  const edm::EDGetTokenT<reco::GenParticleCollection> genParticles_;
+
   const edm::EDGetTokenT<reco::BeamSpot> beamspot_;  
-    
+
   // for PV
   //const edm::EDGetTokenT<reco::VertexCollection> vertexSrc_;
   
@@ -115,8 +117,12 @@ void BToMuMuPiBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup c
   edm::Handle<TransientTrackCollection> pions_ttracks;
   evt.getByToken(pions_ttracks_, pions_ttracks);  
 
+  edm::Handle<reco::GenParticleCollection> genParticles;
+  evt.getByToken(genParticles_, genParticles);
+
   edm::Handle<reco::BeamSpot> beamspot;
   evt.getByToken(beamspot_, beamspot);  
+
 
   //for isolation
   edm::Handle<pat::PackedCandidateCollection> iso_tracks;
@@ -129,7 +135,7 @@ void BToMuMuPiBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup c
 
   std::vector<int> used_lep1_id, used_trk_id;
 
-  // PV fectched for getting the trigger muon id (caveat: B is long lived)
+  // PV fetched for getting the trigger muon id (caveat: B is long lived)
   //edm::Handle<reco::VertexCollection> vertexHandle;
   //evt.getByToken(vertexSrc_, vertexHandle);
   //const reco::Vertex & PV = vertexHandle->front();
@@ -146,9 +152,6 @@ void BToMuMuPiBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup c
     // selection on the trigger muon
     if( !trgmu_selection_(*trg_mu_ptr) ) continue;
 
-    // test
-    //std::cout << "In builder, trg muon dz: " << trg_mu_ptr->vz() << std::endl;
-    
     for(size_t pi_idx = 0; pi_idx < pions->size(); ++pi_idx) {
       edm::Ptr<pat::CompositeCandidate> pi_ptr(pions, pi_idx);
 
@@ -187,9 +190,6 @@ void BToMuMuPiBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup c
 
         // selection on the muon
         if( !selmu_selection_(*sel_mu_ptr) ) continue;
-
-        // test
-        //std::cout << "In builder, muon dz: " << sel_mu_ptr->vz() << std::endl;
 
         // HNL candidate
         pat::CompositeCandidate hnl_cand;
@@ -305,10 +305,6 @@ void BToMuMuPiBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup c
         b_cand.addUserFloat("dr_trgmu_hnl"          , dR_trgmu_hnl                               );
 
 
-        // test
-        //std::cout << "In builder, muon dz: " << fabs(trg_mu_ptr->vz()-sel_mu_ptr->vz()) << std::endl;
-        //std::cout << "mu vz: " << sel_mu_ptr->vz() << " z: " << fitter.daughter_p4(0).z() << std::endl;
-
         // impact parameter variables (with pre-fit quantities)
         b_cand.addUserFloat("trg_muon_ip3d"   , fabs(trg_mu_ptr->dB(pat::Muon::PV3D))                                    );
         b_cand.addUserFloat("trg_muon_sip3d"  , fabs(trg_mu_ptr->dB(pat::Muon::PV3D) / trg_mu_ptr->edB(pat::Muon::PV3D)) );
@@ -398,6 +394,79 @@ void BToMuMuPiBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup c
 
         // post fit selection
         if( !post_vtx_selection_(b_cand) ) continue;        
+
+
+        // gen-matching
+        
+        // for MC only
+        try{ 
+          sel_mu_ptr->userInt("isMC");
+        }
+        catch(...){
+          continue;
+        }
+      
+        int isMatched = 0;
+
+        // pdgId of the gen particle to which the final-state particles are matched
+        int trg_mu_genPdgId = trg_mu_ptr->userInt("mcMatch");
+        int sel_mu_genPdgId = sel_mu_ptr->userInt("mcMatch");
+        int pi_genPdgId     = pi_ptr->userInt("mcMatch");
+        
+        // index of the gen particle to which the final-state particles are matched
+        int trg_mu_genIdx   = trg_mu_ptr->userInt("mcMatchIndex"); 
+        int sel_mu_genIdx   = sel_mu_ptr->userInt("mcMatchIndex"); 
+        int pi_genIdx       = pi_ptr->userInt("mcMatchIndex"); 
+
+        if(trg_mu_genIdx == -1 || sel_mu_genIdx == -1 || pi_genIdx == -1) continue;
+
+        // getting the associated gen particles
+        edm::Ptr<reco::GenParticle> genTriggerMuon_ptr(genParticles, trg_mu_genIdx);
+        edm::Ptr<reco::GenParticle> genMuon_ptr(genParticles, sel_mu_genIdx);
+        edm::Ptr<reco::GenParticle> genPion_ptr(genParticles, pi_genIdx);
+
+        // index of the associated mother particle
+        int genTriggerMuonMother_genIdx = -1;
+        int genMuonMother_genIdx        = -1;
+        int genPionMother_genIdx        = -1;
+        if(genTriggerMuon_ptr->numberOfMothers()>0) genTriggerMuonMother_genIdx = genTriggerMuon_ptr->motherRef(0).key();
+        if(genMuon_ptr->numberOfMothers()>0) genMuonMother_genIdx = genMuon_ptr->motherRef(0).key();
+        if(genPion_ptr->numberOfMothers()>0) genPionMother_genIdx = genPion_ptr->motherRef(0).key();
+
+        // getting the mother particles
+        edm::Ptr<reco::GenParticle> genTriggerMuonMother_ptr(genParticles, genTriggerMuonMother_genIdx);
+        edm::Ptr<reco::GenParticle> genMuonMother_ptr(genParticles, genMuonMother_genIdx);
+        edm::Ptr<reco::GenParticle> genPionMother_ptr(genParticles, genPionMother_genIdx);
+
+        // pdgId of the mother particles
+        int genTriggerMuonMother_genPdgId = genTriggerMuonMother_ptr->pdgId();
+        int genMuonMother_genPdgId        = genMuonMother_ptr->pdgId();
+        int genPionMother_genPdgId        = genPionMother_ptr->pdgId();
+
+        if(
+           fabs(sel_mu_genPdgId) == 13 && fabs(genMuonMother_genPdgId) == 9900015 && 
+           fabs(pi_genPdgId) == 211 && fabs(genPionMother_genPdgId) == 9900015 &&
+           fabs(trg_mu_genPdgId) == 13 && (fabs(genTriggerMuonMother_genPdgId) == 511 || fabs(genTriggerMuonMother_genPdgId) == 521 
+              || fabs(genTriggerMuonMother_genPdgId) == 531 || fabs(genTriggerMuonMother_genPdgId) == 541)
+          ){
+            isMatched = 1;
+        }
+
+        b_cand.addUserInt("isMatched", isMatched);
+        b_cand.addUserInt("matching_trg_mu_genIdx", trg_mu_genIdx);
+        b_cand.addUserInt("matching_sel_mu_genIdx", sel_mu_genIdx);
+        b_cand.addUserInt("matching_pi_genIdx", pi_genIdx);
+        b_cand.addUserInt("matching_trg_mu_motherPdgId", genTriggerMuonMother_genPdgId);
+        b_cand.addUserInt("matching_sel_mu_motherPdgId", genMuonMother_genPdgId);
+        b_cand.addUserInt("matching_pi_motherPdgId", genPionMother_genPdgId);
+
+        int genTriggerMuonMother_genPdgId_matched = isMatched==1 ? genTriggerMuonMother_genPdgId : 0;
+        int genMuonMother_genPdgId_matched = isMatched==1 ? genMuonMother_genPdgId : 0;
+        int genPionMother_genPdgId_matched = isMatched==1 ? genPionMother_genPdgId : 0;
+
+        b_cand.addUserInt("matching_matched_trg_mu_motherPdgId", genTriggerMuonMother_genPdgId_matched);
+        b_cand.addUserInt("matching_matched_sel_mu_motherPdgId", genMuonMother_genPdgId_matched);
+        b_cand.addUserInt("matching_matched_pi_motherPdgId", genPionMother_genPdgId_matched);
 
 
         ret_val->push_back(b_cand);
