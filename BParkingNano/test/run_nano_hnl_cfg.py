@@ -17,7 +17,6 @@ options.register('outFile'        , 'bparknano.root', VarParsing.multiplicity.si
 
 
 options.setDefault('maxEvents', -1)
-#options.setDefault('outputFile', 'bparknano.root')
 options.parseArguments()
 
 
@@ -31,9 +30,10 @@ outputFileFEVT = cms.untracked.string('_'.join(['BParkFullEvt', extension[option
 
 
 if not options.inputFiles:
-    #options.inputFiles = ['/store/data/Run2018B/ParkingBPH4/MINIAOD/05May2019-v2/230000/6B5A24B1-0E6E-504B-8331-BD899EB60110.root', '/store/data/Run2018B/ParkingBPH4/MINIAOD/05May2019-v2/230000/F7E7EF39-476F-1C48-95F7-74CB5C7A542C.root'] if not options.isMC else \
     options.inputFiles = ['/store/data/Run2018B/ParkingBPH4/MINIAOD/05May2019-v2/230000/F7E7EF39-476F-1C48-95F7-74CB5C7A542C.root'] if not options.isMC else \
-                         ['file:%s' %i for i in glob('/pnfs/psi.ch/cms/trivcat/store/user/mratti/BHNLsGen/V11_inclB_n4200000_njt200/mass3.0_ctau811.293081969/step4_nj95.root')]
+                         ['file:%s' %i for i in glob('/pnfs/psi.ch/cms/trivcat/store/user/mratti/BHNLsGen/pilotV15_control/mass999_ctau999/step4_nj*.root')]
+                         #['file:%s' %i for i in glob('/pnfs/psi.ch/cms/trivcat/store/user/mratti/BHNLsGen/V11_inclB_n4200000_njt200/mass3.0_ctau811.293081969/step4_nj95.root')]
+                         #['file:%s' %i for i in glob('/pnfs/psi.ch/cms/trivcat/store/user/anlyon/BHNLsGen/T5_newcmsdrivers_npremix3_n4200000_njt200/mass3.0_ctau811.293081969/step4_nj*.root')]
                          #['file:%s' %i for i in glob('/pnfs/psi.ch/cms/trivcat/store/user/anlyon/BHNLsGen/V03_leptonic_n900000_njt200/mass1.5_ctau17307.5857487/step4_nj95.root')]
                          #['file:%s' %i for i in glob('/pnfs/psi.ch/cms/trivcat/store/user/anlyon/BHNLsGen/V02_testLeptonic_n450000_njt100/mass1.5_ctau51.922757246/step4_nj95.root')]
                          #['file:%s' %i for i in glob('/pnfs/psi.ch/cms/trivcat/store/user/anlyon/BHNLsGen/V01_n9000000_njt300/mass1.5_ctau51.922757246/step4_nj95.root')]
@@ -121,15 +121,17 @@ from PhysicsTools.BParkingNano.nanoBPark_cff import *
 process = nanoAOD_customizeMuonTriggerBPark  (process)
 process = nanoAOD_customizeTrackFilteredBPark(process)
 process = nanoAOD_customizeBToMuMuPi         (process)
+process = nanoAOD_customizeBToKMuMu          (process) 
 process = nanoAOD_customizeTriggerBitsBPark  (process)
 
 # Path and EndPath definitions
 process.nanoAOD_MuMuPi_step = cms.Path(process.nanoSequence + process.nanoBMuMuPiSequence + CountBToMuMuPi )
+process.nanoAOD_KMuMu_step  = cms.Path(process.nanoSequence + process.nanoBKMuMuSequence + CountBToKmumu ) 
 
 # customisation of the process.
 if options.isMC:
     from PhysicsTools.BParkingNano.nanoBPark_cff import nanoAOD_customizeMC
-    nanoAOD_customizeMC(process, ancestor_particles=[511, 521, 9900015])
+    nanoAOD_customizeMC(process, ancestor_particles=[511, 521, 9900015]) 
 
 process.endjob_step = cms.EndPath(process.endOfProcess)
 process.FEVTDEBUGHLToutput_step = cms.EndPath(process.FEVTDEBUGHLToutput)
@@ -138,6 +140,7 @@ process.NANOAODoutput_step = cms.EndPath(process.NANOAODoutput)
 # Schedule definition
 process.schedule = cms.Schedule(
     process.nanoAOD_MuMuPi_step,
+    process.nanoAOD_KMuMu_step, 
     process.endjob_step, 
     process.NANOAODoutput_step
 )
@@ -145,6 +148,7 @@ process.schedule = cms.Schedule(
 if options.wantFullRECO:
     process.schedule = cms.Schedule(
         process.nanoAOD_MuMuPi_step,
+        process.nanoAOD_KMuMu_step, 
         process.endjob_step, 
         process.FEVTDEBUGHLToutput_step, 
         process.NANOAODoutput_step
@@ -153,7 +157,7 @@ from PhysicsTools.PatAlgos.tools.helpers import associatePatAlgosToolsTask
 associatePatAlgosToolsTask(process)
 
 process.NANOAODoutput.SelectEvents = cms.untracked.PSet(
-    SelectEvents = cms.vstring('nanoAOD_MuMuPi_step', )
+    SelectEvents = cms.vstring('nanoAOD_MuMuPi_step', 'nanoAOD_KMuMu_step') 
 )
 
 
