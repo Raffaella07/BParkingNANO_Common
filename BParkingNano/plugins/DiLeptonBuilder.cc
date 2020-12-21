@@ -81,7 +81,7 @@ void DiLeptonBuilder<Lepton>::produce(edm::StreamID, edm::Event &evt, edm::Event
       if (l1_ptr->hasUserInt("isPF") && l2_ptr->hasUserInt("isPF"))
          nlowpt= 2-l1_ptr->userInt("isPF")-l2_ptr->userInt("isPF");
       
-        // Put the lepton passing the corresponding selection
+      // Put the lepton passing the corresponding selection
       lepton_pair.addUserInt("l1_idx", l1_idx );
       lepton_pair.addUserInt("l2_idx", l2_idx );
       // Use UserCands as they should not use memory but keep the Ptr itself
