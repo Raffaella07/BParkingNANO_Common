@@ -143,6 +143,12 @@ BToMuMuPiTable = cms.EDProducer(
         sel_mu_iso04    = ufloat('sel_mu_iso04'   ),
         pi_iso03        = ufloat('pi_iso03'       ),
         pi_iso04        = ufloat('pi_iso04'       ),
+        trg_mu_iso03_close  = ufloat('trg_mu_iso03_close' ), 
+        trg_mu_iso04_close  = ufloat('trg_mu_iso04_close' ),
+        sel_mu_iso03_close  = ufloat('sel_mu_iso03_close' ),
+        sel_mu_iso04_close  = ufloat('sel_mu_iso04_close' ),
+        pi_iso03_close      = ufloat('pi_iso03_close'     ),
+        pi_iso04_close      = ufloat('pi_iso04_close'     ),
         ## dilepton mass
         dilepton_mass   = ufloat('dilepton_mass'  ),
         dilepton_pt     = ufloat('dilepton_pt'    ),
