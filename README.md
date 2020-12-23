@@ -85,7 +85,7 @@ Then do
 python nanoLauncher.py <options>
 ```
 The options are:
-
+```
 *   --mcprivate          : runs the tool on signal samples
 OR  --mccentral          : runs the tool on central QCD MC samples
 OR  --data               : runs the tool on BParking data
@@ -98,7 +98,7 @@ OR  --data               : runs the tool on BParking data
 * --user <user>          : with --mcprivate only, optional; username that produced the miniAOD sample
 * --tag <tag>            : optional, tag to be appended to the rootfile name 
 * --maxfiles <maxfiles>  : optional, maximum number of files to process
-
+```
 
 Once ready, merge the different nano steps by doing
 
