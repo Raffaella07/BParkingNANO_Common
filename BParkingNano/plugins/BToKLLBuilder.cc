@@ -31,6 +31,7 @@ public:
     k_selection_{cfg.getParameter<std::string>("kaonSelection")},
     pre_vtx_selection_{cfg.getParameter<std::string>("preVtxSelection")},
     post_vtx_selection_{cfg.getParameter<std::string>("postVtxSelection")},
+    isMC_{cfg.getParameter<bool>("isMC")},
     dileptons_{consumes<pat::CompositeCandidateCollection>( cfg.getParameter<edm::InputTag>("dileptons") )},
     leptons_ttracks_{consumes<TransientTrackCollection>( cfg.getParameter<edm::InputTag>("leptonTransientTracks") )},
     kaons_{consumes<pat::CompositeCandidateCollection>( cfg.getParameter<edm::InputTag>("kaons") )},
@@ -38,6 +39,7 @@ public:
     isotracksToken_(consumes<pat::PackedCandidateCollection>(cfg.getParameter<edm::InputTag>("tracks"))),
     isolostTracksToken_(consumes<pat::PackedCandidateCollection>(cfg.getParameter<edm::InputTag>("lostTracks"))),
     isotrk_selection_{cfg.getParameter<std::string>("isoTracksSelection")},
+    genParticles_{consumes<reco::GenParticleCollection>( cfg.getParameter<edm::InputTag>("genParticles"))}, 
     beamspot_{consumes<reco::BeamSpot>( cfg.getParameter<edm::InputTag>("beamSpot") )} {
       produces<pat::CompositeCandidateCollection>();
     }
@@ -52,6 +54,7 @@ private:
   const StringCutObjectSelector<pat::CompositeCandidate> k_selection_; 
   const StringCutObjectSelector<pat::CompositeCandidate> pre_vtx_selection_; // cut on the di-lepton before the SV fit
   const StringCutObjectSelector<pat::CompositeCandidate> post_vtx_selection_; // cut on the di-lepton after the SV fit
+  const bool isMC_;
 
   const edm::EDGetTokenT<pat::CompositeCandidateCollection> dileptons_;
   const edm::EDGetTokenT<TransientTrackCollection> leptons_ttracks_;
@@ -61,6 +64,8 @@ private:
   const edm::EDGetTokenT<pat::PackedCandidateCollection> isotracksToken_;
   const edm::EDGetTokenT<pat::PackedCandidateCollection> isolostTracksToken_;
   const StringCutObjectSelector<pat::PackedCandidate> isotrk_selection_; 
+  
+  const edm::EDGetTokenT<reco::GenParticleCollection> genParticles_;
 
   const edm::EDGetTokenT<reco::BeamSpot> beamspot_;  
 };
@@ -79,6 +84,9 @@ void BToKLLBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
   
   edm::Handle<TransientTrackCollection> kaons_ttracks;
   evt.getByToken(kaons_ttracks_, kaons_ttracks);  
+  
+  edm::Handle<reco::GenParticleCollection> genParticles;
+  evt.getByToken(genParticles_, genParticles);
 
   edm::Handle<reco::BeamSpot> beamspot;
   evt.getByToken(beamspot_, beamspot);  
@@ -246,7 +254,71 @@ void BToKLLBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
       cand.addUserFloat("b_iso03" , b_iso03 );
       cand.addUserFloat("b_iso04" , b_iso04 );
 
+      // gen-matching
+      
+      int isMatched = 0;
+      int l1_genIdx(-1), l2_genIdx(-1), k_genIdx(-1);
+      int genMuon1Mother_genPdgId(-1), genMuon2Mother_genPdgId(-1), genKaonMother_genPdgId(-1);
+
+      // for MC only
+      if(isMC_ == true){
+
+
+        // pdgId of the gen particle to which the final-state particles are matched
+        int l1_genPdgId = ll_prt->userInt("l1_mcMatch");
+        int l2_genPdgId = ll_prt->userInt("l2_mcMatch");
+        int k_genPdgId  = k_ptr->userInt("mcMatch");
+        
+        // index of the gen particle to which the final-state particles are matched
+        l1_genIdx = ll_prt->userInt("l1_mcMatchIndex"); 
+        l2_genIdx = ll_prt->userInt("l2_mcMatchIndex"); 
+        k_genIdx  = k_ptr->userInt("mcMatchIndex"); 
+
+        if(l1_genIdx == -1 || l2_genIdx == -1 || k_genIdx == -1) continue;
+
+        // getting the associated gen particles
+        edm::Ptr<reco::GenParticle> genMuon1_ptr(genParticles, l1_genIdx);
+        edm::Ptr<reco::GenParticle> genMuon2_ptr(genParticles, l2_genIdx);
+        edm::Ptr<reco::GenParticle> genKaon_ptr(genParticles, k_genIdx);
+
+        // index of the associated mother particle
+        int genMuon1Mother_genIdx = -1;
+        int genMuon2Mother_genIdx = -1;
+        int genKaonMother_genIdx  = -1;
+        if(genMuon1_ptr->numberOfMothers()>0) genMuon1Mother_genIdx = genMuon1_ptr->motherRef(0).key();
+        if(genMuon2_ptr->numberOfMothers()>0) genMuon2Mother_genIdx = genMuon2_ptr->motherRef(0).key();
+        if(genKaon_ptr->numberOfMothers()>0) genKaonMother_genIdx = genKaon_ptr->motherRef(0).key();
+
+        // getting the mother particles
+        edm::Ptr<reco::GenParticle> genMuon1Mother_ptr(genParticles, genMuon1Mother_genIdx);
+        edm::Ptr<reco::GenParticle> genMuon2Mother_ptr(genParticles, genMuon2Mother_genIdx);
+        edm::Ptr<reco::GenParticle> genKaonMother_ptr(genParticles, genKaonMother_genIdx);
+
+        // pdgId of the mother particles
+        genMuon1Mother_genPdgId = genMuon1Mother_ptr->pdgId();
+        genMuon2Mother_genPdgId = genMuon2Mother_ptr->pdgId();
+        genKaonMother_genPdgId  = genKaonMother_ptr->pdgId();
+
+        if(
+           fabs(l1_genPdgId) == 13 && fabs(genMuon1Mother_genPdgId) == 443 && 
+           fabs(l2_genPdgId) == 13 && fabs(genMuon2Mother_genPdgId) == 443 && 
+           fabs(k_genPdgId) == 321 && fabs(genKaonMother_genPdgId) == 521
+          ){
+            isMatched = 1;
+        }
+      }
+
+      cand.addUserInt("isMatched", isMatched);
+      cand.addUserInt("matching_l1_genIdx", l1_genIdx);
+      cand.addUserInt("matching_l2_genIdx", l2_genIdx);
+      cand.addUserInt("matching_k_genIdx", k_genIdx);
+      cand.addUserInt("matching_l1_motherPdgId", genMuon1Mother_genPdgId);
+      cand.addUserInt("matching_l2_motherPdgId", genMuon2Mother_genPdgId);
+      cand.addUserInt("matching_k_motherPdgId", genKaonMother_genPdgId);
+
+
       ret_val->push_back(cand);
+
     } // for(size_t ll_idx = 0; ll_idx < dileptons->size(); ++ll_idx) {
   } // for(size_t k_idx = 0; k_idx < kaons->size(); ++k_idx)
 

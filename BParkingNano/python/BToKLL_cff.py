@@ -52,7 +52,9 @@ BToKmumu = cms.EDProducer(
     leptonTransientTracks = muonPairsForKmumu.transientTracksSrc,
     kaons = BToKee.kaons,
     kaonsTransientTracks = BToKee.kaonsTransientTracks,
+    genParticles = cms.InputTag("finalGenParticlesBPark"),
     beamSpot = cms.InputTag("offlineBeamSpot"),
+    isMC = cms.bool(True),
     tracks = cms.InputTag("packedPFCandidates"),
     lostTracks = cms.InputTag("lostTracks"),
     kaonSelection = cms.string(''),
@@ -130,6 +132,13 @@ BToKeeTable = cms.EDProducer(
         n_k_used = uint('n_k_used'),
         n_l1_used = uint('n_l1_used'),
         n_l2_used = uint('n_l2_used'),
+        isMatched = Var("userInt('isMatched')", int, mcOnly=True),
+        matching_l1_genIdx = Var("userInt('matching_l1_genIdx')", int, mcOnly=True),
+        matching_l2_genIdx = Var("userInt('matching_l2_genIdx')", int, mcOnly=True),
+        matching_k_genIdx = Var("userInt('matching_k_genIdx')", int, mcOnly=True),
+        matching_l1_motherPdgId = Var("userInt('matching_l1_motherPdgId')", int, mcOnly=True),
+        matching_l2_motherPdgId = Var("userInt('matching_l2_motherPdgId')", int, mcOnly=True),
+        matching_k_motherPdgId = Var("userInt('matching_k_motherPdgId')", int, mcOnly=True),
     )
 )
 

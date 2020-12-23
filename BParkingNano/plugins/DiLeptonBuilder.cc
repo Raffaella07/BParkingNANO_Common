@@ -88,6 +88,12 @@ void DiLeptonBuilder<Lepton>::produce(edm::StreamID, edm::Event &evt, edm::Event
       lepton_pair.addUserCand("l1", l1_ptr );
       lepton_pair.addUserCand("l2", l2_ptr );
       lepton_pair.addUserInt("nlowpt", nlowpt );
+
+      lepton_pair.addUserInt("l1_mcMatch", l1_ptr->userInt("mcMatch"));
+      lepton_pair.addUserInt("l2_mcMatch", l2_ptr->userInt("mcMatch"));
+      lepton_pair.addUserInt("l1_mcMatchIndex", l1_ptr->userInt("mcMatchIndex"));
+      lepton_pair.addUserInt("l2_mcMatchIndex", l2_ptr->userInt("mcMatchIndex"));
+
       if( !pre_vtx_selection_(lepton_pair) ) continue; // before making the SV, cut on the info we have
 
       KinVtxFitter fitter(
