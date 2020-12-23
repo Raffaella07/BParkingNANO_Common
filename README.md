@@ -36,7 +36,7 @@ git cms-merge-topic -u CMSBParking:fixKinParticleVtxFitter
 ```shell
 git clone git@github.com:BParkHNLs/BParkingNANO.git ./PhysicsTools
 git cms-addpkg PhysicsTools/NanoAOD
-scram b
+scram b -j 8
 ```
 
 ### After first installation
@@ -51,7 +51,6 @@ cmsenv
 
 ```shell
 cd PhysicsTools/BParkingNano/test/
-cmsenv 
 cmsRun run_nano_cfg.py
 ```
 
