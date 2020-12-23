@@ -189,6 +189,9 @@ class NanoLauncher(object):
         self.writeFileList(point)
             
         filelist = './files/filelist_{}_{}.txt'.format(self.prodlabel, point)
+        if self.getSize(filelist) == 0:
+          print '        WARNING: no files were found with the corresponding production label'
+          print '                 Did you set the correct username using --user <username>?'
         label = self.prodlabel + '_' + point if self.tag == None else self.prodlabel + '_' + point + '_' +self.tag
 
         self.launchNano(self.getSize(filelist), outputdir, logdir, filelist, label) 
