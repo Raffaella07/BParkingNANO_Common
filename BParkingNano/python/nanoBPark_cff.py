@@ -20,7 +20,7 @@ from PhysicsTools.BParkingNano.electronsBPark_cff import *
 from PhysicsTools.BParkingNano.tracksBPark_cff import *
 
 ## B collections
-from PhysicsTools.BParkingNano.BToMuMuPi_cff import BToMuMuPi, BToMuMuPiTable, BToMuMuPiSequence, CountBToMuMuPi
+from PhysicsTools.BParkingNano.BToMuMuPi_cff import BToMuMuPi, BToMuMuPiMC, BToMuMuPiTable, BToMuMuPiSequence, BToMuMuPiSequenceMC, CountBToMuMuPi
 from PhysicsTools.BParkingNano.BToKLL_cff import *
 from PhysicsTools.BParkingNano.BToKstarLL_cff import *
 
@@ -54,8 +54,11 @@ def nanoAOD_customizeTriggerBitsBPark(process):
     process.nanoSequence = cms.Sequence( process.nanoSequence + trgTables)
     return process
 
-def nanoAOD_customizeBToMuMuPi(process):
-    process.nanoBMuMuPiSequence = cms.Sequence( BToMuMuPiSequence + BToMuMuPiTable )
+def nanoAOD_customizeBToMuMuPi(process, isMC=False):
+    if isMC == False:
+      process.nanoBMuMuPiSequence = cms.Sequence( BToMuMuPiSequence + BToMuMuPiTable )
+    else:
+      process.nanoBMuMuPiSequence = cms.Sequence( BToMuMuPiSequenceMC + BToMuMuPiTable )
     return process
 
 def nanoAOD_customizeBToKMuMu(process):
@@ -88,6 +91,9 @@ def nanoAOD_customizeMC(process, ancestor_particles=[511, 521, 531, 541, 9900015
         massSearchReplaceAnyInputTag(path, 'muonTrgSelector:trgMuons', 'triggerMuonsMCMatchEmbedded')
         massSearchReplaceAnyInputTag(path, 'electronsForAnalysis:SelectedElectrons', 'selectedElectronsMCMatchEmbedded')
         massSearchReplaceAnyInputTag(path, 'tracksBPark:SelectedTracks', 'tracksBParkMCMatchEmbedded')
+
+        # make the BToMuMuPiTable talk to the correct producer
+        massSearchReplaceAnyInputTag(path, 'BToMuMuPi', 'BToMuMuPiMC')
 
         # save the all descendants of ancestor_particles
         to_save = ' || '.join(['abs(pdgId) == %d'%ipdg for ipdg in ancestor_particles])

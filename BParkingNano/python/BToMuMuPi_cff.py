@@ -13,6 +13,7 @@ BToMuMuPi = cms.EDProducer(
     genParticles            = cms.InputTag("finalGenParticlesBPark"),
     beamSpot                = cms.InputTag('offlineBeamSpot'), 
 
+    isMC = cms.bool(False),
 
     # pre-fitter preselection
     pionSelection           = cms.string('pt > 0.55 && abs(eta)<2'), # pion preselection to be modified here 
@@ -55,6 +56,10 @@ BToMuMuPi = cms.EDProducer(
     ), # applied on the B cand
 )
     
+BToMuMuPiMC = BToMuMuPi.clone(
+    isMC = cms.bool(True),
+)
+
 
 BToMuMuPiTable = cms.EDProducer(
     'SimpleCompositeCandidateFlatTableProducer',
@@ -160,13 +165,6 @@ BToMuMuPiTable = cms.EDProducer(
         matching_sel_mu_motherPdgId = Var("userInt('matching_sel_mu_motherPdgId')", int, mcOnly=True),
         matching_trg_mu_motherPdgId = Var("userInt('matching_trg_mu_motherPdgId')", int, mcOnly=True),
         matching_pi_motherPdgId     = Var("userInt('matching_pi_motherPdgId')"    , int, mcOnly=True),
-        #matching_matched_sel_mu_genIdx      = Var("userInt('matching_matched_sel_mu_genIdx')"     , int, mcOnly=True),
-        #matching_matched_trg_mu_genIdx      = Var("userInt('matching_matched_trg_mu_genIdx')"     , int, mcOnly=True),
-        #matching_matched_pi_genIdx          = Var("userInt('matching_matched_pi_genIdx')"         , int, mcOnly=True),
-        matching_matched_sel_mu_motherPdgId = Var("userInt('matching_matched_sel_mu_motherPdgId')", int, mcOnly=True),
-        matching_matched_trg_mu_motherPdgId = Var("userInt('matching_matched_trg_mu_motherPdgId')", int, mcOnly=True),
-        matching_matched_pi_motherPdgId     = Var("userInt('matching_matched_pi_motherPdgId')"    , int, mcOnly=True),
-
     )
 )
 
@@ -177,5 +175,5 @@ CountBToMuMuPi = cms.EDFilter("PATCandViewCountFilter",
     src = cms.InputTag("BToMuMuPi")
 )    
 
-BToMuMuPiSequence = cms.Sequence( BToMuMuPi )
-#BToMuMuPiSequence = cms.Sequence( BToMuMuPi * CountBToMuMuPi )
+BToMuMuPiSequence   = cms.Sequence( BToMuMuPi )
+BToMuMuPiSequenceMC = cms.Sequence( BToMuMuPiMC )
