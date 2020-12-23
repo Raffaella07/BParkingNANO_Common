@@ -126,9 +126,9 @@ class NanoLauncher(object):
         os.system(command_cut)
 
       # slurm cannot deal with too large arrays
-      # -> submit job arrays of size 1000
-      if self.getSize('./files/filelist_{}_{}.txt'.format(ds_label, self.prodlabel)) > 1000:
-        command_split = 'split -l 1000 ./files/filelist_{ds}_{pl}.txt ./files/filelist_{ds}_{pl} --additional-suffix=.txt'.format(ds=ds_label, pl=self.prodlabel)
+      # -> submit job arrays of size 750
+      if self.getSize('./files/filelist_{}_{}.txt'.format(ds_label, self.prodlabel)) > 750:
+        command_split = 'split -l 750 ./files/filelist_{ds}_{pl}.txt ./files/filelist_{ds}_{pl} --additional-suffix=.txt'.format(ds=ds_label, pl=self.prodlabel)
         os.system(command_split)
         os.system('rm ./files/filelist_{}_{}.txt'.format(ds_label, self.prodlabel))
 
