@@ -117,21 +117,21 @@ void BToKLLBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
       );
 
     for(size_t ll_idx = 0; ll_idx < dileptons->size(); ++ll_idx) {
-      edm::Ptr<pat::CompositeCandidate> ll_prt(dileptons, ll_idx);
-      edm::Ptr<reco::Candidate> l1_ptr = ll_prt->userCand("l1");
-      edm::Ptr<reco::Candidate> l2_ptr = ll_prt->userCand("l2");
-      int l1_idx = ll_prt->userInt("l1_idx");
-      int l2_idx = ll_prt->userInt("l2_idx");
+      edm::Ptr<pat::CompositeCandidate> ll_ptr(dileptons, ll_idx);
+      edm::Ptr<reco::Candidate> l1_ptr = ll_ptr->userCand("l1");
+      edm::Ptr<reco::Candidate> l2_ptr = ll_ptr->userCand("l2");
+      int l1_idx = ll_ptr->userInt("l1_idx");
+      int l2_idx = ll_ptr->userInt("l2_idx");
     
       pat::CompositeCandidate cand;
-      cand.setP4(ll_prt->p4() + k_p4);
-      cand.setCharge(ll_prt->charge() + k_ptr->charge());
+      cand.setP4(ll_ptr->p4() + k_p4);
+      cand.setCharge(ll_ptr->charge() + k_ptr->charge());
       // Use UserCands as they should not use memory but keep the Ptr itself
       // Put the lepton passing the corresponding selection
       cand.addUserCand("l1", l1_ptr);
       cand.addUserCand("l2", l2_ptr);
       cand.addUserCand("K", k_ptr);
-      cand.addUserCand("dilepton", ll_prt);
+      cand.addUserCand("dilepton", ll_ptr);
 
       cand.addUserInt("l1_idx", l1_idx);
       cand.addUserInt("l2_idx", l2_idx);
@@ -265,13 +265,13 @@ void BToKLLBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
 
 
         // pdgId of the gen particle to which the final-state particles are matched
-        int l1_genPdgId = ll_prt->userInt("l1_mcMatch");
-        int l2_genPdgId = ll_prt->userInt("l2_mcMatch");
+        int l1_genPdgId = ll_ptr->userInt("l1_mcMatch");
+        int l2_genPdgId = ll_ptr->userInt("l2_mcMatch");
         int k_genPdgId  = k_ptr->userInt("mcMatch");
         
         // index of the gen particle to which the final-state particles are matched
-        l1_genIdx = ll_prt->userInt("l1_mcMatchIndex"); 
-        l2_genIdx = ll_prt->userInt("l2_mcMatchIndex"); 
+        l1_genIdx = ll_ptr->userInt("l1_mcMatchIndex"); 
+        l2_genIdx = ll_ptr->userInt("l2_mcMatchIndex"); 
         k_genIdx  = k_ptr->userInt("mcMatchIndex"); 
 
         if(l1_genIdx == -1 || l2_genIdx == -1 || k_genIdx == -1) continue;
