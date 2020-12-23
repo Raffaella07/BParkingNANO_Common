@@ -118,6 +118,7 @@ class NanoLauncher(object):
 
       os.system('rm ./files/filelist_{ds}_{pl}*.txt'.format(ds=ds_label, pl=self.prodlabel))
       
+      #command = 'dasgoclient --query="file dataset={ds} run between[300000,400000] | grep file.name" > ./files/filelist_{dsl}_{pl}.txt'.format(ds=self.dataset, dsl=ds_label, pl=self.prodlabel)
       command = 'dasgoclient --query="file dataset={ds} | grep file.name" > ./files/filelist_{dsl}_{pl}.txt'.format(ds=self.dataset, dsl=ds_label, pl=self.prodlabel)
       os.system(command)
 
@@ -137,7 +138,7 @@ class NanoLauncher(object):
 
   def launchNano(self, nNano, outputdir, logdir, filelist, label):
     #command = 'sbatch -p quick --account=t3 --time==00:50:00 -o logs/{pl}/nanostep_nj%a.log -e logs/{pl}/nanostep_nj%a.log --job-name=nanostep_nj%a_{pl} --array {ar} submitter.sh {outdir} {usr} {pl} {tag} {flt}'.format(
-    command = 'sbatch -p wn --account=t3 -o {ld}/nanostep_nj%a.log -e {ld}/nanostep_nj%a.log --job-name=nanostep_nj%a_{pl} --array {ar} submitter.sh {outdir} {usr} {pl} {tag} {isMC} {rmt} {flt} {lst}'.format(
+    command = 'sbatch -p quick --account=t3 -o {ld}/nanostep_nj%a.log -e {ld}/nanostep_nj%a.log --job-name=nanostep_nj%a_{pl} --array {ar} submitter.sh {outdir} {usr} {pl} {tag} {isMC} {rmt} {flt} {lst}'.format(
       ld      = logdir,
       pl      = label,
       ar      = '1-{}'.format(nNano),
@@ -150,7 +151,7 @@ class NanoLauncher(object):
       lst     = filelist
     )
 
-    os.system(command)
+    #os.system(command)
 
 
   def process(self):
@@ -181,7 +182,7 @@ class NanoLauncher(object):
         outputdir = '/pnfs/psi.ch/cms/trivcat/store/user/{}/BHNLsGen/{}/{}/nanoFiles/'.format(os.environ["USER"], self.prodlabel, point)
         os.system('mkdir -p {}'.format(outputdir))
         
-        print '\n-> Creating log directory'
+        print '\n  --> Creating log directory'
         logdir = './logs/{}/{}'.format(self.prodlabel, point) if self.tag == None else './logs/{}/{}_{}'.format(self.prodlabel, point, self.tag)
         os.system('mkdir -p {}'.format(logdir))
 
@@ -213,8 +214,8 @@ class NanoLauncher(object):
         os.system('mkdir -p {}'.format(outputdir))
         
         print '\n-> Creating log directory'
-        logdir = './logs/{}_{}/Chunk{}_n{}'.format(ds_label, self.prodlabel, iFile, self.getSize(filelist)) if self.tag == None \
-               else './logs/{}_{}_{}/Chunk{}_n{}'.format(ds_label, self.prodlabel, self.tag, iFile, self.getSize(filelist))
+        logdir = './logs/{}/{}/Chunk{}_n{}'.format(ds_label, self.prodlabel, iFile, self.getSize(filelist)) if self.tag == None \
+               else './logs/{}/{}_{}/Chunk{}_n{}'.format(ds_label, self.prodlabel, self.tag, iFile, self.getSize(filelist))
         os.system('mkdir -p {}'.format(logdir))
           
         label = '{}_{}_Chunk{}_n{}'.format(ds_label, self.prodlabel, iFile, self.getSize(filelist))
