@@ -33,6 +33,7 @@ public:
     pre_vtx_selection_{cfg.getParameter<std::string>("preVtxSelection")},
     post_vtx_selection_{cfg.getParameter<std::string>("postVtxSelection")},
     src_{consumes<LeptonCollection>( cfg.getParameter<edm::InputTag>("src") )},
+    isMC_{cfg.getParameter<bool>("isMC")},
     ttracks_src_{consumes<TransientTrackCollection>( cfg.getParameter<edm::InputTag>("transientTracksSrc") )} {
        produces<pat::CompositeCandidateCollection>();
     }
@@ -49,6 +50,7 @@ private:
   const StringCutObjectSelector<pat::CompositeCandidate> pre_vtx_selection_; // cut on the di-lepton before the SV fit
   const StringCutObjectSelector<pat::CompositeCandidate> post_vtx_selection_; // cut on the di-lepton after the SV fit
   const edm::EDGetTokenT<LeptonCollection> src_;
+  const bool isMC_;
   const edm::EDGetTokenT<TransientTrackCollection> ttracks_src_;
 };
 
@@ -89,10 +91,12 @@ void DiLeptonBuilder<Lepton>::produce(edm::StreamID, edm::Event &evt, edm::Event
       lepton_pair.addUserCand("l2", l2_ptr );
       lepton_pair.addUserInt("nlowpt", nlowpt );
 
-      lepton_pair.addUserInt("l1_mcMatch", l1_ptr->userInt("mcMatch"));
-      lepton_pair.addUserInt("l2_mcMatch", l2_ptr->userInt("mcMatch"));
-      lepton_pair.addUserInt("l1_mcMatchIndex", l1_ptr->userInt("mcMatchIndex"));
-      lepton_pair.addUserInt("l2_mcMatchIndex", l2_ptr->userInt("mcMatchIndex"));
+      if(isMC_){
+        lepton_pair.addUserInt("l1_mcMatch", l1_ptr->userInt("mcMatch"));
+        lepton_pair.addUserInt("l2_mcMatch", l2_ptr->userInt("mcMatch"));
+        lepton_pair.addUserInt("l1_mcMatchIndex", l1_ptr->userInt("mcMatchIndex"));
+        lepton_pair.addUserInt("l2_mcMatchIndex", l2_ptr->userInt("mcMatchIndex"));
+      }
 
       if( !pre_vtx_selection_(lepton_pair) ) continue; // before making the SV, cut on the info we have
 

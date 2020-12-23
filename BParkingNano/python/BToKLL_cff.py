@@ -15,6 +15,7 @@ electronPairsForKee = cms.EDProducer(
     postVtxSelection = cms.string('userFloat("sv_chi2") < 998 && userFloat("sv_prob") > 1.e-5'),
 )
 
+
 BToKee = cms.EDProducer(
     'BToKLLBuilder',
     dileptons = cms.InputTag('electronPairsForKee'),
@@ -38,6 +39,7 @@ BToKee = cms.EDProducer(
 muonPairsForKmumu = cms.EDProducer(
     'DiMuonBuilder',
     src = cms.InputTag('muonTrgSelector', 'SelectedMuons'),
+    isMC = cms.bool(False),
     transientTracksSrc = cms.InputTag('muonTrgSelector', 'SelectedTransientMuons'),
     lep1Selection = cms.string('pt > 1.5'),
     lep2Selection = cms.string(''),
@@ -45,6 +47,12 @@ muonPairsForKmumu = cms.EDProducer(
                                  '&& mass() > 0 && charge() == 0 && userFloat("lep_deltaR") > 0.03'),
     postVtxSelection = electronPairsForKee.postVtxSelection,
 )
+
+
+muonPairsForKmumuMC = muonPairsForKmumu.clone(
+    isMC = cms.bool(True),
+)
+
 
 BToKmumu = cms.EDProducer(
     'BToKLLBuilder',
@@ -54,7 +62,7 @@ BToKmumu = cms.EDProducer(
     kaonsTransientTracks = BToKee.kaonsTransientTracks,
     genParticles = cms.InputTag("finalGenParticlesBPark"),
     beamSpot = cms.InputTag("offlineBeamSpot"),
-    isMC = cms.bool(True),
+    isMC = cms.bool(False),
     tracks = cms.InputTag("packedPFCandidates"),
     lostTracks = cms.InputTag("lostTracks"),
     kaonSelection = cms.string(''),
@@ -70,6 +78,14 @@ BToKmumu = cms.EDProducer(
         '&& userFloat("fitted_mass") > 4.5 && userFloat("fitted_mass") < 6.'
     )
 )
+
+
+BToKmumuMC = BToKmumu.clone(
+    dileptons = cms.InputTag('muonPairsForKmumuMC'),
+    leptonTransientTracks = muonPairsForKmumuMC.transientTracksSrc,
+    isMC = cms.bool(True),
+)
+
 
 BToKeeTable = cms.EDProducer(
     'SimpleCompositeCandidateFlatTableProducer',
@@ -161,7 +177,9 @@ CountBToKee = cms.EDFilter("PATCandViewCountFilter",
     minNumber = cms.uint32(1),
     maxNumber = cms.uint32(999999),
     src = cms.InputTag("BToKee")
-)    
+) 
+
+
 CountBToKmumu = CountBToKee.clone(
     minNumber = cms.uint32(1),
     src = cms.InputTag("BToKmumu")
@@ -171,6 +189,11 @@ CountBToKmumu = CountBToKee.clone(
 BToKMuMuSequence = cms.Sequence(
     (muonPairsForKmumu * BToKmumu)
 )
+
+BToKMuMuSequenceMC = cms.Sequence(
+    (muonPairsForKmumuMC * BToKmumuMC)
+)
+
 BToKEESequence = cms.Sequence(
     (electronPairsForKee * BToKee)
 )
@@ -179,5 +202,6 @@ BToKLLSequence = cms.Sequence(
     (electronPairsForKee * BToKee) +
     (muonPairsForKmumu * BToKmumu)
 )
+
 BToKLLTables = cms.Sequence(BToKeeTable + BToKmumuTable)
 

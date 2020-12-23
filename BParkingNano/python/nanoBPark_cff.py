@@ -61,8 +61,11 @@ def nanoAOD_customizeBToMuMuPi(process, isMC=False):
       process.nanoBMuMuPiSequence = cms.Sequence( BToMuMuPiSequenceMC + BToMuMuPiTable )
     return process
 
-def nanoAOD_customizeBToKMuMu(process):
-    process.nanoBKMuMuSequence = cms.Sequence( BToKMuMuSequence + BToKmumuTable )
+def nanoAOD_customizeBToKMuMu(process, isMC=False):
+    if isMC == False:
+      process.nanoBKMuMuSequence = cms.Sequence( BToKMuMuSequence + BToKmumuTable )
+    else:
+      process.nanoBKMuMuSequence = cms.Sequence( BToKMuMuSequenceMC + BToKmumuTable )
     return process
 
 def nanoAOD_customizeBToKLL(process):
@@ -92,8 +95,11 @@ def nanoAOD_customizeMC(process, ancestor_particles=[511, 521, 531, 541, 9900015
         massSearchReplaceAnyInputTag(path, 'electronsForAnalysis:SelectedElectrons', 'selectedElectronsMCMatchEmbedded')
         massSearchReplaceAnyInputTag(path, 'tracksBPark:SelectedTracks', 'tracksBParkMCMatchEmbedded')
 
-        # make the BToMuMuPiTable talk to the correct producer
+        # make the BToMuMuPiTable/count talk to the correct producer
         massSearchReplaceAnyInputTag(path, 'BToMuMuPi', 'BToMuMuPiMC')
+        
+        # make the BToKMuMuTable/count talk to the correct producer
+        massSearchReplaceAnyInputTag(path, 'BToKmumu', 'BToKmumuMC')
 
         # save the all descendants of ancestor_particles
         to_save = ' || '.join(['abs(pdgId) == %d'%ipdg for ipdg in ancestor_particles])

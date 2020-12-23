@@ -32,6 +32,7 @@ outputFileFEVT = cms.untracked.string('_'.join(['BParkFullEvt', extension[option
 if not options.inputFiles:
     options.inputFiles = ['/store/data/Run2018B/ParkingBPH4/MINIAOD/05May2019-v2/230000/F7E7EF39-476F-1C48-95F7-74CB5C7A542C.root'] if not options.isMC else \
                          ['file:%s' %i for i in glob('/pnfs/psi.ch/cms/trivcat/store/user/mratti/BHNLsGen/V11_inclB_n4200000_njt200/mass3.0_ctau811.293081969/step4_nj95.root')]
+                         #['file:%s' %i for i in glob('/pnfs/psi.ch/cms/trivcat/store/user/mratti/BHNLsGen/pilotV15_control/mass999_ctau999/step4_nj*.root')]
                          #['file:%s' %i for i in glob('/pnfs/psi.ch/cms/trivcat/store/user/mratti/BHNLsGen/pilotV15_control/mass999_ctau999/step4_nj15.root')]
                          #['file:%s' %i for i in glob('/pnfs/psi.ch/cms/trivcat/store/user/anlyon/BHNLsGen/T5_newcmsdrivers_npremix3_n4200000_njt200/mass3.0_ctau811.293081969/step4_nj95.root')]
                          #['file:%s' %i for i in glob('/pnfs/psi.ch/cms/trivcat/store/user/anlyon/BHNLsGen/V03_leptonic_n900000_njt200/mass1.5_ctau17307.5857487/step4_nj95.root')]
@@ -121,7 +122,7 @@ from PhysicsTools.BParkingNano.nanoBPark_cff import *
 process = nanoAOD_customizeMuonTriggerBPark  (process)
 process = nanoAOD_customizeTrackFilteredBPark(process)
 process = nanoAOD_customizeBToMuMuPi         (process, isMC=options.isMC)
-process = nanoAOD_customizeBToKMuMu          (process) 
+process = nanoAOD_customizeBToKMuMu          (process, isMC=options.isMC) 
 process = nanoAOD_customizeTriggerBitsBPark  (process)
 
 # Path and EndPath definitions
