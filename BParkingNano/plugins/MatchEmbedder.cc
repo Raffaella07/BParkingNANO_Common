@@ -67,7 +67,6 @@ void MatchEmbedder<PATOBJ>::produce(edm::StreamID, edm::Event &evt, edm::EventSe
     edm::Ptr<PATOBJ> ptr(src, i);
     reco::GenParticleRef match = (*matching)[ptr];
     out->emplace_back(src->at(i));
-    out->back().addUserInt("isMC", 1);
     out->back().addUserInt(
       "mcMatch", 
       match.isNonnull() ? match->pdgId() : 0

@@ -10,7 +10,7 @@ options.register('skipDuplicated' ,  True           , VarParsing.multiplicity.si
 options.register('globalTag'      , 'NOTSET'        , VarParsing.multiplicity.singleton, VarParsing.varType.string, "Set global tag"                         )
 options.register('wantSummary'    ,  True           , VarParsing.multiplicity.singleton, VarParsing.varType.bool  , "Run this on real data"                  )
 options.register('wantFullRECO'   ,  False          , VarParsing.multiplicity.singleton, VarParsing.varType.bool  , "Run this on real data"                  )
-options.register('reportEvery'    ,  3000           , VarParsing.multiplicity.singleton, VarParsing.varType.int   , "report every N events"                  )
+options.register('reportEvery'    ,  1000           , VarParsing.multiplicity.singleton, VarParsing.varType.int   , "report every N events"                  )
 options.register('skip'           ,  0              , VarParsing.multiplicity.singleton, VarParsing.varType.int   , "skip first N events"                    )
 options.register('inputFile'      , None            , VarParsing.multiplicity.singleton, VarParsing.varType.string, "inputFile name"                         )
 options.register('outFile'        , 'bparknano.root', VarParsing.multiplicity.singleton, VarParsing.varType.string, "outputFile name"                        )
