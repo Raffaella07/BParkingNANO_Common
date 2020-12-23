@@ -118,7 +118,6 @@ class NanoLauncher(object):
 
       os.system('rm ./files/filelist_{ds}_{pl}*.txt'.format(ds=ds_label, pl=self.prodlabel))
       
-      #command = 'dasgoclient --query="file dataset={ds} run between[300000,400000] | grep file.name" > ./files/filelist_{dsl}_{pl}.txt'.format(ds=self.dataset, dsl=ds_label, pl=self.prodlabel)
       command = 'dasgoclient --query="file dataset={ds} | grep file.name" > ./files/filelist_{dsl}_{pl}.txt'.format(ds=self.dataset, dsl=ds_label, pl=self.prodlabel)
       os.system(command)
 
@@ -151,7 +150,7 @@ class NanoLauncher(object):
       lst     = filelist
     )
 
-    #os.system(command)
+    os.system(command)
 
 
   def process(self):
