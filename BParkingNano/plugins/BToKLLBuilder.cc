@@ -210,6 +210,15 @@ void BToKLLBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
       float k_iso04  = 0;
       float b_iso03  = 0;
       float b_iso04  = 0;
+      // with conditions: best track + close to B z-vertex
+      float l1_iso03_close = 0; 
+      float l1_iso04_close = 0; 
+      float l2_iso03_close = 0; 
+      float l2_iso04_close = 0; 
+      float k_iso03_close = 0; 
+      float k_iso04_close = 0; 
+      float b_iso03_close = 0; 
+      float b_iso04_close = 0; 
 
       for( unsigned int iTrk=0; iTrk<totalTracks; ++iTrk ) {
       
@@ -244,7 +253,31 @@ void BToKLLBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
           b_iso04 += trk.pt();
           if (dr_to_b < 0.3) b_iso03 += trk.pt();
         }
+        
+        // add requirement of the tracks to be close to the B
+        if (!l1_ptr->bestTrack() || fabs(trk.dz() - l1_ptr->bestTrack()->dz()) > 0.4) continue;
+        if (dr_to_l1 < 0.4){
+          l1_iso04_close += trk.pt();
+          if ( dr_to_l1 < 0.3) l1_iso03_close += trk.pt();
+        }
+        
+        if (!l2_ptr->bestTrack() || fabs(trk.dz() - l2_ptr->bestTrack()->dz()) > 0.4) continue;
+        if (dr_to_l2 < 0.4){
+          l2_iso04_close += trk.pt();
+          if ( dr_to_l2 < 0.3) l2_iso03_close += trk.pt();
+        }
+        
+        if (fabs(trk.dz() - k_ptr->userFloat("dz")) > 0.4) continue;
+        if (dr_to_k < 0.4){
+          k_iso04_close += trk.pt();
+          if ( dr_to_k < 0.3) k_iso03_close += trk.pt();
+        }
+        if (dr_to_b < 0.4){
+          b_iso04_close += trk.pt();
+          if (dr_to_b < 0.3) b_iso03_close += trk.pt();
+        }
       }
+
       cand.addUserFloat("l1_iso03", l1_iso03);
       cand.addUserFloat("l1_iso04", l1_iso04);
       cand.addUserFloat("l2_iso03", l2_iso03);
@@ -253,6 +286,15 @@ void BToKLLBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
       cand.addUserFloat("k_iso04" , k_iso04 );
       cand.addUserFloat("b_iso03" , b_iso03 );
       cand.addUserFloat("b_iso04" , b_iso04 );
+      
+      cand.addUserFloat("l1_iso03_close", l1_iso03_close);
+      cand.addUserFloat("l1_iso04_close", l1_iso04_close);
+      cand.addUserFloat("l2_iso03_close", l2_iso03_close);
+      cand.addUserFloat("l2_iso04_close", l2_iso04_close);
+      cand.addUserFloat("k_iso03_close", k_iso03_close);
+      cand.addUserFloat("k_iso04_close", k_iso04_close);
+      cand.addUserFloat("b_iso03_close", b_iso03_close);
+      cand.addUserFloat("b_iso04_close", b_iso04_close);
 
       // gen-matching
       
