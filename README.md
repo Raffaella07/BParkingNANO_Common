@@ -82,19 +82,31 @@ voms-proxy-init --voms cms --valid 186:00
 Then do
 
 ```
-python nanoLauncher.py --pl <prodLabel> --tag <tag>
+python nanoLauncher.py <options>
 ```
-
-The tag is optional, and would be appended to the outputfile name.
+The options are:
+```
+- --mcprivate : runs the tool on signal samples
+   OR  --mccentral : runs the tool on central QCD MC samples
+   OR  --data : runs the tool on BParking data
+- --pl <prodLabel>: with --mcprivate: must correspond to the production label under which the miniAOD sample was produced (e.g V11_inclB_n4200000_njt200) 
+                    with --mccentral or --data: any production label of your choice
+- --ds <dataset>: to be used with --data or --mccentral only (e.g /ParkingBPH4/Run2018B-05May2019-v2/MINIAOD, /QCD_Pt-15to20_MuEnrichedPt5_TuneCP5_13TeV_pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v3/MINIAODSIM)
+- --user <user>: with --mcprivate only, optional; username that produced the miniAOD sample
+- --tag <tag>: optional, tag to be appended to the rootfile name 
+- --maxfiles <maxfiles>: optional, maximum number of files to process
+```
 
 Once ready, merge the different nano steps by doing
 
 ```
-python nanoMerger.py --pl <prodLabel> --tag <tag>
+python nanoMerger.py --pl <prodLabel> --tag <tag> --<mcprivate/mccentral/data>
 ```
+Note that the production label and tag have to be consistent with those of the nanoAOD production. For data, the production label is typically the name of the corresponding pnfs dir.
 
 
 
 Note:
 
 To make contributions to the central code, see intructions in https://github.com/CMSBParking/BParkingNANO
+
