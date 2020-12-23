@@ -65,7 +65,7 @@ BToMuMuPiTable = cms.EDProducer(
     'SimpleCompositeCandidateFlatTableProducer',
     src = cms.InputTag("BToMuMuPi"),
     cut = cms.string(""),
-    name = cms.string("b"),
+    name = cms.string("BToMuMuPi"),
     doc = cms.string("HNL Variable"),
     singleton=cms.bool(False),
     extension=cms.bool(False),
