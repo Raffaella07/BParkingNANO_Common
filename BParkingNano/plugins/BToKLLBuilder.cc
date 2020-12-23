@@ -256,18 +256,17 @@ void BToKLLBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
         
         // add requirement of the tracks to be close to the B
         if (!l1_ptr->bestTrack() || fabs(trk.dz() - l1_ptr->bestTrack()->dz()) > 0.4) continue;
+        if (!l2_ptr->bestTrack() || fabs(trk.dz() - l2_ptr->bestTrack()->dz()) > 0.4) continue;
+        if (fabs(trk.dz() - k_ptr->userFloat("dz")) > 0.4) continue;
+
         if (dr_to_l1 < 0.4){
           l1_iso04_close += trk.pt();
           if ( dr_to_l1 < 0.3) l1_iso03_close += trk.pt();
         }
-        
-        if (!l2_ptr->bestTrack() || fabs(trk.dz() - l2_ptr->bestTrack()->dz()) > 0.4) continue;
         if (dr_to_l2 < 0.4){
           l2_iso04_close += trk.pt();
           if ( dr_to_l2 < 0.3) l2_iso03_close += trk.pt();
         }
-        
-        if (fabs(trk.dz() - k_ptr->userFloat("dz")) > 0.4) continue;
         if (dr_to_k < 0.4){
           k_iso04_close += trk.pt();
           if ( dr_to_k < 0.3) k_iso03_close += trk.pt();

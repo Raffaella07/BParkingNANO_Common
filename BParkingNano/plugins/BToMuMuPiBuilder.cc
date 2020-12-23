@@ -330,13 +330,17 @@ void BToMuMuPiBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup c
         float sel_mu_iso04 = 0;
         float pi_iso03  = 0; 
         float pi_iso04  = 0;
-        // with conditions: best track + close to B z-vertex
+        float hnl_iso03 = 0;
+        float hnl_iso04 = 0;
+        // with conditions: best track + close to B 
         float sel_mu_iso03_close = 0; 
         float sel_mu_iso04_close = 0;
         float trg_mu_iso03_close = 0; 
         float trg_mu_iso04_close = 0;
         float pi_iso03_close  = 0; 
         float pi_iso04_close  = 0;
+        float hnl_iso03_close = 0;
+        float hnl_iso04_close = 0;
         
         // nTracks     = iso_tracks->size();
         // totalTracks = nTracks + iso_lostTracks->size();
@@ -359,6 +363,7 @@ void BToMuMuPiBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup c
           float dr_to_trgmu = deltaR(b_cand.userFloat("trg_muon_eta")     , b_cand.userFloat("trg_muon_phi")     , trk.eta(), trk.phi());
           float dr_to_selmu = deltaR(b_cand.userFloat("hnl_fitted_mu_eta"), b_cand.userFloat("hnl_fitted_mu_phi"), trk.eta(), trk.phi());
           float dr_to_pi    = deltaR(b_cand.userFloat("hnl_fitted_pi_eta"), b_cand.userFloat("hnl_fitted_pi_phi"), trk.eta(), trk.phi());
+          float dr_to_hnl   = deltaR(b_cand.userFloat("hnl_fitted_eta")   , b_cand.userFloat("hnl_fitted_phi")   , trk.eta(), trk.phi());
 
           if (dr_to_trgmu < 0.4){
             trg_mu_iso04 += trk.pt();
@@ -372,29 +377,33 @@ void BToMuMuPiBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup c
             pi_iso04 += trk.pt();
             if (dr_to_pi < 0.3) pi_iso03 += trk.pt();
           }
+          if (dr_to_hnl < 0.4){
+            hnl_iso04 += trk.pt();
+            if (dr_to_hnl < 0.3) hnl_iso03 += trk.pt();
+          }
 
           // add requirement of the tracks to be close to the B
           if (!trg_mu_ptr->bestTrack() || fabs(trk.dz() - trg_mu_ptr->bestTrack()->dz()) > 0.4) continue;
+          if (!sel_mu_ptr->bestTrack() || fabs(trk.dz() - sel_mu_ptr->bestTrack()->dz()) > 0.4) continue;
+          //if (!pi_ptr->bestTrack() || fabs(trk.dz() - pi_ptr->bestTrack()->dz()) > 0.4) continue; // pion never passes bestTrack requirement
+          if (fabs(trk.dz() - pi_ptr->userFloat("dz")) > 0.4) continue; //dropping requirement of best track
+
           if (dr_to_trgmu < 0.4){
             trg_mu_iso04_close += trk.pt();
             if ( dr_to_trgmu < 0.3) trg_mu_iso03_close += trk.pt();
           }
-          
-          if (!sel_mu_ptr->bestTrack() || fabs(trk.dz() - sel_mu_ptr->bestTrack()->dz()) > 0.4) continue;
           if (dr_to_selmu < 0.4){
             sel_mu_iso04_close += trk.pt();
             if (dr_to_selmu < 0.3)  sel_mu_iso03_close += trk.pt();
           }
-          
-          //if (!pi_ptr->bestTrack() || fabs(trk.dz() - pi_ptr->bestTrack()->dz()) > 0.4) continue; // pion never passes bestTrack requirement
-          if (fabs(trk.dz() - pi_ptr->userFloat("dz")) > 0.4) continue; //dropping requirement of best track
           if (dr_to_pi < 0.4){
             pi_iso04_close += trk.pt();
             if (dr_to_pi < 0.3) pi_iso03_close += trk.pt();
           }
-
-
-
+          if (dr_to_hnl < 0.4){
+            hnl_iso04_close += trk.pt();
+            if (dr_to_hnl < 0.3) hnl_iso03_close += trk.pt();
+          }
         }
 
         //trg_mu_iso03 /= trg_mu_ptr->pt();
@@ -410,6 +419,8 @@ void BToMuMuPiBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup c
         b_cand.addUserFloat("sel_mu_iso04", sel_mu_iso04);
         b_cand.addUserFloat("pi_iso03" , pi_iso03 );
         b_cand.addUserFloat("pi_iso04" , pi_iso04 );
+        b_cand.addUserFloat("hnl_iso03" , hnl_iso03 );
+        b_cand.addUserFloat("hnl_iso04" , hnl_iso04 );
 
         // add requirement of the tracks to be close to the B
         b_cand.addUserFloat("trg_mu_iso03_close", trg_mu_iso03_close);
@@ -418,6 +429,8 @@ void BToMuMuPiBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup c
         b_cand.addUserFloat("sel_mu_iso04_close", sel_mu_iso04_close);
         b_cand.addUserFloat("pi_iso03_close", pi_iso03_close);
         b_cand.addUserFloat("pi_iso04_close", pi_iso04_close);
+        b_cand.addUserFloat("hnl_iso03_close", hnl_iso03_close);
+        b_cand.addUserFloat("hnl_iso04_close", hnl_iso04_close);
         
 
         // position of the muons / tracks in their own collections
