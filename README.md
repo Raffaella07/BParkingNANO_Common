@@ -86,15 +86,18 @@ python nanoLauncher.py <options>
 ```
 The options are:
 ```
-- --mcprivate : runs the tool on signal samples
-   OR  --mccentral : runs the tool on central QCD MC samples
-   OR  --data : runs the tool on BParking data
-- --pl <prodLabel>: with --mcprivate: must correspond to the production label under which the miniAOD sample was produced (e.g V11_inclB_n4200000_njt200) 
-                    with --mccentral or --data: any production label of your choice
-- --ds <dataset>: to be used with --data or --mccentral only (e.g /ParkingBPH4/Run2018B-05May2019-v2/MINIAOD, /QCD_Pt-15to20_MuEnrichedPt5_TuneCP5_13TeV_pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v3/MINIAODSIM)
-- --user <user>: with --mcprivate only, optional; username that produced the miniAOD sample
-- --tag <tag>: optional, tag to be appended to the rootfile name 
-- --maxfiles <maxfiles>: optional, maximum number of files to process
+*   --mcprivate          : runs the tool on signal samples
+OR  --mccentral          : runs the tool on central QCD MC samples
+OR  --data               : runs the tool on BParking data
+* --pl <prodLabel>       : 
+  * with --mcprivate     : must correspond to the production label under which 
+                           the miniAOD sample was produced (e.g V11_inclB_n4200000_njt200) 
+  * with --mccentral/data: any production label of your choice
+* --ds <dataset>         : to be used with --data or --mccentral only 
+(e.g /ParkingBPH4/Run2018B-05May2019-v2/MINIAOD, /QCD_Pt-15to20_MuEnrichedPt5_TuneCP5_13TeV_pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v3/MINIAODSIM)
+* --user <user>          : with --mcprivate only, optional; username that produced the miniAOD sample
+* --tag <tag>            : optional, tag to be appended to the rootfile name 
+* --maxfiles <maxfiles>  : optional, maximum number of files to process
 ```
 
 Once ready, merge the different nano steps by doing
