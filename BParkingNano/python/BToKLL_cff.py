@@ -15,6 +15,7 @@ electronPairsForKee = cms.EDProducer(
     postVtxSelection = cms.string('userFloat("sv_chi2") < 998 && userFloat("sv_prob") > 1.e-5'),
 )
 
+
 BToKee = cms.EDProducer(
     'BToKLLBuilder',
     dileptons = cms.InputTag('electronPairsForKee'),
@@ -38,6 +39,7 @@ BToKee = cms.EDProducer(
 muonPairsForKmumu = cms.EDProducer(
     'DiMuonBuilder',
     src = cms.InputTag('muonTrgSelector', 'SelectedMuons'),
+    isMC = cms.bool(False),
     transientTracksSrc = cms.InputTag('muonTrgSelector', 'SelectedTransientMuons'),
     lep1Selection = cms.string('pt > 1.5'),
     lep2Selection = cms.string(''),
@@ -46,13 +48,21 @@ muonPairsForKmumu = cms.EDProducer(
     postVtxSelection = electronPairsForKee.postVtxSelection,
 )
 
+
+muonPairsForKmumuMC = muonPairsForKmumu.clone(
+    isMC = cms.bool(True),
+)
+
+
 BToKmumu = cms.EDProducer(
     'BToKLLBuilder',
     dileptons = cms.InputTag('muonPairsForKmumu'),
     leptonTransientTracks = muonPairsForKmumu.transientTracksSrc,
     kaons = BToKee.kaons,
     kaonsTransientTracks = BToKee.kaonsTransientTracks,
+    genParticles = cms.InputTag("finalGenParticlesBPark"),
     beamSpot = cms.InputTag("offlineBeamSpot"),
+    isMC = cms.bool(False),
     tracks = cms.InputTag("packedPFCandidates"),
     lostTracks = cms.InputTag("lostTracks"),
     kaonSelection = cms.string(''),
@@ -68,6 +78,14 @@ BToKmumu = cms.EDProducer(
         '&& userFloat("fitted_mass") > 4.5 && userFloat("fitted_mass") < 6.'
     )
 )
+
+
+BToKmumuMC = BToKmumu.clone(
+    dileptons = cms.InputTag('muonPairsForKmumuMC'),
+    leptonTransientTracks = muonPairsForKmumuMC.transientTracksSrc,
+    isMC = cms.bool(True),
+)
+
 
 BToKeeTable = cms.EDProducer(
     'SimpleCompositeCandidateFlatTableProducer',
@@ -127,9 +145,24 @@ BToKeeTable = cms.EDProducer(
         k_iso04  = ufloat('k_iso04'),
         b_iso03  = ufloat('b_iso03'),
         b_iso04  = ufloat('b_iso04'),
+        l1_iso03_close = ufloat('l1_iso03_close'),
+        l1_iso04_close = ufloat('l1_iso04_close'),
+        l2_iso03_close = ufloat('l2_iso03_close'),
+        l2_iso04_close = ufloat('l2_iso04_close'),
+        k_iso03_close = ufloat('k_iso03_close'),
+        k_iso04_close = ufloat('k_iso04_close'),
+        b_iso03_close = ufloat('b_iso03_close'),
+        b_iso04_close = ufloat('b_iso04_close'),
         n_k_used = uint('n_k_used'),
         n_l1_used = uint('n_l1_used'),
         n_l2_used = uint('n_l2_used'),
+        isMatched = Var("userInt('isMatched')", int, mcOnly=True),
+        matching_l1_genIdx = Var("userInt('matching_l1_genIdx')", int, mcOnly=True),
+        matching_l2_genIdx = Var("userInt('matching_l2_genIdx')", int, mcOnly=True),
+        matching_k_genIdx = Var("userInt('matching_k_genIdx')", int, mcOnly=True),
+        matching_l1_motherPdgId = Var("userInt('matching_l1_motherPdgId')", int, mcOnly=True),
+        matching_l2_motherPdgId = Var("userInt('matching_l2_motherPdgId')", int, mcOnly=True),
+        matching_k_motherPdgId = Var("userInt('matching_k_motherPdgId')", int, mcOnly=True),
     )
 )
 
@@ -144,7 +177,9 @@ CountBToKee = cms.EDFilter("PATCandViewCountFilter",
     minNumber = cms.uint32(1),
     maxNumber = cms.uint32(999999),
     src = cms.InputTag("BToKee")
-)    
+) 
+
+
 CountBToKmumu = CountBToKee.clone(
     minNumber = cms.uint32(1),
     src = cms.InputTag("BToKmumu")
@@ -154,6 +189,11 @@ CountBToKmumu = CountBToKee.clone(
 BToKMuMuSequence = cms.Sequence(
     (muonPairsForKmumu * BToKmumu)
 )
+
+BToKMuMuSequenceMC = cms.Sequence(
+    (muonPairsForKmumuMC * BToKmumuMC)
+)
+
 BToKEESequence = cms.Sequence(
     (electronPairsForKee * BToKee)
 )
@@ -162,5 +202,6 @@ BToKLLSequence = cms.Sequence(
     (electronPairsForKee * BToKee) +
     (muonPairsForKmumu * BToKmumu)
 )
+
 BToKLLTables = cms.Sequence(BToKeeTable + BToKmumuTable)
 

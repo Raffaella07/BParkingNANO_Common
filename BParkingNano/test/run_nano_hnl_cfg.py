@@ -5,17 +5,20 @@ from glob import glob
 
 options = VarParsing('python')
 
-options.register('isMC'          ,    False, VarParsing.multiplicity.singleton, VarParsing.varType.bool  , "Run this on real data"                  )
-options.register('skipDuplicated',     True, VarParsing.multiplicity.singleton, VarParsing.varType.bool  , "Skip duplicated events. True by default")
-options.register('globalTag'     , 'NOTSET', VarParsing.multiplicity.singleton, VarParsing.varType.string, "Set global tag"                         )
-options.register('wantSummary'   ,     True, VarParsing.multiplicity.singleton, VarParsing.varType.bool  , "Run this on real data"                  )
-options.register('wantFullRECO'  ,    False, VarParsing.multiplicity.singleton, VarParsing.varType.bool  , "Run this on real data"                  )
-options.register('reportEvery'   ,       10, VarParsing.multiplicity.singleton, VarParsing.varType.int   , "report every N events"                  )
-options.register('skip'          ,        0, VarParsing.multiplicity.singleton, VarParsing.varType.int   , "skip first N events"                    )
+options.register('isMC'           ,  True           , VarParsing.multiplicity.singleton, VarParsing.varType.bool  , "Run this on real data"                  )
+options.register('skipDuplicated' ,  True           , VarParsing.multiplicity.singleton, VarParsing.varType.bool  , "Skip duplicated events. True by default")
+options.register('globalTag'      , 'NOTSET'        , VarParsing.multiplicity.singleton, VarParsing.varType.string, "Set global tag"                         )
+options.register('wantSummary'    ,  True           , VarParsing.multiplicity.singleton, VarParsing.varType.bool  , "Run this on real data"                  )
+options.register('wantFullRECO'   ,  False          , VarParsing.multiplicity.singleton, VarParsing.varType.bool  , "Run this on real data"                  )
+options.register('reportEvery'    ,  1000           , VarParsing.multiplicity.singleton, VarParsing.varType.int   , "report every N events"                  )
+options.register('skip'           ,  0              , VarParsing.multiplicity.singleton, VarParsing.varType.int   , "skip first N events"                    )
+options.register('inputFile'      , None            , VarParsing.multiplicity.singleton, VarParsing.varType.string, "inputFile name"                         )
+options.register('outFile'        , 'bparknano.root', VarParsing.multiplicity.singleton, VarParsing.varType.string, "outputFile name"                        )
 
-options.setDefault('maxEvents', 100)
-options.setDefault('tag', '10215')
+
+options.setDefault('maxEvents', -1)
 options.parseArguments()
+
 
 globaltag = '102X_dataRun2_v11' if not options.isMC else '102X_upgrade2018_realistic_v15'
 if options._beenSet['globalTag']:
@@ -24,9 +27,19 @@ if options._beenSet['globalTag']:
 extension = {False : 'data', True : 'mc'}
 outputFileNANO = cms.untracked.string('_'.join(['BParkNANO', extension[options.isMC], options.tag])+'.root')
 outputFileFEVT = cms.untracked.string('_'.join(['BParkFullEvt', extension[options.isMC], options.tag])+'.root')
+
+
 if not options.inputFiles:
-    options.inputFiles = ['/store/data/Run2018B/ParkingBPH4/MINIAOD/05May2019-v2/230000/6B5A24B1-0E6E-504B-8331-BD899EB60110.root'] if not options.isMC else \
-                         ['file:%s' %i for i in glob('/pnfs/psi.ch/cms/trivcat/store/user/anlyon/BHNLsGen/V01_n9000000_njt300/mass1.5_ctau51.922757246/step4*root')]
+    options.inputFiles = ['/store/data/Run2018B/ParkingBPH4/MINIAOD/05May2019-v2/230000/F7E7EF39-476F-1C48-95F7-74CB5C7A542C.root'] if not options.isMC else \
+                         ['file:%s' %i for i in glob('/pnfs/psi.ch/cms/trivcat/store/user/mratti/BHNLsGen/V11_inclB_n4200000_njt200/mass3.0_ctau811.293081969/step4_nj95.root')]
+                         #['file:%s' %i for i in glob('/pnfs/psi.ch/cms/trivcat/store/user/mratti/BHNLsGen/pilotV15_control/mass999_ctau999/step4_nj*.root')]
+                         #['file:%s' %i for i in glob('/pnfs/psi.ch/cms/trivcat/store/user/mratti/BHNLsGen/pilotV15_control/mass999_ctau999/step4_nj15.root')]
+                         #['file:%s' %i for i in glob('/pnfs/psi.ch/cms/trivcat/store/user/anlyon/BHNLsGen/T5_newcmsdrivers_npremix3_n4200000_njt200/mass3.0_ctau811.293081969/step4_nj95.root')]
+                         #['file:%s' %i for i in glob('/pnfs/psi.ch/cms/trivcat/store/user/anlyon/BHNLsGen/V03_leptonic_n900000_njt200/mass1.5_ctau17307.5857487/step4_nj95.root')]
+                         #['file:%s' %i for i in glob('/pnfs/psi.ch/cms/trivcat/store/user/anlyon/BHNLsGen/V02_testLeptonic_n450000_njt100/mass1.5_ctau51.922757246/step4_nj95.root')]
+                         #['file:%s' %i for i in glob('/pnfs/psi.ch/cms/trivcat/store/user/anlyon/BHNLsGen/V01_n9000000_njt300/mass1.5_ctau51.922757246/step4_nj95.root')]
+                         #['file:%s' %i for i in glob('/pnfs/psi.ch/cms/trivcat/store/user/anlyon/BHNLsGen/V01_n9000000_njt300/mass1.5_ctau51.922757246/step4*root')]
+
 annotation = '%s nevts:%d' % (outputFileNANO, options.maxEvents)
 
 from Configuration.StandardSequences.Eras import eras
@@ -51,7 +64,7 @@ process.maxEvents = cms.untracked.PSet(
 # Input source
 process.source = cms.Source(
     "PoolSource",
-    fileNames = cms.untracked.vstring(options.inputFiles),
+    fileNames = cms.untracked.vstring(options.inputFiles) if not options.inputFile else cms.untracked.vstring('file:{}'.format(options.inputFile)),
     secondaryFileNames = cms.untracked.vstring(),
     skipEvents=cms.untracked.uint32(options.skip),
     duplicateCheckMode = cms.untracked.string('checkEachFile' if options.skipDuplicated else 'noDuplicateCheck'),
@@ -89,7 +102,8 @@ process.NANOAODoutput = cms.OutputModule("NanoAODOutputModule",
         dataTier = cms.untracked.string('NANOAOD'),
         filterName = cms.untracked.string('')
     ),
-    fileName = outputFileNANO,
+    #fileName = outputFileNANO,
+    fileName = outputFileNANO if not options.outFile else cms.untracked.string('file:{}'.format(options.outFile)),
     outputCommands = cms.untracked.vstring(
         'drop *',
         "keep nanoaodFlatTable_*Table_*_*",     # event data
@@ -107,16 +121,18 @@ process.GlobalTag = GlobalTag(process.GlobalTag, globaltag, '')
 from PhysicsTools.BParkingNano.nanoBPark_cff import *
 process = nanoAOD_customizeMuonTriggerBPark  (process)
 process = nanoAOD_customizeTrackFilteredBPark(process)
-process = nanoAOD_customizeBToMuMuPi         (process)
+process = nanoAOD_customizeBToMuMuPi         (process, isMC=options.isMC)
+process = nanoAOD_customizeBToKMuMu          (process, isMC=options.isMC) 
 process = nanoAOD_customizeTriggerBitsBPark  (process)
 
 # Path and EndPath definitions
 process.nanoAOD_MuMuPi_step = cms.Path(process.nanoSequence + process.nanoBMuMuPiSequence + CountBToMuMuPi )
+process.nanoAOD_KMuMu_step  = cms.Path(process.nanoSequence + process.nanoBKMuMuSequence + CountBToKmumu ) 
 
 # customisation of the process.
 if options.isMC:
     from PhysicsTools.BParkingNano.nanoBPark_cff import nanoAOD_customizeMC
-    nanoAOD_customizeMC(process, ancestor_particles=[511, 521, 9900015])
+    nanoAOD_customizeMC(process, ancestor_particles=[511, 521, 531, 541, 9900015]) 
 
 process.endjob_step = cms.EndPath(process.endOfProcess)
 process.FEVTDEBUGHLToutput_step = cms.EndPath(process.FEVTDEBUGHLToutput)
@@ -125,6 +141,7 @@ process.NANOAODoutput_step = cms.EndPath(process.NANOAODoutput)
 # Schedule definition
 process.schedule = cms.Schedule(
     process.nanoAOD_MuMuPi_step,
+    process.nanoAOD_KMuMu_step, 
     process.endjob_step, 
     process.NANOAODoutput_step
 )
@@ -132,6 +149,7 @@ process.schedule = cms.Schedule(
 if options.wantFullRECO:
     process.schedule = cms.Schedule(
         process.nanoAOD_MuMuPi_step,
+        process.nanoAOD_KMuMu_step, 
         process.endjob_step, 
         process.FEVTDEBUGHLToutput_step, 
         process.NANOAODoutput_step
@@ -140,7 +158,7 @@ from PhysicsTools.PatAlgos.tools.helpers import associatePatAlgosToolsTask
 associatePatAlgosToolsTask(process)
 
 process.NANOAODoutput.SelectEvents = cms.untracked.PSet(
-    SelectEvents = cms.vstring('nanoAOD_MuMuPi_step', )
+    SelectEvents = cms.vstring('nanoAOD_MuMuPi_step', 'nanoAOD_KMuMu_step') 
 )
 
 
