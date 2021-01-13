@@ -1,7 +1,10 @@
 import sys 
 import os
+import os.path
+from os import path
 import glob
 import ROOT
+from nanoLauncher import NanoLauncher
 
 
 def getOptions():
@@ -28,7 +31,7 @@ def checkParser(opt):
     raise RuntimeError('Please indicate if you want to run on data or MC by adding only --data or --mcprivate or --mccentral to the command line')
 
 
-class NanoMerger(object):
+class NanoMerger(NanoLauncher):
   def __init__(self, opt):
     self.prodlabel = vars(opt)['pl']
     self.tag       = vars(opt)['tag']
@@ -45,18 +48,22 @@ class NanoMerger(object):
 
     for subdir in subdirs:
       if 'merged' in subdir: continue
+      if '.root' in subdir: continue
+
       print '\n-> Processing: {}'.format(subdir[subdir.rfind('/')+1:len(subdir)])
 
       # get files
       nanoFiles = [f for f in glob.glob(subdir+nanoName)]
 
       # create the outputdir that will contain the merged file
-      os.system('mkdir {}'.format(subdir+outputdir))
+      if not path.exists(subdir+outputdir):
+        os.system('mkdir {}'.format(subdir+outputdir))
 
       command = 'python haddnano.py {}/{}'.format(subdir+outputdir, mergedName)
 
       print "\n-> Checking the files"
       for iFile, fileName in enumerate(nanoFiles):
+        print fileName
         if iFile%100 == 0:
           print '     --> checked {}% of the files'.format(round(float(iFile)/len(nanoFiles)*100, 1))
         if iFile>990:
@@ -78,12 +85,13 @@ class NanoMerger(object):
 
   def doChunkMerging(self, nanoName, mergedName, locationSE):
 
-    print '\n-> Merging the different chunks'
+    print '\n---> Merging the different chunks'
 
     nanoFiles = [f for f in glob.glob(locationSE+'/Chunk*/'+nanoName)]
 
     # create the outputdir that will contain the merged file
-    os.system('mkdir {}/merged'.format(locationSE))
+    if not path.exists('{}/merged'.format(locationSE)):
+      os.system('mkdir {}/merged'.format(locationSE))
 
     filesValid = []
     print "\n-> Checking the files"
@@ -108,38 +116,49 @@ class NanoMerger(object):
 
 
   def process(self):
+    print '---------------------------------'
+    print '           Nano Merger           '
+    print '---------------------------------'
+
     user      = os.environ["USER"]
+
+    nanoName   = '/bparknano_nj*.root' if self.tag == None else '/bparknano_{}_nj*.root'.format(self.tag)
+    mergedName = 'bparknano.root' if self.tag == None else 'bparknano_{}.root'.format(self.tag)
+    outputdir  = '/merged'
+        
+    nanoName_tot   = 'merged/bparknano.root' if self.tag == None else 'merged/bparknano_{}.root'.format(self.tag)
+    mergedName_tot = 'bparknano.root' if self.tag == None else 'bparknano_{}.root'.format(self.tag)
 
     if self.mcprivate:
       locationSE = '/pnfs/psi.ch/cms/trivcat/store/user/{}/BHNLsGen/{}/'.format(user, self.prodlabel)
       
-      nanoName   = '/nanoFiles/bparknano_nj*.root' if self.tag == None else '/nanoFiles/bparknano_{}_nj*.root'.format(self.tag)
-      mergedName = 'bparknano.root' if self.tag == None else 'bparknano_{}.root'.format(self.tag)
-      outputdir  = '/nanoFiles/merged'
+      pointdirs = NanoLauncher.getPointDirs(self, locationSE)
 
-      self.doMerging(nanoName, mergedName, locationSE, outputdir, True)
+      for pointdir in pointdirs:
+        if 'merged' in pointdir: continue
 
-      if self.doflat:
-        nanoName_flat   = '/nanoFiles/flat/flat_bparknano_nj*.root' if self.tag == None else '/nanoFiles/flat/flat_bparknano_{}_nj*.root'.format(self.tag)
-        mergedName_flat = 'flat_bparknano.root' if self.tag == None else 'flat_bparknano_{}.root'.format(self.tag)
-        outputdir_flat  = '/nanoFiles/flat/merged'
+        print '\n --- Mass point: {} --- '.format(pointdir[pointdir.rfind('/')+1:len(pointdir)])
 
-        self.doMerging(nanoName_flat, mergedName_flat, locationSE, outputdir_flat, False)
+        # per chunk
+        self.doMerging(nanoName, mergedName, pointdir+'/nanoFiles/', outputdir, True)
+
+        # inclusive
+        self.doChunkMerging(nanoName_tot, mergedName_tot, pointdir+'/nanoFiles/')
+  
+        if self.doflat:
+          nanoName_flat   = '/nanoFiles/flat/flat_bparknano_nj*.root' if self.tag == None else '/nanoFiles/flat/flat_bparknano_{}_nj*.root'.format(self.tag)
+          mergedName_flat = 'flat_bparknano.root' if self.tag == None else 'flat_bparknano_{}.root'.format(self.tag)
+          outputdir_flat  = '/nanoFiles/flat/merged'
+
+          self.doMerging(nanoName_flat, mergedName_flat, locationSE, outputdir_flat, False)
 
     elif self.data or self.mccentral:
       locationSE = '/pnfs/psi.ch/cms/trivcat/store/user/{}/BHNLsGen/{}/{}'.format(user, 'data' if self.data else 'mc_central', self.prodlabel)
   
       # per chunk
-      nanoName   = '/bparknano_nj*.root' if self.tag == None else '/bparknano_{}_nj*.root'.format(self.tag)
-      mergedName = 'bparknano.root' if self.tag == None else 'bparknano_{}.root'.format(self.tag)
-      outputdir  = '/merged'
-      
       self.doMerging(nanoName, mergedName, locationSE, outputdir, True)
 
       # inclusive
-      nanoName_tot   = 'merged/bparknano.root' if self.tag == None else 'merged/bparknano_{}.root'.format(self.tag)
-      mergedName_tot = 'bparknano.root' if self.tag == None else 'bparknano_{}.root'.format(self.tag)
-      
       self.doChunkMerging(nanoName_tot, mergedName_tot, locationSE)
 
 
