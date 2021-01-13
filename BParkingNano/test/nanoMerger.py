@@ -66,9 +66,6 @@ class NanoMerger(NanoLauncher):
         print fileName
         if iFile%100 == 0:
           print '     --> checked {}% of the files'.format(round(float(iFile)/len(nanoFiles)*100, 1))
-        if iFile>990:
-          print '     --> cannot deal with more than 1000 files for the moment, skipping next {} files'.format(len(nanoFiles)-1000)
-          break
         rootFile = ROOT.TNetXNGFile.Open(fileName, 'r')
         if not rootFile: continue
         else:
