@@ -1,5 +1,7 @@
 import sys 
 import os
+import os.path
+from os import path
 import glob
 import ROOT
 
@@ -16,6 +18,9 @@ def getOptions():
   parser.add_argument('--mccentral'         , dest='mccentral', help='run the BParking nano tool on a central MC sample'         , action='store_true', default=False)
   parser.add_argument('--data'              , dest='data'     , help='run the BParking nano tool on a data sample'               , action='store_true', default=False)
   parser.add_argument('--doflat'            , dest='doflat'   , help='[optional-mcprivate] launch the ntupliser on top of the nanofile' , action='store_true', default=False)
+  parser.add_argument('--docompile'         , dest='docompile', help='[optional] compile the full BParkingNano tool'                    , action='store_true', default=False)
+  
+  # add domerge, dofullmerge? 
   return parser.parse_args()
 
 
@@ -45,6 +50,7 @@ class NanoLauncher(object):
     self.data      = vars(opt)['data']
     self.user      = vars(opt)["user"]
     self.doflat    = vars(opt)["doflat"]
+    self.docompile = vars(opt)["docompile"]
 
 
   def getPointDirs(self, location):
@@ -87,57 +93,64 @@ class NanoLauncher(object):
 
   def writeFileList(self, point=None):
 
-    os.system('mkdir ./files')
+    if not path.exists('./files'):
+      os.system('mkdir ./files') 
 
     if self.mcprivate:
-      os.system('rm ./files/filelist_{}_{}.txt'.format(self.prodlabel, point))
+      filename = './files/filelist_{}_{}'.format(self.prodlabel, point)
+      if self.maxfiles != None:
+        filename += '_max{}'.format(self.maxfiles)
 
-      myfile = open("./files/filelist_{}_{}.txt".format(self.prodlabel, point), "w+")
+      if not path.exists(filename + '.txt'):
+        myfile = open(filename + '.txt', "w+")
+        
+        nanofiles = self.getLocalFiles(point)
+
+        limit = int(self.maxfiles) if self.maxfiles != None else len(nanofiles)
+
+        for iNano, nanofile in enumerate(nanofiles):
+          if iNano < limit:
+            if self.checkLocalFile(nanofile):
+              iNano += 1
+              myfile.write(nanofile + '\n')
+            else:
+              print '    could not open {} --> skipping'.format(nanofile)
+          else: 
+            continue
       
-      nanofiles = self.getLocalFiles(point)
-
-      for iNano, nanofile in enumerate(nanofiles):
-
-        if self.checkLocalFile(nanofile):
-          iNano += 1
-          myfile.write(nanofile + '\n')
-        else:
-          print '    could not open {} --> skipping'.format(nanofile)
-    
-      myfile.close()  
-      
-      if self.maxfiles!=None:
-        command_cut = 'head -n {max} ./files/filelist_{pl}_{p}.txt > ./files/tmp.txt && mv ./files/tmp.txt ./files/filelist_{pl}_{p}.txt'.format(max=self.maxfiles, pl=self.prodlabel, p=point)
-        os.system(command_cut)
-      
-      print '    ---> ./files/filelist_{pl}_{p}.txt created'.format(pl=self.prodlabel, p=point)
-
-
+        myfile.close()  
+        
     elif self.data or self.mccentral:
       ds_label = self.getDataLabel() if self.data else self.getMCLabel()
 
-      os.system('rm ./files/filelist_{ds}_{pl}*.txt'.format(ds=ds_label, pl=self.prodlabel))
+      filename = './files/filelist_{dsl}_{pl}'.format(dsl=ds_label, pl=self.prodlabel) 
+      if self.maxfiles != None:
+        filename += '_max{}'.format(self.maxfiles)
       
-      command = 'dasgoclient --query="file dataset={ds} | grep file.name" > ./files/filelist_{dsl}_{pl}.txt'.format(ds=self.dataset, dsl=ds_label, pl=self.prodlabel)
-      os.system(command)
-
-      if self.maxfiles!=None:
-        command_cut = 'head -n {max} ./files/filelist_{ds}_{pl}.txt > ./files/tmp.txt && mv ./files/tmp.txt ./files/filelist_{ds}_{pl}.txt'.format(max=self.maxfiles, ds=ds_label, pl=self.prodlabel)
-        os.system(command_cut)
-
-      # slurm cannot deal with too large arrays
-      # -> submit job arrays of size 750
-      if self.getSize('./files/filelist_{}_{}.txt'.format(ds_label, self.prodlabel)) > 750:
-        command_split = 'split -l 750 ./files/filelist_{ds}_{pl}.txt ./files/filelist_{ds}_{pl} --additional-suffix=.txt'.format(ds=ds_label, pl=self.prodlabel)
-        os.system(command_split)
-        os.system('rm ./files/filelist_{}_{}.txt'.format(ds_label, self.prodlabel))
-
-      print '    ---> ./files/filelist_{ds}_{pl}.txt created'.format(ds=ds_label, pl=self.prodlabel)
+      if not path.exists(filename + '.txt'):
       
+        command = 'dasgoclient --query="file dataset={ds} | grep file.name" > {fn}.txt'.format(ds=self.dataset, fn=filename)
+        os.system(command)
+
+        if self.maxfiles!=None:
+          command_cut = 'head -n {maxval} {fn}.txt > ./files/tmp.txt && mv ./files/tmp.txt {fn}.txt'.format(maxval=self.maxfiles, fn=filename)
+          os.system(command_cut)
+
+    # slurm cannot deal with too large arrays
+    # -> submit job arrays of size 750
+    if self.getSize(filename + '.txt') > 750:
+      command_split = 'split -l 750 {fn}.txt {fn}_ --additional-suffix=.txt'.format(fn=filename)
+      os.system(command_split)
+      os.system('rm {fn}.txt'.format(fn=filename))
+      
+    print '    ---> {}*.txt created'.format(filename)
+
+    return filename 
+
 
   def launchNano(self, nNano, outputdir, logdir, filelist, label):
     #command = 'sbatch -p quick --account=t3 --time==00:50:00 -o logs/{pl}/nanostep_nj%a.log -e logs/{pl}/nanostep_nj%a.log --job-name=nanostep_nj%a_{pl} --array {ar} submitter.sh {outdir} {usr} {pl} {tag} {flt}'.format(
-    command = 'sbatch -p wn --account=t3 -o {ld}/nanostep_nj%a.log -e {ld}/nanostep_nj%a.log --job-name=nanostep_nj%a_{pl} --array {ar} --time=03:00:00 submitter.sh {outdir} {usr} {pl} {tag} {isMC} {rmt} {flt} {lst}'.format(
+    command = 'sbatch -p wn --account=t3 -o {ld}/nanostep_nj%a.log -e {ld}/nanostep_nj%a.log --job-name=nanostep_nj%a_{pl} --array {ar} --time=03:00:00 submitter.sh {outdir} {usr} {pl} {tag} {isMC} {rmt} {flt} {lst} 0'.format(
       ld      = logdir,
       pl      = label,
       ar      = '1-{}'.format(nNano),
@@ -155,8 +168,9 @@ class NanoLauncher(object):
 
   def process(self):
   
-    print '-> Compiling'
-    self.compile()
+    if self.docompile:
+      print '-> Compiling'
+      self.compile()
     
 
     print '\n------------'
@@ -177,24 +191,33 @@ class NanoLauncher(object):
      
         print '\n-> Processing mass/ctau point: {}'.format(point)
 
-        print '\n  --> Creating output directory'
-        outputdir = '/pnfs/psi.ch/cms/trivcat/store/user/{}/BHNLsGen/{}/{}/nanoFiles/'.format(os.environ["USER"], self.prodlabel, point)
-        os.system('mkdir -p {}'.format(outputdir))
-        
-        print '\n  --> Creating log directory'
-        logdir = './logs/{}/{}'.format(self.prodlabel, point) if self.tag == None else './logs/{}/{}_{}'.format(self.prodlabel, point, self.tag)
-        os.system('mkdir -p {}'.format(logdir))
+        print '\n  --> Fetching the files'
+        filelistname = self.writeFileList(point)
 
-        print '\n  --> Fetching the files '
-        self.writeFileList(point)
-            
-        filelist = './files/filelist_{}_{}.txt'.format(self.prodlabel, point)
-        if self.getSize(filelist) == 0:
-          print '        WARNING: no files were found with the corresponding production label'
-          print '                 Did you set the correct username using --user <username>?'
-        label = self.prodlabel + '_' + point if self.tag == None else self.prodlabel + '_' + point + '_' +self.tag
+        # loop on the files (containing at most 750 samples) 
+        for iFile, filelist in enumerate(glob.glob('{}*.txt'.format(filelistname))):
 
-        self.launchNano(self.getSize(filelist), outputdir, logdir, filelist, label) 
+          if self.maxfiles == None and 'max' in filelist: continue
+          
+          if self.getSize(filelist) == 0:
+            print '        WARNING: no files were found with the corresponding production label'
+            print '                 Did you set the correct username using --user <username>?'
+
+          print '\n  --> Creating output directory'
+          outputdir = '/pnfs/psi.ch/cms/trivcat/store/user/{}/BHNLsGen/{}/{}/nanoFiles/Chunk{}_n{}'.format(os.environ["USER"], self.prodlabel, point, iFile, self.getSize(filelist))
+          if not path.exists(outputdir):
+            os.system('mkdir -p {}'.format(outputdir))
+          
+          print '\n  --> Creating log directory'
+          logdir = './logs/{}/{}/Chunk{}_n{}'.format(self.prodlabel, point, iFile, self.getSize(filelist)) if self.tag == None \
+                   else './logs/{}/{}_{}/Chunk{}_{}'.format(self.prodlabel, point, self.tag, iFile, self.getSize(filelist))
+          if not path.exists(logdir):
+            os.system('mkdir -p {}'.format(logdir))
+
+          label = self.prodlabel + '_' + point if self.tag == None else self.prodlabel + '_' + point + '_' +self.tag
+          label += '_Chunk{}_n{}'.format(iFile, self.getSize(filelist))
+
+          self.launchNano(self.getSize(filelist), outputdir, logdir, filelist, label) 
 
     
     elif self.data or self.mccentral:
@@ -202,13 +225,15 @@ class NanoLauncher(object):
         if 'ext' in self.dataset:
           self.prodlabel += '_ext'
       
-      print '\n  --> Fetching the files '
-      self.writeFileList()
+      print '\n  --> Fetching the files'
+      filelistname = self.writeFileList()
 
       ds_label = self.getDataLabel() if self.data else self.getMCLabel()
 
-      # loop on the files (containing at most 1k samples) 
-      for iFile, filelist in enumerate(glob.glob('./files/filelist_{}_{}*.txt'.format(ds_label, self.prodlabel))):
+      # loop on the files (containing at most 750 samples) 
+      for iFile, filelist in enumerate(glob.glob('{}*.txt'.format(filelistname))):
+        
+        if self.maxfiles == None and 'max' in filelist: continue
 
         print '\n  --> Creating output directory'
         dirname = 'data' if self.data else 'mc_central'
