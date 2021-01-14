@@ -16,6 +16,7 @@ def getOptions():
   parser.add_argument('--mccentral'    , dest='mccentral', help='run the BParking nano tool on a central MC sample'      , action='store_true', default=False)
   parser.add_argument('--data'         , dest='data'     , help='run the BParking nano tool on a data sample'            , action='store_true', default=False)
   parser.add_argument('--doflat'       , dest='doflat'   , help='merge as well the files coming out of the truth-mathing', action='store_true', default=False)
+  parser.add_argument('--dobatch'      , dest='dobatch'  , help='to be turned on if running the script on the batch'     , action='store_true', default=False)
   return parser.parse_args()
 
 
@@ -39,6 +40,7 @@ class NanoMerger(NanoLauncher):
     self.mccentral = vars(opt)['mccentral']
     self.data      = vars(opt)['data']
     self.doflat    = vars(opt)["doflat"]
+    self.dobatch   = vars(opt)["dobatch"]
 
 
   def doMerging(self, nanoName, mergedName, locationSE, outputdir, cond):
@@ -53,13 +55,16 @@ class NanoMerger(NanoLauncher):
       print '\n-> Processing: {}'.format(subdir[subdir.rfind('/')+1:len(subdir)])
 
       # get files
-      nanoFiles = [f for f in glob.glob(subdir+nanoName)]
+      nanoFilesPlain = [f for f in glob.glob(subdir+nanoName)]
+
+      nanoFiles = map(lambda x: 'root://t3dcachedb.psi.ch:1094/'+x, nanoFilesPlain)
 
       # create the outputdir that will contain the merged file
       if not path.exists(subdir+outputdir):
         os.system('mkdir {}'.format(subdir+outputdir))
 
-      command = 'python haddnano.py {}/{}'.format(subdir+outputdir, mergedName)
+      outputname = '{}/{}'.format(subdir+outputdir, mergedName) if not self.dobatch else 'merge.root'
+      command = 'python haddnano.py {}'.format(outputname)
 
       if len(nanoFiles) == 0: 
         print 'no files of interest in this chunk'
@@ -67,9 +72,9 @@ class NanoMerger(NanoLauncher):
       else:
         print "\n-> Checking the files"
         for iFile, fileName in enumerate(nanoFiles):
-          print fileName
-          if iFile%100 == 0:
-            print '     --> checked {}% of the files'.format(round(float(iFile)/len(nanoFiles)*100, 1))
+          if iFile%100 == 0:              print '     --> checked {}% of the files'.format(round(float(iFile)/len(nanoFiles)*100, 1))
+          elif iFile == len(nanoFiles)-1: print '     --> checked 100% of the files'
+
           rootFile = ROOT.TNetXNGFile.Open(fileName, 'r')
           if not rootFile: continue
           else:
@@ -81,6 +86,10 @@ class NanoMerger(NanoLauncher):
         print '\n-> Start of the merge'
         os.system(command)
 
+        if self.dobatch:
+          command_xrdcp = 'xrdcp -f merge.root root://t3dcachedb.psi.ch:1094/{}/{}'.format(subdir+outputdir, mergedName)
+          os.system(command_xrdcp)
+
         print '{}/{} created \n'.format(subdir+outputdir, mergedName)
 
 
@@ -88,7 +97,8 @@ class NanoMerger(NanoLauncher):
 
     print '\n---> Merging the different chunks'
 
-    nanoFiles = [f for f in glob.glob(locationSE+'/Chunk*/'+nanoName)]
+    nanoFilesPlain = [f for f in glob.glob(locationSE+'/Chunk*/'+nanoName)]
+    nanoFiles = map(lambda x: 'root://t3dcachedb.psi.ch:1094/'+x, nanoFilesPlain)
 
     # create the outputdir that will contain the merged file
     if not path.exists('{}/merged'.format(locationSE)):
@@ -102,18 +112,47 @@ class NanoMerger(NanoLauncher):
         filesValid.append(fileName)
 
     print '\n-> Start of the merge'
-    command = 'python haddnano.py {}/merged/{}'.format(locationSE, mergedName)
+    outputname = '{}/merged/{}'.format(locationSE, mergedName) if not self.dobatch else 'fullmerge.root'
+    command = 'python haddnano.py {}'.format(outputname)
     for iFile, fileName in enumerate(filesValid):
        command = command + ' {}'.format(fileName)
 
     os.system(command)
 
+    if self.dobatch:
+      command_xrdcp = 'xrdcp -f fullmerge.root root://t3dcachedb.psi.ch:1094/{}/merged/{}'.format(locationSE, mergedName)
+      os.system(command_xrdcp)
+
     print '{}/merged/{} created \n'.format(locationSE, mergedName)
 
     # clean
+    print 'cleaning'
     for f in glob.glob(locationSE+'/Chunk*/merged/'):
-      command_clean_file = 'rm -rf {}/bparknano.root'.format(f)
+      command_clean_file = 'rm -rf root://t3dcachedb.psi.ch:1094/{}/{}'.format(f, mergedName)
       os.system(command_clean_file)
+
+
+  def runMergingModule(self, location):
+
+    nanoName   = '/bparknano_nj*.root' if self.tag == None else '/bparknano_{}_nj*.root'.format(self.tag)
+    mergedName = 'bparknano.root' if self.tag == None else 'bparknano_{}.root'.format(self.tag)
+    outputdir  = '/merged'
+        
+    nanoName_tot   = 'merged/bparknano.root' if self.tag == None else 'merged/bparknano_{}.root'.format(self.tag)
+    mergedName_tot = 'bparknano.root' if self.tag == None else 'bparknano_{}.root'.format(self.tag)
+
+    # per chunk
+    self.doMerging(nanoName, mergedName, location, outputdir, True)
+
+    # inclusive
+    self.doChunkMerging(nanoName_tot, mergedName_tot, location)
+
+    if self.doflat:
+      nanoName_flat   = '/nanoFiles/flat/flat_bparknano_nj*.root' if self.tag == None else '/nanoFiles/flat/flat_bparknano_{}_nj*.root'.format(self.tag)
+      mergedName_flat = 'flat_bparknano.root' if self.tag == None else 'flat_bparknano_{}.root'.format(self.tag)
+      outputdir_flat  = '/nanoFiles/flat/merged'
+
+      self.doMerging(nanoName_flat, mergedName_flat, locationSE, outputdir_flat, False)
 
 
   def process(self):
@@ -122,13 +161,6 @@ class NanoMerger(NanoLauncher):
     print '---------------------------------'
 
     user      = os.environ["USER"]
-
-    nanoName   = '/bparknano_nj*.root' if self.tag == None else '/bparknano_{}_nj*.root'.format(self.tag)
-    mergedName = 'bparknano.root' if self.tag == None else 'bparknano_{}.root'.format(self.tag)
-    outputdir  = '/merged'
-        
-    nanoName_tot   = 'merged/bparknano.root' if self.tag == None else 'merged/bparknano_{}.root'.format(self.tag)
-    mergedName_tot = 'bparknano.root' if self.tag == None else 'bparknano_{}.root'.format(self.tag)
 
     if self.mcprivate:
       locationSE = '/pnfs/psi.ch/cms/trivcat/store/user/{}/BHNLsGen/{}/'.format(user, self.prodlabel)
@@ -140,27 +172,13 @@ class NanoMerger(NanoLauncher):
 
         print '\n --- Mass point: {} --- '.format(pointdir[pointdir.rfind('/')+1:len(pointdir)])
 
-        # per chunk
-        self.doMerging(nanoName, mergedName, pointdir+'/nanoFiles/', outputdir, True)
-
-        # inclusive
-        self.doChunkMerging(nanoName_tot, mergedName_tot, pointdir+'/nanoFiles/')
-  
-        if self.doflat:
-          nanoName_flat   = '/nanoFiles/flat/flat_bparknano_nj*.root' if self.tag == None else '/nanoFiles/flat/flat_bparknano_{}_nj*.root'.format(self.tag)
-          mergedName_flat = 'flat_bparknano.root' if self.tag == None else 'flat_bparknano_{}.root'.format(self.tag)
-          outputdir_flat  = '/nanoFiles/flat/merged'
-
-          self.doMerging(nanoName_flat, mergedName_flat, locationSE, outputdir_flat, False)
+        self.runMergingModule(pointdir+'/nanoFiles/')
 
     elif self.data or self.mccentral:
       locationSE = '/pnfs/psi.ch/cms/trivcat/store/user/{}/BHNLsGen/{}/{}'.format(user, 'data' if self.data else 'mc_central', self.prodlabel)
-  
-      # per chunk
-      self.doMerging(nanoName, mergedName, locationSE, outputdir, True)
 
-      # inclusive
-      self.doChunkMerging(nanoName_tot, mergedName_tot, locationSE)
+      self.runMergingModule(locationSE)
+  
 
 
 if __name__ == "__main__":
