@@ -61,23 +61,27 @@ class NanoMerger(NanoLauncher):
 
       command = 'python haddnano.py {}/{}'.format(subdir+outputdir, mergedName)
 
-      print "\n-> Checking the files"
-      for iFile, fileName in enumerate(nanoFiles):
-        print fileName
-        if iFile%100 == 0:
-          print '     --> checked {}% of the files'.format(round(float(iFile)/len(nanoFiles)*100, 1))
-        rootFile = ROOT.TNetXNGFile.Open(fileName, 'r')
-        if not rootFile: continue
-        else:
-          if cond:
-            if not rootFile.GetListOfKeys().Contains('Events'): continue
+      if len(nanoFiles) == 0: 
+        print 'no files of interest in this chunk'
 
-        command = command + ' {}'.format(fileName)
+      else:
+        print "\n-> Checking the files"
+        for iFile, fileName in enumerate(nanoFiles):
+          print fileName
+          if iFile%100 == 0:
+            print '     --> checked {}% of the files'.format(round(float(iFile)/len(nanoFiles)*100, 1))
+          rootFile = ROOT.TNetXNGFile.Open(fileName, 'r')
+          if not rootFile: continue
+          else:
+            if cond:
+              if not rootFile.GetListOfKeys().Contains('Events'): continue
 
-      print '\n-> Start of the merge'
-      os.system(command)
+          command = command + ' {}'.format(fileName)
 
-      print '{}/{} created \n'.format(subdir+outputdir, mergedName)
+        print '\n-> Start of the merge'
+        os.system(command)
+
+        print '{}/{} created \n'.format(subdir+outputdir, mergedName)
 
 
   def doChunkMerging(self, nanoName, mergedName, locationSE):
