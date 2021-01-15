@@ -107,12 +107,18 @@ class NanoProdManager(object):
   def fetchTime(self, logfile, key):
     if key == 'wallclock':
       command = 'grep  "Wallclock running time:" {}'.format(logfile)
-      output = subprocess.check_output(command, shell=True)
-      time = float(output[output.find('time:')+6:len(output)-2])
+      try:
+        output = subprocess.check_output(command, shell=True)
+        time = float(output[output.find('time:')+6:len(output)-2])
+      except:
+        time = 0
     if key == 'cpu':
       command = 'grep  "event loop Real/event" {}'.format(logfile)
-      output = subprocess.check_output(command, shell=True)
-      time = float(output[output.find('event =')+8:len(output)])
+      try:
+        output = subprocess.check_output(command, shell=True)
+        time = float(output[output.find('event =')+8:len(output)])
+      except:
+        time = 0
     return time
 
 
@@ -350,8 +356,8 @@ class NanoProdManager(object):
           if n_unprocessed_perchunk != 0:
             print 'number of idle jobs in this chunk       : {}'.format(n_unprocessed_perchunk)
           if self.dofetchtime:
-            print 'average wallclock time in this chunk    : {}min '.format(round(time_wallclock_perchunk/(n_good_perchunk*60), 1))
-            print 'average CPU time/event in this chunk    : {}s/event '.format(round(time_cpu_perchunk/n_good_perchunk, 3))
+            print 'average wallclock time in this chunk    : {}min '.format(round(time_wallclock_perchunk/(n_good_perchunk*60), 1) if n_good_perchunk != 0 else 0)
+            print 'average CPU time/event in this chunk    : {}s/event '.format(round(time_cpu_perchunk/n_good_perchunk, 3) if n_good_perchunk != 0 else 0)
 
         
         # resubmission
@@ -384,8 +390,8 @@ class NanoProdManager(object):
       print ' --> number of running jobs          : {}    {}%'.format(n_unfinished_perdir, round(n_unfinished_perdir/float(n_tot_perdir)*100, 2))
       print ' --> number of idle jobs             : {}    {}%'.format(n_unprocessed_perdir, round(n_unprocessed_perdir/float(n_tot_perdir)*100, 2))
       if self.dofetchtime:
-        print ' --> average wallclock time          : {}min '.format(round(time_wallclock_perdir/(n_good_perdir*60), 1))
-        print ' --> average CPU time/event          : {}s/event '.format(round(time_cpu_perdir/(n_good_perdir), 3))
+        print ' --> average wallclock time          : {}min '.format(round(time_wallclock_perdir/(n_good_perdir*60), 1) if n_good_perdir != 0 else 0)
+        print ' --> average CPU time/event          : {}s/event '.format(round(time_cpu_perdir/(n_good_perdir), 3) if n_good_perdir != 0 else 0)
       #if n_unstarted_chunk != 0:
       #  print ' --> number of yet unprocessed chunks: {}'.format(n_unstarted_chunk)
 
@@ -429,8 +435,8 @@ class NanoProdManager(object):
     if self.dofetchtime:
       print '\n'
       print ' Time summary: '
-      print '     - average wallclock time: {}min'.format(round(time_wallclock/(n_good*60), 1))
-      print '     - average CPU time/event: {}min/event'.format(round(time_cpu/n_good, 3))
+      print '     - average wallclock time: {}min'.format(round(time_wallclock/(n_good*60), 1) if n_good != 0 else 0)
+      print '     - average CPU time/event: {}s/event'.format(round(time_cpu/n_good, 3) if n_good != 0 else 0)
 
     print '\n'
     print '----------------------------------------------------------'
