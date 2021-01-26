@@ -115,6 +115,33 @@ else #isData
   else
     xrdcp bparknano.root root://t3dcachedb.psi.ch:1094/${1}/bparknano_${4}_nj$outIdx.root 
   fi
+
+  # run the ntupliser on top of the nanofile
+  if [ ${7} == 1 ] ; then
+    echo "creating directory for flat ntuples"
+    mkdir ${1}/flat
+
+    echo "sourcing environment"
+    source /cvmfs/sft.cern.ch/lcg/views/LCG_97python3/x86_64-centos7-gcc9-opt/setup.sh
+    echo "INFO: An environment making the use of RDataFrame possible has been loaded"
+    echo "      A standalone ROOT and python3 are going to be used"
+    echo "      Warnings at file opening about non-existing dictionaries are expected and harmless"
+
+    echo "running the ntupliser on top of the nanofile"
+    DATE_START_DUMP=`date +%s`
+    python nanoDumper.py  
+    DATE_END_DUMP=`date +%s`
+
+    runtime_dump=$((DATE_END_DUMP-DATE_START_DUMP))
+    echo "ntupliser ran in $runtime_dump s"
+
+    echo "copying the file"
+    if [ ${4} == 0 ] ; then
+      xrdcp flat_bparknano.root root://t3dcachedb.psi.ch:1094/${1}/flat/flat_bparknano_nj$outIdx.root
+    else
+      xrdcp flat_bparknano.root root://t3dcachedb.psi.ch:1094/${1}/flat/flat_bparknano_${4}_nj$outIdx.root
+    fi
+  fi
 fi
 
 echo "content of the workdir"
