@@ -26,14 +26,14 @@ if [ ${9} == 0 ] ; then
   cp ${8} $workdir/filelist.txt
 else # different treatment in case of resubmission
   cp -r ${8}* $workdir
-  rm ${8}*$SLURM_ARRAY_TASK_ID*
+  #rm ${8}*$SLURM_ARRAY_TASK_ID*
 fi
 
 # copy the ntupliser 
 if [ ${7} == 1 ] ; then
   echo "copying ntupliser to workdir"
-  cp simple_tester.py $workdir 
-  cp flat_tree_branches.py $workdir
+  cp ../python/dumper/nanoDumper.py $workdir 
+  cp ../python/dumper/myBranches.py $workdir 
 fi
 
 # index of the output file
@@ -79,8 +79,19 @@ if [ ${5} == 1 ] ; then #isMC
     echo "creating directory for flat ntuples"
     mkdir ${1}/flat
 
+    echo "sourcing environment"
+    source /cvmfs/sft.cern.ch/lcg/views/LCG_97python3/x86_64-centos7-gcc9-opt/setup.sh
+    echo "INFO: An environment making the use of RDataFrame possible has been loaded"
+    echo "      A standalone ROOT and python3 are going to be used"
+    echo "      Warnings at file opening about non-existing dictionaries are expected and harmless"
+
     echo "running the ntupliser on top of the nanofile"
-    python simple_tester.py  
+    DATE_START_DUMP=`date +%s`
+    python nanoDumper.py  
+    DATE_END_DUMP=`date +%s`
+
+    runtime_dump=$((DATE_END_DUMP-DATE_START_DUMP))
+    echo "ntupliser ran in $runtime_dump s"
 
     echo "copying the file"
     if [ ${4} == 0 ] ; then
