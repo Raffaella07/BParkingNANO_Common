@@ -135,8 +135,6 @@ process.nanoAOD_KMuMu_step  = cms.Path(process.nanoSequence + process.nanoBKMuMu
 if options.isMC:
     from PhysicsTools.BParkingNano.nanoBPark_cff import nanoAOD_customizeMC
     nanoAOD_customizeMC(process, ancestor_particles=[511, 521, 531, 541, 9900015]) 
-    print('CUSTOMISING genWeightsTable')
-    process.genWeightsTable.debug = cms.untracked.bool(True)
 
 process.endjob_step = cms.EndPath(process.endOfProcess)
 process.FEVTDEBUGHLToutput_step = cms.EndPath(process.FEVTDEBUGHLToutput)
