@@ -106,11 +106,13 @@ process.NANOAODoutput = cms.OutputModule("NanoAODOutputModule",
     fileName = outputFileNANO if not options.outFile else cms.untracked.string('file:{}'.format(options.outFile)),
     outputCommands = cms.untracked.vstring(
         'drop *',
-        "keep nanoaodFlatTable_*Table_*_*",     # event data
-        "keep nanoaodUniqueString_nanoMetadata_*_*",   # basic metadata
+        'keep nanoaodFlatTable_*Table_*_*',     # event data
+        'keep nanoaodUniqueString_nanoMetadata_*_*',   # basic metadata
+        'keep nanoaodMergeableCounterTable_*Table_*_*',  # includes gentables
     )
 
 )
+
 
 # Additional output definition
 
@@ -133,6 +135,8 @@ process.nanoAOD_KMuMu_step  = cms.Path(process.nanoSequence + process.nanoBKMuMu
 if options.isMC:
     from PhysicsTools.BParkingNano.nanoBPark_cff import nanoAOD_customizeMC
     nanoAOD_customizeMC(process, ancestor_particles=[511, 521, 531, 541, 9900015]) 
+    print('CUSTOMISING genWeightsTable')
+    process.genWeightsTable.debug = cms.untracked.bool(True)
 
 process.endjob_step = cms.EndPath(process.endOfProcess)
 process.FEVTDEBUGHLToutput_step = cms.EndPath(process.FEVTDEBUGHLToutput)
