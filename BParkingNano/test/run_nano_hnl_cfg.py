@@ -106,11 +106,13 @@ process.NANOAODoutput = cms.OutputModule("NanoAODOutputModule",
     fileName = outputFileNANO if not options.outFile else cms.untracked.string('file:{}'.format(options.outFile)),
     outputCommands = cms.untracked.vstring(
         'drop *',
-        "keep nanoaodFlatTable_*Table_*_*",     # event data
-        "keep nanoaodUniqueString_nanoMetadata_*_*",   # basic metadata
+        'keep nanoaodFlatTable_*Table_*_*',     # event data
+        'keep nanoaodUniqueString_nanoMetadata_*_*',   # basic metadata
+        'keep nanoaodMergeableCounterTable_*Table_*_*',  # includes gentables
     )
 
 )
+
 
 # Additional output definition
 
