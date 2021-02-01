@@ -32,8 +32,11 @@ fi
 # copy the ntupliser 
 if [ ${7} == 1 ] ; then
   echo "copying ntupliser to workdir"
-  cp ../python/dumper/nanoDumper.py $workdir 
-  cp ../python/dumper/myBranches.py $workdir 
+  cp ../plugins/dumper/starter.C $workdir 
+  cp ../plugins/dumper/NanoDumper.C $workdir 
+  cp ../plugins/dumper/NanoDumper.h $workdir 
+  cp ../plugins/dumper/NanoRunDumper.C $workdir 
+  cp ../plugins/dumper/NanoRunDumper.h $workdir 
 fi
 
 # index of the output file
@@ -58,7 +61,7 @@ if [ ${5} == 1 ] ; then #isMC
     cmsRun run_nano_hnl_cfg.py inputFile=$inputFilename outputFile="bparknano.root" isMC=True
     DATE_END=`date +%s`
     echo "finished running nano step"
-  else
+  else # central MC
     echo "going to run nano step on "$inputFilename
     DATE_START=`date +%s`
     cmsRun run_nano_hnl_cfg.py inputFiles=$inputFilename outputFile="bparknano.root" isMC=True
@@ -73,25 +76,18 @@ if [ ${5} == 1 ] ; then #isMC
     xrdcp bparknano.root root://t3dcachedb.psi.ch:1094/${1}/bparknano_${4}_nj$outIdx.root 
   fi
 
-
   # run the ntupliser on top of the nanofile
   if [ ${7} == 1 ] ; then
     echo "creating directory for flat ntuples"
     mkdir ${1}/flat
 
-    echo "sourcing environment"
-    source /cvmfs/sft.cern.ch/lcg/views/LCG_97python3/x86_64-centos7-gcc9-opt/setup.sh
-    echo "INFO: An environment making the use of RDataFrame possible has been loaded"
-    echo "      A standalone ROOT and python3 are going to be used"
-    echo "      Warnings at file opening about non-existing dictionaries are expected and harmless"
-
     echo "running the ntupliser on top of the nanofile"
     DATE_START_DUMP=`date +%s`
-    python nanoDumper.py  
+    root -l -q "starter.C+(\"true\")" 
     DATE_END_DUMP=`date +%s`
 
     runtime_dump=$((DATE_END_DUMP-DATE_START_DUMP))
-    echo "ntupliser ran in $runtime_dump s"
+    echo "ntupliser took $runtime_dump s to run"
 
     echo "copying the file"
     if [ ${4} == 0 ] ; then
@@ -121,19 +117,13 @@ else #isData
     echo "creating directory for flat ntuples"
     mkdir ${1}/flat
 
-    echo "sourcing environment"
-    source /cvmfs/sft.cern.ch/lcg/views/LCG_97python3/x86_64-centos7-gcc9-opt/setup.sh
-    echo "INFO: An environment making the use of RDataFrame possible has been loaded"
-    echo "      A standalone ROOT and python3 are going to be used"
-    echo "      Warnings at file opening about non-existing dictionaries are expected and harmless"
-
     echo "running the ntupliser on top of the nanofile"
     DATE_START_DUMP=`date +%s`
-    python nanoDumper.py  
+    root -l -q "starter.C+(\"false\")" 
     DATE_END_DUMP=`date +%s`
 
     runtime_dump=$((DATE_END_DUMP-DATE_START_DUMP))
-    echo "ntupliser ran in $runtime_dump s"
+    echo "ntupliser took $runtime_dump s to run"
 
     echo "copying the file"
     if [ ${4} == 0 ] ; then
