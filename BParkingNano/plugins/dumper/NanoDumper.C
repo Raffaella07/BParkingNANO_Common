@@ -324,7 +324,7 @@ Bool_t NanoDumper::Process(Long64_t entry)
   //
   // The return value is currently not used.
 
-  fReader.SetEntry(entry);
+  fReader.SetLocalEntry(entry);
   //cout << endl << "--- Entry " << entry << " ---" << endl;
 
   // number of candidates in the event
