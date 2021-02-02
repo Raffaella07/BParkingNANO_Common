@@ -28,7 +28,6 @@ def getOptions():
 
 
 def checkParser(opt):
-
   if opt.pl==None:
     raise RuntimeError('Please indicate the production label: for --mcprivate, it has to correspond to the label of the miniAODl (eg. V01_n9000000_njt300)')
 
@@ -167,16 +166,27 @@ class NanoLauncher(object):
     return filename 
 
 
-  def writeMergerSubmitter(self, label):
+  def writeMergerSubmitter(self, label, filetype):
     # defining the command
     type_ = 'mcprivate' if self.mcprivate else 'data'
-    prodlabel = self.prodlabel if self.mcprivate else self.prodlabel # to modify
+
+    prodlabel = ''
+    if self.mcprivate: prodlabel = self.prodlabel
+    elif self.mccentral: prodlabel = self.getMCLabel() + '_' + self.prodlabel 
+    elif self.data: prodlabel = self.getDataLabel() + '_' + self.prodlabel 
+
     command = 'python nanoMerger.py --dobatch --pl {pl} --{tp}'.format(
         pl = prodlabel,
         tp = type_,
         )
     if self.tag != None:
       command += ' --tag {}'.format(self.tag)
+    if filetype == 'nano': command += ' --donano' 
+    else: command += ' --doflat'
+    
+    if self.mcprivate: command += ' --mcprivate'
+    if self.mccentral: command += ' --mccentral'
+    if self.data: command += ' --data'
     # add for flat
 
     # defining the workdir
@@ -246,11 +256,13 @@ class NanoLauncher(object):
       print '       ---> (dependency)' 
       print '            {}'.format(job_dump)
 
+    return self.getJobId(job_dump)
 
-  def launchMerger(self, logdir, label, jobIds):
-    self.writeMergerSubmitter(label)
-    command_merge = 'sbatch -p wn --account=t3 -o {ld}/mergerstep.log -e {ld}/mergerstep_njmerge.log --job-name=merger_{pl} --time=01:00:00 --dependency=afterany:{jobid} submitter_merger.sh'.format(
-    #command_merge = 'sbatch -p quick --account=t3 -o {ld}/nanostep_njmerge.log -e {ld}/nanostep_njmerge.log --job-name=merger_{pl} --dependency=afterany:{jobid} submitter_merger.sh'.format(
+
+  def launchMerger(self, logdir, label, jobIds, filetype):
+    self.writeMergerSubmitter(label, filetype)
+    #command_merge = 'sbatch -p wn --account=t3 -o {ld}/mergerstep.log -e {ld}/mergerstep_njmerge.log --job-name=merger_{pl} --time=01:00:00 --dependency=afterany:{jobid} submitter_merger.sh'.format(
+    command_merge = 'sbatch -p quick --account=t3 -o {ld}/mergerstep.log -e {ld}/mergerstep.log --job-name=merger_{pl} --dependency=afterany:{jobid} submitter_merger.sh'.format(
       ld    = logdir,
       pl    = label,
       jobid = self.getJobIdsList(jobIds),
@@ -289,7 +301,8 @@ class NanoLauncher(object):
         filelistname = self.writeFileList(point)
 
         # ids of the launched jobs, needed for dependency of the merger
-        jobIds = []
+        nano_jobIds = []
+        flat_jobIds = []
 
         # loop on the files (containing at most 750 samples) 
         for iFile, filelist in enumerate(glob.glob('{}*.txt'.format(filelistname))):
@@ -314,22 +327,29 @@ class NanoLauncher(object):
           label = self.prodlabel + '_' + point if self.tag == None else self.prodlabel + '_' + point + '_' +self.tag
           label += '_Chunk{}_n{}'.format(iFile, self.getSize(filelist))
 
-          jobId = -99
+          nano_jobId = -99
           if self.donano:
-            jobId = self.launchNano(self.getSize(filelist), outputdir, logdir, filelist, label)
+            nano_jobId = self.launchNano(self.getSize(filelist), outputdir, logdir, filelist, label)
+
+          if self.domerge:
+            nano_jobIds.append(nano_jobId)
+
+            if iFile == len(glob.glob('{}*.txt'.format(filelistname)))-1:
+              self.launchMerger(logdir, label, nano_jobIds)
 
           if self.doflat:
             flat_outputdir = outputdir + '/flat'
             if not path.exists(flat_outputdir):
               os.system('mkdir -p {}'.format(flat_outputdir))
 
-            self.launchDumper(outputdir, logdir, label, jobId)
+            flat_jobId = self.launchDumper(outputdir, logdir, label, nano_jobId)
 
-          #if self.domerge:
-          #  jobIds.append(jobId)
+            # merging of flat files happens automatically
+            flat_jobIds.append(flat_jobId)
 
-          #  if iFile == len(glob.glob('{}*.txt'.format(filelistname)))-1:
-          #    self.launchMerger(logdir, label, jobIds)
+            if iFile == len(glob.glob('{}*.txt'.format(filelistname)))-1:
+              self.launchMerger(logdir, label, flat_jobIds, 'flat')
+
 
     
     elif self.data or self.mccentral:
@@ -343,7 +363,8 @@ class NanoLauncher(object):
       ds_label = self.getDataLabel() if self.data else self.getMCLabel()
 
       # ids of the launched jobs, needed for dependency of the merger
-      jobIds = []
+      nano_jobIds = []
+      flat_jobIds = []
 
       # loop on the files (containing at most 750 samples) 
       for iFile, filelist in enumerate(glob.glob('{}*.txt'.format(filelistname))):
@@ -362,18 +383,29 @@ class NanoLauncher(object):
           
         label = '{}_{}_Chunk{}_n{}'.format(ds_label, self.prodlabel, iFile, self.getSize(filelist))
 
-        jobId = -99
+        nano_jobId = -99
         if self.donano:
-          jobId = self.launchNano(self.getSize(filelist), outputdir, logdir, filelist, label)
-
-        if self.doflat:
-          self.launchDumper(outputdir, logdir, label, jobId)
+          nano_jobId = self.launchNano(self.getSize(filelist), outputdir, logdir, filelist, label)
 
         if self.domerge:
-          jobIds.append(jobId)
+          nano_jobIds.append(nano_jobId)
 
           if iFile == len(glob.glob('{}*.txt'.format(filelistname)))-1:
-            self.launchMerger(logdir, label, jobIds)
+            self.launchMerger(logdir, label, nano_jobIds, 'nano')
+
+        if self.doflat:
+          flat_outputdir = outputdir + '/flat'
+          if not path.exists(flat_outputdir):
+            os.system('mkdir -p {}'.format(flat_outputdir))
+
+          flat_jobId = self.launchDumper(outputdir, logdir, label, nano_jobId)
+          
+          # merging of flat files happens automatically
+          flat_jobIds.append(flat_jobId)
+
+          if iFile == len(glob.glob('{}*.txt'.format(filelistname)))-1:
+            self.launchMerger(logdir, label, flat_jobIds, 'flat')
+
 
 
     print '\n-> Submission completed' 
