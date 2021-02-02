@@ -8,9 +8,8 @@
 # ${4}:  tag
 # ${5}:  isMC
 # ${6}:  isRemote
-# ${7}:  doflat
-# ${8}:  filelist
-# ${9}:  isResubmission (false if first launch)
+# ${7}:  filelist
+# ${8}:  isResubmission (false if first launch)
 #--------------------
 
 
@@ -22,21 +21,11 @@ echo "copying driver to workdir"
 cp run_nano_hnl_cfg.py $workdir
 
 echo "copying the file list(-s) to workdir"
-if [ ${9} == 0 ] ; then
-  cp ${8} $workdir/filelist.txt
+if [ ${8} == 0 ] ; then
+  cp ${7} $workdir/filelist.txt
 else # different treatment in case of resubmission
-  cp -r ${8}* $workdir
-  #rm ${8}*$SLURM_ARRAY_TASK_ID*
-fi
-
-# copy the ntupliser 
-if [ ${7} == 1 ] ; then
-  echo "copying ntupliser to workdir"
-  cp ../plugins/dumper/starter.C $workdir 
-  cp ../plugins/dumper/NanoDumper.C $workdir 
-  cp ../plugins/dumper/NanoDumper.h $workdir 
-  cp ../plugins/dumper/NanoRunDumper.C $workdir 
-  cp ../plugins/dumper/NanoRunDumper.h $workdir 
+  cp -r ${7}* $workdir
+  #rm ${7}*$SLURM_ARRAY_TASK_ID*
 fi
 
 # index of the output file
@@ -46,7 +35,7 @@ echo "index of the outputfile: "$outIdx
 cd $workdir
 
 inputFilename=''
-if [ ${9} == 0 ] ; then
+if [ ${8} == 0 ] ; then
   inputFilename=$(sed $SLURM_ARRAY_TASK_ID'!d' filelist.txt)
 else # different treatment in case of resubmission
   inputFilename=$(sed '1!d' *nj$SLURM_ARRAY_TASK_ID.txt)
@@ -76,27 +65,6 @@ if [ ${5} == 1 ] ; then #isMC
     xrdcp bparknano.root root://t3dcachedb.psi.ch:1094/${1}/bparknano_${4}_nj$outIdx.root 
   fi
 
-  # run the ntupliser on top of the nanofile
-  if [ ${7} == 1 ] ; then
-    echo "creating directory for flat ntuples"
-    mkdir ${1}/flat
-
-    echo "running the ntupliser on top of the nanofile"
-    DATE_START_DUMP=`date +%s`
-    root -l -q "starter.C+(\"true\")" 
-    DATE_END_DUMP=`date +%s`
-
-    runtime_dump=$((DATE_END_DUMP-DATE_START_DUMP))
-    echo "ntupliser took $runtime_dump s to run"
-
-    echo "copying the file"
-    if [ ${4} == 0 ] ; then
-      xrdcp flat_bparknano.root root://t3dcachedb.psi.ch:1094/${1}/flat/flat_bparknano_nj$outIdx.root
-    else
-      xrdcp flat_bparknano.root root://t3dcachedb.psi.ch:1094/${1}/flat/flat_bparknano_${4}_nj$outIdx.root
-    fi
-  fi
-
 else #isData
 
   echo "going to run nano step on "$inputFilename
@@ -110,27 +78,6 @@ else #isData
     xrdcp bparknano.root root://t3dcachedb.psi.ch:1094/${1}/bparknano_nj$outIdx.root 
   else
     xrdcp bparknano.root root://t3dcachedb.psi.ch:1094/${1}/bparknano_${4}_nj$outIdx.root 
-  fi
-
-  # run the ntupliser on top of the nanofile
-  if [ ${7} == 1 ] ; then
-    echo "creating directory for flat ntuples"
-    mkdir ${1}/flat
-
-    echo "running the ntupliser on top of the nanofile"
-    DATE_START_DUMP=`date +%s`
-    root -l -q "starter.C+(\"false\")" 
-    DATE_END_DUMP=`date +%s`
-
-    runtime_dump=$((DATE_END_DUMP-DATE_START_DUMP))
-    echo "ntupliser took $runtime_dump s to run"
-
-    echo "copying the file"
-    if [ ${4} == 0 ] ; then
-      xrdcp flat_bparknano.root root://t3dcachedb.psi.ch:1094/${1}/flat/flat_bparknano_nj$outIdx.root
-    else
-      xrdcp flat_bparknano.root root://t3dcachedb.psi.ch:1094/${1}/flat/flat_bparknano_${4}_nj$outIdx.root
-    fi
   fi
 fi
 

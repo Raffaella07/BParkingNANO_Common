@@ -15,12 +15,13 @@ def getOptions():
   parser.add_argument('--tag'     , type=str, dest='tag'      , help='[optional] tag to be added on the outputfile name'                                   , default=None)
   parser.add_argument('--maxfiles', type=str, dest='maxfiles' , help='[optional] maximum number of files to process'                                       , default=None)
   parser.add_argument('--user'    , type=str, dest='user'     , help='[optional-mcprivate] specify username where the miniAOD files are stored'            , default=os.environ["USER"])
-  parser.add_argument('--mcprivate'         , dest='mcprivate', help='run the BParking nano tool on a private MC sample'               , action='store_true', default=False)
-  parser.add_argument('--mccentral'         , dest='mccentral', help='run the BParking nano tool on a central MC sample'               , action='store_true', default=False)
-  parser.add_argument('--data'              , dest='data'     , help='run the BParking nano tool on a data sample'                     , action='store_true', default=False)
-  parser.add_argument('--doflat'            , dest='doflat'   , help='[optional-mcprivate] launch the ntupliser on top of the nanofile', action='store_true', default=False)
-  parser.add_argument('--domerge'           , dest='domerge'  , help='[optional] merge the nanofile steps'                             , action='store_true', default=False)
-  parser.add_argument('--docompile'         , dest='docompile', help='[optional] compile the full BParkingNano tool'                   , action='store_true', default=False)
+  parser.add_argument('--mcprivate'         , dest='mcprivate', help='run the BParking nano tool on a private MC sample'              , action='store_true', default=False)
+  parser.add_argument('--mccentral'         , dest='mccentral', help='run the BParking nano tool on a central MC sample'              , action='store_true', default=False)
+  parser.add_argument('--data'              , dest='data'     , help='run the BParking nano tool on a data sample'                    , action='store_true', default=False)
+  parser.add_argument('--donano'            , dest='donano'   , help='launch the nano tool on top of the minifile'                    , action='store_true', default=False)
+  parser.add_argument('--doflat'            , dest='doflat'   , help='launch the ntupliser on top of the nanofile'                    , action='store_true', default=False)
+  parser.add_argument('--domerge'           , dest='domerge'  , help='[optional] merge the nanofile steps'                            , action='store_true', default=False)
+  parser.add_argument('--docompile'         , dest='docompile', help='[optional] compile the full BParkingNano tool'                  , action='store_true', default=False)
   
   # add domerge, dofullmerge? 
   return parser.parse_args()
@@ -33,6 +34,9 @@ def checkParser(opt):
 
   if opt.data==True and opt.ds==None:
     raise RuntimeError('You are running on data, please indicate the dataset with --ds <dataset>')
+
+  if opt.donano==False and opt.doflat==False:
+    raise RuntimeError('Please indicate if you want to run the nano tool (--donano) and/or the ntupliser (--doflat)')
 
   if opt.mcprivate==False and opt.mccentral==False and opt.data==False:
     raise RuntimeError('Please indicate if you want to run on data or MC by adding either --data or--mcprivate or --mccentral to the command line')
@@ -51,6 +55,7 @@ class NanoLauncher(object):
     self.mccentral = vars(opt)['mccentral']
     self.data      = vars(opt)['data']
     self.user      = vars(opt)["user"]
+    self.donano    = vars(opt)["donano"]
     self.doflat    = vars(opt)["doflat"]
     self.domerge   = vars(opt)["domerge"]
     self.docompile = vars(opt)["docompile"]
@@ -107,7 +112,6 @@ class NanoLauncher(object):
 
 
   def writeFileList(self, point=None):
-
     if not path.exists('./files'):
       os.system('mkdir ./files') 
 
@@ -153,9 +157,7 @@ class NanoLauncher(object):
 
     # slurm cannot deal with too large arrays
     # -> submit job arrays of size 750
-    #if self.getSize(filename + '.txt') > 750:
     if self.getSize(filename + '.txt') > 750:
-      #command_split = 'split -l 750 {fn}.txt {fn}_ --additional-suffix=.txt'.format(fn=filename)
       command_split = 'split -l 750 {fn}.txt {fn}_ --additional-suffix=.txt'.format(fn=filename)
       os.system(command_split)
       os.system('rm {fn}.txt'.format(fn=filename))
@@ -165,7 +167,7 @@ class NanoLauncher(object):
     return filename 
 
 
-  def writeSubmitterMerger(self, label):
+  def writeMergerSubmitter(self, label):
     # defining the command
     type_ = 'mcprivate' if self.mcprivate else 'data'
     prodlabel = self.prodlabel if self.mcprivate else self.prodlabel # to modify
@@ -206,9 +208,8 @@ class NanoLauncher(object):
 
 
   def launchNano(self, nNano, outputdir, logdir, filelist, label):
-    #command = 'sbatch -p quick --account=t3 --time==00:50:00 -o logs/{pl}/nanostep_nj%a.log -e logs/{pl}/nanostep_nj%a.log --job-name=nanostep_nj%a_{pl} --array {ar} submitter.sh {outdir} {usr} {pl} {tag} {flt}'.format(
-    command = 'sbatch -p wn --account=t3 -o {ld}/nanostep_nj%a.log -e {ld}/nanostep_nj%a.log --job-name=nanostep_nj%a_{pl} --array {ar} --time=03:00:00 submitter.sh {outdir} {usr} {pl} {tag} {isMC} {rmt} {flt} {lst} 0'.format(
-    #command = 'sbatch -p quick --account=t3 -o {ld}/nanostep_nj%a.log -e {ld}/nanostep_nj%a.log --job-name=nanostep_nj%a_{pl} --array {ar} submitter.sh {outdir} {usr} {pl} {tag} {isMC} {rmt} {flt} {lst} 0'.format(
+    #command = 'sbatch -p wn --account=t3 -o {ld}/nanostep_nj%a.log -e {ld}/nanostep_nj%a.log --job-name=nanostep_nj%a_{pl} --array {ar} --time=03:00:00 submitter.sh {outdir} {usr} {pl} {tag} {isMC} {rmt} {lst} 0'.format(
+    command = 'sbatch -p quick --account=t3 -o {ld}/nanostep_nj%a.log -e {ld}/nanostep_nj%a.log --job-name=nanostep_nj%a_{pl} --array {ar} submitter.sh {outdir} {usr} {pl} {tag} {isMC} {rmt} {lst} 0'.format(
       ld      = logdir,
       pl      = label,
       ar      = '1-{}'.format(nNano),
@@ -217,7 +218,6 @@ class NanoLauncher(object):
       tag     = 0 if self.tag == None else self.tag,
       isMC    = 1 if self.mcprivate or self.mccentral else 0,
       rmt     = 0 if self.mcprivate else 1,
-      flt     = 1 if self.doflat == True else 0,
       lst     = filelist
     )
 
@@ -227,9 +227,29 @@ class NanoLauncher(object):
     return self.getJobId(job)
 
 
+  def launchDumper(self, outputdir, logdir, label, jobId):
+    #command = 'sbatch -p wn --account=t3 -o {ld}/dumperstep.log -e {ld}/dumperstep.log --job-name=dumperstep_{pl} --time=03:00:00 submitter_dumper.sh {outdir} {usr} {pl} {tag} {isMC}'.format(
+    command = 'sbatch -p quick --account=t3 -o {ld}/dumperstep.log -e {ld}/dumperstep.log --job-name=dumperstep_{pl} {dp} submitter_dumper.sh {outdir} {usr} {pl} {tag} {isMC}'.format(
+      ld      = logdir,
+      pl      = label,
+      dp      = '--dependency=afterany:{}'.format(jobId) if jobId != -99 else '',
+      outdir  = outputdir,
+      usr     = os.environ["USER"], 
+      tag     = 0 if self.tag == None else self.tag,
+      isMC    = 1 if self.mcprivate or self.mccentral else 0,
+    )
+    
+    job_dump = subprocess.check_output(command, shell=True)
+    if jobId == -99:
+      print '\n       ---> {}'.format(job_dump)
+    else:
+      print '       ---> (dependency)' 
+      print '            {}'.format(job_dump)
+
+
   def launchMerger(self, logdir, label, jobIds):
-    self.writeSubmitterMerger(label)
-    command_merge = 'sbatch -p wn --account=t3 -o {ld}/nanostep_njmerge.log -e {ld}/nanostep_njmerge.log --job-name=merger_{pl} --time=01:00:00 --dependency=afterany:{jobid} submitter_merger.sh'.format(
+    self.writeMergerSubmitter(label)
+    command_merge = 'sbatch -p wn --account=t3 -o {ld}/mergerstep.log -e {ld}/mergerstep_njmerge.log --job-name=merger_{pl} --time=01:00:00 --dependency=afterany:{jobid} submitter_merger.sh'.format(
     #command_merge = 'sbatch -p quick --account=t3 -o {ld}/nanostep_njmerge.log -e {ld}/nanostep_njmerge.log --job-name=merger_{pl} --dependency=afterany:{jobid} submitter_merger.sh'.format(
       ld    = logdir,
       pl    = label,
@@ -244,17 +264,14 @@ class NanoLauncher(object):
 
 
   def process(self):
-  
     if self.docompile:
       print '-> Compiling'
       self.compile()
-    
 
     print '\n------------'
     print ' Processing NanoLauncher on production {} '.format(self.prodlabel if self.mcprivate else self.dataset)
     print ' --> on the batch'
     print '------------'
-
 
     if self.mcprivate:
       locationSE = '/pnfs/psi.ch/cms/trivcat/store/user/{}/BHNLsGen/{}/'.format(self.user, self.prodlabel)
@@ -297,13 +314,22 @@ class NanoLauncher(object):
           label = self.prodlabel + '_' + point if self.tag == None else self.prodlabel + '_' + point + '_' +self.tag
           label += '_Chunk{}_n{}'.format(iFile, self.getSize(filelist))
 
-          jobId = self.launchNano(self.getSize(filelist), outputdir, logdir, filelist, label)
+          jobId = -99
+          if self.donano:
+            jobId = self.launchNano(self.getSize(filelist), outputdir, logdir, filelist, label)
 
-          if self.domerge:
-            jobIds.append(jobId)
+          if self.doflat:
+            flat_outputdir = outputdir + '/flat'
+            if not path.exists(flat_outputdir):
+              os.system('mkdir -p {}'.format(flat_outputdir))
 
-            if iFile == len(glob.glob('{}*.txt'.format(filelistname)))-1:
-              self.launchMerger(logdir, label, jobIds)
+            self.launchDumper(outputdir, logdir, label, jobId)
+
+          #if self.domerge:
+          #  jobIds.append(jobId)
+
+          #  if iFile == len(glob.glob('{}*.txt'.format(filelistname)))-1:
+          #    self.launchMerger(logdir, label, jobIds)
 
     
     elif self.data or self.mccentral:
@@ -336,7 +362,12 @@ class NanoLauncher(object):
           
         label = '{}_{}_Chunk{}_n{}'.format(ds_label, self.prodlabel, iFile, self.getSize(filelist))
 
-        jobId = self.launchNano(self.getSize(filelist), outputdir, logdir, filelist, label)
+        jobId = -99
+        if self.donano:
+          jobId = self.launchNano(self.getSize(filelist), outputdir, logdir, filelist, label)
+
+        if self.doflat:
+          self.launchDumper(outputdir, logdir, label, jobId)
 
         if self.domerge:
           jobIds.append(jobId)
