@@ -58,13 +58,6 @@ if [ ${5} == 1 ] ; then #isMC
     echo "finished running nano step"
   fi
 
-  echo "copying the file"
-  if [ ${4} == 0 ] ; then
-    xrdcp bparknano.root root://t3dcachedb.psi.ch:1094/${1}/bparknano_nj$outIdx.root 
-  else
-    xrdcp bparknano.root root://t3dcachedb.psi.ch:1094/${1}/bparknano_${4}_nj$outIdx.root 
-  fi
-
 else #isData
 
   echo "going to run nano step on "$inputFilename
@@ -73,12 +66,13 @@ else #isData
   DATE_END=`date +%s`
   echo "finished running nano step"
 
-  echo "copying the file"
-  if [ ${4} == 0 ] ; then
-    xrdcp bparknano.root root://t3dcachedb.psi.ch:1094/${1}/bparknano_nj$outIdx.root 
-  else
-    xrdcp bparknano.root root://t3dcachedb.psi.ch:1094/${1}/bparknano_${4}_nj$outIdx.root 
-  fi
+fi
+
+echo "copying the file"
+if [ ${4} == 0 ] ; then
+  xrdcp bparknano.root root://t3dcachedb.psi.ch:1094/${1}/bparknano_nj$outIdx.root 
+else
+  xrdcp bparknano.root root://t3dcachedb.psi.ch:1094/${1}/bparknano_${4}_nj$outIdx.root 
 fi
 
 echo "content of the workdir"
