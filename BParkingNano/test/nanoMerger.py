@@ -10,20 +10,23 @@ from nanoLauncher import NanoLauncher
 def getOptions():
   from argparse import ArgumentParser
   parser = ArgumentParser(description='Script to merge the nanoAOD files resulting from a multijob production', add_help=True)
-  parser.add_argument('--pl' , type=str, dest='pl'       , help='label of the sample filei, e.g ParkingBPH4_Run2018B_V00'                     , default='V01_n9000000_njt300')
-  parser.add_argument('--tag', type=str, dest='tag'      , help='[optional] tag to be added on the outputfile name'                           , default=None)
-  parser.add_argument('--mcprivate'    , dest='mcprivate', help='run the BParking nano tool on a private MC sample'      , action='store_true', default=False)
-  parser.add_argument('--mccentral'    , dest='mccentral', help='run the BParking nano tool on a central MC sample'      , action='store_true', default=False)
-  parser.add_argument('--data'         , dest='data'     , help='run the BParking nano tool on a data sample'            , action='store_true', default=False)
-  parser.add_argument('--doflat'       , dest='doflat'   , help='merge as well the files coming out of the truth-mathing', action='store_true', default=False)
-  parser.add_argument('--dobatch'      , dest='dobatch'  , help='to be turned on if running the script on the batch'     , action='store_true', default=False)
+  parser.add_argument('--pl' , type=str, dest='pl'       , help='label of the sample filei, e.g ParkingBPH4_Run2018B_V00'                , default='V01_n9000000_njt300')
+  parser.add_argument('--tag', type=str, dest='tag'      , help='[optional] tag to be added on the outputfile name'                      , default=None)
+  parser.add_argument('--mcprivate'    , dest='mcprivate', help='run the BParking nano tool on a private MC sample' , action='store_true', default=False)
+  parser.add_argument('--mccentral'    , dest='mccentral', help='run the BParking nano tool on a central MC sample' , action='store_true', default=False)
+  parser.add_argument('--data'         , dest='data'     , help='run the BParking nano tool on a data sample'       , action='store_true', default=False)
+  parser.add_argument('--donano'       , dest='donano'   , help='merge nano files'                                  , action='store_true', default=False)
+  parser.add_argument('--doflat'       , dest='doflat'   , help='merge flat files'                                  , action='store_true', default=False)
+  parser.add_argument('--dobatch'      , dest='dobatch'  , help='to be turned on if running the script on the batch', action='store_true', default=False)
   return parser.parse_args()
 
 
 def checkParser(opt):
-
   if opt.pl==None:
     raise RuntimeError('Please indicate the production label of the nanoAOD production')
+
+  if opt.donano==False and opt.doflat==False:
+    raise RuntimeError('Please indicate if you want to run the nano tool (--donano) and/or the ntupliser (--doflat)')
 
   if opt.mcprivate==False and opt.mccentral==False and opt.data==False:
     raise RuntimeError('Please indicate if you want to run on data or MC by adding either --data or--mcprivate or --mccentral to the command line')
@@ -39,12 +42,12 @@ class NanoMerger(NanoLauncher):
     self.mcprivate = vars(opt)['mcprivate']
     self.mccentral = vars(opt)['mccentral']
     self.data      = vars(opt)['data']
+    self.donano    = vars(opt)["donano"]
     self.doflat    = vars(opt)["doflat"]
     self.dobatch   = vars(opt)["dobatch"]
 
 
   def doMerging(self, nanoName, mergedName, locationSE, outputdir, cond):
-
     print '\n-> Getting the different subdirectories (chunk/signal points)'
     subdirs = [f for f in glob.glob(locationSE+'/*')]
 
@@ -77,9 +80,7 @@ class NanoMerger(NanoLauncher):
 
           rootFile = ROOT.TNetXNGFile.Open(fileName, 'r')
           if not rootFile: continue
-          else:
-            if cond:
-              if not rootFile.GetListOfKeys().Contains('Events'): continue
+          if cond and not rootFile.GetListOfKeys().Contains('Events'): continue
 
           command = command + ' {}'.format(fileName)
 
@@ -93,8 +94,7 @@ class NanoMerger(NanoLauncher):
         print '{}/{} created \n'.format(subdir+outputdir, mergedName)
 
 
-  def doChunkMerging(self, nanoName, mergedName, locationSE):
-
+  def doChunkMerging(self, nanoName, mergedName, locationSE, cond=True):
     print '\n---> Merging the different chunks'
 
     nanoFilesPlain = [f for f in glob.glob(locationSE+'/Chunk*/'+nanoName)]
@@ -108,8 +108,9 @@ class NanoMerger(NanoLauncher):
     print "\n-> Checking the files"
     for fileName in nanoFiles:
       rootFile = ROOT.TNetXNGFile.Open(fileName, 'r')
-      if rootFile and rootFile.GetListOfKeys().Contains('Events'):
-        filesValid.append(fileName)
+      if not rootFile: continue
+      if cond and not rootFile.GetListOfKeys().Contains('Events'): continue
+      filesValid.append(fileName)
 
     print '\n-> Start of the merge'
     outputname = '{}/merged/{}'.format(locationSE, mergedName) if not self.dobatch else 'fullmerge.root'
@@ -133,26 +134,25 @@ class NanoMerger(NanoLauncher):
 
 
   def runMergingModule(self, location):
+    if self.donano:
+      nanoName   = '/bparknano_nj*.root' if self.tag == None else '/bparknano_{}_nj*.root'.format(self.tag)
+      mergedName = 'bparknano.root' if self.tag == None else 'bparknano_{}.root'.format(self.tag)
+      outputdir  = '/merged'
+          
+      nanoName_tot   = 'merged/bparknano.root' if self.tag == None else 'merged/bparknano_{}.root'.format(self.tag)
+      mergedName_tot = 'bparknano.root' if self.tag == None else 'bparknano_{}.root'.format(self.tag)
 
-    nanoName   = '/bparknano_nj*.root' if self.tag == None else '/bparknano_{}_nj*.root'.format(self.tag)
-    mergedName = 'bparknano.root' if self.tag == None else 'bparknano_{}.root'.format(self.tag)
-    outputdir  = '/merged'
-        
-    nanoName_tot   = 'merged/bparknano.root' if self.tag == None else 'merged/bparknano_{}.root'.format(self.tag)
-    mergedName_tot = 'bparknano.root' if self.tag == None else 'bparknano_{}.root'.format(self.tag)
+      # per chunk
+      self.doMerging(nanoName, mergedName, location, outputdir, True)
 
-    # per chunk
-    self.doMerging(nanoName, mergedName, location, outputdir, True)
-
-    # inclusive
-    self.doChunkMerging(nanoName_tot, mergedName_tot, location)
+      # inclusive
+      self.doChunkMerging(nanoName_tot, mergedName_tot, location)
 
     if self.doflat:
-      nanoName_flat   = '/nanoFiles/flat/flat_bparknano_nj*.root' if self.tag == None else '/nanoFiles/flat/flat_bparknano_{}_nj*.root'.format(self.tag)
+      nanoName_flat   = 'flat/flat_bparknano.root' if self.tag == None else 'flat/flat_bparknano_{}.root'.format(self.tag)
       mergedName_flat = 'flat_bparknano.root' if self.tag == None else 'flat_bparknano_{}.root'.format(self.tag)
-      outputdir_flat  = '/nanoFiles/flat/merged'
 
-      self.doMerging(nanoName_flat, mergedName_flat, locationSE, outputdir_flat, False)
+      self.doChunkMerging(nanoName_flat, mergedName_flat, location, False)
 
 
   def process(self):
