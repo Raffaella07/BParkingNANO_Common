@@ -44,7 +44,6 @@ class NanoTools(object):
       '#include "TChain.h"',
       '#include <iostream>',
       '#include "TProof.h"\n',
-      #'void starter(TString isMC){',
       'void starter(){',
       '  TString outFileName = "flat_bparknano.root";',
       '  {addevt}'.format(addevt = event_chain),
