@@ -425,6 +425,8 @@ public :
 
    Float_t the_sig_sv_chi2;
    Float_t the_sig_sv_lxy;
+   Float_t the_sig_sv_pv_lxy;
+   Float_t the_sig_sv_pv_lxyz;
    Float_t the_sig_sv_lxysig;
    Float_t the_sig_sv_prob;
    Float_t the_sig_sv_x;

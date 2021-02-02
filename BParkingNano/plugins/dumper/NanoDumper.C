@@ -241,6 +241,8 @@ void NanoDumper::SlaveBegin(TTree * /*tree*/)
   signal_tree->Branch("deltar_trgmu_hnl", &the_sig_deltar_trgmu_hnl);
   signal_tree->Branch("sv_chi2", &the_sig_sv_chi2);
   signal_tree->Branch("sv_lxy", &the_sig_sv_lxy);
+  signal_tree->Branch("sv_pv_lxy", &the_sig_sv_pv_lxy);
+  signal_tree->Branch("sv_pv_lxyz", &the_sig_sv_pv_lxyz);
   signal_tree->Branch("sv_lxysig", &the_sig_sv_lxysig);
   signal_tree->Branch("sv_prob", &the_sig_sv_prob);
   signal_tree->Branch("sv_x", &the_sig_sv_x);
@@ -326,7 +328,7 @@ Bool_t NanoDumper::Process(Long64_t entry)
 
   fReader.SetLocalEntry(entry);
   //cout << endl << "--- Entry " << entry << " ---" << endl;
-
+  
   // number of candidates in the event
   UInt_t nCand_ctrl = *nBToKMuMu; 
   UInt_t nCand_sig = *nBToMuMuPi; 
@@ -426,6 +428,7 @@ Bool_t NanoDumper::Process(Long64_t entry)
     // - and select the OS cand with the largest hnl pt
     UInt_t selectedCandIdx_sig = pair_candIdx_desc_hnlpt_sig_up[0].first;
 
+
     // fill the signal_tree
     the_sig_b_pt = BToMuMuPi_pt[selectedCandIdx_sig];
     the_sig_b_eta = BToMuMuPi_eta[selectedCandIdx_sig];
@@ -504,6 +507,12 @@ Bool_t NanoDumper::Process(Long64_t entry)
     the_sig_sv_x = BToMuMuPi_sv_x[selectedCandIdx_sig];
     the_sig_sv_y = BToMuMuPi_sv_y[selectedCandIdx_sig];
     the_sig_sv_z = BToMuMuPi_sv_z[selectedCandIdx_sig];
+
+    // additionnal displacement quantities
+    float dist_sv_pv_xy = sqrt((BToMuMuPi_sv_x[selectedCandIdx_sig] - *PV_x) * (BToMuMuPi_sv_x[selectedCandIdx_sig] - *PV_x) + (BToMuMuPi_sv_y[selectedCandIdx_sig] - *PV_y) * (BToMuMuPi_sv_y[selectedCandIdx_sig] - *PV_y));
+    float dist_sv_pv_xyz = sqrt((BToMuMuPi_sv_x[selectedCandIdx_sig] - *PV_x) * (BToMuMuPi_sv_x[selectedCandIdx_sig] - *PV_x) + (BToMuMuPi_sv_y[selectedCandIdx_sig] - *PV_y) * (BToMuMuPi_sv_y[selectedCandIdx_sig] - *PV_y) + (BToMuMuPi_sv_z[selectedCandIdx_sig] - *PV_z) * (BToMuMuPi_sv_z[selectedCandIdx_sig] - *PV_z));
+    the_sig_sv_pv_lxy = dist_sv_pv_xy;
+    the_sig_sv_pv_lxyz = dist_sv_pv_xyz;
 
     the_sig_pi_mu_vzdiff = BToMuMuPi_pi_mu_vzdiff[selectedCandIdx_sig];
 
