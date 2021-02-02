@@ -1,5 +1,5 @@
-#define NanoDumper_cxx
-// The class definition in NanoDumper.h has been generated automatically
+#define NanoDumperMC_cxx
+// The class definition in NanoDumperMC.h has been generated automatically
 // by the ROOT utility TTree::MakeSelector(). This class is derived
 // from the ROOT class TSelector. For more information on the TSelector
 // framework see $ROOTSYS/README/README.SELECTOR or the ROOT User Manual.
@@ -19,13 +19,13 @@
 //
 // To use this file, try the following session on your Tree T:
 //
-// root> T->Process("NanoDumper.C")
-// root> T->Process("NanoDumper.C","some options")
-// root> T->Process("NanoDumper.C+")
+// root> T->Process("NanoDumperMC.C")
+// root> T->Process("NanoDumperMC.C","some options")
+// root> T->Process("NanoDumperMC.C+")
 //
 
 
-#include "NanoDumper.h"
+#include "NanoDumperMC.h"
 #include <TMath.h>
 #include <cmath>
 #include <TH2.h>
@@ -43,7 +43,7 @@ bool sortcansbydesc_opp(const pair<int, float> &a1, const pair<int, float> &a2){
 }
 
 // class functions
-vector<pair<int,float>> NanoDumper::createPairWithDesc(const UInt_t& nCand, const TTreeReaderArray<Float_t>& desc){
+vector<pair<int,float>> NanoDumperMC::createPairWithDesc(const UInt_t& nCand, const TTreeReaderArray<Float_t>& desc){
   vector<pair<int,float>> pair_candIdx_desc;
 
   for(unsigned int iCand(0); iCand < nCand; ++iCand){
@@ -57,7 +57,7 @@ vector<pair<int,float>> NanoDumper::createPairWithDesc(const UInt_t& nCand, cons
 }
 
 
-vector<pair<int,float>> NanoDumper::updatePairWithDesc(vector<pair<int,float>> the_ini_pair, const TTreeReaderArray<Int_t>& charge){
+vector<pair<int,float>> NanoDumperMC::updatePairWithDesc(vector<pair<int,float>> the_ini_pair, const TTreeReaderArray<Int_t>& charge){
   vector<pair<int,float>> pair_candIdx_desc;
 
   for(unsigned int iCand(0); iCand < the_ini_pair.size(); ++iCand){
@@ -70,7 +70,7 @@ vector<pair<int,float>> NanoDumper::updatePairWithDesc(vector<pair<int,float>> t
 }
 
 
-void NanoDumper::Begin(TTree * /*tree*/)
+void NanoDumperMC::Begin(TTree * /*tree*/)
 {
   // The Begin() function is called at the start of the query.
   // When running with PROOF Begin() is only called on the client.
@@ -84,7 +84,7 @@ void NanoDumper::Begin(TTree * /*tree*/)
 }
 
 
-void NanoDumper::SlaveBegin(TTree * /*tree*/)
+void NanoDumperMC::SlaveBegin(TTree * /*tree*/)
 {
   // The SlaveBegin() function is called after the Begin() function.
   // When running with PROOF SlaveBegin() is called on each slave server.
@@ -250,6 +250,10 @@ void NanoDumper::SlaveBegin(TTree * /*tree*/)
   signal_tree->Branch("sv_z", &the_sig_sv_z);
 
   signal_tree->Branch("pi_mu_vzdiff", &the_sig_pi_mu_vzdiff);
+  
+  signal_tree->Branch("gen_mother_hnl_lxyz", &the_gen_mother_hnl_lxyz);
+  signal_tree->Branch("gen_mother_hnl_lxy", &the_gen_mother_hnl_lxy);
+  signal_tree->Branch("gen_hnl_lifetime", &the_gen_hnl_lifetime);
 
   signal_tree->Branch("pv_npvs", &the_pv_npvs);
 
@@ -308,7 +312,7 @@ void NanoDumper::SlaveBegin(TTree * /*tree*/)
 }
 
 
-Bool_t NanoDumper::Process(Long64_t entry)
+Bool_t NanoDumperMC::Process(Long64_t entry)
 {
   // The Process() function is called for each entry in the tree (or possibly
   // keyed object in the case of PROOF) to be processed. The entry argument
@@ -327,7 +331,7 @@ Bool_t NanoDumper::Process(Long64_t entry)
   // The return value is currently not used.
 
   fReader.SetLocalEntry(entry);
-  //cout << endl << "--- Entry " << entry << " ---" << endl;
+  cout << endl << "--- Entry " << entry << " ---" << endl;
   
   // number of candidates in the event
   UInt_t nCand_ctrl = *nBToKMuMu; 
@@ -516,6 +520,44 @@ Bool_t NanoDumper::Process(Long64_t entry)
 
     the_sig_pi_mu_vzdiff = BToMuMuPi_pi_mu_vzdiff[selectedCandIdx_sig];
 
+
+    // getting the displacement at gen level
+
+    UInt_t nGen = *nGenPart;
+    
+    float hnl_vx(0.), hnl_vy(0.), hnl_vz(0.);
+    float mother_vx(0.), mother_vy(0.), mother_vz(0.);
+    int mother_idx(-99);
+
+    Double_t gamma, beta;
+
+    for(int iGen(0); iGen<nGen; ++iGen){
+      if(fabs(GenPart_pdgId[iGen]) == 9900015){
+        hnl_vx = GenPart_vx[iGen];
+        hnl_vy = GenPart_vy[iGen];
+        hnl_vz = GenPart_vz[iGen];
+
+        TLorentzVector the_hnl;
+        the_hnl.SetPtEtaPhiM(GenPart_pt[iGen], GenPart_eta[iGen], GenPart_phi[iGen], GenPart_mass[iGen]);
+        gamma = the_hnl.Gamma();
+        beta = the_hnl.Beta();
+
+        mother_idx = GenPart_genPartIdxMother[iGen];
+      }
+    }
+
+    mother_vx = GenPart_vx[mother_idx];
+    mother_vy = GenPart_vy[mother_idx];
+    mother_vz = GenPart_vz[mother_idx];
+
+    float gen_mother_hnl_lxyz = sqrt((hnl_vx - mother_vx) * (hnl_vx - mother_vx) + (hnl_vy - mother_vy) * (hnl_vy - mother_vy) + (hnl_vz - mother_vz) * (hnl_vz - mother_vz));
+    float gen_mother_hnl_lxy = sqrt((hnl_vx - mother_vx) * (hnl_vx - mother_vx) + (hnl_vy - mother_vy) * (hnl_vy - mother_vy));
+    float gen_hnl_lifetime = gen_mother_hnl_lxyz/(gamma * beta); 
+
+    the_gen_mother_hnl_lxyz = gen_mother_hnl_lxyz;
+    the_gen_mother_hnl_lxy = gen_mother_hnl_lxy;
+    the_gen_hnl_lifetime = gen_hnl_lifetime;
+
     signal_tree->Fill();
 
   }// end at least one candidate in the event
@@ -674,7 +716,7 @@ Bool_t NanoDumper::Process(Long64_t entry)
 }
 
 
-void NanoDumper::SlaveTerminate()
+void NanoDumperMC::SlaveTerminate()
 {
   // The SlaveTerminate() function is called after all entries or objects
   // have been processed. When running with PROOF SlaveTerminate() is called
@@ -683,7 +725,7 @@ void NanoDumper::SlaveTerminate()
 }
 
 
-void NanoDumper::Terminate()
+void NanoDumperMC::Terminate()
 {
   // The Terminate() function is the last function to be called during
   // a query. It always runs on the client, it can be used to present

@@ -5,8 +5,8 @@
 // found on file: bparknano_nj89.root
 //////////////////////////////////////////////////////////
 
-#ifndef NanoDumper_h
-#define NanoDumper_h
+#ifndef NanoDumperMC_h
+#define NanoDumperMC_h
 
 #include <TROOT.h>
 #include <TChain.h>
@@ -20,7 +20,7 @@
 // Headers needed by this particular selector
 
 
-class NanoDumper : public TSelector {
+class NanoDumperMC : public TSelector {
 public :
    TTreeReader     fReader;  //!the tree reader
    TTree          *fChain = 0;   //!pointer to the analyzed TTree or TChain
@@ -303,10 +303,22 @@ public :
    TTreeReaderArray<Float_t> SV_x = {fReader, "SV_x"};
    TTreeReaderArray<Float_t> SV_y = {fReader, "SV_y"};
    TTreeReaderArray<Float_t> SV_z = {fReader, "SV_z"};
+   TTreeReaderValue<UInt_t> nGenPart = {fReader, "nGenPart"};
+   TTreeReaderArray<Float_t> GenPart_eta = {fReader, "GenPart_eta"};
+   TTreeReaderArray<Float_t> GenPart_mass = {fReader, "GenPart_mass"};
+   TTreeReaderArray<Float_t> GenPart_phi = {fReader, "GenPart_phi"};
+   TTreeReaderArray<Float_t> GenPart_pt = {fReader, "GenPart_pt"};
+   TTreeReaderArray<Float_t> GenPart_vx = {fReader, "GenPart_vx"};
+   TTreeReaderArray<Float_t> GenPart_vy = {fReader, "GenPart_vy"};
+   TTreeReaderArray<Float_t> GenPart_vz = {fReader, "GenPart_vz"};
+   TTreeReaderArray<Int_t> GenPart_genPartIdxMother = {fReader, "GenPart_genPartIdxMother"};
+   TTreeReaderArray<Int_t> GenPart_pdgId = {fReader, "GenPart_pdgId"};
+   TTreeReaderArray<Int_t> GenPart_status = {fReader, "GenPart_status"};
+   TTreeReaderArray<Int_t> GenPart_statusFlags = {fReader, "GenPart_statusFlags"};
 
 
-   NanoDumper(TTree * /*tree*/ =0) { }
-   virtual ~NanoDumper() { }
+   NanoDumperMC(TTree * /*tree*/ =0) { }
+   virtual ~NanoDumperMC() { }
    virtual Int_t   Version() const { return 2; }
    virtual void    Begin(TTree *tree);
    virtual void    SlaveBegin(TTree *tree);
@@ -435,6 +447,10 @@ public :
 
    Float_t the_sig_pi_mu_vzdiff;
 
+   Float_t the_gen_mother_hnl_lxyz;
+   Float_t the_gen_mother_hnl_lxy;
+   Float_t the_gen_hnl_lifetime;
+
    Float_t the_ctrl_b_pt;
    Float_t the_ctrl_b_eta;
    Float_t the_ctrl_b_phi;
@@ -512,13 +528,13 @@ public :
    TH1F* sighist_selection_efficiency_dr_allevents;
    TH1F* sighist_selection_efficiency_dr_eventswithmultcands;
 
-   ClassDef(NanoDumper,0);
+   ClassDef(NanoDumperMC,0);
 };
 
 #endif
 
-#ifdef NanoDumper_cxx
-void NanoDumper::Init(TTree *tree)
+#ifdef NanoDumperMC_cxx
+void NanoDumperMC::Init(TTree *tree)
 {
    // The Init() function is called when the selector needs to initialize
    // a new tree or chain. Typically here the reader is initialized.
@@ -530,7 +546,7 @@ void NanoDumper::Init(TTree *tree)
    fReader.SetTree(tree);
 }
 
-Bool_t NanoDumper::Notify()
+Bool_t NanoDumperMC::Notify()
 {
    // The Notify() function is called when a new file is opened. This
    // can be either for a new TTree in a TChain or when when a new TTree
@@ -542,4 +558,4 @@ Bool_t NanoDumper::Notify()
 }
 
 
-#endif // #ifdef NanoDumper_cxx
+#endif // #ifdef NanoDumperMC_cxx
