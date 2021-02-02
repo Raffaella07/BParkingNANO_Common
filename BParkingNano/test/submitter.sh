@@ -70,9 +70,9 @@ fi
 
 echo "copying the file"
 if [ ${4} == 0 ] ; then
-  xrdcp bparknano.root root://t3dcachedb.psi.ch:1094/${1}/bparknano_nj$outIdx.root 
+  xrdcp -f bparknano.root root://t3dcachedb.psi.ch:1094/${1}/bparknano_nj$outIdx.root 
 else
-  xrdcp bparknano.root root://t3dcachedb.psi.ch:1094/${1}/bparknano_${4}_nj$outIdx.root 
+  xrdcp -f bparknano.root root://t3dcachedb.psi.ch:1094/${1}/bparknano_${4}_nj$outIdx.root 
 fi
 
 echo "content of the workdir"
