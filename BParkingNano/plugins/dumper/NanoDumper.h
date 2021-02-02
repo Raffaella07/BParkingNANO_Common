@@ -5,8 +5,8 @@
 // found on file: bparknano_nj89.root
 //////////////////////////////////////////////////////////
 
-#ifndef NanoDumperMC_h
-#define NanoDumperMC_h
+#ifndef NanoDumper_h
+#define NanoDumper_h
 
 #include <TROOT.h>
 #include <TChain.h>
@@ -20,7 +20,7 @@
 // Headers needed by this particular selector
 
 
-class NanoDumperMC : public TSelector {
+class NanoDumper : public TSelector {
 public :
    TTreeReader     fReader;  //!the tree reader
    TTree          *fChain = 0;   //!pointer to the analyzed TTree or TChain
@@ -317,8 +317,8 @@ public :
    TTreeReaderArray<Int_t> GenPart_statusFlags = {fReader, "GenPart_statusFlags"};
 
 
-   NanoDumperMC(TTree * /*tree*/ =0) { }
-   virtual ~NanoDumperMC() { }
+   NanoDumper(TTree * /*tree*/ =0) { }
+   virtual ~NanoDumper() { }
    virtual Int_t   Version() const { return 2; }
    virtual void    Begin(TTree *tree);
    virtual void    SlaveBegin(TTree *tree);
@@ -528,13 +528,13 @@ public :
    TH1F* sighist_selection_efficiency_dr_allevents;
    TH1F* sighist_selection_efficiency_dr_eventswithmultcands;
 
-   ClassDef(NanoDumperMC,0);
+   ClassDef(NanoDumper,0);
 };
 
 #endif
 
-#ifdef NanoDumperMC_cxx
-void NanoDumperMC::Init(TTree *tree)
+#ifdef NanoDumper_cxx
+void NanoDumper::Init(TTree *tree)
 {
    // The Init() function is called when the selector needs to initialize
    // a new tree or chain. Typically here the reader is initialized.
@@ -546,7 +546,7 @@ void NanoDumperMC::Init(TTree *tree)
    fReader.SetTree(tree);
 }
 
-Bool_t NanoDumperMC::Notify()
+Bool_t NanoDumper::Notify()
 {
    // The Notify() function is called when a new file is opened. This
    // can be either for a new TTree in a TChain or when when a new TTree
@@ -558,4 +558,4 @@ Bool_t NanoDumperMC::Notify()
 }
 
 
-#endif // #ifdef NanoDumperMC_cxx
+#endif // #ifdef NanoDumper_cxx

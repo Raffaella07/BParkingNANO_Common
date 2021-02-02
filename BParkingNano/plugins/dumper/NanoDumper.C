@@ -1,5 +1,5 @@
-#define NanoDumperMC_cxx
-// The class definition in NanoDumperMC.h has been generated automatically
+#define NanoDumper_cxx
+// The class definition in NanoDumper.h has been generated automatically
 // by the ROOT utility TTree::MakeSelector(). This class is derived
 // from the ROOT class TSelector. For more information on the TSelector
 // framework see $ROOTSYS/README/README.SELECTOR or the ROOT User Manual.
@@ -19,13 +19,13 @@
 //
 // To use this file, try the following session on your Tree T:
 //
-// root> T->Process("NanoDumperMC.C")
-// root> T->Process("NanoDumperMC.C","some options")
-// root> T->Process("NanoDumperMC.C+")
+// root> T->Process("NanoDumper.C")
+// root> T->Process("NanoDumper.C","some options")
+// root> T->Process("NanoDumper.C+")
 //
 
 
-#include "NanoDumperMC.h"
+#include "NanoDumper.h"
 #include <TMath.h>
 #include <cmath>
 #include <TH2.h>
@@ -43,7 +43,7 @@ bool sortcansbydesc_opp(const pair<int, float> &a1, const pair<int, float> &a2){
 }
 
 // class functions
-vector<pair<int,float>> NanoDumperMC::createPairWithDesc(const UInt_t& nCand, const TTreeReaderArray<Float_t>& desc){
+vector<pair<int,float>> NanoDumper::createPairWithDesc(const UInt_t& nCand, const TTreeReaderArray<Float_t>& desc){
   vector<pair<int,float>> pair_candIdx_desc;
 
   for(unsigned int iCand(0); iCand < nCand; ++iCand){
@@ -57,7 +57,7 @@ vector<pair<int,float>> NanoDumperMC::createPairWithDesc(const UInt_t& nCand, co
 }
 
 
-vector<pair<int,float>> NanoDumperMC::updatePairWithDesc(vector<pair<int,float>> the_ini_pair, const TTreeReaderArray<Int_t>& charge){
+vector<pair<int,float>> NanoDumper::updatePairWithDesc(vector<pair<int,float>> the_ini_pair, const TTreeReaderArray<Int_t>& charge){
   vector<pair<int,float>> pair_candIdx_desc;
 
   for(unsigned int iCand(0); iCand < the_ini_pair.size(); ++iCand){
@@ -70,7 +70,7 @@ vector<pair<int,float>> NanoDumperMC::updatePairWithDesc(vector<pair<int,float>>
 }
 
 
-void NanoDumperMC::Begin(TTree * /*tree*/)
+void NanoDumper::Begin(TTree * /*tree*/)
 {
   // The Begin() function is called at the start of the query.
   // When running with PROOF Begin() is only called on the client.
@@ -84,7 +84,7 @@ void NanoDumperMC::Begin(TTree * /*tree*/)
 }
 
 
-void NanoDumperMC::SlaveBegin(TTree * /*tree*/)
+void NanoDumper::SlaveBegin(TTree * /*tree*/)
 {
   // The SlaveBegin() function is called after the Begin() function.
   // When running with PROOF SlaveBegin() is called on each slave server.
@@ -312,7 +312,7 @@ void NanoDumperMC::SlaveBegin(TTree * /*tree*/)
 }
 
 
-Bool_t NanoDumperMC::Process(Long64_t entry)
+Bool_t NanoDumper::Process(Long64_t entry)
 {
   // The Process() function is called for each entry in the tree (or possibly
   // keyed object in the case of PROOF) to be processed. The entry argument
@@ -716,7 +716,7 @@ Bool_t NanoDumperMC::Process(Long64_t entry)
 }
 
 
-void NanoDumperMC::SlaveTerminate()
+void NanoDumper::SlaveTerminate()
 {
   // The SlaveTerminate() function is called after all entries or objects
   // have been processed. When running with PROOF SlaveTerminate() is called
@@ -725,7 +725,7 @@ void NanoDumperMC::SlaveTerminate()
 }
 
 
-void NanoDumperMC::Terminate()
+void NanoDumper::Terminate()
 {
   // The Terminate() function is the last function to be called during
   // a query. It always runs on the client, it can be used to present
