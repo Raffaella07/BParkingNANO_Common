@@ -32,6 +32,7 @@
 #include <TStyle.h>
 #include "TLorentzVector.h"
 
+
 using namespace std;
 
 // extra functions
@@ -252,9 +253,9 @@ void NanoDumper::SlaveBegin(TTree * /*tree*/)
 
   signal_tree->Branch("pi_mu_vzdiff", &the_sig_pi_mu_vzdiff);
   
-  signal_tree->Branch("gen_mother_hnl_lxyz", &the_gen_mother_hnl_lxyz);
-  signal_tree->Branch("gen_mother_hnl_lxy", &the_gen_mother_hnl_lxy);
-  signal_tree->Branch("gen_hnl_lifetime", &the_gen_hnl_lifetime);
+  //signal_tree->Branch("gen_mother_hnl_lxyz", &the_gen_mother_hnl_lxyz);
+  //signal_tree->Branch("gen_mother_hnl_lxy", &the_gen_mother_hnl_lxy);
+  //signal_tree->Branch("gen_hnl_lifetime", &the_gen_hnl_lifetime);
 
   signal_tree->Branch("pv_npvs", &the_pv_npvs);
 
@@ -333,7 +334,7 @@ Bool_t NanoDumper::Process(Long64_t entry)
 
   fReader.SetLocalEntry(entry);
   //cout << endl << "--- Entry " << entry << " ---" << endl;
-  
+
   // number of candidates in the event
   UInt_t nCand_ctrl = *nBToKMuMu; 
   UInt_t nCand_sig = *nBToMuMuPi; 
@@ -523,7 +524,7 @@ Bool_t NanoDumper::Process(Long64_t entry)
 
 
     // getting the displacement at gen level
-
+    /*
     UInt_t nGen = *nGenPart;
     
     float hnl_vx(0.), hnl_vy(0.), hnl_vz(0.);
@@ -558,6 +559,7 @@ Bool_t NanoDumper::Process(Long64_t entry)
     the_gen_mother_hnl_lxyz = gen_mother_hnl_lxyz;
     the_gen_mother_hnl_lxy = gen_mother_hnl_lxy;
     the_gen_hnl_lifetime = gen_hnl_lifetime;
+    */
 
     signal_tree->Fill();
 
