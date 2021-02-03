@@ -26,12 +26,10 @@ bool lumiMask(int run, int lumi){
   
   // put the content of the json in a tree
   boost::property_tree::ptree the_json_tree;
-  boost::property_tree::read_json("data/golden_2018.json", the_json_tree);
+  boost::property_tree::read_json("golden_2018.json", the_json_tree);
 
   // checking that the run exists
   std::string lumi_ranges = the_json_tree.get<std::string> (std::to_string(run), "RUN NOT FOUND");
-  //std::string lumi_ranges = the_json_tree.get<std::string> ("317320", "RUN NOT FOUND");
-  //std::string lumi_ranges = the_json_tree.get<std::string> ("315257", "RUN NOT FOUND");
 
   if(lumi_ranges == "RUN NOT FOUND"){
     return false; 
