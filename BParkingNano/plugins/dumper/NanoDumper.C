@@ -36,16 +36,7 @@
 
 using namespace std;
 
-// extra functions
-bool sortcansbydesc(const pair<int, float> &a1, const pair<int, float> &a2){
-  return a1.second > a2.second;
-}
 
-bool sortcansbydesc_opp(const pair<int, float> &a1, const pair<int, float> &a2){
-  return a1.second < a2.second;
-}
-
-// class functions
 vector<pair<int,float>> NanoDumper::createPairWithDesc(const UInt_t& nCand, const TTreeReaderArray<Float_t>& desc){
   vector<pair<int,float>> pair_candIdx_desc;
 

@@ -1,6 +1,20 @@
 #include "boost/property_tree/ptree.hpp"
 #include "boost/property_tree/json_parser.hpp"
 
+// ------------------------------------------ //
+//  extra functions needed by the ntupliser
+// ------------------------------------------ //
+
+
+bool sortcansbydesc(const pair<int, float> &a1, const pair<int, float> &a2){
+  return a1.second > a2.second;
+}
+
+
+bool sortcansbydesc_opp(const pair<int, float> &a1, const pair<int, float> &a2){
+  return a1.second < a2.second;
+}
+
 
 bool checkLumi(string lumi_ranges, int lumi, int seed = 1){
   // get boundaries of lumi range
