@@ -31,6 +31,7 @@
 #include <TH2.h>
 #include <TStyle.h>
 #include "TLorentzVector.h"
+#include "utils.C"
 
 
 using namespace std;
@@ -334,6 +335,10 @@ Bool_t NanoDumper::Process(Long64_t entry)
 
   fReader.SetLocalEntry(entry);
   //cout << endl << "--- Entry " << entry << " ---" << endl;
+
+  // add data requirement
+  // we skip the event in case it doesn't pass the lumi mask
+  if(lumiMask(*run, *luminosityBlock) == false) return false;
 
   // number of candidates in the event
   UInt_t nCand_ctrl = *nBToKMuMu; 
