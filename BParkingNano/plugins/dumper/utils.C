@@ -1,0 +1,44 @@
+#include "boost/property_tree/ptree.hpp"
+#include "boost/property_tree/json_parser.hpp"
+
+
+bool checkLumi(string lumi_ranges, int lumi, int seed = 1){
+  // get boundaries of lumi range
+  string range_min = lumi_ranges.substr(lumi_ranges.find("[", seed)+1, int(lumi_ranges.find(",", seed)) - int(lumi_ranges.find("[", seed)+1));
+  string range_max = lumi_ranges.substr(lumi_ranges.find(",", seed)+2, int(lumi_ranges.find("]", seed)) - int(lumi_ranges.find(",", seed)+2));
+  //cout << range_min << " " << range_max << endl;
+
+  if(lumi >= stoi(range_min) && lumi <= stoi(range_max)){
+    //cout << "lumi accepted" << endl;
+    return true;
+  }
+  else if(lumi_ranges.substr(int(lumi_ranges.find("]", seed))+1, 1) != "]"){ // there are further lumi blocks
+    return checkLumi(lumi_ranges, lumi, int(lumi_ranges.find("]", seed)+2));
+  }
+  else{
+    return false;
+  }
+}
+
+
+bool lumiMask(int run, int lumi){
+  //cout << "run " << run << " lumi " << lumi << endl;
+  
+  // put the content of the json in a tree
+  boost::property_tree::ptree the_json_tree;
+  boost::property_tree::read_json("data/golden_2018.json", the_json_tree);
+
+  // checking that the run exists
+  std::string lumi_ranges = the_json_tree.get<std::string> (std::to_string(run), "RUN NOT FOUND");
+  //std::string lumi_ranges = the_json_tree.get<std::string> ("317320", "RUN NOT FOUND");
+  //std::string lumi_ranges = the_json_tree.get<std::string> ("315257", "RUN NOT FOUND");
+
+  if(lumi_ranges == "RUN NOT FOUND"){
+    return false; 
+  }
+  else{
+    // check that lumi is valid
+    return checkLumi(lumi_ranges, lumi);
+  }
+}
+
