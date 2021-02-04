@@ -520,7 +520,7 @@ Bool_t NanoDumper::Process(Long64_t entry)
 
 
     // getting the displacement at gen level
-    /*
+   /* 
     UInt_t nGen = *nGenPart;
     
     float hnl_vx(0.), hnl_vy(0.), hnl_vz(0.);
@@ -555,8 +555,7 @@ Bool_t NanoDumper::Process(Long64_t entry)
     the_gen_mother_hnl_lxyz = gen_mother_hnl_lxyz;
     the_gen_mother_hnl_lxy = gen_mother_hnl_lxy;
     the_gen_hnl_lifetime = gen_hnl_lifetime;
-    */
-
+*/
     signal_tree->Fill();
 
   }// end at least one candidate in the event
@@ -730,7 +729,9 @@ void NanoDumper::Terminate()
   // a query. It always runs on the client, it can be used to present
   // the results graphically or save the results to file.
 
-  my_file->Write();
+  signal_tree->Write("", TObject::kOverwrite);
+  control_tree->Write("", TObject::kOverwrite);
+
   my_file->Close();
 
   cout << "- End Nano Dumper -" << endl;
