@@ -470,38 +470,39 @@ void BToMuMuPiBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup c
           sel_mu_genIdx   = sel_mu_ptr->userInt("mcMatchIndex"); 
           pi_genIdx       = pi_ptr->userInt("mcMatchIndex"); 
 
-          if(trg_mu_genIdx == -1 || sel_mu_genIdx == -1 || pi_genIdx == -1) continue;
+          if(trg_mu_genIdx != -1 && sel_mu_genIdx != -1 && pi_genIdx != -1){
 
-          // getting the associated gen particles
-          edm::Ptr<reco::GenParticle> genTriggerMuon_ptr(genParticles, trg_mu_genIdx);
-          edm::Ptr<reco::GenParticle> genMuon_ptr(genParticles, sel_mu_genIdx);
-          edm::Ptr<reco::GenParticle> genPion_ptr(genParticles, pi_genIdx);
+            // getting the associated gen particles
+            edm::Ptr<reco::GenParticle> genTriggerMuon_ptr(genParticles, trg_mu_genIdx);
+            edm::Ptr<reco::GenParticle> genMuon_ptr(genParticles, sel_mu_genIdx);
+            edm::Ptr<reco::GenParticle> genPion_ptr(genParticles, pi_genIdx);
 
-          // index of the associated mother particle
-          int genTriggerMuonMother_genIdx = -1;
-          int genMuonMother_genIdx        = -1;
-          int genPionMother_genIdx        = -1;
-          if(genTriggerMuon_ptr->numberOfMothers()>0) genTriggerMuonMother_genIdx = genTriggerMuon_ptr->motherRef(0).key();
-          if(genMuon_ptr->numberOfMothers()>0) genMuonMother_genIdx = genMuon_ptr->motherRef(0).key();
-          if(genPion_ptr->numberOfMothers()>0) genPionMother_genIdx = genPion_ptr->motherRef(0).key();
+            // index of the associated mother particle
+            int genTriggerMuonMother_genIdx = -1;
+            int genMuonMother_genIdx        = -1;
+            int genPionMother_genIdx        = -1;
+            if(genTriggerMuon_ptr->numberOfMothers()>0) genTriggerMuonMother_genIdx = genTriggerMuon_ptr->motherRef(0).key();
+            if(genMuon_ptr->numberOfMothers()>0) genMuonMother_genIdx = genMuon_ptr->motherRef(0).key();
+            if(genPion_ptr->numberOfMothers()>0) genPionMother_genIdx = genPion_ptr->motherRef(0).key();
 
-          // getting the mother particles
-          edm::Ptr<reco::GenParticle> genTriggerMuonMother_ptr(genParticles, genTriggerMuonMother_genIdx);
-          edm::Ptr<reco::GenParticle> genMuonMother_ptr(genParticles, genMuonMother_genIdx);
-          edm::Ptr<reco::GenParticle> genPionMother_ptr(genParticles, genPionMother_genIdx);
+            // getting the mother particles
+            edm::Ptr<reco::GenParticle> genTriggerMuonMother_ptr(genParticles, genTriggerMuonMother_genIdx);
+            edm::Ptr<reco::GenParticle> genMuonMother_ptr(genParticles, genMuonMother_genIdx);
+            edm::Ptr<reco::GenParticle> genPionMother_ptr(genParticles, genPionMother_genIdx);
 
-          // pdgId of the mother particles
-          genTriggerMuonMother_genPdgId = genTriggerMuonMother_ptr->pdgId();
-          genMuonMother_genPdgId        = genMuonMother_ptr->pdgId();
-          genPionMother_genPdgId        = genPionMother_ptr->pdgId();
+            // pdgId of the mother particles
+            genTriggerMuonMother_genPdgId = genTriggerMuonMother_ptr->pdgId();
+            genMuonMother_genPdgId        = genMuonMother_ptr->pdgId();
+            genPionMother_genPdgId        = genPionMother_ptr->pdgId();
 
-          if(
-             fabs(sel_mu_genPdgId) == 13 && fabs(genMuonMother_genPdgId) == 9900015 && 
-             fabs(pi_genPdgId) == 211 && fabs(genPionMother_genPdgId) == 9900015 &&
-             fabs(trg_mu_genPdgId) == 13 && (fabs(genTriggerMuonMother_genPdgId) == 511 || fabs(genTriggerMuonMother_genPdgId) == 521 
-                || fabs(genTriggerMuonMother_genPdgId) == 531 || fabs(genTriggerMuonMother_genPdgId) == 541)
-            ){
-              isMatched = 1;
+            if(
+               fabs(sel_mu_genPdgId) == 13 && fabs(genMuonMother_genPdgId) == 9900015 && 
+               fabs(pi_genPdgId) == 211 && fabs(genPionMother_genPdgId) == 9900015 &&
+               fabs(trg_mu_genPdgId) == 13 && (fabs(genTriggerMuonMother_genPdgId) == 511 || fabs(genTriggerMuonMother_genPdgId) == 521 
+                  || fabs(genTriggerMuonMother_genPdgId) == 531 || fabs(genTriggerMuonMother_genPdgId) == 541)
+              ){
+                isMatched = 1;
+            }
           }
         }
 
