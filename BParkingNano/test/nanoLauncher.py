@@ -21,6 +21,7 @@ def getOptions():
   parser.add_argument('--donano'            , dest='donano'   , help='launch the nano tool on top of the minifile'                    , action='store_true', default=False)
   parser.add_argument('--doflat'            , dest='doflat'   , help='launch the ntupliser on top of the nanofile'                    , action='store_true', default=False)
   parser.add_argument('--domerge'           , dest='domerge'  , help='[optional] merge the nanofile steps'                            , action='store_true', default=False)
+  parser.add_argument('--doquick'           , dest='doquick'  , help='[optional] run the jobs on the quick partition (t/job<1h)'      , action='store_true', default=False)
   parser.add_argument('--docompile'         , dest='docompile', help='[optional] compile the full BParkingNano tool'                  , action='store_true', default=False)
   
   # add domerge, dofullmerge? 
@@ -57,6 +58,7 @@ class NanoLauncher(object):
     self.donano    = vars(opt)["donano"]
     self.doflat    = vars(opt)["doflat"]
     self.domerge   = vars(opt)["domerge"]
+    self.doquick   = vars(opt)["doquick"]
     self.docompile = vars(opt)["docompile"]
 
 
@@ -218,18 +220,29 @@ class NanoLauncher(object):
 
 
   def launchNano(self, nNano, outputdir, logdir, filelist, label):
-    #command = 'sbatch -p wn --account=t3 -o {ld}/nanostep_nj%a.log -e {ld}/nanostep_nj%a.log --job-name=nanostep_nj%a_{pl} --array {ar} --time=03:00:00 submitter.sh {outdir} {usr} {pl} {tag} {isMC} {rmt} {lst} 0'.format(
-    command = 'sbatch -p quick --account=t3 -o {ld}/nanostep_nj%a.log -e {ld}/nanostep_nj%a.log --job-name=nanostep_nj%a_{pl} --array {ar} submitter.sh {outdir} {usr} {pl} {tag} {isMC} {rmt} {lst} 0'.format(
-      ld      = logdir,
-      pl      = label,
-      ar      = '1-{}'.format(nNano),
-      outdir  = outputdir,
-      usr     = os.environ["USER"], 
-      tag     = 0 if self.tag == None else self.tag,
-      isMC    = 1 if self.mcprivate or self.mccentral else 0,
-      rmt     = 0 if self.mcprivate else 1,
-      lst     = filelist
-    )
+    if not self.doquick:
+      slurm_options = '-p wn --account=t3 -o {ld}/nanostep_nj%a.log -e {ld}/nanostep_nj%a.log --job-name=nanostep_nj%a_{pl} --array {ar} --time=03:00:00'.format(
+        ld = logdir,
+        pl = label,
+        ar = '1-{}'.format(nNano),
+        )
+    else:
+      slurm_options = '-p quick --account=t3 -o {ld}/nanostep_nj%a.log -e {ld}/nanostep_nj%a.log --job-name=nanostep_nj%a_{pl} --array {ar}'.format(
+        ld = logdir,
+        pl = label,
+        ar = '1-{}'.format(nNano),
+        )
+
+    command = 'sbatch {slurm_opt} submitter.sh {outdir} {usr} {pl} {tag} {isMC} {rmt} {lst} 0'.format(
+      slurm_opt = slurm_options,
+      pl        = label,
+      outdir    = outputdir,
+      usr       = os.environ["USER"], 
+      tag       = 0 if self.tag == None else self.tag,
+      isMC      = 1 if self.mcprivate or self.mccentral else 0,
+      rmt       = 0 if self.mcprivate else 1,
+      lst       = filelist
+      )
 
     job = subprocess.check_output(command, shell=True)
     print '\n       ---> {}'.format(job)
@@ -238,16 +251,27 @@ class NanoLauncher(object):
 
 
   def launchDumper(self, outputdir, logdir, label, jobId):
-    #command = 'sbatch -p wn --account=t3 -o {ld}/dumperstep.log -e {ld}/dumperstep.log --job-name=dumperstep_{pl} --time=03:00:00 submitter_dumper.sh {outdir} {usr} {pl} {tag} {isMC}'.format(
-    command = 'sbatch -p quick --account=t3 -o {ld}/dumperstep.log -e {ld}/dumperstep.log --job-name=dumperstep_{pl} {dp} submitter_dumper.sh {outdir} {usr} {pl} {tag} {isMC}'.format(
-      ld      = logdir,
+    if not self.doquick:
+      slurm_options = '-p wn --account=t3 -o {ld}/dumperstep.log -e {ld}/dumperstep.log --job-name=dumperstep_{pl} --time=03:00:00 {dp}'.format(
+        ld      = logdir,
+        pl      = label,
+        dp      = '--dependency=afterany:{}'.format(jobId) if jobId != -99 else '',
+        )
+    else:
+      slurm_options = '-p quick --account=t3 -o {ld}/dumperstep.log -e {ld}/dumperstep.log --job-name=dumperstep_{pl} {dp}'.format(
+        ld      = logdir,
+        pl      = label,
+        dp      = '--dependency=afterany:{}'.format(jobId) if jobId != -99 else '',
+        )
+
+    command = 'sbatch {slurm_opt} submitter_dumper.sh {outdir} {usr} {pl} {tag} {isMC}'.format(
+      slurm_opt = slurm_options,
       pl      = label,
-      dp      = '--dependency=afterany:{}'.format(jobId) if jobId != -99 else '',
       outdir  = outputdir,
       usr     = os.environ["USER"], 
       tag     = 0 if self.tag == None else self.tag,
       isMC    = 1 if self.mcprivate or self.mccentral else 0,
-    )
+      )
     
     job_dump = subprocess.check_output(command, shell=True)
     if jobId == -99:
@@ -261,12 +285,23 @@ class NanoLauncher(object):
 
   def launchMerger(self, logdir, label, jobIds, filetype):
     self.writeMergerSubmitter(label, filetype)
-    #command_merge = 'sbatch -p wn --account=t3 -o {ld}/mergerstep.log -e {ld}/mergerstep_njmerge.log --job-name=merger_{pl} --time=01:00:00 --dependency=afterany:{jobid} submitter_merger.sh'.format(
-    command_merge = 'sbatch -p quick --account=t3 -o {ld}/mergerstep.log -e {ld}/mergerstep.log --job-name=merger_{pl} --dependency=afterany:{jobid} submitter_merger.sh'.format(
-      ld    = logdir,
-      pl    = label,
-      jobid = self.getJobIdsList(jobIds),
-    )
+
+    if not self.doquick:
+      slurm_options = '-p wn --account=t3 -o {ld}/mergerstep.log -e {ld}/mergerstep_njmerge.log --job-name=mergerstep_{pl} --time=02:00:00 --dependency=afterany:{jobid}'.format(
+        ld    = logdir,
+        pl    = label,
+        jobid = self.getJobIdsList(jobIds),
+        )
+    else:
+      slurm_options = '-p quick --account=t3 -o {ld}/mergerstep.log -e {ld}/mergerstep_njmerge.log --job-name=mergerstep_{pl} --dependency=afterany:{jobid}'.format(
+        ld    = logdir,
+        pl    = label,
+        jobid = self.getJobIdsList(jobIds),
+        )
+
+    command_merge = 'sbatch {slurm_opt} submitter_merger.sh'.format(
+        slurm_opt = slurm_options,
+        )
     
     n_job_merge = subprocess.check_output(command_merge, shell=True)
     print '       ---> (dependency)' 
@@ -296,6 +331,8 @@ class NanoLauncher(object):
       for point in points:
      
         print '\n-> Processing mass/ctau point: {}'.format(point)
+
+        if point != 'mass3.0_ctau184.256851021': continue
 
         print '\n  --> Fetching the files'
         filelistname = self.writeFileList(point)
