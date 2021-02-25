@@ -75,6 +75,9 @@ else
   xrdcp -f bparknano.root root://t3dcachedb.psi.ch:1094/${1}/bparknano_${4}_nj$outIdx.root 
 fi
 
+# copy filelist to pnfs
+xrdcp -f filelist.txt root://t3dcachedb.psi.ch:1094/${1}/filelist_${3}.txt
+
 echo "content of the workdir"
 ls -l
 

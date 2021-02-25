@@ -111,57 +111,39 @@ class NanoLauncher(object):
     return listIds[:len(listIds)-1]
 
 
-  def writeFileList(self, point=None):
+  def writeFileList(self, nfiles_perchunk, point=None):
     if not path.exists('./files'):
       os.system('mkdir ./files') 
 
     if self.mcprivate:
       filename = './files/filelist_{}_{}'.format(self.prodlabel, point)
-      if self.maxfiles != None:
-        filename += '_max{}'.format(self.maxfiles)
+    else:
+      ds_label = self.getDataLabel() if self.data else self.getMCLabel()
+      filename = './files/filelist_{dsl}_{pl}'.format(dsl=ds_label, pl=self.prodlabel) 
 
-      if not path.exists(filename + '.txt'):
-        myfile = open(filename + '.txt', "w+")
-        
-        nanofiles = self.getLocalFiles(point)
+      if len(glob.glob('{}*.txt'.format(filename))) == 0: # do not create file if already exists
+        if self.mcprivate: # fetch miniAOD files
+          myfile = open(filename + '.txt', "w+")
+          nanofiles = self.getLocalFiles(point)
 
-        limit = int(self.maxfiles) if self.maxfiles != None else len(nanofiles)
-
-        for iNano, nanofile in enumerate(nanofiles):
-          if iNano < limit:
+          for nanofile in nanofiles:
             if self.checkLocalFile(nanofile):
-              iNano += 1
               myfile.write(nanofile + '\n')
             else:
               print '    could not open {} --> skipping'.format(nanofile)
-          else: 
-            continue
-      
-        myfile.close()  
         
-    elif self.data or self.mccentral:
-      ds_label = self.getDataLabel() if self.data else self.getMCLabel()
+          myfile.close()  
+        else: # fetch files on DAS
+          command = 'dasgoclient --query="file dataset={ds} | grep file.name" > {fn}.txt'.format(ds=self.dataset, fn=filename)
+          os.system(command)
 
-      filename = './files/filelist_{dsl}_{pl}'.format(dsl=ds_label, pl=self.prodlabel) 
-      if self.maxfiles != None:
-        filename += '_max{}'.format(self.maxfiles)
-      
-      if not path.exists(filename + '.txt'):
-      
-        command = 'dasgoclient --query="file dataset={ds} | grep file.name" > {fn}.txt'.format(ds=self.dataset, fn=filename)
-        os.system(command)
-
-        if self.maxfiles!=None:
-          command_cut = 'head -n {maxval} {fn}.txt > ./files/tmp.txt && mv ./files/tmp.txt {fn}.txt'.format(maxval=self.maxfiles, fn=filename)
-          os.system(command_cut)
-
-    # slurm cannot deal with too large arrays
-    # -> submit job arrays of size 750
-    if self.getSize(filename + '.txt') > 750:
-      command_split = 'split -l 750 {fn}.txt {fn}_ --additional-suffix=.txt'.format(fn=filename)
-      os.system(command_split)
-      os.system('rm {fn}.txt'.format(fn=filename))
-      
+        # slurm cannot deal with too large arrays
+        # -> submit job arrays of size 750
+        if self.getSize(filename + '.txt') > nfiles_perchunk:
+          command_split = 'split -l {nfiles} {fn}.txt {fn}_ --additional-suffix=.txt'.format(nfiles=nfiles_perchunk, fn=filename)
+          os.system(command_split)
+          os.system('rm {fn}.txt'.format(fn=filename))
+        
     print '    ---> {}*.txt created'.format(filename)
 
     return filename 
@@ -218,18 +200,18 @@ class NanoLauncher(object):
     submitter_merger.close()
 
 
-  def launchNano(self, nNano, outputdir, logdir, filelist, label):
+  def launchNano(self, nfiles, outputdir, logdir, filelist, label):
     if not self.doquick:
       slurm_options = '-p wn --account=t3 -o {ld}/nanostep_nj%a.log -e {ld}/nanostep_nj%a.log --job-name=nanostep_nj%a_{pl} --array {ar} --time=03:00:00'.format(
         ld = logdir,
         pl = label,
-        ar = '1-{}'.format(nNano),
+        ar = '1-{}'.format(nfiles),
         )
     else:
       slurm_options = '-p quick --account=t3 -o {ld}/nanostep_nj%a.log -e {ld}/nanostep_nj%a.log --job-name=nanostep_nj%a_{pl} --array {ar}'.format(
         ld = logdir,
         pl = label,
-        ar = '1-{}'.format(nNano),
+        ar = '1-{}'.format(nfiles),
         )
 
     command = 'sbatch {slurm_opt} submitter.sh {outdir} {usr} {pl} {tag} {isMC} {rmt} {lst} 0'.format(
@@ -240,7 +222,7 @@ class NanoLauncher(object):
       tag       = 0 if self.tag == None else self.tag,
       isMC      = 1 if self.mcprivate or self.mccentral else 0,
       rmt       = 0 if self.mcprivate else 1,
-      lst       = filelist
+      lst       = filelist,
       )
 
     job = subprocess.check_output(command, shell=True)
@@ -292,7 +274,7 @@ class NanoLauncher(object):
         jobid = self.getJobIdsList(jobIds),
         )
     else:
-      slurm_options = '-p quick --account=t3 -o {ld}/mergerstep.log -e {ld}/mergerstep_njmerge.log --job-name=mergerstep_{pl} --dependency=afterany:{jobid}'.format(
+      slurm_options = '-p quick --account=t3 -o {ld}/mergerstep.log -e {ld}/mergerstep.log --job-name=mergerstep_{pl} --dependency=afterany:{jobid}'.format(
         ld    = logdir,
         pl    = label,
         jobid = self.getJobIdsList(jobIds),
@@ -309,6 +291,88 @@ class NanoLauncher(object):
     os.system('rm submitter_merger.sh')
 
 
+  def launchingModule(self, point=None, ds_label=None):
+    # declaring some useful quantities
+    # ids of the launched jobs, needed for dependency of the merger
+    nano_jobIds = []
+    flat_jobIds = []
+
+    # counter of processed files
+    nfiles_tot = 0
+        
+    # slurm cannot deal with too large arrays, so does haddnano (keep it hardcoded)
+    maxfiles_perchunk = 750
+    
+    print '\n  --> Fetching the files'
+    filelistname = self.writeFileList(maxfiles_perchunk, point)
+
+    # loop on the files (containing at most 750 samples) 
+    for iFile, filelist in enumerate(glob.glob('{}*.txt'.format(filelistname))):
+      if self.getSize(filelist) == 0:
+        print '        WARNING: no files were found with the corresponding production label'
+        print '                 Did you set the correct username using --user <username>?'
+
+      # enforcing max files limit
+      if self.maxfiles != None and nfiles_tot >= int(self.maxfiles): continue 
+
+      # number of files to process in this chunk
+      if self.maxfiles == None or int(self.maxfiles)-nfiles_tot > maxfiles_perchunk:
+        nfiles = self.getSize(filelist)
+      else:
+        nfiles = int(self.maxfiles)-nfiles_tot
+      nfiles_tot += nfiles
+      
+      # merging step (if any) must happen after nano or flat steps are completed
+      if self.maxfiles == None:
+        merge_cond = (iFile == len(glob.glob('{}*.txt'.format(filelistname)))-1)
+      else:
+        merge_cond = (nfiles_tot == int(self.maxfiles))
+        
+      print '\n  --> Creating output directory'
+      outputdir = '/pnfs/psi.ch/cms/trivcat/store/user/{}/BHNLsGen/'.format(os.environ["USER"])
+      if self.mcprivate:
+        outputdir += '{}/{}/nanoFiles/Chunk{}_n{}'.format(self.prodlabel, point, iFile, nfiles)
+      else:
+        dirname = 'data' if self.data else 'mc_central'
+        outputdir += '{}/{}_{}/Chunk{}_n{}/'.format(dirname, ds_label, self.prodlabel, iFile, nfiles)
+      if not path.exists(outputdir):
+        os.system('mkdir -p {}'.format(outputdir))
+      
+      print '\n  --> Creating log directory'
+      label1 = self.prodlabel if self.mcprivate else ds_label
+      label2 = point if self.mcprivate else self.prodlabel
+      logdir = './logs/{}/{}/Chunk{}_n{}'.format(label1, label2, iFile, nfiles) if self.tag == None \
+               else './logs/{}/{}_{}/Chunk{}_n{}'.format(label1, label2, self.tag, iFile, nfiles)
+      if not path.exists(logdir):
+        os.system('mkdir -p {}'.format(logdir))
+
+      label = '{}_{}_Chunk{}_n{}'.format(label1, label2 if self.tag==None else label2+'_'+self.tag, iFile, self.getSize(filelist))
+
+      nano_jobId = -99
+
+      if self.donano:
+        nano_jobId = self.launchNano(nfiles, outputdir, logdir, filelist, label)
+
+        if self.domergenano:
+          nano_jobIds.append(nano_jobId)
+
+          if merge_cond:
+            self.launchMerger(logdir, label, nano_jobIds, 'nano')
+
+      if self.doflat:
+        flat_outputdir = outputdir + '/flat'
+        if not path.exists(flat_outputdir):
+          os.system('mkdir -p {}'.format(flat_outputdir))
+
+        flat_jobId = self.launchDumper(outputdir, logdir, label, nano_jobId)
+
+        # merging of flat files happens automatically
+        flat_jobIds.append(flat_jobId)
+
+        if merge_cond:
+          self.launchMerger(logdir, label, flat_jobIds, 'flat')
+
+
   def process(self):
     if self.docompile:
       print '-> Compiling'
@@ -318,7 +382,7 @@ class NanoLauncher(object):
     print ' Processing NanoLauncher on production {} '.format(self.prodlabel if self.mcprivate else self.dataset)
     print ' --> on the batch'
     print '------------'
-
+    
     if self.mcprivate:
       locationSE = '/pnfs/psi.ch/cms/trivcat/store/user/{}/BHNLsGen/{}/'.format(self.user, self.prodlabel)
 
@@ -326,123 +390,23 @@ class NanoLauncher(object):
       pointsdir = self.getPointDirs(locationSE)
       points    = [point[point.rfind('/')+1:len(point)] for point in pointsdir]
       
-      # looping over all the different points
+      # looping over the signal points
       for point in points:
-     
         print '\n-> Processing mass/ctau point: {}'.format(point)
 
         if point != 'mass3.0_ctau184.256851021': continue
 
-        print '\n  --> Fetching the files'
-        filelistname = self.writeFileList(point)
-
-        # ids of the launched jobs, needed for dependency of the merger
-        nano_jobIds = []
-        flat_jobIds = []
-
-        # loop on the files (containing at most 750 samples) 
-        for iFile, filelist in enumerate(glob.glob('{}*.txt'.format(filelistname))):
-
-          if self.maxfiles == None and 'max' in filelist: continue
-          
-          if self.getSize(filelist) == 0:
-            print '        WARNING: no files were found with the corresponding production label'
-            print '                 Did you set the correct username using --user <username>?'
-
-          print '\n  --> Creating output directory'
-          outputdir = '/pnfs/psi.ch/cms/trivcat/store/user/{}/BHNLsGen/{}/{}/nanoFiles/Chunk{}_n{}'.format(os.environ["USER"], self.prodlabel, point, iFile, self.getSize(filelist))
-          if not path.exists(outputdir):
-            os.system('mkdir -p {}'.format(outputdir))
-          
-          print '\n  --> Creating log directory'
-          logdir = './logs/{}/{}/Chunk{}_n{}'.format(self.prodlabel, point, iFile, self.getSize(filelist)) if self.tag == None \
-                   else './logs/{}/{}_{}/Chunk{}_{}'.format(self.prodlabel, point, self.tag, iFile, self.getSize(filelist))
-          if not path.exists(logdir):
-            os.system('mkdir -p {}'.format(logdir))
-
-          label = self.prodlabel + '_' + point if self.tag == None else self.prodlabel + '_' + point + '_' +self.tag
-          label += '_Chunk{}_n{}'.format(iFile, self.getSize(filelist))
-
-          nano_jobId = -99
-          if self.donano:
-            nano_jobId = self.launchNano(self.getSize(filelist), outputdir, logdir, filelist, label)
-
-          if self.domergenano:
-            nano_jobIds.append(nano_jobId)
-
-            if iFile == len(glob.glob('{}*.txt'.format(filelistname)))-1:
-              self.launchMerger(logdir, label, nano_jobIds, 'nano')
-
-          if self.doflat:
-            flat_outputdir = outputdir + '/flat'
-            if not path.exists(flat_outputdir):
-              os.system('mkdir -p {}'.format(flat_outputdir))
-
-            flat_jobId = self.launchDumper(outputdir, logdir, label, nano_jobId)
-
-            # merging of flat files happens automatically
-            flat_jobIds.append(flat_jobId)
-
-            if iFile == len(glob.glob('{}*.txt'.format(filelistname)))-1:
-              self.launchMerger(logdir, label, flat_jobIds, 'flat')
-
+        self.launchingModule(point=point)
 
     
     elif self.data or self.mccentral:
       if self.mccentral:
         if 'ext' in self.dataset:
           self.prodlabel += '_ext'
-      
-      print '\n  --> Fetching the files'
-      filelistname = self.writeFileList()
 
-      ds_label = self.getDataLabel() if self.data else self.getMCLabel()
+      dataset_label = self.getDataLabel() if self.data else self.getMCLabel()
 
-      # ids of the launched jobs, needed for dependency of the merger
-      nano_jobIds = []
-      flat_jobIds = []
-
-      # loop on the files (containing at most 750 samples) 
-      for iFile, filelist in enumerate(glob.glob('{}*.txt'.format(filelistname))):
-        
-        if self.maxfiles == None and 'max' in filelist: continue
-
-        print '\n  --> Creating output directory'
-        dirname = 'data' if self.data else 'mc_central'
-        outputdir = '/pnfs/psi.ch/cms/trivcat/store/user/{}/BHNLsGen/{}/{}_{}/Chunk{}_n{}/'.format(os.environ["USER"], dirname, ds_label, self.prodlabel, iFile, self.getSize(filelist))
-        os.system('mkdir -p {}'.format(outputdir))
-        
-        print '\n-> Creating log directory'
-        logdir = '/work/anlyon/logs/{}/{}/Chunk{}_n{}'.format(ds_label, self.prodlabel, iFile, self.getSize(filelist)) if self.tag == None \
-               else './logs/{}/{}_{}/Chunk{}_n{}'.format(ds_label, self.prodlabel, self.tag, iFile, self.getSize(filelist))
-        os.system('mkdir -p {}'.format(logdir))
-          
-        label = '{}_{}_Chunk{}_n{}'.format(ds_label, self.prodlabel, iFile, self.getSize(filelist))
-
-        nano_jobId = -99
-        if self.donano:
-          nano_jobId = self.launchNano(self.getSize(filelist), outputdir, logdir, filelist, label)
-
-        if self.domergenano:
-          nano_jobIds.append(nano_jobId)
-
-          if iFile == len(glob.glob('{}*.txt'.format(filelistname)))-1:
-            self.launchMerger(logdir, label, nano_jobIds, 'nano')
-
-        if self.doflat:
-          flat_outputdir = outputdir + '/flat'
-          if not path.exists(flat_outputdir):
-            os.system('mkdir -p {}'.format(flat_outputdir))
-
-          flat_jobId = self.launchDumper(outputdir, logdir, label, nano_jobId)
-          
-          # merging of flat files happens automatically
-          flat_jobIds.append(flat_jobId)
-
-          if iFile == len(glob.glob('{}*.txt'.format(filelistname)))-1:
-            self.launchMerger(logdir, label, flat_jobIds, 'flat')
-
-
+      self.launchingModule(ds_label=dataset_label)
 
     print '\n-> Submission completed' 
 
