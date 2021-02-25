@@ -4,7 +4,7 @@ import os.path
 from os import path
 import glob
 import ROOT
-from nanoLauncher import NanoLauncher
+from nanoTools import NanoTools
 
 
 def getOptions():
@@ -35,7 +35,7 @@ def checkParser(opt):
     raise RuntimeError('Please indicate if you want to run on data or MC by adding only --data or --mcprivate or --mccentral to the command line')
 
 
-class NanoMerger(NanoLauncher):
+class NanoMerger(NanoTools):
   def __init__(self, opt):
     self.prodlabel = vars(opt)['pl']
     self.tag       = vars(opt)['tag']
@@ -165,7 +165,7 @@ class NanoMerger(NanoLauncher):
     if self.mcprivate:
       locationSE = '/pnfs/psi.ch/cms/trivcat/store/user/{}/BHNLsGen/{}/'.format(user, self.prodlabel)
       
-      pointdirs = NanoLauncher.getPointDirs(self, locationSE)
+      pointdirs = NanoTools.getPointDirs(self, locationSE)
 
       for pointdir in pointdirs:
         if 'merged' in pointdir: continue

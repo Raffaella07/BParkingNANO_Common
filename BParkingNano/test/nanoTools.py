@@ -18,6 +18,10 @@ class NanoTools(object):
     self.outdir  = vars(opt)['outdir']
 
 
+  def getPointDirs(self, location):
+    return [f for f in glob.glob(location+'/*')]
+
+
   def writeDumperStarter(self):
     nanoname = 'bparknano_nj' if self.tag == '0' else 'bparknano_{}_nj'.format(self.tag) 
     nanofiles = [f for f in glob.glob('{}/{}*'.format(self.outdir, nanoname))]

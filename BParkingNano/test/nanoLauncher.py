@@ -6,6 +6,8 @@ import glob
 import subprocess
 import ROOT
 
+from nanoTools import NanoTools
+
 
 def getOptions():
   from argparse import ArgumentParser
@@ -44,25 +46,21 @@ def checkParser(opt):
     raise RuntimeError('Please indicate if you want to run on data or MC by adding only --data or --mcprivate or --mccentral to the command line')
 
 
-class NanoLauncher(object):
+class NanoLauncher(NanoTools):
   def __init__(self, opt):
-    self.prodlabel = vars(opt)['pl']
-    self.dataset   = vars(opt)['ds']
-    self.tag       = vars(opt)['tag']
-    self.maxfiles  = vars(opt)['maxfiles']
-    self.mcprivate = vars(opt)['mcprivate']
-    self.mccentral = vars(opt)['mccentral']
-    self.data      = vars(opt)['data']
-    self.user      = vars(opt)["user"]
-    self.donano    = vars(opt)["donano"]
-    self.doflat    = vars(opt)["doflat"]
-    self.domergenano   = vars(opt)["domergenano"]
-    self.doquick   = vars(opt)["doquick"]
-    self.docompile = vars(opt)["docompile"]
-
-
-  def getPointDirs(self, location):
-    return [f for f in glob.glob(location+'/*')]
+    self.prodlabel   = vars(opt)['pl']
+    self.dataset     = vars(opt)['ds']
+    self.tag         = vars(opt)['tag']
+    self.maxfiles    = vars(opt)['maxfiles']
+    self.mcprivate   = vars(opt)['mcprivate']
+    self.mccentral   = vars(opt)['mccentral']
+    self.data        = vars(opt)['data']
+    self.user        = vars(opt)["user"]
+    self.donano      = vars(opt)["donano"]
+    self.doflat      = vars(opt)["doflat"]
+    self.domergenano = vars(opt)["domergenano"]
+    self.doquick     = vars(opt)["doquick"]
+    self.docompile   = vars(opt)["docompile"]
 
 
   def getLocalFiles(self, point):
@@ -387,7 +385,7 @@ class NanoLauncher(object):
       locationSE = '/pnfs/psi.ch/cms/trivcat/store/user/{}/BHNLsGen/{}/'.format(self.user, self.prodlabel)
 
       print '\n-> Getting the different mass points'
-      pointsdir = self.getPointDirs(locationSE)
+      pointsdir = NanoTools.getPointDirs(self, locationSE)
       points    = [point[point.rfind('/')+1:len(point)] for point in pointsdir]
       
       # looping over the signal points
