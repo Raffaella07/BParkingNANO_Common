@@ -88,7 +88,7 @@ void NanoDumper::SlaveBegin(TTree * /*tree*/)
   TString outFileName = option;
 
   // this option is intentionally hardcoded
-  do_fillhistograms = false;
+  do_fillhistograms = true;
 
   my_file = new TFile(outFileName, "RECREATE");  
   my_file->cd();
@@ -302,6 +302,8 @@ void NanoDumper::SlaveBegin(TTree * /*tree*/)
     sighist_selection_efficiency_hnliso4_eventswithmultcands = new TH1F("sighist_selection_efficiency_hnliso4_eventswithmultcands", "Efficiency of selection of candidate with smallest hnl isolation (events with multiple candidates)", 2, 0, 2);
     sighist_selection_efficiency_dr_allevents = new TH1F("sighist_selection_efficiency_dr_allevents", "Efficiency of selection of candidate with smallest dR(trgmu, hnl) (all events)", 2, 0, 2);
     sighist_selection_efficiency_dr_eventswithmultcands = new TH1F("sighist_selection_efficiency_dr_eventswithmultcands", "Efficiency of selection of candidate with smallest dR(trgmu, hnl) (events with multiple candidates)", 2, 0, 2);
+
+    my_file->cd();
   } // end define histograms
 }
 
@@ -728,6 +730,8 @@ void NanoDumper::Terminate()
   // The Terminate() function is the last function to be called during
   // a query. It always runs on the client, it can be used to present
   // the results graphically or save the results to file.
+
+  my_file->Write();
 
   signal_tree->Write("", TObject::kOverwrite);
   control_tree->Write("", TObject::kOverwrite);
