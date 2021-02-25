@@ -28,9 +28,6 @@ else # different treatment in case of resubmission
   #rm ${7}*$SLURM_ARRAY_TASK_ID*
 fi
 
-# index of the output file
-outIdx=$SLURM_ARRAY_TASK_ID
-echo "index of the outputfile: "$outIdx
 
 cd $workdir
 
@@ -41,6 +38,22 @@ else # different treatment in case of resubmission
   inputFilename=$(sed '1!d' *nj$SLURM_ARRAY_TASK_ID.txt)
 fi
 echo "inputfilename: "$inputFilename
+
+# index of the output file
+if [ ${5} == 1 ] ; then #isMC
+  if [ ${6} == 0 ] ; then  #private MC
+    search='_nj'
+    index=${inputFilename%%$search*}
+    outIdx=${#index}
+    outSuffix=${inputFilename:outIdx+3}
+  else
+    outSuffix=$SLURM_ARRAY_TASK_ID".root" 
+  fi
+else # isData
+  outSuffix=$SLURM_ARRAY_TASK_ID".root" 
+fi
+echo "suffix of the outputfile: "$outSuffix
+
 
 if [ ${5} == 1 ] ; then #isMC
 
@@ -70,9 +83,9 @@ fi
 
 echo "copying the file"
 if [ ${4} == 0 ] ; then
-  xrdcp -f bparknano.root root://t3dcachedb.psi.ch:1094/${1}/bparknano_nj$outIdx.root 
+  xrdcp -f bparknano.root root://t3dcachedb.psi.ch:1094/${1}/bparknano_nj$outSuffix 
 else
-  xrdcp -f bparknano.root root://t3dcachedb.psi.ch:1094/${1}/bparknano_${4}_nj$outIdx.root 
+  xrdcp -f bparknano.root root://t3dcachedb.psi.ch:1094/${1}/bparknano_${4}_nj$outSuffix 
 fi
 
 # copy filelist to pnfs
