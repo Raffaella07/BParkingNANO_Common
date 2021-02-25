@@ -10,21 +10,20 @@ import ROOT
 def getOptions():
   from argparse import ArgumentParser
   parser = ArgumentParser(description='Script to launch the nanoAOD tool on top of privately produced miniAOD files', add_help=True)
-  parser.add_argument('--pl'      , type=str, dest='pl'       , help='label of the sample file'                                                            , default=None)
-  parser.add_argument('--ds'      , type=str, dest='ds'       , help='[data-mccentral] name of the dataset, e.g /ParkingBPH4/Run2018B-05May2019-v2/MINIAOD', default=None)
-  parser.add_argument('--tag'     , type=str, dest='tag'      , help='[optional] tag to be added on the outputfile name'                                   , default=None)
-  parser.add_argument('--maxfiles', type=str, dest='maxfiles' , help='[optional] maximum number of files to process'                                       , default=None)
-  parser.add_argument('--user'    , type=str, dest='user'     , help='[optional-mcprivate] specify username where the miniAOD files are stored'            , default=os.environ["USER"])
-  parser.add_argument('--mcprivate'         , dest='mcprivate', help='run the BParking nano tool on a private MC sample'              , action='store_true', default=False)
-  parser.add_argument('--mccentral'         , dest='mccentral', help='run the BParking nano tool on a central MC sample'              , action='store_true', default=False)
-  parser.add_argument('--data'              , dest='data'     , help='run the BParking nano tool on a data sample'                    , action='store_true', default=False)
-  parser.add_argument('--donano'            , dest='donano'   , help='launch the nano tool on top of the minifile'                    , action='store_true', default=False)
-  parser.add_argument('--doflat'            , dest='doflat'   , help='launch the ntupliser on top of the nanofile'                    , action='store_true', default=False)
-  parser.add_argument('--domerge'           , dest='domerge'  , help='[optional] merge the nanofile steps'                            , action='store_true', default=False)
-  parser.add_argument('--doquick'           , dest='doquick'  , help='[optional] run the jobs on the quick partition (t/job<1h)'      , action='store_true', default=False)
-  parser.add_argument('--docompile'         , dest='docompile', help='[optional] compile the full BParkingNano tool'                  , action='store_true', default=False)
+  parser.add_argument('--pl'      , type=str, dest='pl'         , help='label of the sample file'                                                            , default=None)
+  parser.add_argument('--ds'      , type=str, dest='ds'         , help='[data-mccentral] name of the dataset, e.g /ParkingBPH4/Run2018B-05May2019-v2/MINIAOD', default=None)
+  parser.add_argument('--tag'     , type=str, dest='tag'        , help='[optional] tag to be added on the outputfile name'                                   , default=None)
+  parser.add_argument('--maxfiles', type=str, dest='maxfiles'   , help='[optional] maximum number of files to process'                                       , default=None)
+  parser.add_argument('--user'    , type=str, dest='user'       , help='[optional-mcprivate] specify username where the miniAOD files are stored'            , default=os.environ["USER"])
+  parser.add_argument('--mcprivate'         , dest='mcprivate'  , help='run the BParking nano tool on a private MC sample'              , action='store_true', default=False)
+  parser.add_argument('--mccentral'         , dest='mccentral'  , help='run the BParking nano tool on a central MC sample'              , action='store_true', default=False)
+  parser.add_argument('--data'              , dest='data'       , help='run the BParking nano tool on a data sample'                    , action='store_true', default=False)
+  parser.add_argument('--donano'            , dest='donano'     , help='launch the nano tool on top of the minifile'                    , action='store_true', default=False)
+  parser.add_argument('--doflat'            , dest='doflat'     , help='launch the ntupliser on top of the nanofile'                    , action='store_true', default=False)
+  parser.add_argument('--domergenano'       , dest='domergenano', help='[optional] merge the nanofile steps'                            , action='store_true', default=False)
+  parser.add_argument('--doquick'           , dest='doquick'    , help='[optional] run the jobs on the quick partition (t/job<1h)'      , action='store_true', default=False)
+  parser.add_argument('--docompile'         , dest='docompile'  , help='[optional] compile the full BParkingNano tool'                  , action='store_true', default=False)
   
-  # add domerge, dofullmerge? 
   return parser.parse_args()
 
 
@@ -57,7 +56,7 @@ class NanoLauncher(object):
     self.user      = vars(opt)["user"]
     self.donano    = vars(opt)["donano"]
     self.doflat    = vars(opt)["doflat"]
-    self.domerge   = vars(opt)["domerge"]
+    self.domergenano   = vars(opt)["domergenano"]
     self.doquick   = vars(opt)["doquick"]
     self.docompile = vars(opt)["docompile"]
 
@@ -287,7 +286,7 @@ class NanoLauncher(object):
     self.writeMergerSubmitter(label, filetype)
 
     if not self.doquick:
-      slurm_options = '-p wn --account=t3 -o {ld}/mergerstep.log -e {ld}/mergerstep_njmerge.log --job-name=mergerstep_{pl} --time=02:00:00 --dependency=afterany:{jobid}'.format(
+      slurm_options = '-p wn --account=t3 -o {ld}/mergerstep.log -e {ld}/mergerstep.log --job-name=mergerstep_{pl} --time=02:00:00 --dependency=afterany:{jobid}'.format(
         ld    = logdir,
         pl    = label,
         jobid = self.getJobIdsList(jobIds),
@@ -368,11 +367,11 @@ class NanoLauncher(object):
           if self.donano:
             nano_jobId = self.launchNano(self.getSize(filelist), outputdir, logdir, filelist, label)
 
-          if self.domerge:
+          if self.domergenano:
             nano_jobIds.append(nano_jobId)
 
             if iFile == len(glob.glob('{}*.txt'.format(filelistname)))-1:
-              self.launchMerger(logdir, label, nano_jobIds)
+              self.launchMerger(logdir, label, nano_jobIds, 'nano')
 
           if self.doflat:
             flat_outputdir = outputdir + '/flat'
@@ -424,7 +423,7 @@ class NanoLauncher(object):
         if self.donano:
           nano_jobId = self.launchNano(self.getSize(filelist), outputdir, logdir, filelist, label)
 
-        if self.domerge:
+        if self.domergenano:
           nano_jobIds.append(nano_jobId)
 
           if iFile == len(glob.glob('{}*.txt'.format(filelistname)))-1:

@@ -170,7 +170,8 @@ class NanoMerger(NanoLauncher):
       for pointdir in pointdirs:
         if 'merged' in pointdir: continue
 
-        print '\n --- Mass point: {} --- '.format(pointdir[pointdir.rfind('/')+1:len(pointdir)])
+        point = pointdir[pointdir.rfind('/')+1:len(pointdir)]
+        print '\n --- Mass point: {} --- '.format(point)
 
         self.runMergingModule(pointdir+'/nanoFiles/')
 
