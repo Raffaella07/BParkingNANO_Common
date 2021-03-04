@@ -169,6 +169,13 @@ BToMuMuPiTable = cms.EDProducer(
         matching_sel_mu_motherPdgId = Var("userInt('matching_sel_mu_motherPdgId')", int, mcOnly=True),
         matching_trg_mu_motherPdgId = Var("userInt('matching_trg_mu_motherPdgId')", int, mcOnly=True),
         matching_pi_motherPdgId     = Var("userInt('matching_pi_motherPdgId')"    , int, mcOnly=True),
+        ## displacement 
+        #fitter_bs_lxy = ufloat('fitter_bs_lxy'), #same as sv_lxy, with more explicit naming
+        ##my_fitter_bs_lxy = ufloat('my_fitter_bs_lxy'), 
+        ##disp2DFromBS = ufloat('disp2DFromBS'),
+        ##flightdisp = ufloat('flightdisp'),
+        #gendisp_trgmu_mu_lxyz = ufloat('gendisp_trgmu_mu_lxyz'),
+        #gendisp_trgmu_mu_lxy = ufloat('gendisp_trgmu_mu_lxy'),
     )
 )
 
