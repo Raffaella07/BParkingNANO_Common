@@ -16,6 +16,7 @@ mkdir -p $workdir
 echo "copying ntupliser to workdir"
 cp nanoTools.py $workdir
 cp ../data/json/golden_2018.json $workdir
+cp ../plugins/dumper/utils.C $workdir 
 cp ../plugins/dumper/NanoDumper.C $workdir 
 cp ../plugins/dumper/NanoDumper.h $workdir 
 cp ../plugins/dumper/NanoRunDumper.C $workdir 
