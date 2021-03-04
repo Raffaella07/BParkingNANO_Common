@@ -171,7 +171,7 @@ class NanoProdManager(object):
       
       # close file list
       filelist.close()
-  
+
       #print 'created {}_nj{}.txt'.format(filename, self.getStep(file_))
 
     return filename 
@@ -201,7 +201,7 @@ class NanoProdManager(object):
     filelist  = self.writeFileList(failed_files) 
     
 
-    command = 'sbatch -p wn --account=t3 -o {ld}/nanostep_nj%a.log -e {ld}/nanostep_nj%a.log --job-name=nanostep_nj%a_{pl} --array {ar} --time=03:00:00 submitter.sh {outdir} {usr} {pl} {tag} {isMC} {rmt} {flt} {lst} 1'.format(
+    command = 'sbatch -p wn --account=t3 -o {ld}/nanostep_nj%a.log -e {ld}/nanostep_nj%a.log --job-name=nanostep_nj%a_{pl} --array {ar} --time=03:00:00 submitter.sh {outdir} {usr} {pl} {tag} {isMC} {rmt} {lst} 1'.format(
       ld      = logdir,
       pl      = label,
       ar      = self.getArray(failed_files), 
@@ -210,7 +210,6 @@ class NanoProdManager(object):
       tag     = 0, #if self.tag == None else self.tag, # adapt
       isMC    = 1 if self.mcprivate or self.mccentral else 0,
       rmt     = 0 if self.mcprivate else 1,
-      flt     = 0, #1 if self.doflat == True else 0, # adapt
       lst     =  filelist,
     )
 
