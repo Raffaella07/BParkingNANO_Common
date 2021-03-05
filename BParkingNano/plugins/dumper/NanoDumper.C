@@ -87,9 +87,6 @@ void NanoDumper::SlaveBegin(TTree * /*tree*/)
   TString option = GetOption();
   TString outFileName = option;
 
-  // this option is intentionally hardcoded
-  do_fillhistograms = true;
-
   my_file = new TFile(outFileName, "RECREATE");  
   my_file->cd();
 
@@ -731,7 +728,7 @@ void NanoDumper::Terminate()
   // a query. It always runs on the client, it can be used to present
   // the results graphically or save the results to file.
 
-  my_file->Write();
+  if(do_fillhistograms) my_file->Write();
 
   signal_tree->Write("", TObject::kOverwrite);
   control_tree->Write("", TObject::kOverwrite);

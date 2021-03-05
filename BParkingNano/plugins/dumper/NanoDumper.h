@@ -341,7 +341,8 @@ public :
    TFile* my_file;  
 
    // some option
-   Bool_t do_fillhistograms;
+   // this option is intentionally hardcoded
+   Bool_t do_fillhistograms = true;
 
    // trees to fill
    TTree* signal_tree;
