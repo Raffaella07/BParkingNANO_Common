@@ -13,7 +13,7 @@
 #--------------------
 
 
-workdir="/scratch/"${2}"/"${3}"/job_nj"$SLURM_ARRAY_TASK_ID
+workdir="/scratch/"${2}"/"${3}"/job_nj"${SLURM_JOB_ID}"_"${SLURM_ARRAY_TASK_ID}
 echo "creating workdir "$workdir
 mkdir -p $workdir
 

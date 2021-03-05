@@ -9,7 +9,7 @@
 # ${5}:  isMC
 #--------------------
 
-workdir="/scratch/"${2}"/"${3}"/dumperjob"
+workdir="/scratch/"${2}"/"${3}"/dumperjob_"${SLURM_JOB_ID}_${SLURM_ARRAY_TASK_ID}
 echo "creating workdir "$workdir
 mkdir -p $workdir
 
@@ -38,7 +38,7 @@ DATE_END_DUMP=`date +%s`
 
 echo "copying the file"
 if [ ${4} == 0 ] ; then
-  xrdcp -f flat_bparknano.root root://t3dcachedb.psi.ch:1094/${1}/flat/flat_bparknano.root
+  xrdcp -f flat_bparknano.root root://t3dcachedb.psi.ch:1094/${1}/flat/flat_bparknano_withoutLumiMask.root
 else
   xrdcp -f flat_bparknano.root root://t3dcachedb.psi.ch:1094/${1}/flat/flat_bparknano_${4}.root
 fi
