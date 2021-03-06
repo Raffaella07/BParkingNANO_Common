@@ -9,7 +9,13 @@
 # ${5}:  isMC
 #--------------------
 
-workdir="/scratch/"${2}"/"${3}"/dumperjob_"${SLURM_JOB_ID}_${SLURM_ARRAY_TASK_ID}
+if [ ${5} == 1 ] ; then #isMC
+  tag=${4}
+else
+  tag="0"
+fi
+
+workdir="/scratch/"${2}"/"${3}"/dumperjob_"${SLURM_JOB_ID}
 echo "creating workdir "$workdir
 mkdir -p $workdir
 
@@ -24,9 +30,8 @@ cp ../plugins/dumper/NanoRunDumper.h $workdir
 
 cd $workdir
 
-echo "creating the starter"
-echo " with command: python nanoTools.py --writestarter --outdir ${1} --tag ${4} --ismc ${5}"
-python nanoTools.py --writestarter --outdir ${1} --tag ${4} --ismc ${5} # --myoptions
+echo "creating the starter with command: python nanoTools.py --writestarter --outdir ${1} --tag $tag --ismc ${5}"
+python nanoTools.py --writestarter --outdir ${1} --tag $tag --ismc ${5} 
 
 # for test 
 cp starter.C $CMSSW_BASE/src/PhysicsTools/BParkingNano/test
@@ -38,7 +43,7 @@ DATE_END_DUMP=`date +%s`
 
 echo "copying the file"
 if [ ${4} == 0 ] ; then
-  xrdcp -f flat_bparknano.root root://t3dcachedb.psi.ch:1094/${1}/flat/flat_bparknano_withoutLumiMask.root
+  xrdcp -f flat_bparknano.root root://t3dcachedb.psi.ch:1094/${1}/flat/flat_bparknano.root
 else
   xrdcp -f flat_bparknano.root root://t3dcachedb.psi.ch:1094/${1}/flat/flat_bparknano_${4}.root
 fi
