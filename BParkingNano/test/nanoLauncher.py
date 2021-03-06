@@ -25,7 +25,6 @@ def getOptions():
   parser.add_argument('--domergenano'       , dest='domergenano', help='[optional] merge the nanofile steps'                            , action='store_true', default=False)
   parser.add_argument('--doquick'           , dest='doquick'    , help='[optional] run the jobs on the quick partition (t/job<1h)'      , action='store_true', default=False)
   parser.add_argument('--docompile'         , dest='docompile'  , help='[optional] compile the full BParkingNano tool'                  , action='store_true', default=False)
-  
   return parser.parse_args()
 
 
@@ -179,7 +178,7 @@ class NanoLauncher(NanoTools):
       '#!/bin/bash',
       'workdir="{wrkdir}"',
       'mkdir -p $workdir',
-      'cp nanoLauncher.py $workdir',
+      'cp nanoTools.py $workdir',
       'cp nanoMerger.py $workdir',
       'cp haddnano.py $workdir',
       'cd $workdir',
