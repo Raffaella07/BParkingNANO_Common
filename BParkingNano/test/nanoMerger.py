@@ -10,7 +10,8 @@ from nanoTools import NanoTools
 def getOptions():
   from argparse import ArgumentParser
   parser = ArgumentParser(description='Script to merge the nanoAOD files resulting from a multijob production', add_help=True)
-  parser.add_argument('--pl' , type=str, dest='pl'       , help='label of the sample filei, e.g ParkingBPH4_Run2018B_V00'                , default='V01_n9000000_njt300')
+  parser.add_argument('--pl' , type=str, dest='pl'       , help='label of the nano sample production'                                    , default='V01_n9000000_njt300')
+  parser.add_argument('--ds' , type=str, dest='ds'       , help='[data-mccentral] name of the dataset'                                   , default=None)
   parser.add_argument('--tag', type=str, dest='tag'      , help='[optional] tag to be added on the outputfile name'                      , default=None)
   parser.add_argument('--mcprivate'    , dest='mcprivate', help='run the BParking nano tool on a private MC sample' , action='store_true', default=False)
   parser.add_argument('--mccentral'    , dest='mccentral', help='run the BParking nano tool on a central MC sample' , action='store_true', default=False)
@@ -38,6 +39,7 @@ def checkParser(opt):
 class NanoMerger(NanoTools):
   def __init__(self, opt):
     self.prodlabel = vars(opt)['pl']
+    self.dataset   = vars(opt)['ds']
     self.tag       = vars(opt)['tag']
     self.mcprivate = vars(opt)['mcprivate']
     self.mccentral = vars(opt)['mccentral']
@@ -176,7 +178,8 @@ class NanoMerger(NanoTools):
         self.runMergingModule(pointdir+'/nanoFiles/')
 
     elif self.data or self.mccentral:
-      locationSE = '/pnfs/psi.ch/cms/trivcat/store/user/{}/BHNLsGen/{}/{}'.format(user, 'data' if self.data else 'mc_central', self.prodlabel)
+      dataset_label = NanoTools.getDataLabel(self, self.dataset) if self.data else NanoTools.getMCLabel(self, self.dataset)
+      locationSE = '/pnfs/psi.ch/cms/trivcat/store/user/{}/BHNLsGen/{}/{}/{}'.format(user, 'data' if self.data else 'mc_central', self.prodlabel, dataset_label)
 
       self.runMergingModule(locationSE)
   
