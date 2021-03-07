@@ -332,7 +332,7 @@ class NanoLauncher(NanoTools):
         outputdir += '{}/{}/nanoFiles/Chunk{}_n{}'.format(self.prodlabel, point, iFile, nfiles)
       else:
         dirname = 'data' if self.data else 'mc_central'
-        outputdir += '{}/{}_{}/Chunk{}_n{}/'.format(dirname, ds_label, self.prodlabel, iFile, nfiles)
+        outputdir += '{}/{}/{}/Chunk{}_n{}/'.format(dirname, self.prodlabel, ds_label, iFile, nfiles)
       if not path.exists(outputdir):
         os.system('mkdir -p {}'.format(outputdir))
       
