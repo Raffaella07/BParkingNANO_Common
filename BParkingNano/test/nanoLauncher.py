@@ -148,16 +148,17 @@ class NanoLauncher(NanoTools):
 
   def writeMergerSubmitter(self, label, filetype):
     # defining the command
-    type_ = 'mcprivate' if self.mcprivate else 'data'
+    #type_ = 'mcprivate' if self.mcprivate else 'data'
 
     prodlabel = ''
     if self.mcprivate: prodlabel = self.prodlabel
     elif self.mccentral: prodlabel = self.getMCLabel() + '_' + self.prodlabel 
     elif self.data: prodlabel = self.getDataLabel() + '_' + self.prodlabel 
 
-    command = 'python nanoMerger.py --dobatch --pl {pl} --{tp}'.format(
+    #command = 'python nanoMerger.py --dobatch --pl {pl} --{tp}'.format(
+    command = 'python nanoMerger.py --dobatch --pl {pl}'.format(
         pl = prodlabel,
-        tp = type_,
+        #tp = type_,
         )
     if self.tag != None:
       command += ' --tag {}'.format(self.tag)
