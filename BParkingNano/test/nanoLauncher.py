@@ -116,14 +116,16 @@ class NanoLauncher(NanoTools):
     event_chain = []
     event_chain.append('TChain* c = new TChain("Events");')
     for iFile in range(1, nfiles+1):
-      event_chain.append('  c->Add("{}/{}_nj{}.root");'.format(outputdir, nanoname, NanoTools.getStep(self, lines[iFile-1])))
+      file_step = NanoTools.getStep(self, lines[iFile-1]) if self.mcprivate else iFile
+      event_chain.append('  c->Add("{}/{}_nj{}.root");'.format(outputdir, nanoname, file_step))
     event_chain.append('  c->Process("NanoDumper.C+", outFileName);')
     event_chain = '\n'.join(event_chain)
 
     run_chain = []
     run_chain.append('TChain* c_run = new TChain("Runs");')
     for iFile in range(1, nfiles+1):
-      run_chain.append('  c->Add("{}/{}_nj{}.root");'.format(outputdir, nanoname, NanoTools.getStep(self, lines[iFile-1])))
+      file_step = NanoTools.getStep(self, lines[iFile-1]) if self.mcprivate else iFile
+      run_chain.append('  c->Add("{}/{}_nj{}.root");'.format(outputdir, nanoname, file_step))
     run_chain.append('  c_run->Process("NanoRunDumper.C+", outFileName);')
     run_chain = '\n'.join(run_chain)
 
