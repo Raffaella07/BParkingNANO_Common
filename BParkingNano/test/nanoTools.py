@@ -10,9 +10,9 @@ class NanoTools(object):
 
   def getNanoDirectories(self, location, prodlabel, dataset):
     if dataset == None:
-      dirs = [f for f in glob.glob('{loc}/*{pl}'.format(loc=location, pl=prodlabel))]
+      dirs = [f for f in glob.glob('{loc}/{pl}/*'.format(loc=location, pl=prodlabel))]
     else:
-      dirs = [f for f in glob.glob('{loc}/{ds}_{pl}'.format(loc=location, ds=dataset, pl=prodlabel))]
+      dirs = [f for f in glob.glob('{loc}/{pl}/{ds}'.format(loc=location, pl=prodlabel, ds=dataset))]
     if len(dirs) == 0:
       raise RuntimeError('No samples with the production label "{pl}" were found in {loc}'.format(pl=prodlabel if dataset==None else dataset+'_'+prodlabel, loc=location))
     return dirs
@@ -20,7 +20,7 @@ class NanoTools(object):
 
   def getLogDir(self, file_, prodlabel, isData):
    if isData: # probably to be modified for mc
-     label = file_[file_.find('/',file_.find('data'))+1:file_.find(prodlabel)-1] 
+     label = file_[file_.find('/',file_.find(prodlabel))+1:file_.find('Chunk')-1] 
      chunk = file_[file_.find('Chunk'):file_.find('bparknano')-1]
    return '/work/anlyon/logs/{}/{}/{}'.format(label, prodlabel, chunk) # this will have to be modified
 
