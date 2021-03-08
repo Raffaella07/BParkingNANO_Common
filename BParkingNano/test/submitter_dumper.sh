@@ -20,7 +20,7 @@ echo "creating workdir "$workdir
 mkdir -p $workdir
 
 echo "copying ntupliser to workdir"
-cp nanoTools.py $workdir
+cp ./files/starter_${3}.C $workdir/starter.C
 cp ../data/json/golden_2018.json $workdir
 cp ../plugins/dumper/utils.C $workdir 
 cp ../plugins/dumper/NanoDumper.C $workdir 
@@ -28,13 +28,9 @@ cp ../plugins/dumper/NanoDumper.h $workdir
 cp ../plugins/dumper/NanoRunDumper.C $workdir 
 cp ../plugins/dumper/NanoRunDumper.h $workdir 
 
+rm ./files/starter_${3}.C
+
 cd $workdir
-
-echo "creating the starter with command: python nanoTools.py --writestarter --outdir ${1} --tag $tag --ismc ${5}"
-python nanoTools.py --writestarter --outdir ${1} --tag $tag --ismc ${5} 
-
-# for test 
-cp starter.C $CMSSW_BASE/src/PhysicsTools/BParkingNano/test
 
 echo "running the ntupliser on top of the nanofile"
 DATE_START_DUMP=`date +%s`
@@ -44,8 +40,10 @@ DATE_END_DUMP=`date +%s`
 echo "copying the file"
 if [ ${4} == 0 ] ; then
   xrdcp -f flat_bparknano.root root://t3dcachedb.psi.ch:1094/${1}/flat/flat_bparknano.root
+  xrdcp -f starter.C root://t3dcachedb.psi.ch:1094/${1}/flat/starter.C
 else
   xrdcp -f flat_bparknano.root root://t3dcachedb.psi.ch:1094/${1}/flat/flat_bparknano_${4}.root
+  xrdcp -f starter.C root://t3dcachedb.psi.ch:1094/${1}/flat/starter_${4}.C
 fi
 
 echo "content of the workdir"
