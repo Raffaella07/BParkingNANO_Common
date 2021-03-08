@@ -28,7 +28,6 @@ else # different treatment in case of resubmission
   #rm ${7}*$SLURM_ARRAY_TASK_ID*
 fi
 
-
 cd $workdir
 
 inputFilename=''
@@ -43,9 +42,10 @@ echo "inputfilename: "$inputFilename
 if [ ${5} == 1 ] ; then #isMC
   if [ ${6} == 0 ] ; then  #private MC
     search='_nj'
-    index=${inputFilename%%$search*}
-    outIdx=${#index}
-    outSuffix=${inputFilename:outIdx+3}
+    start=$inputFilename
+    end=${start##*$search}
+    outIdx=$((${#start} - ${#end}))
+    outSuffix=${inputFilename:outIdx}
   else
     outSuffix=$SLURM_ARRAY_TASK_ID".root" 
   fi
@@ -85,6 +85,7 @@ echo "copying the file"
 if [ ${4} == 0 ] ; then
   xrdcp -f bparknano.root root://t3dcachedb.psi.ch:1094/${1}/bparknano_nj$outSuffix 
 else
+  echo "xrdcp -f bparknano.root root://t3dcachedb.psi.ch:1094/${1}/bparknano_${4}_nj$outSuffix"
   xrdcp -f bparknano.root root://t3dcachedb.psi.ch:1094/${1}/bparknano_${4}_nj$outSuffix 
 fi
 
