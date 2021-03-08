@@ -3,6 +3,7 @@ import os
 import glob
 import subprocess
 
+from nanoTools import NanoTools
 
 def getOptions():
   from argparse import ArgumentParser
@@ -31,7 +32,7 @@ def checkParser(opt):
 
 
 
-class NanoProdManager(object):
+class NanoProdManager(NanoTools):
   def __init__(self, opt):
     self.prodlabel    = vars(opt)['pl']
     self.dataset      = vars(opt)['ds']
@@ -43,53 +44,8 @@ class NanoProdManager(object):
     self.doresubmit   = vars(opt)['doresubmit'] 
 
 
-  def getFilesLocation(self):  
-    location = '/pnfs/psi.ch/cms/trivcat/store/user/{usr}/BHNLsGen'.format(usr=os.environ["USER"])
-    if self.data:
-      location += '/data'
-    return location
-
-
-  def getDirectories(self, location):
-    if self.dataset == None:
-      dirs = [f for f in glob.glob('{loc}/*{pl}'.format(loc=location, pl=self.prodlabel))]
-    else:
-      dirs = [f for f in glob.glob('{loc}/{ds}_{pl}'.format(loc=location, ds=self.dataset, pl=self.prodlabel))]
-    if len(dirs) == 0:
-      raise RuntimeError('No samples with the production label "{pl}" were found in {loc}'.format(pl=self.prodlabel if self.dataset==None else self.dataset+'_'+self.prodlabel, loc=location))
-    return dirs
-
-
-  def getNExpectedFiles(self, dir_):
-    n_exp = dir_[dir_.rfind('_n')+2:len(dir_)]
-    return int(n_exp)
-
-
-  def getNOutputFiles(self, dir_): # not needed anymore?
-    command = 'ls -al {}/bparknano_nj*.root | wc -l'.format(dir_)
-    n_out = subprocess.check_output(command, shell=True)
-    return int(n_out)
-
-
-  def checkFileExists(self, file_):
-    import os.path
-    from os import path
-    return path.exists(file_)
-
-
-  def getStep(self, file_): 
-    return file_[file_.rfind('_nj')+3:file_.rfind('.root')]
-
-
-  def getLogDir(self, file_):
-   if self.data: # probably to be modified for mc
-     label = file_[file_.find('/',file_.find('data'))+1:file_.find(self.prodlabel)-1] 
-     chunk = file_[file_.find('Chunk'):file_.find('bparknano')-1]
-   return '/work/anlyon/logs/{}/{}/{}'.format(label, self.prodlabel, chunk) # this will have to be modified
-
-
-  def getLogFile(self, logdir, file_):
-    return '{}/nanostep_{}.log'.format(logdir, file_[file_.rfind('_nj')+1:file_.rfind('.root')])
+  def isJobFinished(self, logfile):
+    return self.scanLogFile(logfile, 'finished running nano step') or self.scanLogFile(logfile, 'slurmstepd: error')
 
 
   def scanLogFile(self, logfile, key):
@@ -99,10 +55,6 @@ class NanoProdManager(object):
       else:
         return False
    
-
-  def isJobFinished(self, logfile):
-    return self.scanLogFile(logfile, 'finished running nano step') or self.scanLogFile(logfile, 'slurmstepd: error')
-      
 
   def fetchTime(self, logfile, key):
     if key == 'wallclock':
@@ -146,7 +98,7 @@ class NanoProdManager(object):
 
   def writeFileList(self, failed_files):
 
-    logdir = self.getLogDir(failed_files[0])
+    logdir = NanoTools.getLogDir(self, failed_files[0], self.prodlabel, self.data)
     label = logdir[logdir.find('logs')+5:].replace('/', '_')
 
     if self.data:
@@ -158,10 +110,10 @@ class NanoProdManager(object):
 
     for file_ in failed_files:
       # open file list
-      filelist = open(filename + '_nj{}.txt'.format(self.getStep(file_)), 'w+')
+      filelist = open(filename + '_nj{}.txt'.format(NanoTools.getStep(self, file_)), 'w+')
 
       # get the file to reprocess
-      logfile = self.getLogFile(logdir, file_)
+      logfile = NanoTools.getLogFile(self, logdir, file_)
       command = 'grep "going to run nano step on" {}'.format(logfile)
       output = subprocess.check_output(command, shell=True)
       file_toresubmit = output[output.find('step on')+8:len(output)]
@@ -172,21 +124,15 @@ class NanoProdManager(object):
       # close file list
       filelist.close()
 
-      #print 'created {}_nj{}.txt'.format(filename, self.getStep(file_))
+      #print 'created {}_nj{}.txt'.format(filename, NanoTools.getStep(self, file_))
 
     return filename 
-
-    # this is to avoid slurm to deal with too large arrays --> to remove if per-chunk resubmission
-    #if len(failed_files) > 1000:
-    #  command_split = 'split -l 1000 {fn}.txt {fn} --additional-suffix=.txt'.format(fn=filename)
-    #  os.system(command_split)
-    #  os.system('rm {fn}.txt'.format(fn=filename))
 
 
   def getArray(self, failed_files): 
     idx = []
     for file_ in failed_files:
-      idx.append(self.getStep(file_))
+      idx.append(NanoTools.getStep(self, file_))
     return ','.join(idx)
     
 
@@ -194,12 +140,11 @@ class NanoProdManager(object):
     # strategy: per chunk resubmission
     #           submit job arrays with indices corresponding to the stepId of the failed jobs
 
-    logdir    = self.getLogDir(failed_files[0]) 
+    logdir    = NanoTools.getLogDir(self, failed_files[0], self.prodlabel, self.data) 
     label     = logdir[logdir.find('logs')+5:].replace('/', '_')
     array     = self.getArray(failed_files)
     outputdir = failed_files[0][0:failed_files[0].find('bparknano')]
     filelist  = self.writeFileList(failed_files) 
-    
 
     command = 'sbatch -p wn --account=t3 -o {ld}/nanostep_nj%a.log -e {ld}/nanostep_nj%a.log --job-name=nanostep_nj%a_{pl} --array {ar} --time=03:00:00 submitter.sh {outdir} {usr} {pl} {tag} {isMC} {rmt} {lst} 1'.format(
       ld      = logdir,
@@ -226,10 +171,10 @@ class NanoProdManager(object):
       print '\nINFO: the JobManager Tool is going to be run on all dataset having "{}" as production label\n'.format(opt.pl)
 
     # pnfs directory where nano samples are located
-    location = self.getFilesLocation()
+    location = NanoTools.getFilesLocation(self, self.data)
 
     # get the directories associated to the production label
-    dirs = self.getDirectories(location)
+    dirs = NanoTools.getNanoDirectories(self, location, self.prodlabel, self.dataset)
     #dirs = [f for f in glob.glob('{loc}/ParkingBPH1_Run2018B*{pl}'.format(loc=location, pl=self.prodlabel))]
     if len(dirs) == 0:
       raise RuntimeError('No samples with the production label "{pl}" were found in {loc}'.format(pl=self.prodlabel, loc=location))
@@ -257,8 +202,6 @@ class NanoProdManager(object):
       n_failed_perdir      = 0
       n_unfinished_perdir  = 0
       n_unprocessed_perdir = 0
-      #n_tot_perdir         = 0
-      #n_unstarted_chunk    = 0
 
       n_failure_xrootd_perdir  = 0
       n_failure_readerr_perdir = 0
@@ -287,33 +230,21 @@ class NanoProdManager(object):
         time_wallclock_perchunk = 0
         time_cpu_perchunk       = 0
 
-        n_exp = self.getNExpectedFiles(chunk_)
-        #n_out = self.getNOutputFiles(chunk_)
-
-        #n_tot_perdir += n_exp
-
-        #if n_out == 0: # production of this chunk of samples has not started yet
-        #  print '-> samples in this chunk have not started to be processed yet'
-        #  n_unstarted_chunk += 1
-          
-        #else:  
-        #if n_exp == n_out: # no failed jobs
-        #  n_good_perchunk = n_exp
-
-        #else: # there are some failed or unfinished jobs
+        n_exp = self.getNExpectedNanoFiles(chunk_)
+        
         files = [chunk_+'/bparknano_nj'+str(nj)+'.root' for nj in range(1, n_exp+1)]
 
         for file_ in files:
           # get the log file
-          logdir = self.getLogDir(file_)
-          logfile = self.getLogFile(logdir, file_)
+          logdir = NanoTools.getLogDir(self, file_, self.prodlabel, self.data)
+          logfile = NanoTools.getLogFile(self, logdir, file_)
           
           # idle jobs
-          if not self.checkFileExists(logfile): 
+          if not NanoTools.checkFileExists(self, logfile): 
             n_unprocessed_perchunk += 1
             continue
 
-          if self.checkFileExists(file_): # successfull job
+          if NanoTools.checkFileExists(self, file_): # successfull job
             n_good_perchunk += 1
 
             if self.dofetchtime:  
@@ -344,7 +275,6 @@ class NanoProdManager(object):
 
                  #print '{} does not exist'.format(file_)
                  failed_files.append(file_)
-                 #failed_logdir.append(self.getLogDir(file_))
   
        
         if self.dofullreport:

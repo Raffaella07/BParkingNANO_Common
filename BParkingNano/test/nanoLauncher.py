@@ -12,19 +12,19 @@ from nanoTools import NanoTools
 def getOptions():
   from argparse import ArgumentParser
   parser = ArgumentParser(description='Script to launch the nanoAOD tool on top of privately produced miniAOD files', add_help=True)
-  parser.add_argument('--pl'      , type=str, dest='pl'         , help='label of the sample file'                                                            , default=None)
-  parser.add_argument('--ds'      , type=str, dest='ds'         , help='[data-mccentral] name of the dataset, e.g /ParkingBPH4/Run2018B-05May2019-v2/MINIAOD', default=None)
-  parser.add_argument('--tag'     , type=str, dest='tag'        , help='[optional] tag to be added on the outputfile name'                                   , default=None)
-  parser.add_argument('--maxfiles', type=str, dest='maxfiles'   , help='[optional] maximum number of files to process'                                       , default=None)
-  parser.add_argument('--user'    , type=str, dest='user'       , help='[optional-mcprivate] specify username where the miniAOD files are stored'            , default=os.environ["USER"])
-  parser.add_argument('--mcprivate'         , dest='mcprivate'  , help='run the BParking nano tool on a private MC sample'              , action='store_true', default=False)
-  parser.add_argument('--mccentral'         , dest='mccentral'  , help='run the BParking nano tool on a central MC sample'              , action='store_true', default=False)
-  parser.add_argument('--data'              , dest='data'       , help='run the BParking nano tool on a data sample'                    , action='store_true', default=False)
-  parser.add_argument('--donano'            , dest='donano'     , help='launch the nano tool on top of the minifile'                    , action='store_true', default=False)
-  parser.add_argument('--doflat'            , dest='doflat'     , help='launch the ntupliser on top of the nanofile'                    , action='store_true', default=False)
-  parser.add_argument('--domergenano'       , dest='domergenano', help='[optional] merge the nanofile steps'                            , action='store_true', default=False)
-  parser.add_argument('--doquick'           , dest='doquick'    , help='[optional] run the jobs on the quick partition (t/job<1h)'      , action='store_true', default=False)
-  parser.add_argument('--docompile'         , dest='docompile'  , help='[optional] compile the full BParkingNano tool'                  , action='store_true', default=False)
+  parser.add_argument('--pl'      , type=str, dest='pl'          , help='label of the sample file'                                                            , default=None)
+  parser.add_argument('--ds'      , type=str, dest='ds'          , help='[data-mccentral] name of the dataset, e.g /ParkingBPH4/Run2018B-05May2019-v2/MINIAOD', default=None)
+  parser.add_argument('--tag'     , type=str, dest='tag'         , help='[optional] tag to be added on the outputfile name'                                   , default=None)
+  parser.add_argument('--maxfiles', type=str, dest='maxfiles'    , help='[optional] maximum number of files to process'                                       , default=None)
+  parser.add_argument('--user'    , type=str, dest='user'        , help='[optional-mcprivate] specify username where the miniAOD files are stored'            , default=os.environ["USER"])
+  parser.add_argument('--mcprivate'         , dest='mcprivate'   , help='run the BParking nano tool on a private MC sample'              , action='store_true', default=False)
+  parser.add_argument('--mccentral'         , dest='mccentral'   , help='run the BParking nano tool on a central MC sample'              , action='store_true', default=False)
+  parser.add_argument('--data'              , dest='data'        , help='run the BParking nano tool on a data sample'                    , action='store_true', default=False)
+  parser.add_argument('--donano'            , dest='donano'      , help='launch the nano tool on top of the minifile'                    , action='store_true', default=False)
+  parser.add_argument('--doflat'            , dest='doflat'      , help='launch the ntupliser on top of the nanofile'                    , action='store_true', default=False)
+  parser.add_argument('--domergenano'       , dest='domergenano' , help='[optional] merge the nanofile steps'                            , action='store_true', default=False)
+  parser.add_argument('--doquick'           , dest='doquick'     , help='[optional] run the jobs on the quick partition (t/job<1h)'      , action='store_true', default=False)
+  parser.add_argument('--docompile'         , dest='docompile'   , help='[optional] compile the full BParkingNano tool'                  , action='store_true', default=False)
   return parser.parse_args()
 
 
@@ -62,50 +62,11 @@ class NanoLauncher(NanoTools):
     self.docompile   = vars(opt)["docompile"]
 
 
-  def getLocalFiles(self, point):
-    pointdir = '/pnfs/psi.ch/cms/trivcat/store/user/{}/BHNLsGen/{}/{}/'.format(self.user, self.prodlabel, point)
-    return [f for f in glob.glob(pointdir+'/step4_nj*.root')]
-
-    
-  def checkLocalFile(self, nanofile):
-    self.prodlabel = vars(opt)['pl']
-    rootFile = ROOT.TNetXNGFile.Open(nanofile, 'r')
-    if rootFile and rootFile.GetListOfKeys().Contains('Events'):
-      return True
-    else: return False
-
-
-  def getDataLabel(self):
-    idx = self.dataset.find('-')
-    return self.dataset.replace('/', '_')[1:idx]
-  
-
-  def getMCLabel(self):
-    idx = self.dataset[1:].find('/')
-    return self.dataset[1:idx+1]
-
-
   def compile(self):
     import subprocess
     cwd = os.getcwd()
     loc = cwd[0:cwd.find('PhysicsTools')]
     subprocess.call("scram b", cwd=loc, shell=True)
-
-
-  def getSize(self, file):
-    return sum(1 for line in open(file))
-
-
-  def getJobId(self, job):
-    return int(job[job.find('job')+4:])
-    #return str(job[job.find('job')+4:])
-
-
-  def getJobIdsList(self, jobIds):
-    listIds = ''
-    for jobId in jobIds:
-      listIds += '{}:'.format(jobId)
-    return listIds[:len(listIds)-1]
 
 
   def writeFileList(self, nfiles_perchunk, point=None):
@@ -115,60 +76,89 @@ class NanoLauncher(NanoTools):
     if self.mcprivate:
       filename = './files/filelist_{}_{}'.format(self.prodlabel, point)
     else:
-      ds_label = self.getDataLabel() if self.data else self.getMCLabel()
+      ds_label = NanoTools.getDataLabel(self, self.dataset) if self.data else NanoTools.getMCLabel(self, self.dataset)
       filename = './files/filelist_{dsl}_{pl}'.format(dsl=ds_label, pl=self.prodlabel) 
 
-      if len(glob.glob('{}*.txt'.format(filename))) == 0: # do not create file if already exists
-        if self.mcprivate: # fetch miniAOD files
-          myfile = open(filename + '.txt', "w+")
-          nanofiles = self.getLocalFiles(point)
+    if len(glob.glob('{}*.txt'.format(filename))) == 0: # do not create file if already exists
+      if self.mcprivate: # fetch miniAOD files
+        myfile = open(filename + '.txt', "w+")
+        nanofiles = NanoTools.getLocalMiniAODFiles(self, self.user, self.prodlabel, point)
 
-          for nanofile in nanofiles:
-            if self.checkLocalFile(nanofile):
-              myfile.write(nanofile + '\n')
-            else:
-              print '    could not open {} --> skipping'.format(nanofile)
-        
-          myfile.close()  
-        else: # fetch files on DAS
-          command = 'dasgoclient --query="file dataset={ds} | grep file.name" > {fn}.txt'.format(ds=self.dataset, fn=filename)
-          os.system(command)
+        for nanofile in nanofiles:
+          if NanoTools.checkLocalFile(self, nanofile):
+            myfile.write(nanofile + '\n')
+          else:
+            print '    could not open {} --> skipping'.format(nanofile)
+      
+        myfile.close()  
+      else: # fetch files on DAS
+        command = 'dasgoclient --query="file dataset={ds} | grep file.name" > {fn}.txt'.format(ds=self.dataset, fn=filename)
+        os.system(command)
 
-        # slurm cannot deal with too large arrays
-        # -> submit job arrays of size 750
-        if self.getSize(filename + '.txt') > nfiles_perchunk:
-          command_split = 'split -l {nfiles} {fn}.txt {fn}_ --additional-suffix=.txt'.format(nfiles=nfiles_perchunk, fn=filename)
-          os.system(command_split)
-          os.system('rm {fn}.txt'.format(fn=filename))
+      # slurm cannot deal with too large arrays
+      # -> submit job arrays of size 750
+      if NanoTools.getNFiles(self, filename + '.txt') > nfiles_perchunk:
+        command_split = 'split -l {nfiles} {fn}.txt {fn}_ --additional-suffix=.txt'.format(nfiles=nfiles_perchunk, fn=filename)
+        os.system(command_split)
+        os.system('rm {fn}.txt'.format(fn=filename))
         
     print '    ---> {}*.txt created'.format(filename)
 
     return filename 
 
 
+  def writeDumperStarter(self, nfiles, outputdir, filelist, label):
+    nanoname = 'bparknano' if self.tag == None else 'bparknano_{}'.format(self.tag) 
+
+    f = open(filelist)
+    lines = f.readlines()
+
+    event_chain = []
+    event_chain.append('TChain* c = new TChain("Events");')
+    for iFile in range(1, nfiles+1):
+      event_chain.append('  c->Add("{}/{}_nj{}.root");'.format(outputdir, nanoname, NanoTools.getStep(self, lines[iFile-1])))
+    event_chain.append('  c->Process("NanoDumper.C+", outFileName);')
+    event_chain = '\n'.join(event_chain)
+
+    run_chain = []
+    run_chain.append('TChain* c_run = new TChain("Runs");')
+    for iFile in range(1, nfiles+1):
+      run_chain.append('  c->Add("{}/{}_nj{}.root");'.format(outputdir, nanoname, NanoTools.getStep(self, lines[iFile-1])))
+    run_chain.append('  c_run->Process("NanoRunDumper.C+", outFileName);')
+    run_chain = '\n'.join(run_chain)
+
+    content = [
+      '#include "TChain.h"',
+      '#include <iostream>',
+      '#include "TProof.h"\n',
+      'void starter(){',
+      '  TString outFileName = "flat_bparknano.root";',
+      '  {addevt}'.format(addevt = event_chain),
+      '  {addrun}'.format(addrun = '' if self.data else run_chain),
+      '}',
+    ]
+    content = '\n'.join(content)
+          
+    starter_name = './files/starter_{}.C'.format(label)
+    dumper_starter = open(starter_name, 'w+')
+    dumper_starter.write(content)
+    dumper_starter.close()
+
+
   def writeMergerSubmitter(self, label, filetype):
     # defining the command
-    #type_ = 'mcprivate' if self.mcprivate else 'data'
-
-    prodlabel = ''
-    if self.mcprivate: prodlabel = self.prodlabel
-    elif self.mccentral: prodlabel = self.getMCLabel() + '_' + self.prodlabel 
-    elif self.data: prodlabel = self.getDataLabel() + '_' + self.prodlabel 
-
-    #command = 'python nanoMerger.py --dobatch --pl {pl} --{tp}'.format(
     command = 'python nanoMerger.py --dobatch --pl {pl}'.format(
-        pl = prodlabel,
-        #tp = type_,
+        pl = self.prodlabel,
         )
+
     if self.tag != None:
       command += ' --tag {}'.format(self.tag)
     if filetype == 'nano': command += ' --donano' 
     else: command += ' --doflat'
     
     if self.mcprivate: command += ' --mcprivate'
-    if self.mccentral: command += ' --mccentral'
-    if self.data: command += ' --data'
-    # add for flat
+    if self.mccentral: command += ' --ds {} --mccentral'.format(self.dataset)
+    if self.data: command += ' --ds {} --data'.format(self.dataset)
 
     # defining the workdir
     dirlabel = label
@@ -226,10 +216,12 @@ class NanoLauncher(NanoTools):
     job = subprocess.check_output(command, shell=True)
     print '\n       ---> {}'.format(job)
 
-    return self.getJobId(job)
+    return NanoTools.getJobId(self, job)
 
 
-  def launchDumper(self, outputdir, logdir, label, jobId):
+  def launchDumper(self, nfiles, outputdir, logdir, filelist, label, jobId):
+    self.writeDumperStarter(nfiles, outputdir, filelist, label)
+
     if not self.doquick:
       slurm_options = '-p wn --account=t3 -o {ld}/dumperstep.log -e {ld}/dumperstep.log --job-name=dumperstep_{pl} --time=03:00:00 {dp}'.format(
         ld      = logdir,
@@ -251,7 +243,7 @@ class NanoLauncher(NanoTools):
       tag     = 0 if self.tag == None else self.tag,
       isMC    = 1 if self.mcprivate or self.mccentral else 0,
       )
-    
+
     job_dump = subprocess.check_output(command, shell=True)
     if jobId == -99:
       print '\n       ---> {}'.format(job_dump)
@@ -259,23 +251,25 @@ class NanoLauncher(NanoTools):
       print '       ---> (dependency)' 
       print '            {}'.format(job_dump)
 
-    return self.getJobId(job_dump)
+    return NanoTools.getJobId(self, job_dump)
 
 
   def launchMerger(self, logdir, label, jobIds, filetype):
     self.writeMergerSubmitter(label, filetype)
 
     if not self.doquick:
-      slurm_options = '-p wn --account=t3 -o {ld}/mergerstep.log -e {ld}/mergerstep.log --job-name=mergerstep_{pl} --time=02:00:00 --dependency=afterany:{jobid}'.format(
+      slurm_options = '-p wn --account=t3 -o {ld}/merger{ft}step.log -e {ld}/merger{ft}step.log --job-name=mergerstep_{pl} --time=02:00:00 --dependency=afterany:{jobid}'.format(
         ld    = logdir,
+        ft    = filetype,
         pl    = label,
-        jobid = self.getJobIdsList(jobIds),
+        jobid = NanoTools.getJobIdsList(self, jobIds),
         )
     else:
-      slurm_options = '-p quick --account=t3 -o {ld}/mergerstep.log -e {ld}/mergerstep.log --job-name=mergerstep_{pl} --dependency=afterany:{jobid}'.format(
+      slurm_options = '-p quick --account=t3 -o {ld}/merger{ft}step.log -e {ld}/merger{ft}step.log --job-name=mergerstep_{pl} --dependency=afterany:{jobid}'.format(
         ld    = logdir,
+        ft    = filetype,
         pl    = label,
-        jobid = self.getJobIdsList(jobIds),
+        jobid = NanoTools.getJobIdsList(self, jobIds),
         )
 
     command_merge = 'sbatch {slurm_opt} submitter_merger.sh'.format(
@@ -306,7 +300,7 @@ class NanoLauncher(NanoTools):
 
     # loop on the files (containing at most 750 samples) 
     for iFile, filelist in enumerate(glob.glob('{}*.txt'.format(filelistname))):
-      if self.getSize(filelist) == 0:
+      if NanoTools.getNFiles(self, filelist) == 0:
         print '        WARNING: no files were found with the corresponding production label'
         print '                 Did you set the correct username using --user <username>?'
 
@@ -315,7 +309,7 @@ class NanoLauncher(NanoTools):
 
       # number of files to process in this chunk
       if self.maxfiles == None or int(self.maxfiles)-nfiles_tot > maxfiles_perchunk:
-        nfiles = self.getSize(filelist)
+        nfiles = NanoTools.getNFiles(self, filelist)
       else:
         nfiles = int(self.maxfiles)-nfiles_tot
       nfiles_tot += nfiles
@@ -344,7 +338,7 @@ class NanoLauncher(NanoTools):
       if not path.exists(logdir):
         os.system('mkdir -p {}'.format(logdir))
 
-      label = '{}_{}_Chunk{}_n{}'.format(label1, label2 if self.tag==None else label2+'_'+self.tag, iFile, self.getSize(filelist))
+      label = '{}_{}_Chunk{}_n{}'.format(label1, label2 if self.tag==None else label2+'_'+self.tag, iFile, NanoTools.getNFiles(self, filelist))
 
       nano_jobId = -99
 
@@ -362,7 +356,7 @@ class NanoLauncher(NanoTools):
         if not path.exists(flat_outputdir):
           os.system('mkdir -p {}'.format(flat_outputdir))
 
-        flat_jobId = self.launchDumper(outputdir, logdir, label, nano_jobId)
+        flat_jobId = self.launchDumper(nfiles, outputdir, logdir, filelist, label, nano_jobId)
 
         # merging of flat files happens automatically
         flat_jobIds.append(flat_jobId)
@@ -392,17 +386,13 @@ class NanoLauncher(NanoTools):
       for point in points:
         print '\n-> Processing mass/ctau point: {}'.format(point)
 
-        if point != 'mass3.0_ctau184.256851021': continue
+        #if point != 'mass3.0_ctau184.256851021': continue
 
         self.launchingModule(point=point)
 
     
     elif self.data or self.mccentral:
-      if self.mccentral:
-        if 'ext' in self.dataset:
-          self.prodlabel += '_ext'
-
-      dataset_label = self.getDataLabel() if self.data else self.getMCLabel()
+      dataset_label = NanoTools.getDataLabel(self, self.dataset) if self.data else NanoTools.getMCLabel(self, self.dataset)
 
       self.launchingModule(ds_label=dataset_label)
 

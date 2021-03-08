@@ -80,9 +80,7 @@ class NanoMerger(NanoTools):
           if iFile%100 == 0:              print '     --> checked {}% of the files'.format(round(float(iFile)/len(nanoFiles)*100, 1))
           elif iFile == len(nanoFiles)-1: print '     --> checked 100% of the files'
 
-          rootFile = ROOT.TNetXNGFile.Open(fileName, 'r')
-          if not rootFile: continue
-          if cond and not rootFile.GetListOfKeys().Contains('Events'): continue
+          if not NanoTools.checkLocalFile(self, fileName, cond): continue
 
           command = command + ' {}'.format(fileName)
 
@@ -109,9 +107,8 @@ class NanoMerger(NanoTools):
     filesValid = []
     print "\n-> Checking the files"
     for fileName in nanoFiles:
-      rootFile = ROOT.TNetXNGFile.Open(fileName, 'r')
-      if not rootFile: continue
-      if cond and not rootFile.GetListOfKeys().Contains('Events'): continue
+      if not NanoTools.checkLocalFile(self, fileName, cond): continue
+
       filesValid.append(fileName)
 
     print '\n-> Start of the merge'

@@ -1,71 +1,93 @@
+import os
 import glob
 import ROOT
 
 
-def getOptions():
-  from argparse import ArgumentParser
-  parser = ArgumentParser(description='Script to launch the nanoAOD tool on top of privately produced miniAOD files', add_help=True)
-  parser.add_argument('--outdir'      , type=str, dest='outdir'      , help='dir where nanofiles are stored'                      , default=None)
-  parser.add_argument('--tag'         , type=str, dest='tag'         , help='[optional] tag of the outputfile name'               , default='0')
-  parser.add_argument('--ismc'        , type=str, dest='ismc'        , help='sample is mc'                                        , default='0')
-  parser.add_argument('--writestarter'          , dest='writestarter', help='write starter to process dumper', action='store_true', default=False)
-  return parser.parse_args()
-
 class NanoTools(object):
-  def __init__(self, opt):
-    self.ismc    = vars(opt)['ismc']
-    self.tag     = vars(opt)['tag']
-    self.outdir  = vars(opt)['outdir']
-
-
   def getPointDirs(self, location):
     return [f for f in glob.glob(location+'/*')]
 
 
-  def writeDumperStarter(self):
-    nanoname = 'bparknano_nj' if self.tag == '0' else 'bparknano_{}_nj'.format(self.tag) 
-    nanofiles = [f for f in glob.glob('{}/{}*'.format(self.outdir, nanoname))]
+  def getNanoDirectories(self, location, prodlabel, dataset):
+    if dataset == None:
+      dirs = [f for f in glob.glob('{loc}/*{pl}'.format(loc=location, pl=prodlabel))]
+    else:
+      dirs = [f for f in glob.glob('{loc}/{ds}_{pl}'.format(loc=location, ds=dataset, pl=prodlabel))]
+    if len(dirs) == 0:
+      raise RuntimeError('No samples with the production label "{pl}" were found in {loc}'.format(pl=prodlabel if dataset==None else dataset+'_'+prodlabel, loc=location))
+    return dirs
 
-    event_chain = []
-    event_chain.append('TChain* c = new TChain("Events");')
-    for nanofile in nanofiles:
-      rootFile = ROOT.TNetXNGFile.Open(nanofile, 'r')
-      if rootFile and rootFile.GetListOfKeys().Contains('Events'):
-        event_chain.append('  c->Add("{}");'.format(nanofile))
-    event_chain.append('  c->Process("NanoDumper.C+", outFileName);')
-    event_chain = '\n'.join(event_chain)
 
-    run_chain = []
-    run_chain.append('TChain* c_run = new TChain("Runs");')
-    for nanofile in nanofiles:
-      rootFile = ROOT.TNetXNGFile.Open(nanofile, 'r')
-      if rootFile and rootFile.GetListOfKeys().Contains('Events'):
-        run_chain.append('  c_run->Add("{}");'.format(nanofile))
-    run_chain.append('  c_run->Process("NanoRunDumper.C+", outFileName);')
-    run_chain = '\n'.join(run_chain)
+  def getLogDir(self, file_, prodlabel, isData):
+   if isData: # probably to be modified for mc
+     label = file_[file_.find('/',file_.find('data'))+1:file_.find(prodlabel)-1] 
+     chunk = file_[file_.find('Chunk'):file_.find('bparknano')-1]
+   return '/work/anlyon/logs/{}/{}/{}'.format(label, prodlabel, chunk) # this will have to be modified
 
-    content = [
-      '#include "TChain.h"',
-      '#include <iostream>',
-      '#include "TProof.h"\n',
-      'void starter(){',
-      '  TString outFileName = "flat_bparknano.root";',
-      '  {addevt}'.format(addevt = event_chain),
-      '  {addrun}'.format(addrun = '' if self.ismc == '0' else run_chain),
-      '}',
-    ]
-    content = '\n'.join(content)
-          
-    dumper_starter = open('starter.C', 'w+')
-    dumper_starter.write(content)
-    dumper_starter.close()
+
+  def getFilesLocation(self, isData):  
+    location = '/pnfs/psi.ch/cms/trivcat/store/user/{usr}/BHNLsGen'.format(usr=os.environ["USER"])
+    if isData:
+      location += '/data'
+    return location
+  
+
+  def getLogFile(self, logdir, file_):
+    return '{}/nanostep_{}.log'.format(logdir, file_[file_.rfind('_nj')+1:file_.rfind('.root')])
+
+
+  def getLocalMiniAODFiles(self, user, prodlabel, point):
+    pointdir = '/pnfs/psi.ch/cms/trivcat/store/user/{}/BHNLsGen/{}/{}/'.format(user, prodlabel, point)
+    return [f for f in glob.glob(pointdir+'/step4_nj*.root')]
+
+
+  def checkLocalFile(self, nanofile, cond=True):
+    rootFile = ROOT.TNetXNGFile.Open(nanofile, 'r')
+    if not rootFile: return False
+    if cond and not rootFile.GetListOfKeys().Contains('Events'): return False
+    else: return True
+
+
+  def checkFileExists(self, file_):
+    import os.path
+    from os import path
+    return path.exists(file_)
+
+
+  def getNFiles(self, file_):
+    return sum(1 for line in open(file_))
+
+
+  def getNExpectedNanoFiles(self, dir_):
+    n_exp = dir_[dir_.rfind('_n')+2:len(dir_)]
+    return int(n_exp)
+
+
+  def getJobId(self, job):
+    return int(job[job.find('job')+4:])
+
+
+  def getJobIdsList(self, jobIds):
+    listIds = ''
+    for jobId in jobIds:
+      listIds += '{}:'.format(jobId)
+    return listIds[:len(listIds)-1]
+
+
+  def getDataLabel(self, dataset):
+    idx = dataset.find('-')
+    return dataset.replace('/', '_')[1:idx]
+  
+
+  def getMCLabel(self, dataset):
+    idx = dataset[1:].find('/')
+    label = dataset[1:idx+1]
+    if 'ext' in self.dataset: label += '_ext'
+    return label
+
+
+  def getStep(self, file_): 
+    return file_[file_.rfind('_nj')+3:file_.rfind('.root')]
 
     
-if __name__ == "__main__":
-
-  opt = getOptions()
-
-  if vars(opt)['writestarter']:
-    NanoTools(opt).writeDumperStarter()
-
 
