@@ -15,14 +15,13 @@ config.General.workArea = 'BParkingNANO_%s' % production_tag
 
 config.section_('Data')
 config.Data.publication = False
-config.Data.outLFNDirBase = '/store/group/cmst3/group/bpark/%s' % (config.General.workArea)
+config.Data.outLFNDirBase = '/store/group/phys_bphys/bpark/nanoaod_RK2021/%s' % (config.General.workArea)
 config.Data.inputDBS = 'global'
 
 config.section_('JobType')
 config.JobType.pluginName = 'Analysis'
 config.JobType.psetName = '../test/run_nano_cfg.py'
 config.JobType.maxJobRuntimeMin = 3000
-config.JobType.maxMemoryMB = 4000
 config.JobType.allowUndistributedCMSSW = True
 config.JobType.inputFiles = ["../test/lowPtEleReg_2018_02062020_nv.db"]
 
