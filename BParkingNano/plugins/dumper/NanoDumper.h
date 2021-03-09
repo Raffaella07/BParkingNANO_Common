@@ -342,7 +342,7 @@ public :
 
    // some option
    // this option is intentionally hardcoded
-   Bool_t do_fillhistograms = true;
+   Bool_t do_fillhistograms = false;
 
    // trees to fill
    TTree* signal_tree;

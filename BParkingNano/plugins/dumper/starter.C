@@ -1,3 +1,5 @@
+// example of usage: root -l starter.C+\(\"true\"\)
+
 #include "TChain.h"
 #include <iostream>
 #include "TProof.h"

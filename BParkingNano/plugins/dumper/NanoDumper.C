@@ -326,9 +326,8 @@ Bool_t NanoDumper::Process(Long64_t entry)
   fReader.SetLocalEntry(entry);
   //cout << endl << "--- Entry " << entry << " ---" << endl;
 
-  // add data requirement
-  // we skip the event in case it doesn't pass the lumi mask
-  if(lumiMask(*run, *luminosityBlock) == false) return false;
+  // for data, we skip the event in case it doesn't pass the lumi mask
+  if(*run != 1 && lumiMask(*run, *luminosityBlock) == false) return false;
 
   // number of candidates in the event
   UInt_t nCand_ctrl = *nBToKMuMu; 
