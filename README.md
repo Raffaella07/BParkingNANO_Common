@@ -83,8 +83,8 @@ Then do
 ```
 python nanoLauncher.py <options>
 ```
-The options are:
-```
+Options:
+
 * Indicate whether to run on data or mc (central or private)
   * --mcprivate or   
   * --mccentral or
@@ -102,7 +102,6 @@ The options are:
 * --maxfiles <maxfiles>: optional, maximum number of files to process
 * --doquick: optional run on slurm quick partition (time/job < 1h)
 * --docompile: optional, compiles the BParkingNano tool before launching
-```
 
 Examples of usage:
 ```
