@@ -2,91 +2,95 @@
 
 #--------------------
 # This script launches the nanoAOD production of a given file on slurm
-# ${1}: outdir
-# ${2}: usr
-# ${3}: pl
-# ${4}: tag
-# ${5}: isMC
-# ${6}: isRemote
-# ${7}: flt
-# ${8}: filelist
+# ${1}:  outdir
+# ${2}:  usr
+# ${3}:  pl
+# ${4}:  tag
+# ${5}:  isMC
+# ${6}:  isRemote
+# ${7}:  filelist
+# ${8}:  isResubmission (false if first launch)
 #--------------------
 
 
-workdir="/scratch/"${2}"/"${3}"/job_nj"$SLURM_ARRAY_TASK_ID
+workdir="/scratch/"${2}"/"${3}"/job_nj"${SLURM_JOB_ID}"_"${SLURM_ARRAY_TASK_ID}
 echo "creating workdir "$workdir
 mkdir -p $workdir
 
 echo "copying driver to workdir"
 cp run_nano_hnl_cfg.py $workdir
 
-echo "copying the file list to workdir"
-cp ${8} $workdir/filelist.txt
-
-# copy the ntupliser 
-if [ ${7} == 1 ] ; then
-  echo "copying ntupliser to workdir"
-  cp simple_tester.py $workdir 
-  cp flat_tree_branches.py $workdir
+echo "copying the file list(-s) to workdir"
+if [ ${8} == 0 ] ; then
+  cp ${7} $workdir/filelist.txt
+else # different treatment in case of resubmission
+  cp -r ${7}* $workdir
+  #rm ${7}*$SLURM_ARRAY_TASK_ID*
 fi
 
 cd $workdir
 
+inputFilename=''
+if [ ${8} == 0 ] ; then
+  inputFilename=$(sed $SLURM_ARRAY_TASK_ID'!d' filelist.txt)
+else # different treatment in case of resubmission
+  inputFilename=$(sed '1!d' *nj$SLURM_ARRAY_TASK_ID.txt)
+fi
+echo "inputfilename: "$inputFilename
+
+# index of the output file
+if [ ${5} == 1 ] ; then #isMC
+  if [ ${6} == 0 ] ; then  #private MC
+    search='_nj'
+    start=$inputFilename
+    end=${start##*$search}
+    outIdx=$((${#start} - ${#end}))
+    outSuffix=${inputFilename:outIdx}
+  else
+    outSuffix=$SLURM_ARRAY_TASK_ID".root" 
+  fi
+else # isData
+  outSuffix=$SLURM_ARRAY_TASK_ID".root" 
+fi
+echo "suffix of the outputfile: "$outSuffix
+
+
 if [ ${5} == 1 ] ; then #isMC
 
   if [ ${6} == 0 ] ; then  #private MC
-    echo "going to run nano step on "$(sed $SLURM_ARRAY_TASK_ID'!d' filelist.txt)
+    echo "going to run nano step on "$inputFilename 
     DATE_START=`date +%s`
-    cmsRun run_nano_hnl_cfg.py inputFile=$(sed $SLURM_ARRAY_TASK_ID'!d' filelist.txt) outputFile="bparknano.root" isMC=True
+    cmsRun run_nano_hnl_cfg.py inputFile=$inputFilename outputFile="bparknano.root" isMC=True
     DATE_END=`date +%s`
     echo "finished running nano step"
-  else
-    echo "going to run nano step on "$(sed $SLURM_ARRAY_TASK_ID'!d' filelist.txt)
+  else # central MC
+    echo "going to run nano step on "$inputFilename
     DATE_START=`date +%s`
-    cmsRun run_nano_hnl_cfg.py inputFiles=$(sed $SLURM_ARRAY_TASK_ID'!d' filelist.txt) outputFile="bparknano.root" isMC=True
+    cmsRun run_nano_hnl_cfg.py inputFiles=$inputFilename outputFile="bparknano.root" isMC=True
     DATE_END=`date +%s`
     echo "finished running nano step"
-  fi
-
-  echo "copying the file"
-  if [ ${4} == 0 ] ; then
-    xrdcp bparknano.root root://t3dcachedb.psi.ch:1094/${1}/bparknano_nj$SLURM_ARRAY_TASK_ID.root 
-  else
-    xrdcp bparknano.root root://t3dcachedb.psi.ch:1094/${1}/bparknano_${4}_nj$SLURM_ARRAY_TASK_ID.root 
-  fi
-
-
-  # run the ntupliser on top of the nanofile
-  if [ ${7} == 1 ] ; then
-    echo "creating directory for flat ntuples"
-    mkdir ${1}/flat
-
-    echo "running the ntupliser on top of the nanofile"
-    python simple_tester.py  
-
-    echo "copying the file"
-    if [ ${4} == 0 ] ; then
-      xrdcp flat_bparknano.root root://t3dcachedb.psi.ch:1094/${1}/flat/flat_bparknano_nj$SLURM_ARRAY_TASK_ID.root
-    else
-      xrdcp flat_bparknano.root root://t3dcachedb.psi.ch:1094/${1}/flat/flat_bparknano_${4}_nj$SLURM_ARRAY_TASK_ID.root
-    fi
   fi
 
 else #isData
 
-  echo "going to run nano step on "$(sed $SLURM_ARRAY_TASK_ID'!d' filelist.txt)
+  echo "going to run nano step on "$inputFilename
   DATE_START=`date +%s`
-  cmsRun run_nano_hnl_cfg.py inputFiles=$(sed $SLURM_ARRAY_TASK_ID'!d' filelist.txt) outputFile="bparknano.root" isMC=False
+  cmsRun run_nano_hnl_cfg.py inputFiles=$inputFilename outputFile="bparknano.root" isMC=False
   DATE_END=`date +%s`
   echo "finished running nano step"
 
-  echo "copying the file"
-  if [ ${4} == 0 ] ; then
-    xrdcp bparknano.root root://t3dcachedb.psi.ch:1094/${1}/bparknano_nj$SLURM_ARRAY_TASK_ID.root 
-  else
-    xrdcp bparknano.root root://t3dcachedb.psi.ch:1094/${1}/bparknano_${4}_nj$SLURM_ARRAY_TASK_ID.root 
-  fi
 fi
+
+echo "copying the file"
+if [ ${4} == 0 ] ; then
+  xrdcp -f bparknano.root root://t3dcachedb.psi.ch:1094/${1}/bparknano_nj$outSuffix 
+else
+  echo "xrdcp -f bparknano.root root://t3dcachedb.psi.ch:1094/${1}/bparknano_${4}_nj$outSuffix"
+  xrdcp -f bparknano.root root://t3dcachedb.psi.ch:1094/${1}/bparknano_${4}_nj$outSuffix 
+fi
+
+# copy filelist to pnfs
+xrdcp -f filelist.txt root://t3dcachedb.psi.ch:1094/${1}/filelist_${3}.txt
 
 echo "content of the workdir"
 ls -l

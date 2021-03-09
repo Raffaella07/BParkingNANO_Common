@@ -5,6 +5,7 @@ from PhysicsTools.NanoAOD.common_cff import *
 
 muonTrgSelector = cms.EDProducer("MuonTriggerSelector",
                                  muonCollection = cms.InputTag("slimmedMuons"), #same collection as in NanoAOD                                                           
+                                 displacedStandaloneMuonCollection = cms.InputTag("displacedStandAloneMuons"), #same collection as in NanoAOD                                                           
                                  bits = cms.InputTag("TriggerResults","","HLT"),
                                  prescales = cms.InputTag("patTrigger"),
                                  objects = cms.InputTag("slimmedPatTrigger"),
@@ -16,10 +17,12 @@ muonTrgSelector = cms.EDProducer("MuonTriggerSelector",
                                  ## for the output selected collection (tag + all compatible in dZ)
                                  # difference of the vz of the trigger muon with selected muon
                                  dzForCleaning_wrtTrgMuon = cms.double(1.8),
+                                 #dzForCleaning_wrtTrgMuon = cms.double(-1),
                                  
                                  # selection for the selected muon
                                  selmu_ptMin = cms.double(0.5),
                                  selmu_absEtaMax = cms.double(2.4),
+                                 #selmu_softMuonsOnly = cms.bool(False)
                                  selmu_softMuonsOnly = cms.bool(True)
                              )
 
