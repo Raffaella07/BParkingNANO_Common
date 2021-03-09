@@ -93,7 +93,8 @@ BToKmumu = cms.EDProducer(
 
 
 BToKmumuMC = BToKmumu.clone(
-    dileptons = cms.InputTag('muonPairsForKmumuMC'),
+    dileptons = cms.InputTag('muonPairsForKmumuMC', 'SelectedDiLeptons'),
+    dileptonKinVtxs = cms.InputTag('muonPairsForKmumuMC', 'SelectedDiLeptonKinVtxs'),
     leptonTransientTracks = muonPairsForKmumuMC.transientTracksSrc,
     isMC = cms.bool(True),
 )

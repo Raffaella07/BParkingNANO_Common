@@ -336,6 +336,24 @@ void BToKLLBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
         }
       }
 
+      cand.addUserFloat("l1_iso03", l1_iso03);
+      cand.addUserFloat("l1_iso04", l1_iso04);
+      cand.addUserFloat("l2_iso03", l2_iso03);
+      cand.addUserFloat("l2_iso04", l2_iso04);
+      cand.addUserFloat("k_iso03" , k_iso03 );
+      cand.addUserFloat("k_iso04" , k_iso04 );
+      cand.addUserFloat("b_iso03" , b_iso03 );
+      cand.addUserFloat("b_iso04" , b_iso04 );
+      
+      cand.addUserFloat("l1_iso03_close", l1_iso03_close);
+      cand.addUserFloat("l1_iso04_close", l1_iso04_close);
+      cand.addUserFloat("l2_iso03_close", l2_iso03_close);
+      cand.addUserFloat("l2_iso04_close", l2_iso04_close);
+      cand.addUserFloat("k_iso03_close", k_iso03_close);
+      cand.addUserFloat("k_iso04_close", k_iso04_close);
+      cand.addUserFloat("b_iso03_close", b_iso03_close);
+      cand.addUserFloat("b_iso04_close", b_iso04_close);
+
       //compute isolation from surrounding tracks only
       float l1_iso03_dca = 0;
       float l1_iso04_dca = 0;
@@ -450,26 +468,39 @@ void BToKLLBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
         }
       }
 
-      cand.addUserFloat("l1_iso03", l1_iso03);
-      cand.addUserFloat("l1_iso04", l1_iso04);
-      cand.addUserFloat("l2_iso03", l2_iso03);
-      cand.addUserFloat("l2_iso04", l2_iso04);
-      cand.addUserFloat("k_iso03" , k_iso03 );
-      cand.addUserFloat("k_iso04" , k_iso04 );
-      cand.addUserFloat("b_iso03" , b_iso03 );
-      cand.addUserFloat("b_iso04" , b_iso04 );
-      
-      cand.addUserFloat("l1_iso03_close", l1_iso03_close);
-      cand.addUserFloat("l1_iso04_close", l1_iso04_close);
-      cand.addUserFloat("l2_iso03_close", l2_iso03_close);
-      cand.addUserFloat("l2_iso04_close", l2_iso04_close);
-      cand.addUserFloat("k_iso03_close", k_iso03_close);
-      cand.addUserFloat("k_iso04_close", k_iso04_close);
-      cand.addUserFloat("b_iso03_close", b_iso03_close);
-      cand.addUserFloat("b_iso04_close", b_iso04_close);
+      cand.addUserInt("l1_n_isotrk" , l1_n_isotrk);
+      cand.addUserInt("l2_n_isotrk" , l2_n_isotrk);
+      cand.addUserInt("k_n_isotrk" ,  k_n_isotrk);
+      cand.addUserInt("b_n_isotrk" ,  b_n_isotrk);
+
+      cand.addUserFloat("l1_iso03_dca", l1_iso03_dca);
+      cand.addUserFloat("l1_iso04_dca", l1_iso04_dca);
+      cand.addUserFloat("l2_iso03_dca", l2_iso03_dca);
+      cand.addUserFloat("l2_iso04_dca", l2_iso04_dca);
+      cand.addUserFloat("k_iso03_dca" , k_iso03_dca );
+      cand.addUserFloat("k_iso04_dca" , k_iso04_dca );
+      cand.addUserFloat("b_iso03_dca" , b_iso03_dca );
+      cand.addUserFloat("b_iso04_dca" , b_iso04_dca );
+      cand.addUserInt("l1_n_isotrk_dca" , l1_n_isotrk_dca);
+      cand.addUserInt("l2_n_isotrk_dca" , l2_n_isotrk_dca);
+      cand.addUserInt("k_n_isotrk_dca" ,  k_n_isotrk_dca);
+      cand.addUserInt("b_n_isotrk_dca" ,  b_n_isotrk_dca);
+
+      cand.addUserFloat("l1_iso03_dca_tight", l1_iso03_dca_tight);
+      cand.addUserFloat("l1_iso04_dca_tight", l1_iso04_dca_tight);
+      cand.addUserFloat("l2_iso03_dca_tight", l2_iso03_dca_tight);
+      cand.addUserFloat("l2_iso04_dca_tight", l2_iso04_dca_tight);
+      cand.addUserFloat("k_iso03_dca_tight" , k_iso03_dca_tight );
+      cand.addUserFloat("k_iso04_dca_tight" , k_iso04_dca_tight );
+      cand.addUserFloat("b_iso03_dca_tight" , b_iso03_dca_tight );
+      cand.addUserFloat("b_iso04_dca_tight" , b_iso04_dca_tight );
+      cand.addUserInt("l1_n_isotrk_dca_tight" , l1_n_isotrk_dca_tight);
+      cand.addUserInt("l2_n_isotrk_dca_tight" , l2_n_isotrk_dca_tight);
+      cand.addUserInt("k_n_isotrk_dca_tight" ,  k_n_isotrk_dca_tight);
+      cand.addUserInt("b_n_isotrk_dca_tight" ,  b_n_isotrk_dca_tight);
+
 
       // gen-matching
-      
       int isMatched = 0;
       int l1_genIdx(-1), l2_genIdx(-1), k_genIdx(-1);
       int genMuon1Mother_genPdgId(-1), genMuon2Mother_genPdgId(-1), genKaonMother_genPdgId(-1);
@@ -530,36 +561,6 @@ void BToKLLBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
       cand.addUserInt("matching_l2_motherPdgId", genMuon2Mother_genPdgId);
       cand.addUserInt("matching_k_motherPdgId", genKaonMother_genPdgId);
 
-      cand.addUserInt("l1_n_isotrk" , l1_n_isotrk);
-      cand.addUserInt("l2_n_isotrk" , l2_n_isotrk);
-      cand.addUserInt("k_n_isotrk" ,  k_n_isotrk);
-      cand.addUserInt("b_n_isotrk" ,  b_n_isotrk);
-
-      cand.addUserFloat("l1_iso03_dca", l1_iso03_dca);
-      cand.addUserFloat("l1_iso04_dca", l1_iso04_dca);
-      cand.addUserFloat("l2_iso03_dca", l2_iso03_dca);
-      cand.addUserFloat("l2_iso04_dca", l2_iso04_dca);
-      cand.addUserFloat("k_iso03_dca" , k_iso03_dca );
-      cand.addUserFloat("k_iso04_dca" , k_iso04_dca );
-      cand.addUserFloat("b_iso03_dca" , b_iso03_dca );
-      cand.addUserFloat("b_iso04_dca" , b_iso04_dca );
-      cand.addUserInt("l1_n_isotrk_dca" , l1_n_isotrk_dca);
-      cand.addUserInt("l2_n_isotrk_dca" , l2_n_isotrk_dca);
-      cand.addUserInt("k_n_isotrk_dca" ,  k_n_isotrk_dca);
-      cand.addUserInt("b_n_isotrk_dca" ,  b_n_isotrk_dca);
-
-      cand.addUserFloat("l1_iso03_dca_tight", l1_iso03_dca_tight);
-      cand.addUserFloat("l1_iso04_dca_tight", l1_iso04_dca_tight);
-      cand.addUserFloat("l2_iso03_dca_tight", l2_iso03_dca_tight);
-      cand.addUserFloat("l2_iso04_dca_tight", l2_iso04_dca_tight);
-      cand.addUserFloat("k_iso03_dca_tight" , k_iso03_dca_tight );
-      cand.addUserFloat("k_iso04_dca_tight" , k_iso04_dca_tight );
-      cand.addUserFloat("b_iso03_dca_tight" , b_iso03_dca_tight );
-      cand.addUserFloat("b_iso04_dca_tight" , b_iso04_dca_tight );
-      cand.addUserInt("l1_n_isotrk_dca_tight" , l1_n_isotrk_dca_tight);
-      cand.addUserInt("l2_n_isotrk_dca_tight" , l2_n_isotrk_dca_tight);
-      cand.addUserInt("k_n_isotrk_dca_tight" ,  k_n_isotrk_dca_tight);
-      cand.addUserInt("b_n_isotrk_dca_tight" ,  b_n_isotrk_dca_tight);
 
       ret_val->push_back(cand);
 
