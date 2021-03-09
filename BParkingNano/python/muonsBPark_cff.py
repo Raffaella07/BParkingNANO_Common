@@ -24,7 +24,7 @@ muonTrgSelector = cms.EDProducer("MuonTriggerSelector",
                                  selmu_ptMin = cms.double(0.5),
                                  selmu_absEtaMax = cms.double(2.4),
                                  #selmu_softMuonsOnly = cms.bool(False)
-                                 selmu_softMuonsOnly = cms.bool(True)
+                                 selmu_softMuonsOnly = cms.bool(True),
                                  HLTPaths=cms.vstring(Path)#, ### comma to the softMuonsOnly
 #				 L1seeds=cms.vstring(Seed)
                              )

@@ -78,7 +78,7 @@ MuonTriggerSelector::MuonTriggerSelector(const edm::ParameterSet &iConfig):
   dzTrg_cleaning_(iConfig.getParameter<double>("dzForCleaning_wrtTrgMuon")),
   selmu_ptMin_(iConfig.getParameter<double>("selmu_ptMin")),
   selmu_absEtaMax_(iConfig.getParameter<double>("selmu_absEtaMax")),
-  selmu_softMuonsOnly_(iConfig.getParameter<bool>("selmu_softMuonsOnly"))
+  selmu_softMuonsOnly_(iConfig.getParameter<bool>("selmu_softMuonsOnly")),
   HLTPaths_(iConfig.getParameter<std::vector<std::string>>("HLTPaths"))//,   //////////Comma
 //  L1Seeds_(iConfig.getParameter<std::vector<std::string>>("L1seeds"))
 {
@@ -228,8 +228,8 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
     //and now save the reco muon triggering or not 
     for(const pat::Muon & muon : *muons){
         unsigned int iMuo(&muon - &(muons->at(0)) );
-        if(muon.pt()<ptMin_) continue;
-        if(fabs(muon.eta())>absEtaMax_) continue;
+        if(muon.pt()<selmu_ptMin_) continue;
+        if(fabs(muon.eta())>selmu_absEtaMax_) continue;
         if(muon.isLooseMuon()){loose_id[iMuo] = 1;}
         bool SkipMuon=true;
         if(dzTrg_cleaning_<0) SkipMuon=false;
