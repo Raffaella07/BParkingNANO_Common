@@ -92,19 +92,35 @@ OR  --data               : runs the tool on BParking data
   * with --mcprivate     : must correspond to the production label under which 
                            the miniAOD sample was produced (e.g V11_inclB_n4200000_njt200) 
   * with --mccentral/data: any production label of your choice
-* --ds <dataset>         : to be used with --data or --mccentral only 
-(e.g /ParkingBPH4/Run2018B-05May2019-v2/MINIAOD, /QCD_Pt-15to20_MuEnrichedPt5_TuneCP5_13TeV_pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v3/MINIAODSIM)
+* --ds <dataset>         : to be used with --data or --mccentral only. Datasets listed in data/samples 
+* --donano               : launch the nano step
+* --doflat               : launch the ntuplising step
+* --domergenano          : launch the merging tool automatically after the nano step. Not recommended as doubles the storage space needed
 * --user <user>          : with --mcprivate only, optional; username that produced the miniAOD sample
 * --tag <tag>            : optional, tag to be appended to the rootfile name 
 * --maxfiles <maxfiles>  : optional, maximum number of files to process
+* --doquick              : run on slurm quick partition (time/job < 1h)
+* --docompile            : optional, compiles the BParkingNano tool before launching
 ```
 
-Once ready, merge the different nano steps by doing
+Examples of usage:
+```
+python nanoLauncher.py --pl V15_full --user mratti --donano --doflat --mcprivate
+```
+```
+python nanoLauncher.py --pl V01 --ds /ParkingBPH1/Run2018A-05May2019-v1/MINIAOD --donano --doflat --data
+```
+```
+python nanoLauncher.py --pl V01 --ds /QCD_Pt-15to20_MuEnrichedPt5_TuneCP5_13TeV_pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v3/MINIAODSIM --donano --doflat --mccentral```
+```
+
+If not done at launching, you can merge a posteriori the different nano steps by doing
 
 ```
-python nanoMerger.py --pl <prodLabel> --tag <tag> --<mcprivate/mccentral/data>
+python nanoMerger.py --pl <prodLabel> --ds <dataset> --tag <tag> --<mcprivate/mccentral/data>
 ```
-Note that the production label and tag have to be consistent with those of the nanoAOD production. For data, the production label is typically the name of the corresponding pnfs dir.
+
+Note that the production label and tag have to be consistent with those of the nanoAOD production.
 
 
 
