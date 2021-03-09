@@ -85,22 +85,23 @@ python nanoLauncher.py <options>
 ```
 The options are:
 ```
-*   --mcprivate          : runs the tool on signal samples
-OR  --mccentral          : runs the tool on central QCD MC samples
-OR  --data               : runs the tool on BParking data
-* --pl <prodLabel>       : 
-  * with --mcprivate     : must correspond to the production label under which 
-                           the miniAOD sample was produced (e.g V11_inclB_n4200000_njt200) 
+* Indicate whether to run on data or mc (central or private)
+  * --mcprivate or   
+  * --mccentral or
+  *  --data       
+* --pl <prodLabel> 
+  * with --mcprivate:  must correspond to the production label of the miniAOD sample (e.g V15_full) 
   * with --mccentral/data: any production label of your choice
-* --ds <dataset>         : to be used with --data or --mccentral only. Datasets listed in data/samples 
-* --donano               : launch the nano step
-* --doflat               : launch the ntuplising step
-* --domergenano          : launch the merging tool automatically after the nano step. Not recommended as doubles the storage space needed
-* --user <user>          : with --mcprivate only, optional; username that produced the miniAOD sample
-* --tag <tag>            : optional, tag to be appended to the rootfile name 
-* --maxfiles <maxfiles>  : optional, maximum number of files to process
-* --doquick              : run on slurm quick partition (time/job < 1h)
-* --docompile            : optional, compiles the BParkingNano tool before launching
+* --ds <dataset>:  to be used with --data or --mccentral only. Datasets listed in data/samples 
+* Indicate on which steps to run
+  * --donano: launch the nano step
+  * --doflat: launch the ntuplising step
+  * --domergenano: launch the merging tool automatically after the nano step. Not recommended as doubles the storage space needed
+* --user <user>: with --mcprivate only; username where the miniAOD samples are stored
+* --tag <tag>: optional, tag to be appended to the rootfile name 
+* --maxfiles <maxfiles>: optional, maximum number of files to process
+* --doquick: optional run on slurm quick partition (time/job < 1h)
+* --docompile: optional, compiles the BParkingNano tool before launching
 ```
 
 Examples of usage:
@@ -111,7 +112,7 @@ python nanoLauncher.py --pl V15_full --user mratti --donano --doflat --mcprivate
 python nanoLauncher.py --pl V01 --ds /ParkingBPH1/Run2018A-05May2019-v1/MINIAOD --donano --doflat --data
 ```
 ```
-python nanoLauncher.py --pl V01 --ds /QCD_Pt-15to20_MuEnrichedPt5_TuneCP5_13TeV_pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v3/MINIAODSIM --donano --doflat --mccentral```
+python nanoLauncher.py --pl V01 --ds /QCD_Pt-15to20_MuEnrichedPt5_TuneCP5_13TeV_pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v3/MINIAODSIM --donano --doflat --mccentral
 ```
 
 If not done at launching, you can merge a posteriori the different nano steps by doing
