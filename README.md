@@ -21,14 +21,13 @@ git checkout -b from-CMSSW_10_2_15__ID-2020Jul26-depth13-700__WithFinalReg crove
 ### Add the modification needed to use post-fit quantities for electrons  
 
 ```shell
-git cms-addpkg TrackingTools/TransientTrack
-git cms-merge-topic -u CMSBParking:GsfTransientTracks
+git cms-merge-topic -u CMSBParking:GsfTransientTracks # unsafe checkout (no checkdeps), but suggested here
 ```
 
 ### Add the modification needed to use the KinematicParticleVertexFitter  
 
 ```shell
-git cms-merge-topic -u CMSBParking:fixKinParticleVtxFitter
+git cms-merge-topic -u CMSBParking:fixKinParticleVtxFitter # unsafe checkout (no checkdeps), but suggested here
 ```
 
 ### Add the BParkingNano package and build everything

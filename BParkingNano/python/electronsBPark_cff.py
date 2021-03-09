@@ -216,11 +216,15 @@ electronsForAnalysis = cms.EDProducer(
   pf_ptMin = cms.double(1.),
   ptMin = cms.double(0.5),
   etaMax = cms.double(2.5),
-  bdtMin = cms.double(-4.5), #this cut can be used to deactivate low pT e if set to >12
+  bdtMin = cms.double(-2.5), #this cut can be used to deactivate low pT e if set to >12
   useRegressionModeForP4 = cms.bool(True),
   useGsfModeForP4 = cms.bool(False),
   sortOutputCollections = cms.bool(True),
   saveLowPtE = cms.bool(True),
+    # conversions
+    conversions = cms.InputTag('gsfTracksOpenConversions:gsfTracksOpenConversions'),
+    beamSpot = cms.InputTag("offlineBeamSpot"),
+    addUserVarsExtra = cms.bool(True),
 )
 
 electronBParkTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
@@ -240,6 +244,7 @@ electronBParkTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
         vx = Var("vx()",float,doc="x coordinate of vertex position, in cm",precision=6),
         vy = Var("vy()",float,doc="y coordinate of vertex position, in cm",precision=6),
         vz = Var("vz()",float,doc="z coordinate of vertex position, in cm",precision=6),
+        dzTrg = Var("userFloat('dzTrg')",float,doc="dz from the corresponding trigger muon, in cm",precision=10),
         ip3d = Var("abs(dB('PV3D'))",float,doc="3D impact parameter wrt first PV, in cm",precision=10),
         sip3d = Var("abs(dB('PV3D')/edB('PV3D'))",float,doc="3D impact parameter significance wrt first PV, in cm",precision=10),
 #        deltaEtaSC = Var("superCluster().eta()-eta()",float,doc="delta eta (SC,ele) with sign",precision=10),
@@ -259,11 +264,40 @@ electronBParkTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
         pfmvaId = Var("userFloat('pfmvaId')",float,doc="MVA ID for pfEle, 20 for low pT"),
         fBrem = Var("fbrem()",float,doc="brem fraction from the gsf fit",precision=12),
         isPFoverlap = Var("userInt('isPFoverlap')",bool,doc="flag lowPt ele overlapping with pf in selected_pf_collection",precision=8),
+        convOpen = Var("userInt('convOpen')",bool,doc="Matched to a conversion in gsfTracksOpenConversions collection"),
+        convLoose = Var("userInt('convLoose')",bool,doc="Matched to a conversion satisfying Loose WP (see code)"),
+        convTight = Var("userInt('convTight')",bool,doc="Matched to a conversion satisfying Tight WP (see code)"),
+        convLead = Var("userInt('convLead')",bool,doc="Matched to leading track from conversion"),
+        convTrail = Var("userInt('convTrail')",bool,doc="Matched to trailing track from conversion"),
+        convExtra = Var("userInt('convExtra')",bool,doc="Flag to indicate if all conversion variables are stored"),
         )
 )
 
-
-
+if electronsForAnalysis.addUserVarsExtra : 
+    electronBParkTable.variables = cms.PSet(
+        electronBParkTable.variables,
+        convValid = Var("userInt('convValid')",bool,doc="Valid conversion"),
+        convChi2Prob = Var("userFloat('convChi2Prob')",float,doc="Reduced chi2 for conversion vertex fit"),
+        convQualityHighPurity = Var("userInt('convQualityHighPurity')",bool,doc="'High purity' quality flag for conversion"),
+        convQualityHighEff = Var("userInt('convQualityHighEff')",bool,doc="'High efficiency' quality flag for conversion"),
+        convTracksN = Var("userInt('convTracksN')",int,doc="Number of tracks associated with conversion"),
+        convMinTrkPt = Var("userFloat('convMinTrkPt')",float,doc="Minimum pT found for tracks associated with conversion"),
+        convLeadIdx = Var("userInt('convLeadIdx')",int,doc="Index of leading track"),
+        convTrailIdx = Var("userInt('convTrailIdx')",int,doc="Index of trailing track"),
+        convLxy = Var("userFloat('convLxy')",float,doc="Transverse position of conversion vertex"),
+        convVtxRadius = Var("userFloat('convVtxRadius')",float,doc="Radius of conversion vertex"),
+        convMass = Var("userFloat('convMass')",float,doc="Invariant mass from conversion pair"),
+        convMassFromPin = Var("userFloat('convMassFromPin')",float,doc="Invariant mass from inner momeuntum of conversion pair"),
+        convMassBeforeFit = Var("userFloat('convMassBeforeFit')",float,doc="Invariant mass from conversion pair before fit"),
+        convMassAfterFit = Var("userFloat('convMassAfterFit')",float,doc="Invariant mass from conversion pair after fit"),
+        convLeadNHitsBeforeVtx = Var("userInt('convLeadNHitsBeforeVtx')",int,doc="Number of hits before vertex for lead track"),
+        convTrailNHitsBeforeVtx = Var("userInt('convTrailNHitsBeforeVtx')",int,doc="Number of hits before vertex for trail track"),
+        convMaxNHitsBeforeVtx = Var("userInt('convMaxNHitsBeforeVtx')",int,doc="Maximum number of hits per track before vertex"),
+        convSumNHitsBeforeVtx = Var("userInt('convSumNHitsBeforeVtx')",int,doc="Summed number of hits over tracks before vertex"),
+        convDeltaExpectedNHitsInner = Var("userInt('convDeltaExpectedNHitsInner')",int,doc="Delta number of expected hits before vertex"),
+        convDeltaCotFromPin = Var("userFloat('convDeltaCotFromPin')",float,doc="Delta cotangent theta from inner momenta"),
+    )
+    
 electronsBParkMCMatchForTable = cms.EDProducer("MCMatcher",  # cut on deltaR, deltaPt/Pt; pick best by deltaR
     src         = electronBParkTable.src,                 # final reco collection
     matched     = cms.InputTag("finalGenParticlesBPark"), # final mc-truth particle collection

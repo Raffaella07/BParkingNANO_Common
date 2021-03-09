@@ -2,6 +2,7 @@ import FWCore.ParameterSet.Config as cms
 from PhysicsTools.NanoAOD.common_cff import *
 
 
+Path=["HLT_Mu7_IP4","HLT_Mu8_IP6","HLT_Mu8_IP5","HLT_Mu8_IP3","HLT_Mu8p5_IP3p5","HLT_Mu9_IP6","HLT_Mu9_IP5","HLT_Mu9_IP4","HLT_Mu10p5_IP3p5","HLT_Mu12_IP6"]
 
 muonTrgSelector = cms.EDProducer("MuonTriggerSelector",
                                  muonCollection = cms.InputTag("slimmedMuons"), #same collection as in NanoAOD                                                           
@@ -24,8 +25,10 @@ muonTrgSelector = cms.EDProducer("MuonTriggerSelector",
                                  selmu_absEtaMax = cms.double(2.4),
                                  #selmu_softMuonsOnly = cms.bool(False)
                                  selmu_softMuonsOnly = cms.bool(True)
+                                 HLTPaths=cms.vstring(Path)#, ### comma to the softMuonsOnly
+#				 L1seeds=cms.vstring(Seed)
                              )
-
+#cuts minimun number in B both mu and e, min number of trg, dz muon, dz and dr track, 
 countTrgMuons = cms.EDFilter("PATCandViewCountFilter",
     minNumber = cms.uint32(1),
     maxNumber = cms.uint32(999999),
@@ -74,7 +77,21 @@ muonBParkTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
 #        multiIsoId = Var("?passed('MultiIsoMedium')?2:passed('MultiIsoLoose')","uint8",doc="MultiIsoId from miniAOD selector (1=MultiIsoLoose, 2=MultiIsoMedium)"),
         triggerIdLoose = Var("passed('TriggerIdLoose')",bool,doc="TriggerIdLoose ID"),
 #        inTimeMuon = Var("passed('InTimeMuon')",bool,doc="inTimeMuon ID"),
-        isTriggering = Var("userInt('isTriggering')", int,doc="flag the reco muon is also triggering")
+        isTriggering = Var("userInt('isTriggering')", int,doc="flag the reco muon is also triggering"),#########################################################3,
+#        toWhichHLTisMatched = Var("userInt('ToWhichHLTisMatched')",int,doc="To which HLT muons is the reco muon matched, -1 for probe" ),
+        matched_dr = Var("userFloat('DR')",float,doc="dr with the matched triggering muon" ),
+        matched_dpt = Var("userFloat('DPT')",float,doc="dpt/pt with the matched triggering muon" ),        #comma
+        looseId = Var("userInt('looseId')",int,doc="reco muon is Loose"),
+        fired_HLT_Mu7_IP4 = Var("userInt('HLT_Mu7_IP4')",int,doc="reco muon fired this trigger"),
+        fired_HLT_Mu8_IP6 = Var("userInt('HLT_Mu8_IP6')",int,doc="reco muon fired this trigger"),
+        fired_HLT_Mu8_IP5 = Var("userInt('HLT_Mu8_IP5')",int,doc="reco muon fired this trigger"),
+        fired_HLT_Mu8_IP3 = Var("userInt('HLT_Mu8_IP3')",int,doc="reco muon fired this trigger"),
+        fired_HLT_Mu8p5_IP3p5 = Var("userInt('HLT_Mu8p5_IP3p5')",int,doc="reco muon fired this trigger"),
+        fired_HLT_Mu9_IP6 = Var("userInt('HLT_Mu9_IP6')",int,doc="reco muon fired this trigger"),
+        fired_HLT_Mu9_IP5 = Var("userInt('HLT_Mu9_IP5')",int,doc="reco muon fired this trigger"),
+        fired_HLT_Mu9_IP4 = Var("userInt('HLT_Mu9_IP4')",int,doc="reco muon fired this trigger"),
+        fired_HLT_Mu10p5_IP3p5 = Var("userInt('HLT_Mu10p5_IP3p5')",int,doc="reco muon fired this trigger"),
+        fired_HLT_Mu12_IP6 = Var("userInt('HLT_Mu12_IP6')",int,doc="reco muon fired this trigger")#,
     ),
 )
 
@@ -109,12 +126,12 @@ selectedMuonsMCMatchEmbedded = cms.EDProducer(
 muonTriggerBParkTable = muonBParkTable.clone(
     src = cms.InputTag("muonTrgSelector:trgMuons"),
     name = cms.string("TriggerMuon"),
-    doc  = cms.string("reco muon matched to triggering muon"),
+    doc  = cms.string("HLT Muons matched with reco muons"), #reco muon matched to triggering muon"),
     variables = cms.PSet(CandVars,
         vx = Var("vx()",float,doc="x coordinate of vertex position, in cm",precision=6),
         vy = Var("vy()",float,doc="y coordinate of vertex position, in cm",precision=6),
-        vz = Var("vz()",float,doc="z coordinate of vertex position, in cm",precision=6),
-        trgMuonIndex = Var("userInt('trgMuonIndex')", int,doc="index in trigger muon collection")
+        vz = Var("vz()",float,doc="z coordinate of vertex position, in cm",precision=6)####################,
+#        trgMuonIndex = Var("userInt('trgMuonIndex')", int,doc="index in trigger muon collection")
    )
 )
 
