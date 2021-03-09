@@ -109,6 +109,10 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
     std::unique_ptr<pat::MuonCollection>      trgmuons_out   ( new pat::MuonCollection );
     std::unique_ptr<pat::MuonCollection>      muons_out      ( new pat::MuonCollection );
     std::unique_ptr<TransientTrackCollection> trans_muons_out( new TransientTrackCollection );
+    
+    //now check for reco muons matched to triggering muons
+    edm::Handle<std::vector<pat::Muon>> muons;
+    iEvent.getByToken(muonSrc_, muons);
 
     std::vector<int> muonIsTrigger(muons->size(), 0);
     std::vector<float> muonDR(muons->size(),-1.);
