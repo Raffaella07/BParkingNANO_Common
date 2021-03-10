@@ -2,7 +2,7 @@ import FWCore.ParameterSet.Config as cms
 from PhysicsTools.BParkingNano.common_cff import uint, ufloat, Var, CandVars
 
 BToMuMuPi = cms.EDProducer(
-    'BToMuMuPiBuilder',
+    'my_BToMuMuPiBuilder',
     trgMuons                = cms.InputTag('muonTrgSelector', 'trgMuons'),
     selMuons                = cms.InputTag('muonTrgSelector', 'SelectedMuons'), 
     selMuonsTransientTracks = cms.InputTag('muonTrgSelector', 'SelectedTransientMuons'), 

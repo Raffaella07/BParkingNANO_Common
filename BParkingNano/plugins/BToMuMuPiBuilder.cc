@@ -25,13 +25,13 @@
 #include <algorithm>
 #include "KinVtxFitter.h"
 
-class BToMuMuPiBuilder : public edm::global::EDProducer<> {
+class my_BToMuMuPiBuilder : public edm::global::EDProducer<> {
 
   // perhaps we need better structure here (begin run etc)
 public:
   typedef std::vector<reco::TransientTrack> TransientTrackCollection;
 
-  explicit BToMuMuPiBuilder(const edm::ParameterSet &cfg):
+  explicit my_BToMuMuPiBuilder(const edm::ParameterSet &cfg):
     pi_selection_      {cfg.getParameter<std::string>("pionSelection"     )},
     isotrk_selection_  {cfg.getParameter<std::string>("isoTracksSelection")},
     trgmu_selection_   {cfg.getParameter<std::string>("trgMuonSelection"  )},
@@ -62,7 +62,7 @@ public:
     //vertexSrc_         { consumes<reco::VertexCollection>          ( iConfig.getParameter<edm::InputTag>( "vertexCollection"  ) )},
     //vertexSrc_( consumes<reco::VertexCollection> ( iConfig.getParameter<edm::InputTag>( "vertexCollection" ) ) )
 
-  ~BToMuMuPiBuilder() override {}
+  ~my_BToMuMuPiBuilder() override {}
   
   void produce(edm::StreamID, edm::Event&, const edm::EventSetup&) const override;
 
@@ -99,7 +99,7 @@ private:
   
 };
 
-void BToMuMuPiBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup const &) const {
+void my_BToMuMuPiBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup const &) const {
 
   //input
 
@@ -525,4 +525,4 @@ void BToMuMuPiBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup c
 }
 
 #include "FWCore/Framework/interface/MakerMacros.h"
-DEFINE_FWK_MODULE(BToMuMuPiBuilder);
+DEFINE_FWK_MODULE(my_BToMuMuPiBuilder);
