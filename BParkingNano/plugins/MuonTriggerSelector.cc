@@ -64,7 +64,7 @@ class MuonTriggerSelector : public edm::EDProducer {
     const double selmu_absEtaMax_;      // max eta ""
     const bool selmu_softMuonsOnly_;    // cuts muons without soft ID
     std::vector<std::string> HLTPaths_;
-//    std::vector<std::string> L1Seeds_;
+    //std::vector<std::string> L1Seeds_;
 };
 
 
@@ -79,8 +79,8 @@ MuonTriggerSelector::MuonTriggerSelector(const edm::ParameterSet &iConfig):
   selmu_ptMin_(iConfig.getParameter<double>("selmu_ptMin")),
   selmu_absEtaMax_(iConfig.getParameter<double>("selmu_absEtaMax")),
   selmu_softMuonsOnly_(iConfig.getParameter<bool>("selmu_softMuonsOnly")),
-  HLTPaths_(iConfig.getParameter<std::vector<std::string>>("HLTPaths"))//,   //////////Comma
-//  L1Seeds_(iConfig.getParameter<std::vector<std::string>>("L1seeds"))
+  HLTPaths_(iConfig.getParameter<std::vector<std::string>>("HLTPaths")),
+  //L1Seeds_(iConfig.getParameter<std::vector<std::string>>("L1seeds"))
 {
   // produce 2 collections: trgMuons (tags) and SelectedMuons (probes & tags if survive preselection cuts)
   produces<pat::MuonCollection>("trgMuons"); 
@@ -94,11 +94,11 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
     iSetup.get<IdealMagneticFieldRecord>().get(bFieldHandle);
     edm::Handle<reco::VertexCollection> vertexHandle;
     iEvent.getByToken(vertexSrc_, vertexHandle);
-//    const reco::Vertex & PV = vertexHandle->front();
+    //const reco::Vertex & PV = vertexHandle->front();
 
     edm::Handle<edm::TriggerResults> triggerBits;
     iEvent.getByToken(triggerBits_, triggerBits);
-//    const edm::TriggerNames &names = iEvent.triggerNames(*triggerBits);
+    //const edm::TriggerNames &names = iEvent.triggerNames(*triggerBits);
 
     std::vector<pat::TriggerObjectStandAlone> triggeringMuons;
 
@@ -128,10 +128,10 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
     std::vector<std::vector<float>> DR;
     std::vector<std::vector<float>> DPT;    
     for(const pat::Muon &muon : *muons){
-        if(debug)std::cout <<"Muon Pt="<< muon.pt() << " Eta=" << muon.eta() << " Phi=" << muon.phi()  <<endl;
+        if(debug) std::cout <<"Muon Pt="<< muon.pt() << " Eta=" << muon.eta() << " Phi=" << muon.phi()  <<endl;
 
         std::vector<int> frs(HLTPaths_.size(),0); //path fires for each reco muon
-//        std::vector<int> sds(L1Seeds_.size(),0);// L1 Seeds for each L1 muon
+        //std::vector<int> sds(L1Seeds_.size(),0);// L1 Seeds for each L1 muon
         std::vector<float> temp_matched_to(HLTPaths_.size(),1000.);
         std::vector<float> temp_DR(HLTPaths_.size(),1000.);
         std::vector<float> temp_DPT(HLTPaths_.size(),1000.);
@@ -163,7 +163,7 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
                 for(size_t i=0; i<muon.triggerObjectMatches().size();i++){
 //                if(muon.triggerObjectMatch(i)!=0 && muon.triggerObjectMatch(i)->hasAlgorithm)
                     if(muon.triggerObjectMatch(i)!=0 && muon.triggerObjectMatch(i)->hasPathName(cstr,true,true)){
-//                        if(abs(muon.triggerObjectMatch(i)->eta())>1.5) std::cout << "HEEEEEEEEEEEEEEEEEEREEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE eta=" <<muon.triggerObjectMatch(i)->eta();
+//                        if(abs(muon.triggerObjectMatch(i)->eta())>1.5) std::cout << "eta=" <<muon.triggerObjectMatch(i)->eta();
                         frs[ipath]=1;
                         float dr=TMath::Sqrt(pow(muon.triggerObjectMatch(i)->eta()-muon.eta(),2.)+pow(muon.triggerObjectMatch(i)->phi()-muon.phi(),2.));
                         float dpt=(muon.triggerObjectMatch(i)->pt()-muon.pt())/muon.triggerObjectMatch(i)->pt();
@@ -233,7 +233,6 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
         if(muon.isLooseMuon()){loose_id[iMuo] = 1;}
         bool SkipMuon=true;
         if(dzTrg_cleaning_<0) SkipMuon=false;
-        if(debug && trgmuons_out->size()==0) std::cout <<"HEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEERRRRRRRRRRRRRRREEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE" << endl;
         for(const pat::Muon & trgmu : *trgmuons_out){
             if(fabs(muon.vz()-trgmu.vz())> dzTrg_cleaning_ && dzTrg_cleaning_>0) continue;
             SkipMuon=false;

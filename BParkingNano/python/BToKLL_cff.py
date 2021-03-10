@@ -81,7 +81,7 @@ BToKmumu = cms.EDProducer(
     drIso_cleaning = BToKee.drIso_cleaning,
     # This in principle can be different between electrons and muons
     preVtxSelection = cms.string(
-        'pt > 3. && userFloat("min_dr") > 0.03 '
+        'pt > 3. && userFloat("min_dr") > 0.03 ' # move pT down to 1.75?
         '&& mass < 7. && mass > 4.'
         ),
     postVtxSelection = cms.string(
