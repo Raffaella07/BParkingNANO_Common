@@ -79,7 +79,7 @@ MuonTriggerSelector::MuonTriggerSelector(const edm::ParameterSet &iConfig):
   selmu_ptMin_(iConfig.getParameter<double>("selmu_ptMin")),
   selmu_absEtaMax_(iConfig.getParameter<double>("selmu_absEtaMax")),
   selmu_softMuonsOnly_(iConfig.getParameter<bool>("selmu_softMuonsOnly")),
-  HLTPaths_(iConfig.getParameter<std::vector<std::string>>("HLTPaths")),
+  HLTPaths_(iConfig.getParameter<std::vector<std::string>>("HLTPaths"))
   //L1Seeds_(iConfig.getParameter<std::vector<std::string>>("L1seeds"))
 {
   // produce 2 collections: trgMuons (tags) and SelectedMuons (probes & tags if survive preselection cuts)
