@@ -382,7 +382,7 @@ void BToKLLBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
       int b_n_isotrk_dca_tight = 0;
 
       for(size_t trk_idx = 0; trk_idx < kaons->size(); ++trk_idx) {
-        // corss clean kaon
+        // cross clean kaon
         if (trk_idx == k_idx) continue;
         edm::Ptr<pat::CompositeCandidate> trk_ptr(kaons, trk_idx);
         if( !isotrk_dca_selection_(*trk_ptr) ) continue;
