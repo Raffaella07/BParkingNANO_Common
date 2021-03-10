@@ -1,38 +1,35 @@
 # nanoAOD producer customized for BParking analysis 
 
-## Getting started
+## Installation
 
-```shell
+Setup the environment
+```
 cmsrel CMSSW_10_2_15
 cd CMSSW_10_2_15/src
 cmsenv
 git cms-init
 ```
 
-### Add energy regression and July20-depth13-700trees model for LPT electron ID
-
-```shell
-scp <username>@lxplus.cern.ch:/afs/cern.ch/user/c/crovelli/public/4BParking/sparse-checkout .git/info/sparse-checkout
-git remote add crovelli git@github.com:crovelli/cmssw.git
-git fetch crovelli
-git checkout -b from-CMSSW_10_2_15__ID-2020Jul26-depth13-700__WithFinalReg crovelli/from-CMSSW_10_2_15__ID-2020Jul26-depth13-700__WithFinalReg
+Import the BParking modifications on the TransientTracks, the KinematicVertexFitter, the ElectronRegression and GBRForest
+```
+git cms-merge-topic -u amlyon:BHNLNano
 ```
 
-### Add the modification needed to use post-fit quantities for electrons  
-
-```shell
-git cms-merge-topic -u CMSBParking:GsfTransientTracks # unsafe checkout (no checkdeps), but suggested here
+Clone CMSBParking branch for ElectronIndentification
+```
+git clone --single-branch --branch from-CMSSW_10_2_15_2020Sept15 git@github.com:CMSBParking/RecoEgamma-ElectronIdentification.git $CMSSW_BASE/external/$SCRAM_ARCH/data/RecoEgamma/ElectronIdentification/data
 ```
 
-### Add the modification needed to use the KinematicParticleVertexFitter  
-
-```shell
-git cms-merge-topic -u CMSBParking:fixKinParticleVtxFitter # unsafe checkout (no checkdeps), but suggested here
+To run on CRAB, do
+```
+git cms-addpkg RecoEgamma/ElectronIdentification
+mkdir -p $CMSSW_BASE/src/RecoEgamma/ElectronIdentification/data/LowPtElectrons
+cp $CMSSW_BASE/external/$SCRAM_ARCH/data/RecoEgamma/ElectronIdentification/data/LowPtElectrons/LowPtElectrons_ID_2020Sept15.root $CMSSW_BASE/src/RecoEgamma/ElectronIdentification/data/LowPtElectrons
 ```
 
-### Add the BParkingNano package and build everything
+Add the BParkingNano tool and build everything
 
-```shell
+```
 git clone git@github.com:BParkHNLs/BParkingNANO.git ./PhysicsTools
 git cms-addpkg PhysicsTools/NanoAOD
 scram b -j 8
@@ -46,16 +43,9 @@ cmsenv
 ```
 
 
-### To run on a test file
-
-```shell
-cd PhysicsTools/BParkingNano/test/
-cmsRun run_nano_cfg.py
-```
-
 ## Nano samples production
 
-```shell
+```
 cd PhysicsTools/BParkingNano/test/
 ```
 
