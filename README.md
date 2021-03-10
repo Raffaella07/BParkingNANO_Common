@@ -10,7 +10,7 @@ cmsenv
 git cms-init
 ```
 
-Import the BParking modifications on the TransientTracks, the KinematicVertexFitter, the ElectronRegression and GBRForest
+Import the BParking modifications on the TransientTracks, KinematicVertexFitter, ElectronRegression and GBRForest
 ```
 git cms-merge-topic -u amlyon:BHNLNano
 ```
