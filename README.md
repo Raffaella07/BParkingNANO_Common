@@ -76,7 +76,7 @@ Options:
   * --mcprivate or   
   * --mccentral or
   *  --data       
-* --pl <prodLabel> 
+* --pl `<prodLabel>` 
   * with --mcprivate:  must correspond to the production label of the miniAOD sample (e.g V15_full) 
   * with --mccentral/data: any production label of your choice
 * --ds <dataset>:  to be used with --data or --mccentral only. Datasets listed in data/samples 
