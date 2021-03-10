@@ -79,14 +79,14 @@ Options:
 * --pl `<prodLabel>` 
   * with --mcprivate:  must correspond to the production label of the miniAOD sample (e.g V15_full) 
   * with --mccentral/data: any production label of your choice
-* --ds <dataset>:  to be used with --data or --mccentral only. Datasets listed in data/samples 
+* --ds `<dataset>`:  to be used with --data or --mccentral only. Datasets listed in data/samples 
 * Indicate on which steps to run
   * --donano: launch the nano step
   * --doflat: launch the ntuplising step
   * --domergenano: launch the merging tool automatically after the nano step. Not recommended as doubles the storage space needed
-* --user <user>: with --mcprivate only; username where the miniAOD samples are stored
-* --tag <tag>: optional, tag to be appended to the rootfile name 
-* --maxfiles <maxfiles>: optional, maximum number of files to process
+* --user `<user>`: with --mcprivate only; username where the miniAOD samples are stored
+* --tag `<tag>`: optional, tag to be appended to the rootfile name 
+* --maxfiles `<maxfiles>`: optional, maximum number of files to process
 * --doquick: optional run on slurm quick partition (time/job < 1h)
 * --docompile: optional, compiles the BParkingNano tool before launching
 
@@ -126,8 +126,8 @@ python nanoProdManager.py <options>
 ```
 Options:
 * --data 
-* --pl <prodLabel>
-* --ds <dataset>: optional, if not set, will loop on all datasets produced under <prodLabel>
+* --pl `<prodLabel>`
+* --ds `<dataset>`: optional, if not set, will loop on all datasets produced under `<prodLabel>`
 * --dofullreport: expands the status report with per-chunk information and details on reasons of jobs failure
 * --dofetchtime: returns how much time the jobs took to run
 * --doresubmit: resubmits the failed jobs
