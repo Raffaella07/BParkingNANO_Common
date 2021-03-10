@@ -34,7 +34,7 @@ BToKee = cms.EDProducer(
     isotrkDCATightCut = cms.double(0.1),
     drIso_cleaning = cms.double(0.03),
     preVtxSelection = cms.string(
-        'pt > 3. && userFloat("min_dr") > 0.03 '
+        'pt > 1.75 && userFloat("min_dr") > 0.03 '
         '&& mass < 7. && mass > 4.'
         ),
     postVtxSelection = cms.string(
@@ -81,7 +81,7 @@ BToKmumu = cms.EDProducer(
     drIso_cleaning = BToKee.drIso_cleaning,
     # This in principle can be different between electrons and muons
     preVtxSelection = cms.string(
-        'pt > 1.75 && userFloat("min_dr") > 0.03 '
+        'pt > 3. && userFloat("min_dr") > 0.03 '
         '&& mass < 7. && mass > 4.'
         ),
     postVtxSelection = cms.string(
