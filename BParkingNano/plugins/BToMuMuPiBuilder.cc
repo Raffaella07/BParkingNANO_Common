@@ -134,8 +134,6 @@ void BToMuMuPiBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup c
   unsigned int nTracks     = iso_tracks->size();
   unsigned int totalTracks = nTracks + iso_lostTracks->size();
 
-  std::vector<int> used_lep1_id, used_trk_id;
-
   // PV fetched for getting the trigger muon id (caveat: B is long lived)
   //edm::Handle<reco::VertexCollection> vertexHandle;
   //evt.getByToken(vertexSrc_, vertexHandle);
