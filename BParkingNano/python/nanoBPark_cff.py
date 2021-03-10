@@ -20,7 +20,7 @@ from PhysicsTools.BParkingNano.electronsBPark_cff import *
 from PhysicsTools.BParkingNano.tracksBPark_cff import *
 
 ## B collections
-from PhysicsTools.BParkingNano.BToMuMuPi_cff import BToMuMuPi, BToMuMuPiMC, BToMuMuPiTable, BToMuMuPiSequence, BToMuMuPiSequenceMC, CountBToMuMuPi
+from PhysicsTools.BParkingNano.BToMuLPi_cff import BToMuMuPi, BToMuMuPiMC, BToMuMuPiTable, BToMuMuPiSequence, BToMuMuPiSequenceMC, CountBToMuMuPi
 from PhysicsTools.BParkingNano.BToKLL_cff import *
 from PhysicsTools.BParkingNano.BToKstarLL_cff import *
 
