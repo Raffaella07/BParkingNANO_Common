@@ -224,7 +224,7 @@ public :
    TTreeReaderArray<Float_t> TriggerMuon_vz = {fReader, "TriggerMuon_vz"};
    TTreeReaderArray<Int_t> TriggerMuon_charge = {fReader, "TriggerMuon_charge"};
    TTreeReaderArray<Int_t> TriggerMuon_pdgId = {fReader, "TriggerMuon_pdgId"};
-   TTreeReaderArray<Int_t> TriggerMuon_trgMuonIndex = {fReader, "TriggerMuon_trgMuonIndex"};
+   //TTreeReaderArray<Int_t> TriggerMuon_trgMuonIndex = {fReader, "TriggerMuon_trgMuonIndex"};
    TTreeReaderValue<Float_t> fixedGridRhoFastjetAll = {fReader, "fixedGridRhoFastjetAll"};
    TTreeReaderValue<Float_t> fixedGridRhoFastjetCentral = {fReader, "fixedGridRhoFastjetCentral"};
    TTreeReaderValue<Float_t> fixedGridRhoFastjetCentralCalo = {fReader, "fixedGridRhoFastjetCentralCalo"};
@@ -303,18 +303,20 @@ public :
    TTreeReaderArray<Float_t> SV_x = {fReader, "SV_x"};
    TTreeReaderArray<Float_t> SV_y = {fReader, "SV_y"};
    TTreeReaderArray<Float_t> SV_z = {fReader, "SV_z"};
-   //TTreeReaderValue<UInt_t> nGenPart = {fReader, "nGenPart"};
-   //TTreeReaderArray<Float_t> GenPart_eta = {fReader, "GenPart_eta"};
-   //TTreeReaderArray<Float_t> GenPart_mass = {fReader, "GenPart_mass"};
-   //TTreeReaderArray<Float_t> GenPart_phi = {fReader, "GenPart_phi"};
-   //TTreeReaderArray<Float_t> GenPart_pt = {fReader, "GenPart_pt"};
-   //TTreeReaderArray<Float_t> GenPart_vx = {fReader, "GenPart_vx"};
-   //TTreeReaderArray<Float_t> GenPart_vy = {fReader, "GenPart_vy"};
-   //TTreeReaderArray<Float_t> GenPart_vz = {fReader, "GenPart_vz"};
-   //TTreeReaderArray<Int_t> GenPart_genPartIdxMother = {fReader, "GenPart_genPartIdxMother"};
-   //TTreeReaderArray<Int_t> GenPart_pdgId = {fReader, "GenPart_pdgId"};
-   //TTreeReaderArray<Int_t> GenPart_status = {fReader, "GenPart_status"};
-   //TTreeReaderArray<Int_t> GenPart_statusFlags = {fReader, "GenPart_statusFlags"};
+   // branches intentionally pointed to wrong variable, to avoid crash when running on data
+   TTreeReaderValue<UInt_t> nGenPart = {fReader, "nBToMuMuPi"};
+   TTreeReaderArray<Float_t> GenPart_eta = {fReader, "BToMuMuPi_eta"};
+   TTreeReaderArray<Float_t> GenPart_mass = {fReader, "BToMuMuPi_eta"};
+   TTreeReaderArray<Float_t> GenPart_phi = {fReader, "BToMuMuPi_eta"};
+   TTreeReaderArray<Float_t> GenPart_pt = {fReader, "BToMuMuPi_eta"};
+   TTreeReaderArray<Float_t> GenPart_vx = {fReader, "BToMuMuPi_eta"};
+   TTreeReaderArray<Float_t> GenPart_vy = {fReader, "BToMuMuPi_eta"};
+   TTreeReaderArray<Float_t> GenPart_vz = {fReader, "BToMuMuPi_eta"};
+   TTreeReaderArray<Int_t> GenPart_genPartIdxMother = {fReader, "BToMuMuPi_charge"};
+   TTreeReaderArray<Int_t> GenPart_pdgId = {fReader, "BToMuMuPi_charge"};
+   TTreeReaderArray<Int_t> GenPart_status = {fReader, "BToMuMuPi_charge"};
+   TTreeReaderArray<Int_t> GenPart_statusFlags = {fReader, "BToMuMuPi_charge"};
+   TTreeReaderArray<Int_t> Muon_genPartIdx = {fReader, "BToMuMuPi_charge"};
 
 
    NanoDumper(TTree * /*tree*/ =0) { }
@@ -339,6 +341,9 @@ public :
 
    // output file
    TFile* my_file;  
+
+   // some branches will be added only if sample is MC
+   Bool_t isMC;
 
    // some option
    // this option is intentionally hardcoded
@@ -448,9 +453,8 @@ public :
 
    Float_t the_sig_pi_mu_vzdiff;
 
-   //Float_t the_gen_mother_hnl_lxyz;
-   //Float_t the_gen_mother_hnl_lxy;
-   //Float_t the_gen_hnl_lifetime;
+   Float_t the_gen_trgmu_mu_lxy;
+   Float_t the_gen_trgmu_mu_lxyz;
 
    Float_t the_ctrl_b_pt;
    Float_t the_ctrl_b_eta;
