@@ -87,6 +87,29 @@ void NanoDumper::SlaveBegin(TTree * /*tree*/)
   TString option = GetOption();
   TString outFileName = option;
 
+  if(outFileName.Contains("isMC")){
+    isMC = true;
+    outFileName.Resize(outFileName.Length()-5);
+  }
+  else isMC = false;
+
+  // if MC, get the correct content of the GenPart branches
+  if(isMC){
+    nGenPart = {fReader, "nGenPart"};
+    GenPart_eta = {fReader, "GenPart_eta"};
+    GenPart_mass = {fReader, "GenPart_mass"};
+    GenPart_phi = {fReader, "GenPart_phi"};
+    GenPart_pt = {fReader, "GenPart_pt"};
+    GenPart_vx = {fReader, "GenPart_vx"};
+    GenPart_vy = {fReader, "GenPart_vy"};
+    GenPart_vz = {fReader, "GenPart_vz"};
+    GenPart_genPartIdxMother = {fReader, "GenPart_genPartIdxMother"};
+    GenPart_pdgId = {fReader, "GenPart_pdgId"};
+    GenPart_status = {fReader, "GenPart_status"};
+    GenPart_statusFlags = {fReader, "GenPart_statusFlags"};
+    Muon_genPartIdx = {fReader, "Muon_genPartIdx"};
+  }
+
   my_file = new TFile(outFileName, "RECREATE");  
   my_file->cd();
 
@@ -242,9 +265,10 @@ void NanoDumper::SlaveBegin(TTree * /*tree*/)
 
   signal_tree->Branch("pi_mu_vzdiff", &the_sig_pi_mu_vzdiff);
   
-  //signal_tree->Branch("gen_mother_hnl_lxyz", &the_gen_mother_hnl_lxyz);
-  //signal_tree->Branch("gen_mother_hnl_lxy", &the_gen_mother_hnl_lxy);
-  //signal_tree->Branch("gen_hnl_lifetime", &the_gen_hnl_lifetime);
+  if(isMC){
+    signal_tree->Branch("gen_trgmu_mu_lxy", &the_gen_trgmu_mu_lxy);
+    signal_tree->Branch("gen_trgmu_mu_lxyz", &the_gen_trgmu_mu_lxyz);
+  }
 
   signal_tree->Branch("pv_npvs", &the_pv_npvs);
 
@@ -327,7 +351,7 @@ Bool_t NanoDumper::Process(Long64_t entry)
   //cout << endl << "--- Entry " << entry << " ---" << endl;
 
   // for data, we skip the event in case it doesn't pass the lumi mask
-  if(*run != 1 && lumiMask(*run, *luminosityBlock) == false) return false;
+  if(!isMC && lumiMask(*run, *luminosityBlock) == false) return false;
 
   // number of candidates in the event
   UInt_t nCand_ctrl = *nBToKMuMu; 
@@ -518,42 +542,32 @@ Bool_t NanoDumper::Process(Long64_t entry)
 
 
     // getting the displacement at gen level
-   /* 
-    UInt_t nGen = *nGenPart;
-    
-    float hnl_vx(0.), hnl_vy(0.), hnl_vz(0.);
-    float mother_vx(0.), mother_vy(0.), mother_vz(0.);
-    int mother_idx(-99);
+    if(isMC){
+      UInt_t nGen = *nGenPart;
+      
+      float hnl_vx(0.), hnl_vy(0.), hnl_vz(0.);
+      float mother_vx(0.), mother_vy(0.), mother_vz(0.);
+      float trgmu_vx(0.), trgmu_vy(0.), trgmu_vz(0.);
+      float mu_vx(0.), mu_vy(0.), mu_vz(0.);
+      int mother_idx(-99), trgmu_idx(-99), mu_idx(-99);
 
-    Double_t gamma, beta;
+      if(BToMuMuPi_isMatched[selectedCandIdx_sig]==1){
+        trgmu_vx = GenPart_vx[Muon_genPartIdx[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]]];
+        trgmu_vy = GenPart_vy[Muon_genPartIdx[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]]];
+        trgmu_vz = GenPart_vz[Muon_genPartIdx[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]]];
+        mu_vx = GenPart_vx[Muon_genPartIdx[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]]];
+        mu_vy = GenPart_vy[Muon_genPartIdx[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]]];
+        mu_vz = GenPart_vz[Muon_genPartIdx[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]]];
 
-    for(int iGen(0); iGen<nGen; ++iGen){
-      if(fabs(GenPart_pdgId[iGen]) == 9900015){
-        hnl_vx = GenPart_vx[iGen];
-        hnl_vy = GenPart_vy[iGen];
-        hnl_vz = GenPart_vz[iGen];
-
-        TLorentzVector the_hnl;
-        the_hnl.SetPtEtaPhiM(GenPart_pt[iGen], GenPart_eta[iGen], GenPart_phi[iGen], GenPart_mass[iGen]);
-        gamma = the_hnl.Gamma();
-        beta = the_hnl.Beta();
-
-        mother_idx = GenPart_genPartIdxMother[iGen];
+        the_gen_trgmu_mu_lxy = sqrt((trgmu_vx - mu_vx) * (trgmu_vx - mu_vx) + (trgmu_vy - mu_vy) * (trgmu_vy - mu_vy));
+        the_gen_trgmu_mu_lxyz = sqrt((trgmu_vx - mu_vx) * (trgmu_vx - mu_vx) + (trgmu_vy - mu_vy) * (trgmu_vy - mu_vy) + (trgmu_vz - mu_vz) * (trgmu_vz - mu_vz));
+      }
+      else{
+        the_gen_trgmu_mu_lxy = -99.;
+        the_gen_trgmu_mu_lxyz = -99;
       }
     }
 
-    mother_vx = GenPart_vx[mother_idx];
-    mother_vy = GenPart_vy[mother_idx];
-    mother_vz = GenPart_vz[mother_idx];
-
-    float gen_mother_hnl_lxyz = sqrt((hnl_vx - mother_vx) * (hnl_vx - mother_vx) + (hnl_vy - mother_vy) * (hnl_vy - mother_vy) + (hnl_vz - mother_vz) * (hnl_vz - mother_vz));
-    float gen_mother_hnl_lxy = sqrt((hnl_vx - mother_vx) * (hnl_vx - mother_vx) + (hnl_vy - mother_vy) * (hnl_vy - mother_vy));
-    float gen_hnl_lifetime = gen_mother_hnl_lxyz/(gamma * beta); 
-
-    the_gen_mother_hnl_lxyz = gen_mother_hnl_lxyz;
-    the_gen_mother_hnl_lxy = gen_mother_hnl_lxy;
-    the_gen_hnl_lifetime = gen_hnl_lifetime;
-*/
     signal_tree->Fill();
 
   }// end at least one candidate in the event
