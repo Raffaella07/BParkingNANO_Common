@@ -2,10 +2,10 @@ import FWCore.ParameterSet.Config as cms
 from PhysicsTools.BParkingNano.common_cff import uint, ufloat, Var, CandVars
 
 BToMuMuPi = cms.EDProducer(
-    'my_BToMuMuPiBuilder',
+    'BToMuMuPiBuilder',
     trgMuons                = cms.InputTag('muonTrgSelector', 'trgMuons'),
-    selMuons                = cms.InputTag('muonTrgSelector', 'SelectedMuons'), 
-    selMuonsTransientTracks = cms.InputTag('muonTrgSelector', 'SelectedTransientMuons'), 
+    leptons                 = cms.InputTag('muonTrgSelector', 'SelectedMuons'), 
+    leptonsTransientTracks  = cms.InputTag('muonTrgSelector', 'SelectedTransientMuons'), 
     pions                   = cms.InputTag('tracksBPark', 'SelectedTracks'),
     pionsTransientTracks    = cms.InputTag('tracksBPark', 'SelectedTransientTracks'),
     tracks                  = cms.InputTag("packedPFCandidates"), 
@@ -13,13 +13,14 @@ BToMuMuPi = cms.EDProducer(
     genParticles            = cms.InputTag("finalGenParticlesBPark"),
     beamSpot                = cms.InputTag('offlineBeamSpot'), 
 
-    isMC = cms.bool(False),
+    label = cms.string('muon'),
+    isMC  = cms.bool(False),
 
     # pre-fitter preselection
-    pionSelection           = cms.string('pt > 0.55 && abs(eta)<2'), # pion preselection to be modified here 
+    pionSelection           = cms.string('pt > 0.55 && abs(eta)<2'),  
     isoTracksSelection      = cms.string('pt > 0.55 && abs(eta)<2'),
     trgMuonSelection        = cms.string('pt > 5 && abs(eta) < 1.7'),
-    selMuonSelection        = cms.string('pt > 1.5 && abs(eta) < 2'),
+    leptonSelection        = cms.string('pt > 1.5 && abs(eta) < 2'),
     preVtxSelection = cms.string(' & '.join([
         'pt > 2',
         'mass > 0.2',        
@@ -73,20 +74,20 @@ BToMuMuPiTable = cms.EDProducer(
         # pre-fit quantities
         CandVars,
         trg_mu_idx      = uint('trg_mu_idx'),
-        sel_mu_idx      = uint('sel_mu_idx'), 
+        sel_mu_idx      = uint('lep_idx'), 
         pi_idx          = uint('pi_idx'    ), 
         ## trigger muon
         trg_mu_pt       = ufloat('trg_muon_pt'   ), 
         trg_mu_eta      = ufloat('trg_muon_eta'  ), 
         trg_mu_phi      = ufloat('trg_muon_phi'  ), 
         ## vertex difference between the two muons
-        dimu_vxdiff     = ufloat('dimuon_vxdiff' ),
-        dimu_vydiff     = ufloat('dimuon_vydiff' ),
-        dimu_vzdiff     = ufloat('dimuon_vzdiff' ),
-        dimu_Lxy        = ufloat('dimuon_Lxy'    ),
-        dimu_Lxyz       = ufloat('dimuon_Lxyz'   ),
+        dimu_vxdiff     = ufloat('dilepton_vxdiff' ),
+        dimu_vydiff     = ufloat('dilepton_vydiff' ),
+        dimu_vzdiff     = ufloat('dilepton_vzdiff' ),
+        dimu_Lxy        = ufloat('dilepton_Lxy'    ),
+        dimu_Lxyz       = ufloat('dilepton_Lxyz'   ),
         ## vertex difference between the trigger muon and pion
-        pi_mu_vzdiff    = ufloat('pion_muon_vzdiff'  ),
+        pi_mu_vzdiff    = ufloat('pion_trgmuon_vzdiff'  ),
         # post-fit quantities
         ## vertex information 
         sv_chi2         = ufloat('hnl_vtx_chi2' ),
@@ -109,18 +110,18 @@ BToMuMuPiTable = cms.EDProducer(
         hnl_charge      = Var('daughter("hnl").charge()', int),
         hnl_cos2D       = ufloat('hnl_fitted_cos_theta_2D'   ),
         ## daughter muon
-        fit_mu_pt       = ufloat('hnl_fitted_mu_pt'  ), 
-        fit_mu_eta      = ufloat('hnl_fitted_mu_eta' ),
-        fit_mu_phi      = ufloat('hnl_fitted_mu_phi' ),
-        fit_mu_mass     = ufloat('hnl_fitted_mu_mass'),
+        fit_mu_pt       = ufloat('hnl_fitted_lep_pt'  ), 
+        fit_mu_eta      = ufloat('hnl_fitted_lep_eta' ),
+        fit_mu_phi      = ufloat('hnl_fitted_lep_phi' ),
+        fit_mu_mass     = ufloat('hnl_fitted_lep_mass'),
         ## daughter pion
         fit_pi_pt       = ufloat('hnl_fitted_pi_pt'  ),
         fit_pi_eta      = ufloat('hnl_fitted_pi_eta' ),
         fit_pi_phi      = ufloat('hnl_fitted_pi_phi' ),
         fit_pi_mass     = ufloat('hnl_fitted_pi_mass'),
         ## dR quantities
-        dr_mu_pi        = ufloat('dr_mu_pi'     ),
-        dr_trgmu_hnl    = ufloat('dr_trgmu_hnl' ),
+        dr_mu_pi        = ufloat('dr_lep_pi'     ),
+        dr_trgmu_hnl    = ufloat('dr_trgmu_hnl'  ),
         # Other quantities
         ## ID WP of the selected muon 
         sel_mu_isSoft   = ufloat('sel_muon_isSoft'   ),
@@ -144,8 +145,8 @@ BToMuMuPiTable = cms.EDProducer(
         ## isolation
         trg_mu_iso03    = ufloat('trg_mu_iso03'   ), 
         trg_mu_iso04    = ufloat('trg_mu_iso04'   ),
-        sel_mu_iso03    = ufloat('sel_mu_iso03'   ),
-        sel_mu_iso04    = ufloat('sel_mu_iso04'   ),
+        sel_mu_iso03    = ufloat('lep_iso03'      ),
+        sel_mu_iso04    = ufloat('lep_iso04'      ),
         pi_iso03        = ufloat('pi_iso03'       ),
         pi_iso04        = ufloat('pi_iso04'       ),
         hnl_iso03       = ufloat('hnl_iso03'      ),

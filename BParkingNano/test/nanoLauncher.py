@@ -135,6 +135,7 @@ class NanoLauncher(NanoTools):
       '#include "TProof.h"\n',
       'void starter(){',
       '  TString outFileName = "flat_bparknano.root";',
+      '  {addMC}'.format(addMC = '' if self.data else 'outFileName += "_isMC";'),
       '  {addevt}'.format(addevt = event_chain),
       '  {addrun}'.format(addrun = '' if self.data else run_chain),
       '}',

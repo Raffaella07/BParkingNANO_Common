@@ -20,7 +20,7 @@ from PhysicsTools.BParkingNano.electronsBPark_cff import *
 from PhysicsTools.BParkingNano.tracksBPark_cff import *
 
 ## B collections
-from PhysicsTools.BParkingNano.BToMuMuPi_cff import BToMuMuPi, BToMuMuPiMC, BToMuMuPiTable, BToMuMuPiSequence, BToMuMuPiSequenceMC, CountBToMuMuPi
+from PhysicsTools.BParkingNano.BToMuLPi_cff import BToMuMuPi, BToMuMuPiMC, BToMuMuPiTable, BToMuMuPiSequence, BToMuMuPiSequenceMC, CountBToMuMuPi
 from PhysicsTools.BParkingNano.BToKLL_cff import *
 from PhysicsTools.BParkingNano.BToKstarLL_cff import *
 
@@ -38,6 +38,7 @@ nanoSequenceMC = cms.Sequence(particleLevelBParkSequence + genParticleBParkSeque
 
 
 def nanoAOD_customizeMuonTriggerBPark(process):
+    #process.nanoSequence = cms.Sequence( process.nanoSequence + muonBParkSequence + muonBParkTables)#+ muonTriggerMatchedTables)   ###comment in this extra table in case you want to create the TriggerMuon collection again.
     process.nanoSequence = cms.Sequence( process.nanoSequence + muonBParkSequence + muonTriggerMatchedTables + muonBParkTables)
     return process
 
