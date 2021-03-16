@@ -108,7 +108,7 @@ class NanoLauncher(NanoTools):
 
 
   def writeDumperStarter(self, nfiles, outputdir, filelist, label):
-    nanoname = 'bparknano' if self.tag == None else 'bparknano_{}'.format(self.tag) 
+    nanoname = 'bparknano' if self.tag == None or self.donano == False else 'bparknano_{}'.format(self.tag) 
 
     f = open(filelist)
     lines = f.readlines()
