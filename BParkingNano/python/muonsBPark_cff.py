@@ -13,7 +13,7 @@ muonTrgSelector = cms.EDProducer("MuonTriggerSelector",
                                  vertexCollection = cms.InputTag("offlineSlimmedPrimaryVertices"),
                                  
                                  ##for the output trigger matched collection
-                                 maxdR_matching = cms.double(0.1),
+                                 maxdR_matching = cms.double(0.1), # to study? 
                                  
                                  ## for the output selected collection (tag + all compatible in dZ)
                                  # difference of the vz of the trigger muon with selected muon
@@ -21,8 +21,9 @@ muonTrgSelector = cms.EDProducer("MuonTriggerSelector",
                                  
                                  # selection for the selected muon
                                  selmu_ptMin = cms.double(0.5),
-                                 selmu_absEtaMax = cms.double(2.4),
-                                 selmu_softMuonsOnly = cms.bool(False), # note used anymore
+                                 #selmu_absEtaMax = cms.double(2.4),
+                                 selmu_absEtaMax = cms.double(2.8), # probably tighten it
+                                 selmu_softMuonsOnly = cms.bool(False), # note used anymore, remove
                                  HLTPaths=cms.vstring(Path),
                                  #L1seeds=cms.vstring(Seed),
                              )
