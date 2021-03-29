@@ -18,11 +18,12 @@ class NanoTools(object):
     return dirs
 
 
-  def getLogDir(self, file_, prodlabel, isData):
+  def getLogDir(self, file_, prodlabel, tag, isData):
    if isData: # probably to be modified for mc
      label = file_[file_.find('/',file_.find(prodlabel))+1:file_.find('Chunk')-1] 
      chunk = file_[file_.find('Chunk'):file_.find('bparknano')-1]
-   return '/work/anlyon/logs/{}/{}/{}'.format(label, prodlabel, chunk) # this will have to be modified
+   #return '/work/anlyon/logs/{}/{}/{}'.format(label, prodlabel, chunk) # this will have to be modified
+   return './logs/{}/{}_{}/{}'.format(label, prodlabel, tag, chunk) # this will have to be modified
 
 
   def getFilesLocation(self, isData):  

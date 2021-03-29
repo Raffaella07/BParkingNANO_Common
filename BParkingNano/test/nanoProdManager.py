@@ -10,6 +10,7 @@ def getOptions():
   parser = ArgumentParser(description='Script to report the status of a nanoAOD production and resubmit failed files', add_help=True)
   parser.add_argument('--pl'        , type=str, dest='pl'          , help='label of the sample file'                                        , default=None)
   parser.add_argument('--ds'        , type=str, dest='ds'          , help='[optional] name of dataset'                                      , default=None)
+  parser.add_argument('--tag'       , type=str, dest='tag'         , help='[optional] tag name'                                             , default=None)
   parser.add_argument('--mcprivate'           , dest='mcprivate'   , help='run the resubmitter on a private MC sample' , action='store_true', default=False)
   parser.add_argument('--mccentral'           , dest='mccentral'   , help='run the resubmitter on a central MC sample' , action='store_true', default=False)
   parser.add_argument('--data'                , dest='data'        , help='run the resubmitter on a data sample'       , action='store_true', default=False)
@@ -36,6 +37,7 @@ class NanoProdManager(NanoTools):
   def __init__(self, opt):
     self.prodlabel    = vars(opt)['pl']
     self.dataset      = vars(opt)['ds']
+    self.tag          = vars(opt)['tag']
     self.mcprivate    = vars(opt)['mcprivate']
     self.mccentral    = vars(opt)['mccentral']
     self.data         = vars(opt)['data']
@@ -98,7 +100,7 @@ class NanoProdManager(NanoTools):
 
   def writeFileList(self, failed_files):
 
-    logdir = NanoTools.getLogDir(self, failed_files[0], self.prodlabel, self.data)
+    logdir = NanoTools.getLogDir(self, failed_files[0], self.prodlabel, self.tag, self.data)
     label = logdir[logdir.find('logs')+5:].replace('/', '_')
 
     if self.data:
@@ -140,7 +142,7 @@ class NanoProdManager(NanoTools):
     # strategy: per chunk resubmission
     #           submit job arrays with indices corresponding to the stepId of the failed jobs
 
-    logdir    = NanoTools.getLogDir(self, failed_files[0], self.prodlabel, self.data) 
+    logdir    = NanoTools.getLogDir(self, failed_files[0], self.prodlabel, self.tag, self.data) 
     label     = logdir[logdir.find('logs')+5:].replace('/', '_')
     array     = self.getArray(failed_files)
     outputdir = failed_files[0][0:failed_files[0].find('bparknano')]
@@ -232,11 +234,14 @@ class NanoProdManager(NanoTools):
 
         n_exp = self.getNExpectedNanoFiles(chunk_)
         
-        files = [chunk_+'/bparknano_nj'+str(nj)+'.root' for nj in range(1, n_exp+1)]
+        if self.tag == None:
+          files = [chunk_+'/bparknano_nj'+str(nj)+'.root' for nj in range(1, n_exp+1)]
+        else:
+          files = [chunk_+'/bparknano_{}_nj'.format(self.tag) +str(nj)+'.root' for nj in range(1, n_exp+1)]
 
         for file_ in files:
           # get the log file
-          logdir = NanoTools.getLogDir(self, file_, self.prodlabel, self.data)
+          logdir = NanoTools.getLogDir(self, file_, self.prodlabel, self.tag, self.data)
           logfile = NanoTools.getLogFile(self, logdir, file_)
           
           # idle jobs
