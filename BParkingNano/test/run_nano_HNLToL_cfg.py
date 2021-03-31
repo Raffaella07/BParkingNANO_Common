@@ -230,8 +230,8 @@ process = nanoAOD_customizeTriggerBitsBPark  (process)
 process = nanoAOD_customizeElectronFilteredBPark(process)
 
 # Path and EndPath definitions
-process.nanoAOD_MuMuPi_step = cms.Path(process.nanoSequence + process.nanoBMuMuPiSequence  )
-process.nanoAOD_MuEPi_step = cms.Path(process.nanoSequence + process.nanoeSequence + process.nanoBMuEPiSequence  )
+process.nanoAOD_MuMuPi_step = cms.Path(process.nanoSequence + process.nanoBMuMuPiSequence  ) #candidate counter have been included in the sequence definition
+process.nanoAOD_MuEPi_step = cms.Path(process.nanoSequence + process.nanoeSequence + process.nanoBMuEPiSequence  ) #candidate counter have been included in the sequence definition
 process.nanoAOD_KMuMu_step  = cms.Path(process.nanoSequence + process.nanoBKMuMuSequence + CountBToKmumu ) 
 
 # customisation of the process.
