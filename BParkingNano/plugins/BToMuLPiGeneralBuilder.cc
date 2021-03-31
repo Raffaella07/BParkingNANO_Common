@@ -502,9 +502,9 @@ void BToMuLPiGeneralBuilder<Lepton>::produce(edm::StreamID, edm::Event &evt, edm
             genTriggerMuonMother_genPdgId = genTriggerMuonMother_ptr->pdgId();
             genLeptonMother_genPdgId        = genLeptonMother_ptr->pdgId();
             genPionMother_genPdgId        = genPionMother_ptr->pdgId();
-	    std::cout << "sel lep pdgId "<<sel_lep_genPdgId << " Lep mother pdgId " << genLeptonMother_genPdgId <<std::endl; 
-	    std::cout << "sel pi pdgId "<<pi_genPdgId << " pi mother pdgId " << genPionMother_genPdgId <<std::endl; 
-	    std::cout << "trg mu pdgId "<< trg_mu_genPdgId << " trgmu  mother pdgId " << genTriggerMuonMother_genPdgId <<std::endl; 
+	//    std::cout << "sel lep pdgId "<<sel_lep_genPdgId << " Lep mother pdgId " << genLeptonMother_genPdgId <<std::endl; 
+	//    std::cout << "sel pi pdgId "<<pi_genPdgId << " pi mother pdgId " << genPionMother_genPdgId <<std::endl; 
+	//    std::cout << "trg mu pdgId "<< trg_mu_genPdgId << " trgmu  mother pdgId " << genTriggerMuonMother_genPdgId <<std::endl; 
             if(
                (fabs(sel_lep_genPdgId) == 13 || fabs(sel_lep_genPdgId) == 11) && fabs(genLeptonMother_genPdgId) == 9900015 && 
                fabs(pi_genPdgId) == 211 && fabs(genPionMother_genPdgId) == 9900015 &&
