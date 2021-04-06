@@ -300,6 +300,8 @@ void NanoDumper::SlaveBegin(TTree * /*tree*/)
     ctrlhist_selection_efficiency_cos2d_eventswithmultcands = new TH1F("ctrlhist_selection_efficiency_cos2d_eventswithmultcands", "Efficiency of selection of candidate with largest vertex cos(angle) (events with multiple candidates)", 2, 0, 2);
     ctrlhist_selection_efficiency_kpt_allevents = new TH1F("ctrlhist_selection_efficiency_kpt_allevents", "Efficiency of selection of candidate with largest k pT (all events)", 2, 0, 2);
     ctrlhist_selection_efficiency_kpt_eventswithmultcands = new TH1F("ctrlhist_selection_efficiency_kpt_eventswithmultcands", "Efficiency of selection of candidate with largest k pT (events with multiple candidates)", 2, 0, 2);
+    
+    ctrlhist_ncand_wtriggeringmuon = new TH1F("ctrlhist_ncand_wtriggeringmuon", "ctrlhist_ncand_wtriggeringmuon", 2, 0, 2);
 
     my_file->cd("signal_channel");
 
@@ -378,7 +380,11 @@ Bool_t NanoDumper::Process(Long64_t entry)
 
   //   ----- Control Channel -----  //
   
+  int ncand_ctrl(0);
+  int ncand_istriggering(0);
+
   if(nCand_ctrl > 0){ // at least one candidate per event
+    ncand_ctrl = 1;
 
     // selecting the candidate as the one having the largest b pt
     // - create candIdx - b pt pair
@@ -388,52 +394,56 @@ Bool_t NanoDumper::Process(Long64_t entry)
     // - fetch candIdx associated to the largest b pt
     UInt_t selectedCandIdx_ctrl = pair_candIdx_desc_bpt_ctrl[0].first;
 
-    // fill the control_tree
-    the_ctrl_b_pt = BToKMuMu_fit_pt[selectedCandIdx_ctrl];
-    the_ctrl_b_eta = BToKMuMu_fit_eta[selectedCandIdx_ctrl];
-    the_ctrl_b_phi = BToKMuMu_fit_phi[selectedCandIdx_ctrl];
-    the_ctrl_b_mass = BToKMuMu_fit_mass[selectedCandIdx_ctrl];
-    the_ctrl_b_charge = BToKMuMu_charge[selectedCandIdx_ctrl];
-    the_ctrl_b_pdgid = BToKMuMu_pdgId[selectedCandIdx_ctrl];
-    the_ctrl_b_cos2d = BToKMuMu_fit_cos2D[selectedCandIdx_ctrl];
-    the_ctrl_b_iso03 = BToKMuMu_b_iso03[selectedCandIdx_ctrl];
-    the_ctrl_b_iso03_close = BToKMuMu_b_iso03_close[selectedCandIdx_ctrl];
-    the_ctrl_b_iso04 = BToKMuMu_b_iso04[selectedCandIdx_ctrl];
-    the_ctrl_b_iso04_close = BToKMuMu_b_iso04_close[selectedCandIdx_ctrl];
+    // temporary - we manually ask l1 to be the triggering muon
+    if(Muon_isTriggering[BToKMuMu_l1Idx[selectedCandIdx_ctrl]] == 1){
+      ncand_istriggering = 1; 
 
-    the_ctrl_k_pt = BToKMuMu_fit_k_pt[selectedCandIdx_ctrl];
-    the_ctrl_k_eta = BToKMuMu_fit_k_eta[selectedCandIdx_ctrl];
-    the_ctrl_k_phi = BToKMuMu_fit_k_phi[selectedCandIdx_ctrl];
-    the_ctrl_k_iso03 = BToKMuMu_k_iso03[selectedCandIdx_ctrl];
-    the_ctrl_k_iso03_close = BToKMuMu_k_iso03_close[selectedCandIdx_ctrl];
-    the_ctrl_k_iso04 = BToKMuMu_k_iso04[selectedCandIdx_ctrl];
-    the_ctrl_k_iso04_close = BToKMuMu_k_iso04_close[selectedCandIdx_ctrl];
+      // fill the control_tree
+      the_ctrl_b_pt = BToKMuMu_fit_pt[selectedCandIdx_ctrl];
+      the_ctrl_b_eta = BToKMuMu_fit_eta[selectedCandIdx_ctrl];
+      the_ctrl_b_phi = BToKMuMu_fit_phi[selectedCandIdx_ctrl];
+      the_ctrl_b_mass = BToKMuMu_fit_mass[selectedCandIdx_ctrl];
+      the_ctrl_b_charge = BToKMuMu_charge[selectedCandIdx_ctrl];
+      the_ctrl_b_pdgid = BToKMuMu_pdgId[selectedCandIdx_ctrl];
+      the_ctrl_b_cos2d = BToKMuMu_fit_cos2D[selectedCandIdx_ctrl];
+      the_ctrl_b_iso03 = BToKMuMu_b_iso03[selectedCandIdx_ctrl];
+      the_ctrl_b_iso03_close = BToKMuMu_b_iso03_close[selectedCandIdx_ctrl];
+      the_ctrl_b_iso04 = BToKMuMu_b_iso04[selectedCandIdx_ctrl];
+      the_ctrl_b_iso04_close = BToKMuMu_b_iso04_close[selectedCandIdx_ctrl];
 
-    the_ctrl_l1_pt = BToKMuMu_fit_l1_pt[selectedCandIdx_ctrl];
-    the_ctrl_l1_eta = BToKMuMu_fit_l1_eta[selectedCandIdx_ctrl];
-    the_ctrl_l1_phi = BToKMuMu_fit_l1_phi[selectedCandIdx_ctrl];
-    the_ctrl_l1_iso03 = BToKMuMu_l1_iso03[selectedCandIdx_ctrl];
-    the_ctrl_l1_iso03_close = BToKMuMu_l1_iso03_close[selectedCandIdx_ctrl];
-    the_ctrl_l1_iso04 = BToKMuMu_l1_iso04[selectedCandIdx_ctrl];
-    the_ctrl_l1_iso04_close = BToKMuMu_l1_iso04_close[selectedCandIdx_ctrl];
+      the_ctrl_k_pt = BToKMuMu_fit_k_pt[selectedCandIdx_ctrl];
+      the_ctrl_k_eta = BToKMuMu_fit_k_eta[selectedCandIdx_ctrl];
+      the_ctrl_k_phi = BToKMuMu_fit_k_phi[selectedCandIdx_ctrl];
+      the_ctrl_k_iso03 = BToKMuMu_k_iso03[selectedCandIdx_ctrl];
+      the_ctrl_k_iso03_close = BToKMuMu_k_iso03_close[selectedCandIdx_ctrl];
+      the_ctrl_k_iso04 = BToKMuMu_k_iso04[selectedCandIdx_ctrl];
+      the_ctrl_k_iso04_close = BToKMuMu_k_iso04_close[selectedCandIdx_ctrl];
 
-    the_ctrl_l2_pt = BToKMuMu_fit_l2_pt[selectedCandIdx_ctrl];
-    the_ctrl_l2_eta = BToKMuMu_fit_l2_eta[selectedCandIdx_ctrl];
-    the_ctrl_l2_phi = BToKMuMu_fit_l2_phi[selectedCandIdx_ctrl];
-    the_ctrl_l2_iso03 = BToKMuMu_l2_iso03[selectedCandIdx_ctrl];
-    the_ctrl_l2_iso03_close = BToKMuMu_l2_iso03_close[selectedCandIdx_ctrl];
-    the_ctrl_l2_iso04 = BToKMuMu_l2_iso04[selectedCandIdx_ctrl];
-    the_ctrl_l2_iso04_close = BToKMuMu_l2_iso04_close[selectedCandIdx_ctrl];
+      the_ctrl_l1_pt = BToKMuMu_fit_l1_pt[selectedCandIdx_ctrl];
+      the_ctrl_l1_eta = BToKMuMu_fit_l1_eta[selectedCandIdx_ctrl];
+      the_ctrl_l1_phi = BToKMuMu_fit_l1_phi[selectedCandIdx_ctrl];
+      the_ctrl_l1_iso03 = BToKMuMu_l1_iso03[selectedCandIdx_ctrl];
+      the_ctrl_l1_iso03_close = BToKMuMu_l1_iso03_close[selectedCandIdx_ctrl];
+      the_ctrl_l1_iso04 = BToKMuMu_l1_iso04[selectedCandIdx_ctrl];
+      the_ctrl_l1_iso04_close = BToKMuMu_l1_iso04_close[selectedCandIdx_ctrl];
 
-    the_ctrl_dimu_mass = BToKMuMu_mll_fullfit[selectedCandIdx_ctrl];
-    the_ctrl_vtx_x = BToKMuMu_vtx_x[selectedCandIdx_ctrl];
-    the_ctrl_vtx_y = BToKMuMu_vtx_x[selectedCandIdx_ctrl];
-    the_ctrl_vtx_z = BToKMuMu_vtx_x[selectedCandIdx_ctrl];
-    the_ctrl_vtx_lxy = BToKMuMu_vtx_x[selectedCandIdx_ctrl];
-    the_ctrl_sv_prob = BToKMuMu_svprob[selectedCandIdx_ctrl];
+      the_ctrl_l2_pt = BToKMuMu_fit_l2_pt[selectedCandIdx_ctrl];
+      the_ctrl_l2_eta = BToKMuMu_fit_l2_eta[selectedCandIdx_ctrl];
+      the_ctrl_l2_phi = BToKMuMu_fit_l2_phi[selectedCandIdx_ctrl];
+      the_ctrl_l2_iso03 = BToKMuMu_l2_iso03[selectedCandIdx_ctrl];
+      the_ctrl_l2_iso03_close = BToKMuMu_l2_iso03_close[selectedCandIdx_ctrl];
+      the_ctrl_l2_iso04 = BToKMuMu_l2_iso04[selectedCandIdx_ctrl];
+      the_ctrl_l2_iso04_close = BToKMuMu_l2_iso04_close[selectedCandIdx_ctrl];
 
-    control_tree->Fill();
+      the_ctrl_dimu_mass = BToKMuMu_mll_fullfit[selectedCandIdx_ctrl];
+      the_ctrl_vtx_x = BToKMuMu_vtx_x[selectedCandIdx_ctrl];
+      the_ctrl_vtx_y = BToKMuMu_vtx_x[selectedCandIdx_ctrl];
+      the_ctrl_vtx_z = BToKMuMu_vtx_x[selectedCandIdx_ctrl];
+      the_ctrl_vtx_lxy = BToKMuMu_vtx_x[selectedCandIdx_ctrl];
+      the_ctrl_sv_prob = BToKMuMu_svprob[selectedCandIdx_ctrl];
 
+      control_tree->Fill();
+    } // l1 is triggering
   }// end at least one candidate in the event
 
 
@@ -473,6 +483,7 @@ Bool_t NanoDumper::Process(Long64_t entry)
     the_sig_hnl_iso04_close = BToMuMuPi_hnl_iso04_close[selectedCandIdx_sig];
 
     the_sig_trgmu_pt = BToMuMuPi_trg_mu_pt[selectedCandIdx_sig];
+    // add a temporary continue for the case the trg muons don't agree, to skip candidates where the index was not saved correctly
     the_sig_trgmu_eta = BToMuMuPi_trg_mu_eta[selectedCandIdx_sig];
     the_sig_trgmu_phi = BToMuMuPi_trg_mu_phi[selectedCandIdx_sig];
     the_sig_trgmu_dxy = BToMuMuPi_trg_mu_dxy[selectedCandIdx_sig];
@@ -592,6 +603,8 @@ Bool_t NanoDumper::Process(Long64_t entry)
 
       ctrlhist_ncand_matched_perevent->Fill(nMatchedCand_ctrl);
 
+      ctrlhist_ncand_wtriggeringmuon->Fill(ncand_istriggering/ncand_ctrl);
+
       vector<pair<int,float>> pair_candIdx_desc_bpT_ctrl = createPairWithDesc(nCand_ctrl, BToKMuMu_pt);
       vector<pair<int,float>> pair_candIdx_desc_svprob_ctrl = createPairWithDesc(nCand_ctrl, BToKMuMu_svprob);
       vector<pair<int,float>> pair_candIdx_desc_cos2d_ctrl = createPairWithDesc(nCand_ctrl, BToKMuMu_fit_cos2D);
@@ -615,7 +628,7 @@ Bool_t NanoDumper::Process(Long64_t entry)
       UInt_t selEff_kpt_ctrl = BToKMuMu_isMatched[pair_candIdx_desc_kpt_ctrl[0].first];
       //cout << selEff << endl;
 
-      if(nMatchedCand_ctrl != 0){
+      if(nMatchedCand_ctrl != 0 && Muon_isTriggering[BToKMuMu_l1Idx[pair_candIdx_desc_bpT_ctrl[0].first]]==1){
         ctrlhist_selection_efficiency_bpt_allevents->Fill(selEff_bpt_ctrl);
         ctrlhist_selection_efficiency_svprob_allevents->Fill(selEff_svprob_ctrl);
         ctrlhist_selection_efficiency_cos2d_allevents->Fill(selEff_cos2d_ctrl);

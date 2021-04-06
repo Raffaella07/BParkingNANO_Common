@@ -511,6 +511,7 @@ public :
    TH1F* ctrlhist_selection_efficiency_cos2d_eventswithmultcands;
    TH1F* ctrlhist_selection_efficiency_kpt_allevents;
    TH1F* ctrlhist_selection_efficiency_kpt_eventswithmultcands;
+   TH1F* ctrlhist_ncand_wtriggeringmuon;
 
    TH1F* sighist_ncand_perevent;
    TH1F* sighist_ncand_matched_perevent;
