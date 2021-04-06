@@ -12,8 +12,8 @@ muonTrgSelector = cms.EDProducer("MuonTriggerSelector",
                                  dzForCleaning_wrtTrgMuon = cms.double(-1), # initial value: 1.8
                                  
                                  # selection for the selected muon
-                                 selmu_ptMin = cms.double(0.3), #0.5),
-                                 selmu_absEtaMax = cms.double(2.8), # probably tighten it
+                                 selmu_ptMin = cms.double(1.),
+                                 selmu_absEtaMax = cms.double(2.3),
                                  HLTPaths=cms.vstring(Path),
                                  #L1seeds=cms.vstring(Seed),
                              )
