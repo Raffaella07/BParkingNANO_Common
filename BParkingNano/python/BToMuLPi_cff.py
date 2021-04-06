@@ -17,52 +17,34 @@ BToMuMuPi = cms.EDProducer(
     isMC  = cms.bool(False),
 
     # pre-fitter preselection
-    #pionSelection           = cms.string('pt > 0.55 && abs(eta)<2'),  
-    pionSelection           = cms.string('pt > 0. && abs(eta)<5.'),  
-    #isoTracksSelection      = cms.string('pt > 0.55 && abs(eta)<2'),
-    isoTracksSelection      = cms.string('pt > 0. && abs(eta)<5.'),
-    #trgMuonSelection        = cms.string('pt > 5 && abs(eta) < 1.7'),
-    trgMuonSelection        = cms.string('pt > 0. && abs(eta) < 5.'),
-    #leptonSelection        = cms.string('pt > 1.5 && abs(eta) < 2'),
-    leptonSelection        = cms.string('pt > 0. && abs(eta) < 5.'),
+    pionSelection      = cms.string('pt > 0.7 && abs(eta)<2'),  
+    isoTracksSelection = cms.string('pt > 0.7 && abs(eta)<2'),
+    trgMuonSelection   = cms.string('pt > 7 && abs(eta) < 1.5'),
+    leptonSelection    = cms.string('pt > 1.5 && abs(eta) < 2'),
     preVtxSelection = cms.string(' & '.join([
-        #'pt > 2',
-        #'mass > 0.2',        
-        #'mass < 7.0',        
         'pt > 1',
         'mass > 0.2',        
         'mass < 7.0',        
         ])
-    ), # applied on the HNL cand 
+    ),  
 
     # post-fitter preselection
     postVtxSelection = cms.string(' & '.join([
         'userInt("hnl_vtx_OK") == 1',
-        'userFloat("hnl_vtx_prob") > 0.0001',
-        'mass < 10',
-        'userInt("isMatched")==1',
-        #'pt > 11',
-        #'abs(eta) < 1.7',
-        #'userFloat("hnl_vtx_chi2") < 9',
-        #'userFloat("trg_muon_sip3d") > 0.8',
-        ###'userFloat("sel_muon_ip3d") > 0.0015',
-        ###'abs(userFloat("sel_muon_dxy")) > 0.0005',
-        ###'abs(userFloat("pion_dz")) > 0.001',
-        ###'abs(userFloat("pion_dxy")) > 0.0003',
-        #'abs(userFloat("pion_dzS")) > 0.5',
-        #'abs(userFloat("pion_dxyS")) > 0.2',
-        #'abs(userFloat("pion_DCASig")) > 0.3',
-        ###'userFloat("muons_Lxyz") > 0.005',
-        ###'userFloat("pion_muon_vzdiff") > 0.001',
-        ###'userFloat("dr_mu_pi") < 1.8',
-        #'userFloat("dr_trgmu_hnl") < 0.8',
-        #'userFloat("hnl_fitted_mass") > 0.5',
-        #'userFloat("hnl_fitted_mass") < 6.5',
-        #'userFloat("hnl_fitted_pt") > 4',
-        #'abs(userFloat("hnl_fitted_eta")) < 1.8',
-        #'userFloat("hnl_fitted_cos_theta_2D") > 0.95',
+        'abs(userFloat("sel_muon_dz")) > 0.0015', # move to pre-fitter
+        'abs(userFloat("sel_muon_dxy")) > 0.001', # move to pre-fitter
+        'userFloat("sel_muon_sip3d") > 7',  # move to pre-fitter
+        'abs(userFloat("pion_dz")) > 0.005',  # move to pre-fitter
+        'abs(userFloat("pion_dzS")) > 1.5',  # move to pre-fitter
+        'abs(userFloat("pion_dxy")) > 0.005',  # move to pre-fitter
+        'abs(userFloat("pion_dxyS")) > 3',  # move to pre-fitter
+        'abs(userFloat("pion_DCASig")) > 5',  # move to pre-fitter
+        'userFloat("dr_trgmu_hnl") < 0.5',
+        'userFloat("hnl_vtx_prob") > 0.001',
+        'userFloat("hnl_fitted_cos_theta_2D") > 0.99',
+        'mass < 8',
         ])
-    ), # applied on the B cand
+    ), 
 )
     
 BToMuMuPiMC = BToMuMuPi.clone(
@@ -178,7 +160,7 @@ BToMuMuPiTable = cms.EDProducer(
         matching_sel_mu_motherPdgId = Var("userInt('matching_sel_mu_motherPdgId')", int, mcOnly=True),
         matching_trg_mu_motherPdgId = Var("userInt('matching_trg_mu_motherPdgId')", int, mcOnly=True),
         matching_pi_motherPdgId     = Var("userInt('matching_pi_motherPdgId')"    , int, mcOnly=True),
-        ## displacement 
+        ## gen displacement 
         #fitter_bs_lxy = ufloat('fitter_bs_lxy'), #same as sv_lxy, with more explicit naming
         ##my_fitter_bs_lxy = ufloat('my_fitter_bs_lxy'), 
         ##disp2DFromBS = ufloat('disp2DFromBS'),
