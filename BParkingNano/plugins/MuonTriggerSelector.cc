@@ -149,7 +149,7 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
                 for(size_t i=0; i<muon.triggerObjectMatches().size();i++){
                   if(debug) std::cout << "muon " << i << " " << cstr << " " <<  muon.triggerObjectMatch(i)->hasPathName(cstr,true,true) << " " << muon.triggerObjectMatch(i)->hasPathName(cstr,false,false) << " " << muon.triggerObjectMatch(i)->hasPathName(cstr,false,true) << " " << muon.triggerObjectMatch(i)->hasPathName(cstr,true,false) << std::endl;
                     // first bool is pathLastFilterAccepted, second is pathL3FilterAccepted
-                    if(muon.triggerObjectMatch(i)!=0 && muon.triggerObjectMatch(i)->hasPathName(cstr,true,true)){
+                    if(muon.triggerObjectMatch(i)!=0 && muon.triggerObjectMatch(i)->hasPathName(cstr,false,false)){
                         //if(abs(muon.triggerObjectMatch(i)->eta())>1.5) std::cout << "eta=" <<muon.triggerObjectMatch(i)->eta();
                         frs[ipath]=1;
                         float dr=TMath::Sqrt(pow(muon.triggerObjectMatch(i)->eta()-muon.eta(),2.)+pow(muon.triggerObjectMatch(i)->phi()-muon.phi(),2.));
