@@ -6,24 +6,14 @@ Path=["HLT_Mu7_IP4","HLT_Mu8_IP6","HLT_Mu8_IP5","HLT_Mu8_IP3","HLT_Mu8p5_IP3p5",
 
 muonTrgSelector = cms.EDProducer("MuonTriggerSelector",
                                  muonCollection = cms.InputTag("slimmedMuons"), #same collection as in NanoAOD                                                           
-                                 displacedStandaloneMuonCollection = cms.InputTag("displacedStandAloneMuons"), #same collection as in NanoAOD                                                           
-                                 bits = cms.InputTag("TriggerResults","","HLT"),
-                                 prescales = cms.InputTag("patTrigger"),
-                                 objects = cms.InputTag("slimmedPatTrigger"),
-                                 vertexCollection = cms.InputTag("offlineSlimmedPrimaryVertices"),
-                                 
-                                 ##for the output trigger matched collection
-                                 maxdR_matching = cms.double(0.1), # to study? 
                                  
                                  ## for the output selected collection (tag + all compatible in dZ)
                                  # difference of the vz of the trigger muon with selected muon
                                  dzForCleaning_wrtTrgMuon = cms.double(-1), # initial value: 1.8
                                  
                                  # selection for the selected muon
-                                 selmu_ptMin = cms.double(0.5),
-                                 #selmu_absEtaMax = cms.double(2.4),
+                                 selmu_ptMin = cms.double(0.3), #0.5),
                                  selmu_absEtaMax = cms.double(2.8), # probably tighten it
-                                 selmu_softMuonsOnly = cms.bool(False), # note used anymore, remove
                                  HLTPaths=cms.vstring(Path),
                                  #L1seeds=cms.vstring(Seed),
                              )
@@ -135,7 +125,6 @@ muonTriggerBParkTable = muonBParkTable.clone(
    )
 )
 
-
 muonsTriggerBParkMCMatchForTable = cms.EDProducer("MCMatcher",# cut on deltaR, deltaPt/Pt; pick best by deltaR
     src         = muonTriggerBParkTable.src,                  # final reco collection
     matched     = cms.InputTag("finalGenParticlesBPark"),     # final mc-truth particle collection
@@ -162,7 +151,6 @@ triggerMuonsMCMatchEmbedded = cms.EDProducer(
     src = cms.InputTag('muonTrgSelector', 'trgMuons'),
     matching = cms.InputTag('muonsTriggerBParkMCMatchForTable')
 )
-
 
 muonBParkSequence = cms.Sequence(muonTrgSelector * countTrgMuons)
 muonBParkMC = cms.Sequence(muonTrgSelector + muonsBParkMCMatchForTable + selectedMuonsMCMatchEmbedded + muonBParkMCTable + muonsTriggerBParkMCMatchForTable + triggerMuonsMCMatchEmbedded + muonTriggerBParkMCTable* countTrgMuons)
