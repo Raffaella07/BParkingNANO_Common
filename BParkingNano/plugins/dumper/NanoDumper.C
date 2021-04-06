@@ -135,6 +135,7 @@ void NanoDumper::SlaveBegin(TTree * /*tree*/)
   control_tree->Branch("k_pt", &the_ctrl_k_pt);
   control_tree->Branch("k_eta", &the_ctrl_k_eta);
   control_tree->Branch("k_phi", &the_ctrl_k_phi);
+  control_tree->Branch("k_charge", &the_ctrl_k_charge);
   control_tree->Branch("k_iso03", &the_ctrl_k_iso03);
   control_tree->Branch("k_iso03_close", &the_ctrl_k_iso03_close);
   control_tree->Branch("k_iso04", &the_ctrl_k_iso04);
@@ -143,25 +144,31 @@ void NanoDumper::SlaveBegin(TTree * /*tree*/)
   control_tree->Branch("l1_pt", &the_ctrl_l1_pt);
   control_tree->Branch("l1_eta", &the_ctrl_l1_eta);
   control_tree->Branch("l1_phi", &the_ctrl_l1_phi);
+  control_tree->Branch("l1_charge", &the_ctrl_l1_charge);
   control_tree->Branch("l1_iso03", &the_ctrl_l1_iso03);
   control_tree->Branch("l1_iso03_close", &the_ctrl_l1_iso03_close);
   control_tree->Branch("l1_iso04", &the_ctrl_l1_iso04);
   control_tree->Branch("l1_iso04_close", &the_ctrl_l1_iso04_close);
+  control_tree->Branch("l1_istriggering", &the_ctrl_l1_istriggering);
 
   control_tree->Branch("l2_pt", &the_ctrl_l2_pt);
   control_tree->Branch("l2_eta", &the_ctrl_l2_eta);
   control_tree->Branch("l2_phi", &the_ctrl_l2_phi);
+  control_tree->Branch("l2_charge", &the_ctrl_l2_charge);
   control_tree->Branch("l2_iso03", &the_ctrl_l2_iso03);
   control_tree->Branch("l2_iso03_close", &the_ctrl_l2_iso03_close);
   control_tree->Branch("l2_iso04", &the_ctrl_l2_iso04);
   control_tree->Branch("l2_iso04_close", &the_ctrl_l2_iso04_close);
+  control_tree->Branch("l2_istriggering", &the_ctrl_l2_istriggering);
 
   control_tree->Branch("dimu_mass", &the_ctrl_dimu_mass);
-  control_tree->Branch("vtx_x", &the_ctrl_vtx_x);
-  control_tree->Branch("vtx_y", &the_ctrl_vtx_y);
-  control_tree->Branch("vtx_z", &the_ctrl_vtx_z);
-  control_tree->Branch("vtx_lxy", &the_ctrl_vtx_lxy);
+  control_tree->Branch("sv_x", &the_ctrl_sv_x);
+  control_tree->Branch("sv_y", &the_ctrl_sv_y);
+  control_tree->Branch("sv_z", &the_ctrl_sv_z);
+  control_tree->Branch("sv_lxy", &the_ctrl_sv_lxy);
   control_tree->Branch("sv_prob", &the_ctrl_sv_prob);
+
+  control_tree->Branch("ismatched", &the_ctrl_ismatched);
 
   control_tree->Branch("pv_npvs", &the_pv_npvs);
 
@@ -205,6 +212,7 @@ void NanoDumper::SlaveBegin(TTree * /*tree*/)
   signal_tree->Branch("trgmu_pt", &the_sig_trgmu_pt);
   signal_tree->Branch("trgmu_eta", &the_sig_trgmu_eta);
   signal_tree->Branch("trgmu_phi", &the_sig_trgmu_phi);
+  signal_tree->Branch("trgmu_charge", &the_sig_trgmu_charge);
   signal_tree->Branch("trgmu_dxy", &the_sig_trgmu_dxy);
   signal_tree->Branch("trgmu_dz", &the_sig_trgmu_dz);
   signal_tree->Branch("trgmu_ip3d", &the_sig_trgmu_ip3d);
@@ -213,10 +221,12 @@ void NanoDumper::SlaveBegin(TTree * /*tree*/)
   signal_tree->Branch("trgmu_iso03_close", &the_sig_trgmu_iso03_close);
   signal_tree->Branch("trgmu_iso04", &the_sig_trgmu_iso04);
   signal_tree->Branch("trgmu_iso04_close", &the_sig_trgmu_iso04_close);
+  signal_tree->Branch("trgmu_istriggering", &the_sig_trgmu_istriggering);
 
   signal_tree->Branch("mu_pt", &the_sig_mu_pt);
   signal_tree->Branch("mu_eta", &the_sig_mu_eta);
   signal_tree->Branch("mu_phi", &the_sig_mu_phi);
+  signal_tree->Branch("mu_charge", &the_sig_mu_charge);
   signal_tree->Branch("mu_dxy", &the_sig_mu_dxy);
   signal_tree->Branch("mu_dz", &the_sig_mu_dz);
   signal_tree->Branch("mu_ip3d", &the_sig_mu_ip3d);
@@ -229,10 +239,12 @@ void NanoDumper::SlaveBegin(TTree * /*tree*/)
   signal_tree->Branch("mu_ismedium", &the_sig_mu_ismedium);
   signal_tree->Branch("mu_istight", &the_sig_mu_istight);
   signal_tree->Branch("mu_issoft", &the_sig_mu_issoft);
+  signal_tree->Branch("mu_istriggering", &the_sig_mu_istriggering);
 
   signal_tree->Branch("pi_pt", &the_sig_pi_pt);
   signal_tree->Branch("pi_eta", &the_sig_pi_eta);
   signal_tree->Branch("pi_phi", &the_sig_pi_phi);
+  signal_tree->Branch("pi_charge", &the_sig_pi_charge);
   signal_tree->Branch("pi_dcasig", &the_sig_pi_dcasig);
   signal_tree->Branch("pi_dxy", &the_sig_pi_dxy);
   signal_tree->Branch("pi_dz", &the_sig_pi_dz);
@@ -264,6 +276,8 @@ void NanoDumper::SlaveBegin(TTree * /*tree*/)
   signal_tree->Branch("sv_z", &the_sig_sv_z);
 
   signal_tree->Branch("pi_mu_vzdiff", &the_sig_pi_mu_vzdiff);
+
+  signal_tree->Branch("ismatched", &the_sig_ismatched);
   
   if(isMC){
     signal_tree->Branch("gen_trgmu_mu_lxy", &the_gen_trgmu_mu_lxy);
@@ -426,6 +440,7 @@ Bool_t NanoDumper::Process(Long64_t entry)
       the_ctrl_l1_iso03_close = BToKMuMu_l1_iso03_close[selectedCandIdx_ctrl];
       the_ctrl_l1_iso04 = BToKMuMu_l1_iso04[selectedCandIdx_ctrl];
       the_ctrl_l1_iso04_close = BToKMuMu_l1_iso04_close[selectedCandIdx_ctrl];
+      the_ctrl_l1_istriggering = Muon_isTriggering[BToKMuMu_l1Idx[selectedCandIdx_ctrl]];
 
       the_ctrl_l2_pt = BToKMuMu_fit_l2_pt[selectedCandIdx_ctrl];
       the_ctrl_l2_eta = BToKMuMu_fit_l2_eta[selectedCandIdx_ctrl];
@@ -434,13 +449,16 @@ Bool_t NanoDumper::Process(Long64_t entry)
       the_ctrl_l2_iso03_close = BToKMuMu_l2_iso03_close[selectedCandIdx_ctrl];
       the_ctrl_l2_iso04 = BToKMuMu_l2_iso04[selectedCandIdx_ctrl];
       the_ctrl_l2_iso04_close = BToKMuMu_l2_iso04_close[selectedCandIdx_ctrl];
+      the_ctrl_l2_istriggering = Muon_isTriggering[BToKMuMu_l2Idx[selectedCandIdx_ctrl]];
 
       the_ctrl_dimu_mass = BToKMuMu_mll_fullfit[selectedCandIdx_ctrl];
-      the_ctrl_vtx_x = BToKMuMu_vtx_x[selectedCandIdx_ctrl];
-      the_ctrl_vtx_y = BToKMuMu_vtx_x[selectedCandIdx_ctrl];
-      the_ctrl_vtx_z = BToKMuMu_vtx_x[selectedCandIdx_ctrl];
-      the_ctrl_vtx_lxy = BToKMuMu_vtx_x[selectedCandIdx_ctrl];
+      the_ctrl_sv_x = BToKMuMu_vtx_x[selectedCandIdx_ctrl];
+      the_ctrl_sv_y = BToKMuMu_vtx_x[selectedCandIdx_ctrl];
+      the_ctrl_sv_z = BToKMuMu_vtx_x[selectedCandIdx_ctrl];
+      the_ctrl_sv_lxy = BToKMuMu_l_xy[selectedCandIdx_ctrl];
       the_ctrl_sv_prob = BToKMuMu_svprob[selectedCandIdx_ctrl];
+
+      the_ctrl_ismatched = BToKMuMu_isMatched[selectedCandIdx_ctrl];
 
       control_tree->Fill();
     } // l1 is triggering
@@ -462,8 +480,8 @@ Bool_t NanoDumper::Process(Long64_t entry)
     // - and select the OS cand with the largest hnl pt
     UInt_t selectedCandIdx_sig = pair_candIdx_desc_hnlpt_sig_up[0].first;
 
-
     // fill the signal_tree
+    if(BToMuMuPi_trg_mu_pt[selectedCandIdx_sig] == Muon_pt[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]]){ // temporary condition, skip events with faulty indexing
     the_sig_b_pt = BToMuMuPi_pt[selectedCandIdx_sig];
     the_sig_b_eta = BToMuMuPi_eta[selectedCandIdx_sig];
     the_sig_b_phi = BToMuMuPi_phi[selectedCandIdx_sig];
@@ -483,9 +501,12 @@ Bool_t NanoDumper::Process(Long64_t entry)
     the_sig_hnl_iso04_close = BToMuMuPi_hnl_iso04_close[selectedCandIdx_sig];
 
     the_sig_trgmu_pt = BToMuMuPi_trg_mu_pt[selectedCandIdx_sig];
-    // add a temporary continue for the case the trg muons don't agree, to skip candidates where the index was not saved correctly
+    //the_sig_trgmu_pt = Muon_pt[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
     the_sig_trgmu_eta = BToMuMuPi_trg_mu_eta[selectedCandIdx_sig];
+    //the_sig_trgmu_eta = Muon_eta[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
     the_sig_trgmu_phi = BToMuMuPi_trg_mu_phi[selectedCandIdx_sig];
+    //the_sig_trgmu_phi = Muon_phi[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
+    the_sig_trgmu_charge = Muon_charge[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
     the_sig_trgmu_dxy = BToMuMuPi_trg_mu_dxy[selectedCandIdx_sig];
     the_sig_trgmu_dz = BToMuMuPi_trg_mu_dz[selectedCandIdx_sig];
     the_sig_trgmu_ip3d = BToMuMuPi_trg_mu_ip3d[selectedCandIdx_sig];
@@ -494,10 +515,12 @@ Bool_t NanoDumper::Process(Long64_t entry)
     the_sig_trgmu_iso03_close = BToMuMuPi_trg_mu_iso03_close[selectedCandIdx_sig];
     the_sig_trgmu_iso04 = BToMuMuPi_trg_mu_iso04[selectedCandIdx_sig];
     the_sig_trgmu_iso04_close = BToMuMuPi_trg_mu_iso04_close[selectedCandIdx_sig];
+    the_sig_trgmu_istriggering = Muon_isTriggering[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
 
     the_sig_mu_pt = BToMuMuPi_fit_mu_pt[selectedCandIdx_sig];
     the_sig_mu_eta = BToMuMuPi_fit_mu_eta[selectedCandIdx_sig];
-    the_sig_mu_phi = BToMuMuPi_fit_mu_phi[selectedCandIdx_sig];
+    the_sig_mu_phi = BToMuMuPi_fit_mu_phi[selectedCandIdx_sig]; 
+    the_sig_mu_charge = Muon_charge[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]]; //to validate
     the_sig_mu_dxy = BToMuMuPi_sel_mu_dxy[selectedCandIdx_sig];
     the_sig_mu_dz = BToMuMuPi_sel_mu_dz[selectedCandIdx_sig];
     the_sig_mu_ip3d = BToMuMuPi_sel_mu_ip3d[selectedCandIdx_sig];
@@ -510,10 +533,12 @@ Bool_t NanoDumper::Process(Long64_t entry)
     the_sig_mu_ismedium = BToMuMuPi_sel_mu_isMedium[selectedCandIdx_sig];
     the_sig_mu_istight = BToMuMuPi_sel_mu_isTight[selectedCandIdx_sig];
     the_sig_mu_issoft = BToMuMuPi_sel_mu_isSoft[selectedCandIdx_sig];
+    the_sig_mu_istriggering = Muon_isTriggering[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
 
     the_sig_pi_pt = BToMuMuPi_fit_pi_pt[selectedCandIdx_sig];
     the_sig_pi_eta = BToMuMuPi_fit_pi_eta[selectedCandIdx_sig];
-    the_sig_pi_phi = BToMuMuPi_fit_pi_phi[selectedCandIdx_sig];
+    the_sig_pi_phi = BToMuMuPi_fit_pi_phi[selectedCandIdx_sig]; 
+    the_sig_pi_charge = ProbeTracks_charge[BToMuMuPi_pi_idx[selectedCandIdx_sig]]; // to validate
     the_sig_pi_dcasig = BToMuMuPi_pi_DCASig[selectedCandIdx_sig];
     the_sig_pi_dxy = BToMuMuPi_pi_dxy[selectedCandIdx_sig];
     the_sig_pi_dz = BToMuMuPi_pi_dz[selectedCandIdx_sig];
@@ -542,6 +567,8 @@ Bool_t NanoDumper::Process(Long64_t entry)
     the_sig_sv_x = BToMuMuPi_sv_x[selectedCandIdx_sig];
     the_sig_sv_y = BToMuMuPi_sv_y[selectedCandIdx_sig];
     the_sig_sv_z = BToMuMuPi_sv_z[selectedCandIdx_sig];
+
+    the_sig_ismatched = BToMuMuPi_isMatched[selectedCandIdx_sig];
 
     // additionnal displacement quantities
     float dist_sv_pv_xy = sqrt((BToMuMuPi_sv_x[selectedCandIdx_sig] - *PV_x) * (BToMuMuPi_sv_x[selectedCandIdx_sig] - *PV_x) + (BToMuMuPi_sv_y[selectedCandIdx_sig] - *PV_y) * (BToMuMuPi_sv_y[selectedCandIdx_sig] - *PV_y));
@@ -580,7 +607,7 @@ Bool_t NanoDumper::Process(Long64_t entry)
     }
 
     signal_tree->Fill();
-
+    } // end sound index
   }// end at least one candidate in the event
 
   

@@ -375,14 +375,14 @@ public :
    Float_t the_sig_b_eta;
    Float_t the_sig_b_phi;
    Float_t the_sig_b_mass;
-   Float_t the_sig_b_charge;
+   Int_t the_sig_b_charge;
    Int_t the_sig_b_pdgid;
 
    Float_t the_sig_hnl_pt;
    Float_t the_sig_hnl_eta;
    Float_t the_sig_hnl_phi;
    Float_t the_sig_hnl_mass;
-   Float_t the_sig_hnl_charge;
+   Int_t the_sig_hnl_charge;
    Float_t the_sig_hnl_cos2d;
    Float_t the_sig_hnl_iso03;
    Float_t the_sig_hnl_iso03_close;
@@ -392,6 +392,7 @@ public :
    Float_t the_sig_trgmu_pt;
    Float_t the_sig_trgmu_eta;
    Float_t the_sig_trgmu_phi;
+   Int_t the_sig_trgmu_charge;
    Float_t the_sig_trgmu_dxy;
    Float_t the_sig_trgmu_dz;
    Float_t the_sig_trgmu_ip3d;
@@ -400,10 +401,12 @@ public :
    Float_t the_sig_trgmu_iso03_close;
    Float_t the_sig_trgmu_iso04;
    Float_t the_sig_trgmu_iso04_close;
+   Float_t the_sig_trgmu_istriggering;
 
    Float_t the_sig_mu_pt;
    Float_t the_sig_mu_eta;
    Float_t the_sig_mu_phi;
+   Int_t the_sig_mu_charge;
    Float_t the_sig_mu_dxy;
    Float_t the_sig_mu_dz;
    Float_t the_sig_mu_ip3d;
@@ -416,10 +419,12 @@ public :
    Float_t the_sig_mu_ismedium;
    Float_t the_sig_mu_istight;
    Float_t the_sig_mu_issoft;
+   Float_t the_sig_mu_istriggering;
 
    Float_t the_sig_pi_pt;
    Float_t the_sig_pi_eta;
    Float_t the_sig_pi_phi;
+   Int_t the_sig_pi_charge;
    Float_t the_sig_pi_dcasig;
    Float_t the_sig_pi_dxy;
    Float_t the_sig_pi_dz;
@@ -453,6 +458,8 @@ public :
 
    Float_t the_sig_pi_mu_vzdiff;
 
+   Int_t the_sig_ismatched;
+
    Float_t the_gen_trgmu_mu_lxy;
    Float_t the_gen_trgmu_mu_lxyz;
 
@@ -460,7 +467,7 @@ public :
    Float_t the_ctrl_b_eta;
    Float_t the_ctrl_b_phi;
    Float_t the_ctrl_b_mass;
-   Float_t the_ctrl_b_charge;
+   Int_t the_ctrl_b_charge;
    Int_t the_ctrl_b_pdgid;
    Float_t the_ctrl_b_cos2d;
    Float_t the_ctrl_b_iso03;
@@ -471,6 +478,7 @@ public :
    Float_t the_ctrl_k_pt;
    Float_t the_ctrl_k_eta;
    Float_t the_ctrl_k_phi;
+   Int_t the_ctrl_k_charge;
    Float_t the_ctrl_k_iso03;
    Float_t the_ctrl_k_iso03_close;
    Float_t the_ctrl_k_iso04;
@@ -479,26 +487,32 @@ public :
    Float_t the_ctrl_l1_pt;
    Float_t the_ctrl_l1_eta;
    Float_t the_ctrl_l1_phi;
+   Int_t the_ctrl_l1_charge;
    Float_t the_ctrl_l1_iso03;
    Float_t the_ctrl_l1_iso03_close;
    Float_t the_ctrl_l1_iso04;
    Float_t the_ctrl_l1_iso04_close;
+   Float_t the_ctrl_l1_istriggering;
 
    Float_t the_ctrl_l2_pt;
    Float_t the_ctrl_l2_eta;
    Float_t the_ctrl_l2_phi;
+   Int_t the_ctrl_l2_charge;
    Float_t the_ctrl_l2_iso03;
    Float_t the_ctrl_l2_iso03_close;
    Float_t the_ctrl_l2_iso04;
    Float_t the_ctrl_l2_iso04_close;
+   Float_t the_ctrl_l2_istriggering;
 
    Float_t the_ctrl_dimu_mass;
 
-   Float_t the_ctrl_vtx_x;
-   Float_t the_ctrl_vtx_y;
-   Float_t the_ctrl_vtx_z;
-   Float_t the_ctrl_vtx_lxy;
+   Float_t the_ctrl_sv_x;
+   Float_t the_ctrl_sv_y;
+   Float_t the_ctrl_sv_z;
+   Float_t the_ctrl_sv_lxy;
    Float_t the_ctrl_sv_prob;
+
+   Int_t the_ctrl_ismatched;
 
    // histograms
    TH1F* ctrlhist_ncand_perevent;
