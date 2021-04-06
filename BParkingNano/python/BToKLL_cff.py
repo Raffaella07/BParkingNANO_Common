@@ -117,8 +117,9 @@ BToKeeTable = cms.EDProducer(
         minDR = ufloat('min_dr'),
         maxDR = ufloat('max_dr'),
         # fit and vtx info
-        #chi2 = ufloat('sv_chi2'),
+        chi2 = ufloat('sv_chi2'),
         svprob = ufloat('sv_prob'),
+        sv_ndof = ufloat('sv_ndof'),
         l_xy = ufloat('l_xy'),
         l_xy_unc = ufloat('l_xy_unc'),
         vtx_x = ufloat('vtx_x'),
