@@ -27,7 +27,7 @@ public:
   float chi2() const {return success_ ? fitted_vtx_->chiSquared() : 999;}
   float dof() const  {return success_ ? fitted_vtx_->degreesOfFreedom() : -1;}
   float prob() const {
-    return success_ ? ChiSquaredProbability(chi2(), dof()) : 0.;
+    return success_ ? ChiSquaredProbability(fabs(chi2()), dof()) : 0.;
   }
   float kin_chi2() const {return kin_chi2_;} // should they be merged in a single value?
   float kin_ndof() const {return kin_ndof_;}
