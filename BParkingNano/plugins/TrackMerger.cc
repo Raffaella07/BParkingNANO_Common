@@ -45,7 +45,7 @@ public:
     trkPtCut_(cfg.getParameter<double>("trkPtCut")),
     trkEtaCut_(cfg.getParameter<double>("trkEtaCut")),
     dzTrg_cleaning_(cfg.getParameter<double>("dzTrg_cleaning")),
-    drTrg_Cleaning_(cfg.getParameter<double>("drTrg_Cleaning")),
+    drTrg_cleaning_(cfg.getParameter<double>("drTrg_cleaning")),
     dcaSig_(cfg.getParameter<double>("dcaSig")),
     trkNormChiMin_(cfg.getParameter<int>("trkNormChiMin")),
     trkNormChiMax_(cfg.getParameter<int>("trkNormChiMax")) 
@@ -77,7 +77,7 @@ private:
   const double trkPtCut_;
   const double trkEtaCut_;
   const double dzTrg_cleaning_;
-  const double drTrg_Cleaning_;
+  const double drTrg_cleaning_;
   const double dcaSig_;
   const int trkNormChiMin_;
   const int trkNormChiMax_;
@@ -157,7 +157,7 @@ void TrackMerger::produce(edm::StreamID, edm::Event &evt, edm::EventSetup const 
     float dzTrg = 0.0;
     for (const pat::Muon & mu: *trgMuons){
       //remove tracks inside trg muons jet
-      if(reco::deltaR(trk, mu) < drTrg_Cleaning_ && drTrg_Cleaning_ >0) 
+      if(reco::deltaR(trk, mu) < drTrg_cleaning_ && drTrg_cleaning_ >0) 
         continue;
       //if dz is negative it is deactivated
       if((fabs(trk.vz() - mu.vz()) > dzTrg_cleaning_ && dzTrg_cleaning_ > 0))
