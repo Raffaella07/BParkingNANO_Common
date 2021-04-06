@@ -296,7 +296,7 @@ class NanoLauncher(NanoTools):
     nfiles_tot = 0
         
     # slurm cannot deal with too large arrays, so does haddnano (keep it hardcoded)
-    maxfiles_perchunk = 750
+    maxfiles_perchunk = 500
     
     print '\n  --> Fetching the files'
     filelistname = self.writeFileList(maxfiles_perchunk, point)
