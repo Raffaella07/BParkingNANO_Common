@@ -428,6 +428,7 @@ Bool_t NanoDumper::Process(Long64_t entry)
       the_ctrl_k_pt = BToKMuMu_fit_k_pt[selectedCandIdx_ctrl];
       the_ctrl_k_eta = BToKMuMu_fit_k_eta[selectedCandIdx_ctrl];
       the_ctrl_k_phi = BToKMuMu_fit_k_phi[selectedCandIdx_ctrl];
+      the_ctrl_k_charge = ProbeTracks_charge[BToKMuMu_kIdx[selectedCandIdx_ctrl]];
       the_ctrl_k_iso03 = BToKMuMu_k_iso03[selectedCandIdx_ctrl];
       the_ctrl_k_iso03_close = BToKMuMu_k_iso03_close[selectedCandIdx_ctrl];
       the_ctrl_k_iso04 = BToKMuMu_k_iso04[selectedCandIdx_ctrl];
@@ -436,6 +437,7 @@ Bool_t NanoDumper::Process(Long64_t entry)
       the_ctrl_l1_pt = BToKMuMu_fit_l1_pt[selectedCandIdx_ctrl];
       the_ctrl_l1_eta = BToKMuMu_fit_l1_eta[selectedCandIdx_ctrl];
       the_ctrl_l1_phi = BToKMuMu_fit_l1_phi[selectedCandIdx_ctrl];
+      the_ctrl_l1_charge = Muon_charge[BToKMuMu_l1Idx[selectedCandIdx_ctrl]];
       the_ctrl_l1_iso03 = BToKMuMu_l1_iso03[selectedCandIdx_ctrl];
       the_ctrl_l1_iso03_close = BToKMuMu_l1_iso03_close[selectedCandIdx_ctrl];
       the_ctrl_l1_iso04 = BToKMuMu_l1_iso04[selectedCandIdx_ctrl];
@@ -445,6 +447,7 @@ Bool_t NanoDumper::Process(Long64_t entry)
       the_ctrl_l2_pt = BToKMuMu_fit_l2_pt[selectedCandIdx_ctrl];
       the_ctrl_l2_eta = BToKMuMu_fit_l2_eta[selectedCandIdx_ctrl];
       the_ctrl_l2_phi = BToKMuMu_fit_l2_phi[selectedCandIdx_ctrl];
+      the_ctrl_l2_charge = Muon_charge[BToKMuMu_l2Idx[selectedCandIdx_ctrl]];
       the_ctrl_l2_iso03 = BToKMuMu_l2_iso03[selectedCandIdx_ctrl];
       the_ctrl_l2_iso03_close = BToKMuMu_l2_iso03_close[selectedCandIdx_ctrl];
       the_ctrl_l2_iso04 = BToKMuMu_l2_iso04[selectedCandIdx_ctrl];
@@ -520,7 +523,7 @@ Bool_t NanoDumper::Process(Long64_t entry)
     the_sig_mu_pt = BToMuMuPi_fit_mu_pt[selectedCandIdx_sig];
     the_sig_mu_eta = BToMuMuPi_fit_mu_eta[selectedCandIdx_sig];
     the_sig_mu_phi = BToMuMuPi_fit_mu_phi[selectedCandIdx_sig]; 
-    the_sig_mu_charge = Muon_charge[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]]; //to validate
+    the_sig_mu_charge = Muon_charge[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
     the_sig_mu_dxy = BToMuMuPi_sel_mu_dxy[selectedCandIdx_sig];
     the_sig_mu_dz = BToMuMuPi_sel_mu_dz[selectedCandIdx_sig];
     the_sig_mu_ip3d = BToMuMuPi_sel_mu_ip3d[selectedCandIdx_sig];
@@ -538,7 +541,7 @@ Bool_t NanoDumper::Process(Long64_t entry)
     the_sig_pi_pt = BToMuMuPi_fit_pi_pt[selectedCandIdx_sig];
     the_sig_pi_eta = BToMuMuPi_fit_pi_eta[selectedCandIdx_sig];
     the_sig_pi_phi = BToMuMuPi_fit_pi_phi[selectedCandIdx_sig]; 
-    the_sig_pi_charge = ProbeTracks_charge[BToMuMuPi_pi_idx[selectedCandIdx_sig]]; // to validate
+    the_sig_pi_charge = ProbeTracks_charge[BToMuMuPi_pi_idx[selectedCandIdx_sig]];
     the_sig_pi_dcasig = BToMuMuPi_pi_DCASig[selectedCandIdx_sig];
     the_sig_pi_dxy = BToMuMuPi_pi_dxy[selectedCandIdx_sig];
     the_sig_pi_dz = BToMuMuPi_pi_dz[selectedCandIdx_sig];
