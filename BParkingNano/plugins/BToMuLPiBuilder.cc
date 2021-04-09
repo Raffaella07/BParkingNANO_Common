@@ -149,7 +149,7 @@ void BToMuLPiBuilder<Lepton>::produce(edm::StreamID, edm::Event &evt, edm::Event
 
   for(size_t trg_mu_idx = 0; trg_mu_idx < trg_muons->size(); ++trg_mu_idx) {
 
-    size_t trg_mu_position = leptons->size(); // make it point to just beyond the size of the collection
+    size_t trg_mu_position = leptons->size()-1; // make it point to just beyond the size of the collection
     
     edm::Ptr<pat::Muon> trg_mu_ptr(trg_muons, trg_mu_idx);
 
