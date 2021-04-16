@@ -460,14 +460,14 @@ void BToMuLPiBuilder<Lepton>::produce(edm::StreamID, edm::Event &evt, edm::Event
 
 
         // gen-matching
-        
+
         int isMatched = 0;
+        int trg_mu_isMatched(0), sel_mu_isMatched(0), pi_isMatched(0);
         int trg_mu_genIdx(-1), sel_mu_genIdx(-1), pi_genIdx(-1);
         int genTriggerMuonMother_genPdgId(-1), genMuonMother_genPdgId(-1), genPionMother_genPdgId(-1);
 
         // for MC only
         if(isMC_ == true){
-
           // pdgId of the gen particle to which the final-state particles are matched
           int trg_mu_genPdgId = trg_mu_ptr->userInt("mcMatch");
           int sel_mu_genPdgId = lep_ptr->userInt("mcMatch");
@@ -478,50 +478,81 @@ void BToMuLPiBuilder<Lepton>::produce(edm::StreamID, edm::Event &evt, edm::Event
           sel_mu_genIdx   = lep_ptr->userInt("mcMatchIndex"); 
           pi_genIdx       = pi_ptr->userInt("mcMatchIndex"); 
 
-          if(trg_mu_genIdx != -1 && sel_mu_genIdx != -1 && pi_genIdx != -1){
-
+          if(trg_mu_genIdx != -1){
             // getting the associated gen particles
             edm::Ptr<reco::GenParticle> genTriggerMuon_ptr(genParticles, trg_mu_genIdx);
-            edm::Ptr<reco::GenParticle> genMuon_ptr(genParticles, sel_mu_genIdx);
-            edm::Ptr<reco::GenParticle> genPion_ptr(genParticles, pi_genIdx);
 
             // index of the associated mother particle
             int genTriggerMuonMother_genIdx = -1;
-            int genMuonMother_genIdx        = -1;
-            int genPionMother_genIdx        = -1;
             if(genTriggerMuon_ptr->numberOfMothers()>0) genTriggerMuonMother_genIdx = genTriggerMuon_ptr->motherRef(0).key();
-            if(genMuon_ptr->numberOfMothers()>0) genMuonMother_genIdx = genMuon_ptr->motherRef(0).key();
-            if(genPion_ptr->numberOfMothers()>0) genPionMother_genIdx = genPion_ptr->motherRef(0).key();
 
             // getting the mother particles
             edm::Ptr<reco::GenParticle> genTriggerMuonMother_ptr(genParticles, genTriggerMuonMother_genIdx);
-            edm::Ptr<reco::GenParticle> genMuonMother_ptr(genParticles, genMuonMother_genIdx);
-            edm::Ptr<reco::GenParticle> genPionMother_ptr(genParticles, genPionMother_genIdx);
 
             // pdgId of the mother particles
             genTriggerMuonMother_genPdgId = genTriggerMuonMother_ptr->pdgId();
-            genMuonMother_genPdgId        = genMuonMother_ptr->pdgId();
-            genPionMother_genPdgId        = genPionMother_ptr->pdgId();
 
-            if(
-               fabs(sel_mu_genPdgId) == 13 && fabs(genMuonMother_genPdgId) == 9900015 && 
-               fabs(pi_genPdgId) == 211 && fabs(genPionMother_genPdgId) == 9900015 &&
-               fabs(trg_mu_genPdgId) == 13 && (fabs(genTriggerMuonMother_genPdgId) == 511 || fabs(genTriggerMuonMother_genPdgId) == 521 
-                  || fabs(genTriggerMuonMother_genPdgId) == 531 || fabs(genTriggerMuonMother_genPdgId) == 541)
-              ){
-                isMatched = 1;
+            if(fabs(trg_mu_genPdgId) == 13 && (fabs(genTriggerMuonMother_genPdgId) == 511 || fabs(genTriggerMuonMother_genPdgId) == 521 
+                  || fabs(genTriggerMuonMother_genPdgId) == 531 || fabs(genTriggerMuonMother_genPdgId) == 541)){
+              trg_mu_isMatched = 1;
             }
           }
+
+          if(sel_mu_genIdx != -1){
+            // getting the associated gen particles
+            edm::Ptr<reco::GenParticle> genMuon_ptr(genParticles, sel_mu_genIdx);
+
+            // index of the associated mother particle
+            int genMuonMother_genIdx        = -1;
+            if(genMuon_ptr->numberOfMothers()>0) genMuonMother_genIdx = genMuon_ptr->motherRef(0).key();
+
+            // getting the mother particles
+            edm::Ptr<reco::GenParticle> genMuonMother_ptr(genParticles, genMuonMother_genIdx);
+
+            // pdgId of the mother particles
+            genMuonMother_genPdgId        = genMuonMother_ptr->pdgId();
+
+            if(fabs(sel_mu_genPdgId) == 13 && fabs(genMuonMother_genPdgId) == 9900015){
+                sel_mu_isMatched = 1;
+            }
+          }
+
+          if(pi_genIdx != -1){
+            // getting the associated gen particles
+            edm::Ptr<reco::GenParticle> genPion_ptr(genParticles, pi_genIdx);
+
+            // index of the associated mother particle
+            int genPionMother_genIdx        = -1;
+            if(genPion_ptr->numberOfMothers()>0) genPionMother_genIdx = genPion_ptr->motherRef(0).key();
+
+            // getting the mother particles
+            edm::Ptr<reco::GenParticle> genPionMother_ptr(genParticles, genPionMother_genIdx);
+
+            // pdgId of the mother particles
+            genPionMother_genPdgId        = genPionMother_ptr->pdgId();
+
+            if(fabs(pi_genPdgId) == 211 && fabs(genPionMother_genPdgId) == 9900015){
+              pi_isMatched = 1;
+            }
+          }
+
+          if(trg_mu_isMatched==1 && sel_mu_isMatched==1 && pi_isMatched==1){
+            isMatched = 1;
+          }
         }
+        
 
         b_cand.addUserInt("isMatched", isMatched);
+        b_cand.addUserInt("trg_mu_isMatched", trg_mu_isMatched);
+        b_cand.addUserInt("sel_mu_isMatched", sel_mu_isMatched);
+        b_cand.addUserInt("pi_isMatched", pi_isMatched);
         b_cand.addUserInt("matching_trg_mu_genIdx", trg_mu_genIdx);
         b_cand.addUserInt("matching_sel_mu_genIdx", sel_mu_genIdx);
         b_cand.addUserInt("matching_pi_genIdx", pi_genIdx);
         b_cand.addUserInt("matching_trg_mu_motherPdgId", genTriggerMuonMother_genPdgId);
         b_cand.addUserInt("matching_sel_mu_motherPdgId", genMuonMother_genPdgId);
         b_cand.addUserInt("matching_pi_motherPdgId", genPionMother_genPdgId);
-
+        
 
         ret_val->push_back(b_cand);
               
