@@ -6,6 +6,7 @@ Path=["HLT_Mu7_IP4","HLT_Mu8_IP6","HLT_Mu8_IP5","HLT_Mu8_IP3","HLT_Mu8p5_IP3p5",
 
 muonTrgSelector = cms.EDProducer("MuonTriggerSelector",
                                  muonCollection = cms.InputTag("slimmedMuons"), #same collection as in NanoAOD                                                           
+                                 displacedStandaloneMuonCollection = cms.InputTag("displacedStandAloneMuons"), #same collection as in NanoAOD                                                           
                                  
                                  ## for the output selected collection (tag + all compatible in dZ)
                                  # difference of the vz of the trigger muon with selected muon
@@ -96,6 +97,8 @@ muonsBParkMCMatchForTable = cms.EDProducer("MCMatcher",       # cut on deltaR, d
     maxDPtRel   = cms.double(0.5),                            # Minimum deltaPt/Pt for the match
     resolveAmbiguities    = cms.bool(True),                   # Forbid two RECO objects to match to the same GEN object
     resolveByMatchQuality = cms.bool(True),                   # False = just match input in order; True = pick lowest deltaR pair first
+    minPt = muonTrgSelector.selmu_ptMin,
+    maxEta = muonTrgSelector.selmu_absEtaMax,
 )
 
 muonBParkMCTable = cms.EDProducer("CandMCMatchTableProducerBPark",
@@ -121,7 +124,7 @@ muonTriggerBParkTable = muonBParkTable.clone(
         vx = Var("vx()",float,doc="x coordinate of vertex position, in cm",precision=6),
         vy = Var("vy()",float,doc="y coordinate of vertex position, in cm",precision=6),
         vz = Var("vz()",float,doc="z coordinate of vertex position, in cm",precision=6)####################,
-#        trgMuonIndex = Var("userInt('trgMuonIndex')", int,doc="index in trigger muon collection")
+#       trgMuonIndex = Var("userInt('trgMuonIndex')", int,doc="index in trigger muon collection")
    )
 )
 
@@ -135,6 +138,8 @@ muonsTriggerBParkMCMatchForTable = cms.EDProducer("MCMatcher",# cut on deltaR, d
     maxDPtRel   = cms.double(0.5),                            # Minimum deltaPt/Pt for the match
     resolveAmbiguities    = cms.bool(True),                   # Forbid two RECO objects to match to the same GEN object
     resolveByMatchQuality = cms.bool(True),                   # False = just match input in order; True = pick lowest deltaR pair first
+    minPt = cms.double(0.),
+    maxEta = cms.double(10.),
 )
 
 muonTriggerBParkMCTable = cms.EDProducer("CandMCMatchTableProducerBPark",

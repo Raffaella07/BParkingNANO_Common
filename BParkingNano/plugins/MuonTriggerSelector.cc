@@ -15,6 +15,10 @@
 #include "DataFormats/VertexReco/interface/Vertex.h"
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
 
+// added
+#include "DataFormats/TrackReco/interface/Track.h"
+#include "DataFormats/TrackReco/interface/TrackFwd.h"
+
 #include "DataFormats/PatCandidates/interface/Muon.h"
 
 #include "FWCore/Common/interface/TriggerNames.h"
@@ -49,6 +53,7 @@ class MuonTriggerSelector : public edm::EDProducer {
     virtual void produce(edm::Event&, const edm::EventSetup&);
 
     edm::EDGetTokenT<std::vector<pat::Muon>> muonSrc_;
+    edm::EDGetTokenT<std::vector<reco::Track>> displacedStandaloneMuonSrc_;
 
     //for filter wrt trigger
     const double dzTrg_cleaning_; // selects primary vertex
@@ -63,6 +68,7 @@ class MuonTriggerSelector : public edm::EDProducer {
 
 MuonTriggerSelector::MuonTriggerSelector(const edm::ParameterSet &iConfig):
   muonSrc_( consumes<std::vector<pat::Muon>> ( iConfig.getParameter<edm::InputTag>("muonCollection"))),
+  displacedStandaloneMuonSrc_(consumes<std::vector<reco::Track>> (iConfig.getParameter<edm::InputTag>("displacedStandaloneMuonCollection"))),
   dzTrg_cleaning_(iConfig.getParameter<double>("dzForCleaning_wrtTrgMuon")),
   selmu_ptMin_(iConfig.getParameter<double>("selmu_ptMin")),
   selmu_absEtaMax_(iConfig.getParameter<double>("selmu_absEtaMax")),
@@ -72,6 +78,7 @@ MuonTriggerSelector::MuonTriggerSelector(const edm::ParameterSet &iConfig):
   // produce 2 collections: trgMuons (tags) and SelectedMuons (probes & tags if survive preselection cuts)
   produces<pat::MuonCollection>("trgMuons"); 
   produces<pat::MuonCollection>("SelectedMuons");
+  produces<std::vector<reco::Track>>("DisplacedStandaloneMuons");
   produces<TransientTrackCollection>("SelectedTransientMuons");  
 }
 
@@ -82,10 +89,14 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
 
     std::unique_ptr<pat::MuonCollection>      trgmuons_out   ( new pat::MuonCollection );
     std::unique_ptr<pat::MuonCollection>      muons_out      ( new pat::MuonCollection );
+    std::unique_ptr<std::vector<reco::Track>>      displaced_standalone_muons_out ( new std::vector<reco::Track> );
     std::unique_ptr<TransientTrackCollection> trans_muons_out( new TransientTrackCollection );
     
     edm::Handle<std::vector<pat::Muon>> muons;
     iEvent.getByToken(muonSrc_, muons);
+
+    edm::Handle<std::vector<reco::Track>> displaced_standalone_muons;
+    iEvent.getByToken(displacedStandaloneMuonSrc_, displaced_standalone_muons);
 
     std::vector<int> muonIsTrigger(muons->size(), 0);
     std::vector<float> muonDR(muons->size(),-1.);
@@ -100,6 +111,8 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
     std::vector<std::vector<float>> matcher; 
     std::vector<std::vector<float>> DR;
     std::vector<std::vector<float>> DPT;    
+
+    //std::cout << std::endl;
 
     // proceeding to the trigger muon matching
     // for that, only use slimmedMuons
@@ -214,6 +227,21 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
         }
     }
 
+    // add the displaced standalone muons to the collection
+    for(const reco::Track & muon : *displaced_standalone_muons){
+      unsigned int iMuo(&muon -&(displaced_standalone_muons->at(0)));
+      if(muon.pt()<selmu_ptMin_) continue;
+      if(fabs(muon.eta())>selmu_absEtaMax_) continue;
+      //std::cout << "muon " << iMuo << " pt " << muon.pt() << " eta " << muon.eta() << std::endl;
+      displaced_standalone_muons_out->push_back(muon);
+
+      // add the muon to the transient track collection
+      // one has to make sure that the indices in the muon and transient track collections match
+      //const reco::TransientTrack muonTT((*(&muon)),&(*bFieldHandle)); 
+      //if(!muonTT.isValid()) continue; 
+      //trans_muons_out->emplace_back(muonTT);
+    }
+
     //and now save the reco muon triggering or not 
     for(const pat::Muon & muon : *muons){
         unsigned int iMuo(&muon - &(muons->at(0)) );
@@ -230,6 +258,7 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
         const reco::TransientTrack muonTT((*(muon.bestTrack())),&(*bFieldHandle)); //sara:check,why not using inner track for muons? GM: What is this and why do we need this???
         if(!muonTT.isValid()) continue; // GM: and why do we skip this muon if muonTT is invalid? This seems to have no effect so I kept it.
 
+        //std::cout << "muon " << iMuo << " pt " << muon.pt() << std::endl;
         muons_out->emplace_back(muon);
         muons_out->back().addUserInt("isTriggering", muonIsTrigger[iMuo]);
         muons_out->back().addUserFloat("DR",muonDR[iMuo]);
@@ -241,6 +270,7 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
 
     iEvent.put(std::move(trgmuons_out),    "trgMuons"); 
     iEvent.put(std::move(muons_out),       "SelectedMuons");
+    iEvent.put(std::move(displaced_standalone_muons_out),       "DisplacedStandaloneMuons");
     iEvent.put(std::move(trans_muons_out), "SelectedTransientMuons");
 }
 
