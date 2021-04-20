@@ -89,7 +89,7 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
 
     std::unique_ptr<pat::MuonCollection>      trgmuons_out   ( new pat::MuonCollection );
     std::unique_ptr<pat::MuonCollection>      muons_out      ( new pat::MuonCollection );
-    std::unique_ptr<std::vector<reco::Track>>      displaced_standalone_muons_out ( new std::vector<reco::Track> );
+    //std::unique_ptr<std::vector<reco::Track>>      displaced_standalone_muons_out ( new std::vector<reco::Track> );
     std::unique_ptr<TransientTrackCollection> trans_muons_out( new TransientTrackCollection );
     
     edm::Handle<std::vector<pat::Muon>> muons;
@@ -228,19 +228,19 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
     }
 
     // add the displaced standalone muons to the collection
-    for(const reco::Track & muon : *displaced_standalone_muons){
-      unsigned int iMuo(&muon -&(displaced_standalone_muons->at(0)));
-      if(muon.pt()<selmu_ptMin_) continue;
-      if(fabs(muon.eta())>selmu_absEtaMax_) continue;
-      //std::cout << "muon " << iMuo << " pt " << muon.pt() << " eta " << muon.eta() << std::endl;
-      displaced_standalone_muons_out->push_back(muon);
+    //for(const reco::Track & muon : *displaced_standalone_muons){
+    //  //unsigned int iMuo(&muon -&(displaced_standalone_muons->at(0)));
+    //  if(muon.pt()<selmu_ptMin_) continue;
+    //  if(fabs(muon.eta())>selmu_absEtaMax_) continue;
+    //  //std::cout << "muon " << iMuo << " pt " << muon.pt() << " eta " << muon.eta() << std::endl;
+    //  displaced_standalone_muons_out->push_back(muon);
 
-      // add the muon to the transient track collection
-      // one has to make sure that the indices in the muon and transient track collections match
-      //const reco::TransientTrack muonTT((*(&muon)),&(*bFieldHandle)); 
-      //if(!muonTT.isValid()) continue; 
-      //trans_muons_out->emplace_back(muonTT);
-    }
+    //  // add the muon to the transient track collection
+    //  // one has to make sure that the indices in the muon and transient track collections match
+    //  //const reco::TransientTrack muonTT((*(&muon)),&(*bFieldHandle)); 
+    //  //if(!muonTT.isValid()) continue; 
+    //  //trans_muons_out->emplace_back(muonTT);
+    //}
 
     //and now save the reco muon triggering or not 
     for(const pat::Muon & muon : *muons){
@@ -264,13 +264,30 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
         muons_out->back().addUserFloat("DR",muonDR[iMuo]);
         muons_out->back().addUserFloat("DPT",muonDPT[iMuo]);
         muons_out->back().addUserInt("looseId",loose_id[iMuo]);
+
+        muons_out->back().addUserInt("isGlobalOrTrackerMuon", muon.isGlobalMuon() || muon.isTrackerMuon()); 
+        muons_out->back().addUserInt("isGlobalNotTrackerMuon", muon.isGlobalMuon() && !muon.isTrackerMuon()); 
+        muons_out->back().addUserInt("isTrackerNotGlobalMuon", !muon.isGlobalMuon() && muon.isTrackerMuon()); 
+        muons_out->back().addUserFloat("segmentCompatibility", muon.segmentCompatibility()); 
+        muons_out->back().addUserFloat("validHitFraction", muon.isGlobalMuon() || muon.isTrackerMuon() ? muon.innerTrack()->validFraction(): -1.);
+        muons_out->back().addUserFloat("kinkFinderChi2", muon.combinedQuality().trkKink); 
+        muons_out->back().addUserFloat("globalNormalisedChi2", muon.isGlobalMuon() ? muon.globalTrack()->normalizedChi2(): -1.); 
+        muons_out->back().addUserFloat("localPositionChi2", muon.combinedQuality().chi2LocalPosition); 
+        muons_out->back().addUserFloat("caloCompatibility", muon.caloCompatibility()); 
+        muons_out->back().addUserInt("numberOfValidMuonHits", muon.isGlobalMuon() ? muon.globalTrack()->hitPattern().numberOfValidMuonHits(): -1); 
+        muons_out->back().addUserInt("numberOfValidPixelHits", muon.isGlobalMuon() || muon.isTrackerMuon() ? muon.innerTrack()->hitPattern().numberOfValidPixelHits(): -1); 
+        muons_out->back().addUserInt("numberOfTrackerLayers", muon.isGlobalMuon() || muon.isTrackerMuon() ? muon.innerTrack()->hitPattern().trackerLayersWithMeasurement(): -1); 
+        muons_out->back().addUserInt("numberOfPixelLayers", muon.isGlobalMuon() || muon.isTrackerMuon() ? muon.innerTrack()->hitPattern().pixelLayersWithMeasurement(): -1); 
+        muons_out->back().addUserInt("trackerHighPurityFlag", muon.isGlobalMuon() || muon.isTrackerMuon() ? muon.innerTrack()->quality(reco::TrackBase::highPurity): -1); 
+        muons_out->back().addUserInt("nStations", muon.numberOfMatchedStations()); 
+
         for(unsigned int i=0; i<HLTPaths_.size(); i++){muons_out->back().addUserInt(HLTPaths_[i],fires[iMuo][i]);}
         trans_muons_out->emplace_back(muonTT);
     }
 
     iEvent.put(std::move(trgmuons_out),    "trgMuons"); 
     iEvent.put(std::move(muons_out),       "SelectedMuons");
-    iEvent.put(std::move(displaced_standalone_muons_out),       "DisplacedStandaloneMuons");
+    //iEvent.put(std::move(displaced_standalone_muons_out),       "DisplacedStandaloneMuons");
     iEvent.put(std::move(trans_muons_out), "SelectedTransientMuons");
 }
 
