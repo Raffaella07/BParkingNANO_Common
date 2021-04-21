@@ -50,6 +50,7 @@ void NanoRunDumper::SlaveBegin(TTree * /*tree*/)
 
   TString option = GetOption();
   TString outFileName = option;
+  outFileName.Resize(outFileName.Length()-5);
 
   my_file = new TFile(outFileName, "UPDATE");  
   my_file->cd();
