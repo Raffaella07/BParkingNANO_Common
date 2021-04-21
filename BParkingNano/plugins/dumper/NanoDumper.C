@@ -473,15 +473,15 @@ Bool_t NanoDumper::Process(Long64_t entry)
   if(nCand_sig > 0){ // at least one candidate per event
 
     // selecting the candidate as the one having the largest hnl pt
-    // - create candIdx - hnl pt pairs
-    vector<pair<int,float>> pair_candIdx_desc_hnlpt_sig = createPairWithDesc(nCand_sig, BToMuMuPi_hnl_pt);
-    // - sort it in decreasing hnl pt
-    sort(pair_candIdx_desc_hnlpt_sig.begin(), pair_candIdx_desc_hnlpt_sig.end(), sortcansbydesc);
+    // - create candIdx - cos2d pairs
+    vector<pair<int,float>> pair_candIdx_desc_cos2d_sig = createPairWithDesc(nCand_sig, BToMuMuPi_hnl_cos2D);
+    // - sort it in decreasing cos2d
+    sort(pair_candIdx_desc_cos2d_sig.begin(), pair_candIdx_desc_cos2d_sig.end(), sortcansbydesc);
     // - then privilege OS cand over SS ones
-    vector<pair<int,float>> pair_candIdx_desc_hnlpt_sig_up = updatePairWithDesc(pair_candIdx_desc_hnlpt_sig, BToMuMuPi_hnl_charge);
-    sort(pair_candIdx_desc_hnlpt_sig_up.begin(), pair_candIdx_desc_hnlpt_sig_up.end(), sortcansbydesc_opp);
-    // - and select the OS cand with the largest hnl pt
-    UInt_t selectedCandIdx_sig = pair_candIdx_desc_hnlpt_sig_up[0].first;
+    vector<pair<int,float>> pair_candIdx_desc_cos2d_sig_up = updatePairWithDesc(pair_candIdx_desc_cos2d_sig, BToMuMuPi_hnl_charge);
+    sort(pair_candIdx_desc_cos2d_sig_up.begin(), pair_candIdx_desc_cos2d_sig_up.end(), sortcansbydesc_opp);
+    // - and select the OS cand with the largest cos2d
+    UInt_t selectedCandIdx_sig = pair_candIdx_desc_cos2d_sig_up[0].first;
 
     // fill the signal_tree
     if(BToMuMuPi_trg_mu_pt[selectedCandIdx_sig] == Muon_pt[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]]){ // temporary condition, skip events with faulty indexing
@@ -685,7 +685,7 @@ Bool_t NanoDumper::Process(Long64_t entry)
       vector<pair<int,float>> pair_candIdx_desc_pipt_sig = createPairWithDesc(nCand_sig, BToMuMuPi_fit_pi_pt);
       vector<pair<int,float>> pair_candIdx_desc_svprob_sig = createPairWithDesc(nCand_sig, BToMuMuPi_sv_prob);
       vector<pair<int,float>> pair_candIdx_desc_svchi2_sig = createPairWithDesc(nCand_sig, BToMuMuPi_sv_chi2);
-      vector<pair<int,float>> pair_candIdx_desc_cos2d_sig = createPairWithDesc(nCand_sig, BToMuMuPi_hnl_cos2D);
+      vector<pair<int,float>> pair_candIdx_desc_cos2D_sig = createPairWithDesc(nCand_sig, BToMuMuPi_hnl_cos2D);
       vector<pair<int,float>> pair_candIdx_desc_dr_sig = createPairWithDesc(nCand_sig, BToMuMuPi_dr_trgmu_hnl);
       vector<pair<int,float>> pair_candIdx_desc_hnliso4_sig = createPairWithDesc(nCand_sig, BToMuMuPi_hnl_iso04_close);
 
@@ -695,7 +695,7 @@ Bool_t NanoDumper::Process(Long64_t entry)
       sort(pair_candIdx_desc_pipt_sig.begin(), pair_candIdx_desc_pipt_sig.end(), sortcansbydesc);
       sort(pair_candIdx_desc_svprob_sig.begin(), pair_candIdx_desc_svprob_sig.end(), sortcansbydesc);
       sort(pair_candIdx_desc_svchi2_sig.begin(), pair_candIdx_desc_svchi2_sig.end(), sortcansbydesc_opp);
-      sort(pair_candIdx_desc_cos2d_sig.begin(), pair_candIdx_desc_cos2d_sig.end(), sortcansbydesc);
+      sort(pair_candIdx_desc_cos2D_sig.begin(), pair_candIdx_desc_cos2D_sig.end(), sortcansbydesc);
       sort(pair_candIdx_desc_hnliso4_sig.begin(), pair_candIdx_desc_hnliso4_sig.end(), sortcansbydesc_opp);
       sort(pair_candIdx_desc_dr_sig.begin(), pair_candIdx_desc_dr_sig.end(), sortcansbydesc_opp);
     
@@ -706,7 +706,7 @@ Bool_t NanoDumper::Process(Long64_t entry)
       vector<pair<int,float>> pair_candIdx_desc_pipt_sig_up = updatePairWithDesc(pair_candIdx_desc_pipt_sig, BToMuMuPi_hnl_charge);
       vector<pair<int,float>> pair_candIdx_desc_svprob_sig_up = updatePairWithDesc(pair_candIdx_desc_svprob_sig, BToMuMuPi_hnl_charge);
       vector<pair<int,float>> pair_candIdx_desc_svchi2_sig_up = updatePairWithDesc(pair_candIdx_desc_svchi2_sig, BToMuMuPi_hnl_charge);
-      vector<pair<int,float>> pair_candIdx_desc_cos2d_sig_up = updatePairWithDesc(pair_candIdx_desc_cos2d_sig, BToMuMuPi_hnl_charge);
+      vector<pair<int,float>> pair_candIdx_desc_cos2D_sig_up = updatePairWithDesc(pair_candIdx_desc_cos2D_sig, BToMuMuPi_hnl_charge);
       vector<pair<int,float>> pair_candIdx_desc_hnliso4_sig_up = updatePairWithDesc(pair_candIdx_desc_hnliso4_sig, BToMuMuPi_hnl_charge);
       vector<pair<int,float>> pair_candIdx_desc_dr_sig_up = updatePairWithDesc(pair_candIdx_desc_dr_sig, BToMuMuPi_hnl_charge);
 
@@ -716,7 +716,7 @@ Bool_t NanoDumper::Process(Long64_t entry)
       sort(pair_candIdx_desc_pipt_sig_up.begin(), pair_candIdx_desc_pipt_sig_up.end(), sortcansbydesc_opp);
       sort(pair_candIdx_desc_svprob_sig_up.begin(), pair_candIdx_desc_svprob_sig_up.end(), sortcansbydesc_opp);
       sort(pair_candIdx_desc_svchi2_sig_up.begin(), pair_candIdx_desc_svchi2_sig_up.end(), sortcansbydesc_opp);
-      sort(pair_candIdx_desc_cos2d_sig_up.begin(), pair_candIdx_desc_cos2d_sig_up.end(), sortcansbydesc_opp);
+      sort(pair_candIdx_desc_cos2D_sig_up.begin(), pair_candIdx_desc_cos2D_sig_up.end(), sortcansbydesc_opp);
       sort(pair_candIdx_desc_hnliso4_sig_up.begin(), pair_candIdx_desc_hnliso4_sig_up.end(), sortcansbydesc_opp);
       sort(pair_candIdx_desc_dr_sig_up.begin(), pair_candIdx_desc_dr_sig_up.end(), sortcansbydesc_opp);
 
@@ -737,7 +737,7 @@ Bool_t NanoDumper::Process(Long64_t entry)
       UInt_t selEff_pipt_sig = BToMuMuPi_isMatched[pair_candIdx_desc_pipt_sig_up[0].first];
       UInt_t selEff_svprob_sig = BToMuMuPi_isMatched[pair_candIdx_desc_svprob_sig_up[0].first];
       UInt_t selEff_svchi2_sig = BToMuMuPi_isMatched[pair_candIdx_desc_svchi2_sig_up[0].first];
-      UInt_t selEff_cos2d_sig = BToMuMuPi_isMatched[pair_candIdx_desc_cos2d_sig_up[0].first];
+      UInt_t selEff_cos2d_sig = BToMuMuPi_isMatched[pair_candIdx_desc_cos2D_sig_up[0].first];
       UInt_t selEff_hnliso4_sig = BToMuMuPi_isMatched[pair_candIdx_desc_hnliso4_sig_up[0].first];
       UInt_t selEff_dr_sig = BToMuMuPi_isMatched[pair_candIdx_desc_dr_sig_up[0].first];
 
