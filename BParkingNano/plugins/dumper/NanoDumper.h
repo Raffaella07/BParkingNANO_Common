@@ -193,8 +193,8 @@ public :
    TTreeReaderArray<Float_t> Muon_eta = {fReader, "Muon_eta"};
    TTreeReaderArray<Float_t> Muon_ip3d = {fReader, "Muon_ip3d"};
    TTreeReaderArray<Float_t> Muon_mass = {fReader, "Muon_mass"};
-   TTreeReaderArray<Float_t> Muon_pfRelIso03_all = {fReader, "Muon_pfRelIso03_all"};
-   TTreeReaderArray<Float_t> Muon_pfRelIso04_all = {fReader, "Muon_pfRelIso04_all"};
+   //TTreeReaderArray<Float_t> Muon_pfiso03Rel_all = {fReader, "Muon_pfiso03Rel_all"};
+   //TTreeReaderArray<Float_t> Muon_pfiso04Rel_all = {fReader, "Muon_pfiso04Rel_all"};
    TTreeReaderArray<Float_t> Muon_phi = {fReader, "Muon_phi"};
    TTreeReaderArray<Float_t> Muon_pt = {fReader, "Muon_pt"};
    TTreeReaderArray<Float_t> Muon_ptErr = {fReader, "Muon_ptErr"};
@@ -205,9 +205,9 @@ public :
    TTreeReaderArray<Int_t> Muon_charge = {fReader, "Muon_charge"};
    TTreeReaderArray<Int_t> Muon_isTriggering = {fReader, "Muon_isTriggering"};
    TTreeReaderArray<Int_t> Muon_pdgId = {fReader, "Muon_pdgId"};
-   TTreeReaderArray<Bool_t> Muon_isGlobal = {fReader, "Muon_isGlobal"};
-   TTreeReaderArray<Bool_t> Muon_isPFcand = {fReader, "Muon_isPFcand"};
-   TTreeReaderArray<Bool_t> Muon_isTracker = {fReader, "Muon_isTracker"};
+   //TTreeReaderArray<Bool_t> Muon_isGlobalMuon = {fReader, "Muon_isGlobalMuon"};
+   //TTreeReaderArray<Bool_t> Muon_isPFcand = {fReader, "Muon_isPF"};
+   //TTreeReaderArray<Bool_t> Muon_isTrackerMuon = {fReader, "Muon_isTrackerMuon"};
    TTreeReaderArray<Bool_t> Muon_mediumId = {fReader, "Muon_mediumId"};
    TTreeReaderArray<UChar_t> Muon_pfIsoId = {fReader, "Muon_pfIsoId"};
    TTreeReaderArray<Bool_t> Muon_softId = {fReader, "Muon_softId"};
