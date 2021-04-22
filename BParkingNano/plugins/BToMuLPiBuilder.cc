@@ -32,7 +32,6 @@ class BToMuLPiBuilder : public edm::global::EDProducer<> {
 public:
   typedef std::vector<Lepton> LeptonCollection;
   typedef std::vector<reco::TransientTrack> TransientTrackCollection;
-  typedef std::vector<reco::Track> DSAMuonCollection;
 
   explicit BToMuLPiBuilder(const edm::ParameterSet &cfg):
     pi_selection_      {cfg.getParameter<std::string>("pionSelection"     )},
@@ -51,7 +50,6 @@ public:
     //      fired the trigger). It's a superset of the previous collection
     trg_muons_         {consumes<pat::MuonCollection>              ( cfg.getParameter<edm::InputTag>("trgMuons"               ) )},
     leptons_           {consumes<LeptonCollection>                 ( cfg.getParameter<edm::InputTag>("leptons"                ) )},
-    displaced_standalone_muons_           {consumes<DSAMuonCollection>                 ( cfg.getParameter<edm::InputTag>("displaced_standalone_muons" ) )},
     leptons_ttracks_   {consumes<TransientTrackCollection>         ( cfg.getParameter<edm::InputTag>("leptonsTransientTracks" ) )},
     pions_             {consumes<pat::CompositeCandidateCollection>( cfg.getParameter<edm::InputTag>("pions"                  ) )},
     pions_ttracks_     {consumes<TransientTrackCollection>         ( cfg.getParameter<edm::InputTag>("pionsTransientTracks"   ) )},
@@ -88,7 +86,6 @@ private:
 
   const edm::EDGetTokenT<pat::MuonCollection> trg_muons_;
   const edm::EDGetTokenT<LeptonCollection> leptons_;
-  const edm::EDGetTokenT<DSAMuonCollection> displaced_standalone_muons_;
   const edm::EDGetTokenT<TransientTrackCollection> leptons_ttracks_;
 
   const edm::EDGetTokenT<pat::CompositeCandidateCollection> pions_;
@@ -116,9 +113,6 @@ void BToMuLPiBuilder<Lepton>::produce(edm::StreamID, edm::Event &evt, edm::Event
 
   edm::Handle<LeptonCollection> leptons;
   evt.getByToken(leptons_, leptons);
-
-  edm::Handle<DSAMuonCollection> displaced_standalone_muons;
-  evt.getByToken(displaced_standalone_muons_, displaced_standalone_muons);
   
   edm::Handle<TransientTrackCollection> leptons_ttracks;
   evt.getByToken(leptons_ttracks_, leptons_ttracks);
@@ -150,68 +144,8 @@ void BToMuLPiBuilder<Lepton>::produce(edm::StreamID, edm::Event &evt, edm::Event
   //evt.getByToken(vertexSrc_, vertexHandle);
   //const reco::Vertex & PV = vertexHandle->front();
 
-  int n_matched(0);
-  //std::cout << std::endl;
-
-  int gen_pdgId(0);
-  //float gen_mu_pt(-99);
-  //float gen_mu_eta(-99);
-  //float gen_pi_pt(-99);
-  //float gen_pi_eta(-99);
-  if(isMC_ == true){
-    
-    unsigned int hnl_idx(-99);
-    unsigned int mother_idx(-99);
-
-    for(size_t gen_idx = 0; gen_idx < genParticles->size(); ++gen_idx) {
-      edm::Ptr<reco::GenParticle> genPart_ptr(genParticles, gen_idx);
-      if(fabs(genPart_ptr->pdgId()) == 9900015){
-        //std::cout << "found a hnl" << std::endl;
-        hnl_idx = gen_idx;
-
-        if(genPart_ptr->numberOfMothers()>0){
-          mother_idx = genPart_ptr->motherRef(0).key();
-        }
-      }
-    }
-    int n_muons(0);
-    for(size_t gen_idx = 0; gen_idx < genParticles->size(); ++gen_idx) {
-      edm::Ptr<reco::GenParticle> genPart_ptr(genParticles, gen_idx);
-      if(genPart_ptr->numberOfMothers()>0 && genPart_ptr->motherRef(0).key() == mother_idx){
-        //std::cout << "found a mother " << genPart_ptr->pdgId() << std::endl;
-      }
-      //if(genPart_ptr->numberOfMothers()>0) std::cout << genPart_ptr->motherRef(0).key() << " " << hnl_idx << std::endl;
-      if(genPart_ptr->numberOfMothers()>0 && genPart_ptr->motherRef(0).key() == hnl_idx){
-        //std::cout << "found a daughter" << " pdgId: " << genPart_ptr->pdgId() << " pt " << genPart_ptr->pt() << " eta " << genPart_ptr->eta() << std::endl;
-        if(abs(genPart_ptr->pdgId())==11){
-          gen_pdgId = 11;
-        }
-        if(abs(genPart_ptr->pdgId())==13){
-          //gen_mu_pt = genPart_ptr->pt();
-          //gen_mu_eta = genPart_ptr->eta();
-          ++n_muons;
-        }
-        if(abs(genPart_ptr->pdgId())==211){
-          //gen_pi_pt = genPart_ptr->pt();
-          //gen_pi_eta = genPart_ptr->eta();
-        }
-      }
-    }
-  }
-
-
   // output
   std::unique_ptr<pat::CompositeCandidateCollection> ret_val(new pat::CompositeCandidateCollection());
-
-  //for(size_t dsa_mu_idx = 0; dsa_mu_idx < displaced_standalone_muons->size(); ++dsa_mu_idx) {
-  //  edm::Ptr<reco::Track> dsa_mu_ptr(displaced_standalone_muons, dsa_mu_idx);
-  //  std::cout << "builder muon " << dsa_mu_idx << " pt " << dsa_mu_ptr->pt() << " eta " << dsa_mu_ptr->eta() << std::endl;
-  //}
-
-  //for(size_t ttmu_idx = 0; ttmu_idx < leptons_ttracks->size(); ++ttmu_idx) {
-  //  // try that to access other variables with dsa muons
-  //  std::cout << "builder TTmuon " << ttmu_idx << " pt " << leptons_ttracks->at(ttmu_idx).track().pt() << " eta " << leptons_ttracks->at(ttmu_idx).track().eta() << std::endl;
-  //}
 
   for(size_t trg_mu_idx = 0; trg_mu_idx < trg_muons->size(); ++trg_mu_idx) {
 
@@ -238,11 +172,9 @@ void BToMuLPiBuilder<Lepton>::produce(edm::StreamID, edm::Event &evt, edm::Event
       // loop on selected muons and for a mu-pi candidate 
       // as well as a B candidate, that is HNL + trg mu
       for(size_t lep_idx = 0; lep_idx < leptons->size(); ++lep_idx) {
-      //for(size_t lep_idx = 0; lep_idx < displaced_standalone_muons->size(); ++lep_idx) {
-
         edm::Ptr<Lepton> lep_ptr(leptons, lep_idx);
-        //edm::Ptr<reco::Track> lep_ptr(displaced_standalone_muons, lep_idx);
-            
+        
+
         // the second muon must be _other_ than the trigger muon
         if(lep_ptr->pt()==trg_mu_ptr->pt()) { // lacking of any better idea for a comparison by pointer... 
             // save anyways the position in the collection
@@ -259,12 +191,9 @@ void BToMuLPiBuilder<Lepton>::produce(edm::StreamID, edm::Event &evt, edm::Event
 //                                   << std::endl;
             continue;
         }
-    
+
         // selection on the lepton
         if( !lep_selection_(*lep_ptr) ) continue;
-
-        //if(gen_pdgId==11) int dummy(0); //continue;
-        if(fabs(gen_pdgId)==11) continue;
 
         // HNL candidate
         pat::CompositeCandidate hnl_cand;
@@ -283,7 +212,6 @@ void BToMuLPiBuilder<Lepton>::produce(edm::StreamID, edm::Event &evt, edm::Event
           {lep_ptr->mass()             , PI_MASS                  },
           {LEP_SIGMA                   , PI_SIGMA                 } //some small sigma for the lepton mass
         );
-
         if(!fitter.success()) continue; // hardcoded, but do we need otherwise?
         hnl_cand.setVertex( 
           reco::Candidate::Point( 
@@ -335,10 +263,10 @@ void BToMuLPiBuilder<Lepton>::produce(edm::StreamID, edm::Event &evt, edm::Event
         b_cand.addUserFloat("hnl_vtx_ex"             , sqrt(fitter.fitted_vtx_uncertainty().cxx())                             );
         b_cand.addUserFloat("hnl_vtx_ey"             , sqrt(fitter.fitted_vtx_uncertainty().cyy())                             );
         b_cand.addUserFloat("hnl_vtx_ez"             , sqrt(fitter.fitted_vtx_uncertainty().czz())                             );
-        b_cand.addUserFloat("hnl_fitted_lep_pt"      , fitter.daughter_p4(0).pt()                                              ); 
-        b_cand.addUserFloat("hnl_fitted_lep_eta"     , fitter.daughter_p4(0).eta()                                             );
-        b_cand.addUserFloat("hnl_fitted_lep_phi"     , fitter.daughter_p4(0).phi()                                             );
-        b_cand.addUserFloat("hnl_fitted_lep_mass"    , fitter.daughter_p4(0).mass()                                            );
+        b_cand.addUserFloat("hnl_fitted_lep_pt"       , fitter.daughter_p4(0).pt()                                             ); 
+        b_cand.addUserFloat("hnl_fitted_lep_eta"      , fitter.daughter_p4(0).eta()                                            );
+        b_cand.addUserFloat("hnl_fitted_lep_phi"      , fitter.daughter_p4(0).phi()                                            );
+        b_cand.addUserFloat("hnl_fitted_lep_mass"     , fitter.daughter_p4(0).mass()                                           );
         b_cand.addUserFloat("hnl_fitted_pi_pt"       , fitter.daughter_p4(1).pt()                                              ); 
         b_cand.addUserFloat("hnl_fitted_pi_eta"      , fitter.daughter_p4(1).eta()                                             );
         b_cand.addUserFloat("hnl_fitted_pi_phi"      , fitter.daughter_p4(1).phi()                                             );
@@ -440,10 +368,10 @@ void BToMuLPiBuilder<Lepton>::produce(edm::StreamID, edm::Event &evt, edm::Event
               track_to_lepton_match(lep_ptr, iso_tracks.id(), iTrk) ) continue;
 
           // add to final particle iso if dR < cone
-          float dr_to_trgmu = deltaR(b_cand.userFloat("trg_muon_eta")      , b_cand.userFloat("trg_muon_phi")      , trk.eta(), trk.phi());
-          float dr_to_lep   = deltaR(b_cand.userFloat("hnl_fitted_lep_eta"), b_cand.userFloat("hnl_fitted_lep_phi"), trk.eta(), trk.phi());
-          float dr_to_pi    = deltaR(b_cand.userFloat("hnl_fitted_pi_eta") , b_cand.userFloat("hnl_fitted_pi_phi") , trk.eta(), trk.phi());
-          float dr_to_hnl   = deltaR(b_cand.userFloat("hnl_fitted_eta")    , b_cand.userFloat("hnl_fitted_phi")    , trk.eta(), trk.phi());
+          float dr_to_trgmu = deltaR(b_cand.userFloat("trg_muon_eta")     , b_cand.userFloat("trg_muon_phi")     , trk.eta(), trk.phi());
+          float dr_to_lep = deltaR(b_cand.userFloat("hnl_fitted_lep_eta"), b_cand.userFloat("hnl_fitted_lep_phi"), trk.eta(), trk.phi());
+          float dr_to_pi    = deltaR(b_cand.userFloat("hnl_fitted_pi_eta"), b_cand.userFloat("hnl_fitted_pi_phi"), trk.eta(), trk.phi());
+          float dr_to_hnl   = deltaR(b_cand.userFloat("hnl_fitted_eta")   , b_cand.userFloat("hnl_fitted_phi")   , trk.eta(), trk.phi());
 
           if (dr_to_trgmu < 0.4){
             trg_mu_iso04 += trk.pt();
@@ -516,7 +444,7 @@ void BToMuLPiBuilder<Lepton>::produce(edm::StreamID, edm::Event &evt, edm::Event
         // position of the muons / tracks in their own collections
         b_cand.addUserInt("trg_mu_idx", trg_mu_position);
         b_cand.addUserInt("lep_idx", lep_idx);
-        b_cand.addUserInt("pi_idx", pi_idx);
+        b_cand.addUserInt("pi_idx"    , pi_idx    );
 
 
         // di-lepton (for control channel)
@@ -528,32 +456,18 @@ void BToMuLPiBuilder<Lepton>::produce(edm::StreamID, edm::Event &evt, edm::Event
 
 
         // post fit selection
-        // move directly after vertex fitting depending on the selection
         if( !post_vtx_selection_(b_cand) ) continue;        
 
+
         // gen-matching
-        
+
         int isMatched = 0;
         int trg_mu_isMatched(0), sel_mu_isMatched(0), pi_isMatched(0);
         int trg_mu_genIdx(-1), sel_mu_genIdx(-1), pi_genIdx(-1);
         int genTriggerMuonMother_genPdgId(-1), genMuonMother_genPdgId(-1), genPionMother_genPdgId(-1);
-        float gen_lxy(0.), gen_lxyz(0.);
-        float gen_ct(0.);
-        float gen_ct_2d(0.);
-        float reco_ct(0.);
-        float weight_ctau_6721(-99.);
-        float weight_ctau_2d(-99.);
-        float weight_ctau_reco(-99.);
-
-        //int n_matched(0);
 
         // for MC only
-        
         if(isMC_ == true){
-          //float deltaR_mu = reco::deltaR(lep_ptr->eta(), lep_ptr->phi(), gen_mu_pt, gen_mu_eta); 
-          //float deltaR_phi = reco::deltaR(pi_ptr->eta(), pi_ptr->phi(), gen_pi_pt, gen_pi_eta); 
-          //std::cout << lep_ptr->eta() << " " << deltaR_mu << std::endl;
-
           // pdgId of the gen particle to which the final-state particles are matched
           int trg_mu_genPdgId = trg_mu_ptr->userInt("mcMatch");
           int sel_mu_genPdgId = lep_ptr->userInt("mcMatch");
@@ -564,13 +478,6 @@ void BToMuLPiBuilder<Lepton>::produce(edm::StreamID, edm::Event &evt, edm::Event
           sel_mu_genIdx   = lep_ptr->userInt("mcMatchIndex"); 
           pi_genIdx       = pi_ptr->userInt("mcMatchIndex"); 
 
-          //std::cout << trg_mu_genIdx << " " << sel_mu_genIdx << " " << pi_genIdx << std::endl;
-          //std::cout << trg_mu_ptr->pt() << " " << trg_mu_ptr->eta() << " " << lep_ptr->pt() << " " << lep_ptr->eta() << " " << pi_ptr->pt() << " " << pi_ptr->eta() << std::endl;
-          //std::cout << sel_mu_genIdx << " " << pi_genIdx << std::endl;
-          //if(trg_mu_genIdx != -1 && pi_genIdx != -1){
-          //std::cout << trg_mu_genIdx << " " << sel_mu_genIdx << " " << pi_genIdx << std::endl;
-          //if(sel_mu_genIdx != -1 && pi_genIdx != -1){
-          //if(trg_mu_genIdx != -1 && sel_mu_genIdx != -1 && pi_genIdx != -1){
           if(trg_mu_genIdx != -1){
             // getting the associated gen particles
             edm::Ptr<reco::GenParticle> genTriggerMuon_ptr(genParticles, trg_mu_genIdx);
@@ -630,53 +537,8 @@ void BToMuLPiBuilder<Lepton>::produce(edm::StreamID, edm::Event &evt, edm::Event
           }
 
           if(trg_mu_isMatched==1 && sel_mu_isMatched==1 && pi_isMatched==1){
-            //std::cout << "is matched" << std::endl;
             isMatched = 1;
-            ++n_matched;
-        
-            edm::Ptr<reco::GenParticle> genTriggerMuon_ptr(genParticles, trg_mu_genIdx);
-            edm::Ptr<reco::GenParticle> genMuon_ptr(genParticles, sel_mu_genIdx);
-
-            //// displacement at generator level taken between the trigger muon and the displaced muon
-            gen_lxy = sqrt(pow(genTriggerMuon_ptr->vx() - genMuon_ptr->vx(), 2) + pow(genTriggerMuon_ptr->vy() - genMuon_ptr->vy(), 2));
-            //gen_lxyz = sqrt(pow(genTriggerMuon_ptr->vx() - genMuon_ptr->vx(), 2) + pow(genTriggerMuon_ptr->vy() - genMuon_ptr->vy(), 2) + pow(genTriggerMuon_ptr->vz() - genMuon_ptr->vz(), 2));
-
-            //// this is temporary, to be moved to the ntupliser
-            //// get the hnl
-            //int hnl_genIdx(-99);
-
-            //for(size_t gen_idx = 0; gen_idx < genParticles->size(); ++gen_idx) {
-            //  edm::Ptr<reco::GenParticle> genPart_ptr(genParticles, gen_idx);
-            //  if(fabs(genPart_ptr->pdgId()) == 9900015){
-            //    hnl_genIdx = gen_idx;
-            //  }
-            //}
-            //edm::Ptr<reco::GenParticle> hnl_ptr(genParticles, hnl_genIdx);
-
-            //// lifetime computed out of the 3D information
-            ////gen_ct = (gen_lxyz * hnl_ptr->mass() * 299792458) / hnl_ptr->p();
-            //gen_ct = (gen_lxyz * hnl_ptr->mass()) / hnl_ptr->p();
-
-            //// compute weight
-            //float ctau0 = 18.4;
-            //float ctau1 = 6721;
-
-            //weight_ctau_6721 = ctau0/ctau1 * exp(gen_ct*(1/ctau0 - 1/ctau1));
-
-            //// lifetime computed out of the 2D information
-            ////gen_ct = (gen_lxy * hnl_ptr->pt() * hnl_ptr->mass() * 299792458) / (hnl_ptr->pt() * hnl_ptr->pt());
-            //gen_ct_2d = (gen_lxy * hnl_ptr->pt() * hnl_ptr->mass()) / (hnl_ptr->pt() * hnl_ptr->pt());
-            //weight_ctau_2d = ctau0/ctau1 * exp(gen_ct_2d*(1/ctau0 - 1/ctau1));
-
-            //reco_ct = (lxy.value() * fit_p4.pt() * fitter.fitted_candidate().mass()) / (fit_p4.pt() * fit_p4.pt());
-            //weight_ctau_reco = ctau0/ctau1 * exp(reco_ct*(1/ctau0 - 1/ctau1));
-
-            ////std::cout << weight_ctau_2d << " " << weight_ctau_reco << std::endl;
           }
-        //else{
-        //  std::cout << "does not pass ancestor requirement" << std::endl;
-        //}
-      //}
         }
         
 
@@ -690,19 +552,7 @@ void BToMuLPiBuilder<Lepton>::produce(edm::StreamID, edm::Event &evt, edm::Event
         b_cand.addUserInt("matching_trg_mu_motherPdgId", genTriggerMuonMother_genPdgId);
         b_cand.addUserInt("matching_sel_mu_motherPdgId", genMuonMother_genPdgId);
         b_cand.addUserInt("matching_pi_motherPdgId", genPionMother_genPdgId);
-        b_cand.addUserFloat("gen_lxy", gen_lxy);
-        b_cand.addUserFloat("gen_lxyz", gen_lxyz);
-        b_cand.addUserFloat("gen_ct", gen_ct);
-        b_cand.addUserFloat("gen_ct_2d", gen_ct_2d);
-        b_cand.addUserFloat("reco_ct", reco_ct);
-        b_cand.addUserFloat("weight_ctau", weight_ctau_6721);
-        b_cand.addUserFloat("weight_ctau_2d", weight_ctau_2d);
-        b_cand.addUserFloat("weight_ctau_reco", weight_ctau_reco);
-        b_cand.addUserInt("n_matched", n_matched);
-
-
-        // post fit selection
-        //if( !post_vtx_selection_(b_cand) ) continue;        
+        
 
         ret_val->push_back(b_cand);
               
@@ -711,8 +561,6 @@ void BToMuLPiBuilder<Lepton>::produce(edm::StreamID, edm::Event &evt, edm::Event
     } // for(size_t pi_idx = 0; pi_idx < kaons->size(); ++pi_idx)
 
   } // for(size_t trg_mu_idx = 0; trg_mu_idx < trg_muons->size(); ++trg_mu_idx)
-
-  //std::cout << n_matched << std::endl;
   
   evt.put(std::move(ret_val));
 }

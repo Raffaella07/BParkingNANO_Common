@@ -5,7 +5,6 @@ BToMuMuPi = cms.EDProducer(
     'BToMuMuPiBuilder',
     trgMuons                = cms.InputTag('muonTrgSelector', 'trgMuons'),
     leptons                 = cms.InputTag('muonTrgSelector', 'SelectedMuons'), 
-    displaced_standalone_muons = cms.InputTag('muonTrgSelector', 'DisplacedStandaloneMuons'), 
     leptonsTransientTracks  = cms.InputTag('muonTrgSelector', 'SelectedTransientMuons'), 
     pions                   = cms.InputTag('tracksBPark', 'SelectedTracks'),
     pionsTransientTracks    = cms.InputTag('tracksBPark', 'SelectedTransientTracks'),
@@ -31,10 +30,6 @@ BToMuMuPi = cms.EDProducer(
 
     # post-fitter preselection
     postVtxSelection = cms.string(' & '.join([
-        #'userInt("hnl_vtx_OK") == 1',
-        #'mass < 10',
-        #'userFloat("hnl_fitted_cos_theta_2D") > 0.9',
-
         'userInt("hnl_vtx_OK") == 1',
         'abs(userFloat("sel_muon_dz")) > 0.0015', # move to pre-fitter
         'abs(userFloat("sel_muon_dxy")) > 0.001', # move to pre-fitter
@@ -169,15 +164,6 @@ BToMuMuPiTable = cms.EDProducer(
         matching_trg_mu_motherPdgId = Var("userInt('matching_trg_mu_motherPdgId')", int, mcOnly=True),
         matching_pi_motherPdgId     = Var("userInt('matching_pi_motherPdgId')"    , int, mcOnly=True),
         ## gen displacement 
-        gen_lxy  = ufloat('gen_lxy'),
-        #gen_lxyz = ufloat('gen_lxyz'),
-        #gen_ct = ufloat('gen_ct'),
-        #gen_ct_2d = ufloat('gen_ct_2d'),
-        #reco_ct = ufloat('reco_ct'),
-        #weight_ctau = ufloat('weight_ctau'),
-        #weight_ctau_2d = ufloat('weight_ctau_2d'),
-        #weight_ctau_reco = ufloat('weight_ctau_reco'),
-        #n_matched = uint('n_matched'),
         #fitter_bs_lxy = ufloat('fitter_bs_lxy'), #same as sv_lxy, with more explicit naming
         ##my_fitter_bs_lxy = ufloat('my_fitter_bs_lxy'), 
         ##disp2DFromBS = ufloat('disp2DFromBS'),
