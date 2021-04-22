@@ -14,7 +14,8 @@ def getOptions():
   parser = ArgumentParser(description='Script to launch the nanoAOD tool on top of privately produced miniAOD files', add_help=True)
   parser.add_argument('--pl'      , type=str, dest='pl'          , help='label of the sample file'                                                            , default=None)
   parser.add_argument('--ds'      , type=str, dest='ds'          , help='[data-mccentral] name of the dataset, e.g /ParkingBPH4/Run2018B-05May2019-v2/MINIAOD', default=None)
-  parser.add_argument('--tag'     , type=str, dest='tag'         , help='[optional] tag to be added on the outputfile name'                                   , default=None)
+  parser.add_argument('--tagnano' , type=str, dest='tagnano'     , help='[optional] tag to be added on the outputfile name of the nano sample'                , default=None)
+  parser.add_argument('--tagflat' , type=str, dest='tagflat'     , help='[optional] tag to be added on the outputfile name of the flat sample'                , default=None)
   parser.add_argument('--maxfiles', type=str, dest='maxfiles'    , help='[optional] maximum number of files to process'                                       , default=None)
   parser.add_argument('--user'    , type=str, dest='user'        , help='[optional-mcprivate] specify username where the miniAOD files are stored'            , default=os.environ["USER"])
   parser.add_argument('--mcprivate'         , dest='mcprivate'   , help='run the BParking nano tool on a private MC sample'              , action='store_true', default=False)
@@ -49,7 +50,8 @@ class NanoLauncher(NanoTools):
   def __init__(self, opt):
     self.prodlabel   = vars(opt)['pl']
     self.dataset     = vars(opt)['ds']
-    self.tag         = vars(opt)['tag']
+    self.tagnano     = vars(opt)['tagnano']
+    self.tagflat     = vars(opt)['tagflat']
     self.maxfiles    = vars(opt)['maxfiles']
     self.mcprivate   = vars(opt)['mcprivate']
     self.mccentral   = vars(opt)['mccentral']
@@ -60,6 +62,9 @@ class NanoLauncher(NanoTools):
     self.domergenano = vars(opt)["domergenano"]
     self.doquick     = vars(opt)["doquick"]
     self.docompile   = vars(opt)["docompile"]
+
+    if self.donano and self.doflat:
+      self.tagflat = self.tagnano
 
 
   def compile(self):
@@ -108,7 +113,7 @@ class NanoLauncher(NanoTools):
 
 
   def writeDumperStarter(self, nfiles, outputdir, filelist, label):
-    nanoname = 'bparknano' if self.tag == None or self.donano == False else 'bparknano_{}'.format(self.tag) 
+    nanoname = 'bparknano' if self.tagnano == None else 'bparknano_{}'.format(self.tagnano) 
 
     f = open(filelist)
     lines = f.readlines()
@@ -117,6 +122,7 @@ class NanoLauncher(NanoTools):
     event_chain.append('TChain* c = new TChain("Events");')
     for iFile in range(1, nfiles+1):
       file_step = NanoTools.getStep(self, lines[iFile-1]) if self.mcprivate else iFile
+      #file_step = iFile
       event_chain.append('  c->Add("{}/{}_nj{}.root");'.format(outputdir, nanoname, file_step))
     event_chain.append('  c->Process("NanoDumper.C+", outFileName);')
     event_chain = '\n'.join(event_chain)
@@ -125,6 +131,7 @@ class NanoLauncher(NanoTools):
     run_chain.append('TChain* c_run = new TChain("Runs");')
     for iFile in range(1, nfiles+1):
       file_step = NanoTools.getStep(self, lines[iFile-1]) if self.mcprivate else iFile
+      #file_step = iFile
       run_chain.append('  c->Add("{}/{}_nj{}.root");'.format(outputdir, nanoname, file_step))
     run_chain.append('  c_run->Process("NanoRunDumper.C+", outFileName);')
     run_chain = '\n'.join(run_chain)
@@ -154,8 +161,8 @@ class NanoLauncher(NanoTools):
         pl = self.prodlabel,
         )
 
-    if self.tag != None:
-      command += ' --tag {}'.format(self.tag)
+    if self.tagnano != None: command += ' --tagnano {}'.format(self.tagnano)
+    if self.tagflat != None: command += ' --tagflat {}'.format(self.tagflat if self.donano==None else self.tagnano+'_'+self.tagflat)
     if filetype == 'nano': command += ' --donano' 
     else: command += ' --doflat'
     
@@ -193,7 +200,7 @@ class NanoLauncher(NanoTools):
 
   def launchNano(self, nfiles, outputdir, logdir, filelist, label):
     if not self.doquick:
-      slurm_options = '-p wn --account=t3 -o {ld}/nanostep_nj%a.log -e {ld}/nanostep_nj%a.log --job-name=nanostep_nj%a_{pl} --array {ar} --time=03:00:00'.format(
+      slurm_options = '-p wn --account=t3 -o {ld}/nanostep_nj%a.log -e {ld}/nanostep_nj%a.log --job-name=nanostep_nj%a_{pl} --array {ar} --time=10:00:00'.format(
         ld = logdir,
         pl = label,
         ar = '1-{}'.format(nfiles),
@@ -210,7 +217,7 @@ class NanoLauncher(NanoTools):
       pl        = label,
       outdir    = outputdir,
       usr       = os.environ["USER"], 
-      tag       = 0 if self.tag == None else self.tag,
+      tag       = 0 if self.tagnano == None else self.tagnano,
       isMC      = 1 if self.mcprivate or self.mccentral else 0,
       rmt       = 0 if self.mcprivate else 1,
       lst       = filelist,
@@ -226,7 +233,7 @@ class NanoLauncher(NanoTools):
     self.writeDumperStarter(nfiles, outputdir, filelist, label)
 
     if not self.doquick:
-      slurm_options = '-p wn --account=t3 -o {ld}/dumperstep.log -e {ld}/dumperstep.log --job-name=dumperstep_{pl} --time=03:00:00 {dp}'.format(
+      slurm_options = '-p wn --account=t3 -o {ld}/dumperstep.log -e {ld}/dumperstep.log --job-name=dumperstep_{pl} --time=10:00:00 {dp}'.format(
         ld      = logdir,
         pl      = label,
         dp      = '--dependency=afterany:{}'.format(jobId) if jobId != -99 else '',
@@ -243,7 +250,7 @@ class NanoLauncher(NanoTools):
       pl      = label,
       outdir  = outputdir,
       usr     = os.environ["USER"], 
-      tag     = 0 if self.tag == None else self.tag,
+      tag     = 0 if self.tagflat == None else (self.tagflat if self.tagnano==None else self.tagnano+'_'+self.tagflat),
       isMC    = 1 if self.mcprivate or self.mccentral else 0,
       )
 
@@ -303,7 +310,7 @@ class NanoLauncher(NanoTools):
 
     # loop on the files (containing at most 750 samples) 
     for iFile, filelist in enumerate(glob.glob('{}*.txt'.format(filelistname))):
-      if NanoTools.getNFiles(self, filelist) == 0:
+      if NanoTools.getNFiles(self, filelist) == 0 and self.donano:
         print '        WARNING: no files were found with the corresponding production label'
         print '                 Did you set the correct username using --user <username>?'
 
@@ -336,12 +343,15 @@ class NanoLauncher(NanoTools):
       print '\n  --> Creating log directory'
       label1 = self.prodlabel if self.mcprivate else ds_label
       label2 = point if self.mcprivate else self.prodlabel
-      logdir = './logs/{}/{}/Chunk{}_n{}'.format(label1, label2, iFile, nfiles) if self.tag == None \
-               else './logs/{}/{}_{}/Chunk{}_n{}'.format(label1, label2, self.tag, iFile, nfiles)
+      if self.donano: tag = self.tagnano
+      else: tag = self.tagflat if self.tagnano==None else self.tagnano+'_'+self.tagflat
+
+      logdir = './logs/{}/{}/Chunk{}_n{}'.format(label1, label2, iFile, nfiles) if tag == None \
+               else './logs/{}/{}_{}/Chunk{}_n{}'.format(label1, label2, tag, iFile, nfiles)
       if not path.exists(logdir):
         os.system('mkdir -p {}'.format(logdir))
 
-      label = '{}_{}_Chunk{}_n{}'.format(label1, label2 if self.tag==None else label2+'_'+self.tag, iFile, NanoTools.getNFiles(self, filelist))
+      label = '{}_{}_Chunk{}_n{}'.format(label1, label2 if tag==None else label2+'_'+tag, iFile, NanoTools.getNFiles(self, filelist))
 
       nano_jobId = -99
 
