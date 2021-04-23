@@ -154,7 +154,7 @@ class NanoProdManager(NanoTools):
       ar      = self.getArray(failed_files), 
       outdir  = outputdir,
       usr     = os.environ["USER"], 
-      tag     = 0, #if self.tag == None else self.tag, # adapt
+      tag     = 0 if self.tag == None else self.tag,
       isMC    = 1 if self.mcprivate or self.mccentral else 0,
       rmt     = 0 if self.mcprivate else 1,
       lst     =  filelist,
