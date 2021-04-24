@@ -17,10 +17,26 @@ BToMuMuPi = cms.EDProducer(
     isMC  = cms.bool(False),
 
     # pre-fitter preselection
-    pionSelection      = cms.string('pt > 0.7 && abs(eta)<2'),  
+    pionSelection = cms.string(' && '.join([
+        'pt > 0.7',
+        'abs(eta)<2',
+        'abs(userFloat("dz")) > 0.005',
+        'abs(userFloat("dzS")) > 1.5',  
+        'abs(userFloat("dxy")) > 0.005',
+        'abs(userFloat("dxyS")) > 3',
+        'abs(userFloat("DCASig")) > 5',
+      ])
+    ),
     isoTracksSelection = cms.string('pt > 0.7 && abs(eta)<2'),
     trgMuonSelection   = cms.string('pt > 7 && abs(eta) < 1.5'),
-    leptonSelection    = cms.string('pt > 1.5 && abs(eta) < 2'),
+    leptonSelection    = cms.string(' && '.join([
+        'pt > 1.5',
+        'abs(eta) < 2',
+        'abs(userFloat("dz")) > 0.0015',
+        'abs(userFloat("dxy")) > 0.001',
+        'abs(userFloat("sip3d")) > 7',
+      ])
+    ),
     preVtxSelection = cms.string(' & '.join([
         'pt > 1',
         'mass > 0.2',        
@@ -31,14 +47,14 @@ BToMuMuPi = cms.EDProducer(
     # post-fitter preselection
     postVtxSelection = cms.string(' & '.join([
         'userInt("hnl_vtx_OK") == 1',
-        'abs(userFloat("sel_muon_dz")) > 0.0015', # move to pre-fitter
-        'abs(userFloat("sel_muon_dxy")) > 0.001', # move to pre-fitter
-        'userFloat("sel_muon_sip3d") > 7',  # move to pre-fitter
-        'abs(userFloat("pion_dz")) > 0.005',  # move to pre-fitter
-        'abs(userFloat("pion_dzS")) > 1.5',  # move to pre-fitter
-        'abs(userFloat("pion_dxy")) > 0.005',  # move to pre-fitter
-        'abs(userFloat("pion_dxyS")) > 3',  # move to pre-fitter
-        'abs(userFloat("pion_DCASig")) > 5',  # move to pre-fitter
+        #'abs(userFloat("sel_muon_dz")) > 0.0015',
+        #'abs(userFloat("sel_muon_dxy")) > 0.001',
+        #'userFloat("sel_muon_sip3d") > 7',
+        #'abs(userFloat("pion_dz")) > 0.005',
+        #'abs(userFloat("pion_dzS")) > 1.5',  
+        #'abs(userFloat("pion_dxy")) > 0.005',
+        #'abs(userFloat("pion_dxyS")) > 3',
+        #'abs(userFloat("pion_DCASig")) > 5',
         'userFloat("dr_trgmu_hnl") < 0.5',
         'userFloat("hnl_vtx_prob") > 0.001',
         'userFloat("hnl_fitted_cos_theta_2D") > 0.99',

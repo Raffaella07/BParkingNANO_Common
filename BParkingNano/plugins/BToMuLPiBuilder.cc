@@ -74,7 +74,7 @@ public:
 private:
   // pre-fitter preselection 
   const StringCutObjectSelector<pat::CompositeCandidate> pi_selection_; 
-  const StringCutObjectSelector<pat::PackedCandidate> isotrk_selection_; // not needed for the moment 
+  const StringCutObjectSelector<pat::PackedCandidate> isotrk_selection_;
   const StringCutObjectSelector<pat::Muon> trgmu_selection_; 
   const StringCutObjectSelector<Lepton> lep_selection_; 
   const StringCutObjectSelector<pat::CompositeCandidate> pre_vtx_selection_; 
@@ -318,17 +318,20 @@ void BToMuLPiBuilder<Lepton>::produce(edm::StreamID, edm::Event &evt, edm::Event
         b_cand.addUserFloat("trg_muon_dz"     , trg_mu_ptr->dB(pat::Muon::PVDZ)                                          );
         
         if(lepton_type_ == "muon"){
-          b_cand.addUserFloat("sel_muon_ip3d"   , fabs(lep_ptr->dB(pat::Muon::PV3D))                                    );
+          b_cand.addUserFloat("sel_muon_ip3d"   , fabs(lep_ptr->dB(pat::Muon::PV3D))                                 );
           b_cand.addUserFloat("sel_muon_sip3d"  , fabs(lep_ptr->dB(pat::Muon::PV3D) / lep_ptr->edB(pat::Muon::PV3D)) );
-          b_cand.addUserFloat("sel_muon_dxy"    , lep_ptr->dB(pat::Muon::PV2D)                                          );
-          b_cand.addUserFloat("sel_muon_dz"     , lep_ptr->dB(pat::Muon::PVDZ)                                          );
+          b_cand.addUserFloat("sel_muon_dxy"    , lep_ptr->dB(pat::Muon::PV2D)                                       );
+          b_cand.addUserFloat("sel_muon_dz"     , lep_ptr->dB(pat::Muon::PVDZ)                                       );
         }
 
-        b_cand.addUserFloat("pion_dz"         , pi_ptr->userFloat("dz")                                                  );
-        b_cand.addUserFloat("pion_dxy"        , pi_ptr->userFloat("dxy")                                                 );
-        b_cand.addUserFloat("pion_dzS"        , pi_ptr->userFloat("dzS")                                                 );
-        b_cand.addUserFloat("pion_dxyS"       , pi_ptr->userFloat("dxyS")                                                );
-        b_cand.addUserFloat("pion_DCASig"     , pi_ptr->userFloat("DCASig")                                              );
+        b_cand.addUserFloat("pion_dz"         , pi_ptr->userFloat("dz")     );
+        b_cand.addUserFloat("pion_dxy"        , pi_ptr->userFloat("dxy")    );
+        b_cand.addUserFloat("pion_dzS"        , pi_ptr->userFloat("dzS")    );
+        b_cand.addUserFloat("pion_dxyS"       , pi_ptr->userFloat("dxyS")   );
+        b_cand.addUserFloat("pion_DCASig"     , pi_ptr->userFloat("DCASig") );
+
+        // post fit selection
+        if( !post_vtx_selection_(b_cand) ) continue;        
 
         // isolation
         float trg_mu_iso03 = 0; 
@@ -357,7 +360,7 @@ void BToMuLPiBuilder<Lepton>::produce(edm::StreamID, edm::Event &evt, edm::Event
         
           const pat::PackedCandidate & trk = (iTrk < nTracks) ? (*iso_tracks)[iTrk] : (*iso_lostTracks)[iTrk-nTracks];
 
-          // same preselection as for tracks
+          // same preselection as for pion tracks
           if( !isotrk_selection_(trk) ) continue;
 
           // check if the track is the pion
@@ -456,7 +459,7 @@ void BToMuLPiBuilder<Lepton>::produce(edm::StreamID, edm::Event &evt, edm::Event
 
 
         // post fit selection
-        if( !post_vtx_selection_(b_cand) ) continue;        
+        //if( !post_vtx_selection_(b_cand) ) continue;        
 
 
         // gen-matching
