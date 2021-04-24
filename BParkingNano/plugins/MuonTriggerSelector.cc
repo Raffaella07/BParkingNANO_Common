@@ -260,6 +260,17 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
 
         //std::cout << "muon " << iMuo << " pt " << muon.pt() << std::endl;
         muons_out->emplace_back(muon);
+
+        muons_out->back().addUserFloat("dz", muon.dB(muon.PVDZ));
+        muons_out->back().addUserFloat("dzErr", fabs(muon.edB(muon.PVDZ)));
+        muons_out->back().addUserFloat("dzS", fabs(muon.dB(muon.PVDZ)/muon.edB(muon.PVDZ)));
+        muons_out->back().addUserFloat("dxy", muon.dB(muon.PV2D));
+        muons_out->back().addUserFloat("dxyErr", fabs(muon.edB(muon.PV2D)));
+        muons_out->back().addUserFloat("dxyS", fabs(muon.dB(muon.PV2D)/muon.edB(muon.PV2D)));
+        muons_out->back().addUserFloat("ip3d", fabs(muon.dB(muon.PV3D)));
+        muons_out->back().addUserFloat("ip3dErr", fabs(muon.edB(muon.PV3D)));
+        muons_out->back().addUserFloat("sip3d", fabs(muon.dB(muon.PV3D)/muon.edB(muon.PV3D)));
+
         muons_out->back().addUserInt("isTriggering", muonIsTrigger[iMuo]);
         muons_out->back().addUserFloat("DR",muonDR[iMuo]);
         muons_out->back().addUserFloat("DPT",muonDPT[iMuo]);
