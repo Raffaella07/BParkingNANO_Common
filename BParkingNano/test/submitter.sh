@@ -25,7 +25,9 @@ if [ ${8} == 0 ] ; then
   cp ${7} $workdir/filelist.txt
 else # different treatment in case of resubmission
   cp -r ${7}* $workdir
-  #rm ${7}*$SLURM_ARRAY_TASK_ID*
+  # copy filelist to pnfs
+  xrdcp -rf ${7}*$SLURM_ARRAY_TASK_ID* root://t3dcachedb.psi.ch:1094/${1}
+  rm ${7}*$SLURM_ARRAY_TASK_ID*
 fi
 
 cd $workdir

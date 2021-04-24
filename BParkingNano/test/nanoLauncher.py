@@ -36,6 +36,14 @@ def checkParser(opt):
   if opt.data==True and opt.ds==None:
     raise RuntimeError('You are running on data, please indicate the dataset with --ds <dataset>')
 
+  if opt.domergenano==True and opt.donano==False:
+    command = 'python nanoMerger.py --donano --pl {}'.format(opt.pl)
+    if opt.data==True: command += ' --ds {} --data'.format(opt.ds)
+    elif opt.mccentral==True: command += ' --ds {} --mccentral'.format(opt.mccentral)
+    elif opt.mcprivate==True: command += ' --mcprivate'
+    if opt.tagnano != None: command += ' --tagnano {}'.format(opt.tagnano)
+    raise RuntimeError('This tool is not well suited for processing the merging of the nano step only. Use instead: \n {}'.format(command))
+
   if opt.donano==False and opt.doflat==False:
     raise RuntimeError('Please indicate if you want to run the nano tool (--donano) and/or the ntupliser (--doflat)')
 
@@ -200,7 +208,7 @@ class NanoLauncher(NanoTools):
 
   def launchNano(self, nfiles, outputdir, logdir, filelist, label):
     if not self.doquick:
-      slurm_options = '-p wn --account=t3 -o {ld}/nanostep_nj%a.log -e {ld}/nanostep_nj%a.log --job-name=nanostep_nj%a_{pl} --array {ar} --time=10:00:00'.format(
+      slurm_options = '-p wn --account=t3 -o {ld}/nanostep_nj%a.log -e {ld}/nanostep_nj%a.log --job-name=nanostep_nj%a_{pl} --array {ar} --time=5:00:00'.format(
         ld = logdir,
         pl = label,
         ar = '1-{}'.format(nfiles),
@@ -233,7 +241,7 @@ class NanoLauncher(NanoTools):
     self.writeDumperStarter(nfiles, outputdir, filelist, label)
 
     if not self.doquick:
-      slurm_options = '-p wn --account=t3 -o {ld}/dumperstep.log -e {ld}/dumperstep.log --job-name=dumperstep_{pl} --time=10:00:00 {dp}'.format(
+      slurm_options = '-p wn --account=t3 -o {ld}/dumperstep.log -e {ld}/dumperstep.log --job-name=dumperstep_{pl} --time=3:00:00 {dp}'.format(
         ld      = logdir,
         pl      = label,
         dp      = '--dependency=afterany:{}'.format(jobId) if jobId != -99 else '',
