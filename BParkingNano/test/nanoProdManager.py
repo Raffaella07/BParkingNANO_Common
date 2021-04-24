@@ -173,7 +173,10 @@ class NanoProdManager(NanoTools):
       print '\nINFO: the JobManager Tool is going to be run on all dataset having "{}" as production label\n'.format(opt.pl)
 
     # pnfs directory where nano samples are located
-    location = NanoTools.getFilesLocation(self, self.data)
+    if self.data: dirtag = 'data'
+    elif self.mccentral: dirtag = 'mccentral'
+    else: dirtag == ''
+    location = NanoTools.getFilesLocation(self, dirtag)
 
     # get the directories associated to the production label
     dirs = NanoTools.getNanoDirectories(self, location, self.prodlabel, self.dataset)

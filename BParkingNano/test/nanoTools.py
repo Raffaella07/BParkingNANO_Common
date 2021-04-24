@@ -19,17 +19,19 @@ class NanoTools(object):
 
 
   def getLogDir(self, file_, prodlabel, tag, isData):
-   if isData: # probably to be modified for mc
-     label = file_[file_.find('/',file_.find(prodlabel))+1:file_.find('Chunk')-1] 
-     chunk = file_[file_.find('Chunk'):file_.find('bparknano')-1]
+   #if isData: # probably to be modified for mc
+   label = file_[file_.find('/',file_.find(prodlabel))+1:file_.find('Chunk')-1] 
+   chunk = file_[file_.find('Chunk'):file_.find('bparknano')-1]
    #return '/work/anlyon/logs/{}/{}/{}'.format(label, prodlabel, chunk) # this will have to be modified
    return './logs/{}/{}_{}/{}'.format(label, prodlabel, tag, chunk) # this will have to be modified
 
 
-  def getFilesLocation(self, isData):  
+  def getFilesLocation(self, dirtag):  
     location = '/pnfs/psi.ch/cms/trivcat/store/user/{usr}/BHNLsGen'.format(usr=os.environ["USER"])
-    if isData:
+    if dirtag == 'data':
       location += '/data'
+    elif dirtag == 'mccentral': 
+      location += '/mc_central'
     return location
   
 
