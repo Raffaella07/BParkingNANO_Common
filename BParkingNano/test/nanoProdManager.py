@@ -100,7 +100,7 @@ class NanoProdManager(NanoTools):
 
   def writeFileList(self, failed_files):
 
-    logdir = NanoTools.getLogDir(self, failed_files[0], self.prodlabel, self.tag, self.data)
+    logdir = NanoTools.getLogDir(self, failed_files[0], self.prodlabel, self.tag, self.data, 'mcprivate' if self.mcprivate else '')
     label = logdir[logdir.find('logs')+5:].replace('/', '_')
 
     if self.data:
@@ -142,7 +142,7 @@ class NanoProdManager(NanoTools):
     # strategy: per chunk resubmission
     #           submit job arrays with indices corresponding to the stepId of the failed jobs
 
-    logdir    = NanoTools.getLogDir(self, failed_files[0], self.prodlabel, self.tag, self.data) 
+    logdir    = NanoTools.getLogDir(self, failed_files[0], self.prodlabel, self.tag, self.data, 'mcprivate' if self.mcprivate else '') 
     label     = logdir[logdir.find('logs')+5:].replace('/', '_')
     array     = self.getArray(failed_files)
     outputdir = failed_files[0][0:failed_files[0].find('bparknano')]
@@ -175,11 +175,11 @@ class NanoProdManager(NanoTools):
     # pnfs directory where nano samples are located
     if self.data: dirtag = 'data'
     elif self.mccentral: dirtag = 'mccentral'
-    else: dirtag == ''
+    else:  dirtag = ''
     location = NanoTools.getFilesLocation(self, dirtag)
 
     # get the directories associated to the production label
-    dirs = NanoTools.getNanoDirectories(self, location, self.prodlabel, self.dataset)
+    dirs = NanoTools.getNanoDirectories(self, location, self.prodlabel, self.dataset, 'mcprivate' if self.mcprivate else '')
     #dirs = [f for f in glob.glob('{loc}/ParkingBPH1_Run2018B*{pl}'.format(loc=location, pl=self.prodlabel))]
     if len(dirs) == 0:
       raise RuntimeError('No samples with the production label "{pl}" were found in {loc}'.format(pl=self.prodlabel, loc=location))
@@ -237,15 +237,33 @@ class NanoProdManager(NanoTools):
 
         n_exp = self.getNExpectedNanoFiles(chunk_)
         
-        if self.tag == None:
-          files = [chunk_+'/bparknano_nj'+str(nj)+'.root' for nj in range(1, n_exp+1)]
-        else:
-          files = [chunk_+'/bparknano_{}_nj'.format(self.tag) +str(nj)+'.root' for nj in range(1, n_exp+1)]
+        if not self.mcprivate:
+          if self.tag == None:
+            files = [chunk_+'/bparknano_nj'+str(nj)+'.root' for nj in range(1, n_exp+1)]
+          else:
+            files = [chunk_+'/bparknano_{}_nj'.format(self.tag) +str(nj)+'.root' for nj in range(1, n_exp+1)]
 
-        for file_ in files:
+          logdir = NanoTools.getLogDir(self, files[0], self.prodlabel, self.tag, self.data, 'mcprivate' if self.mcprivate else '')
+          logfiles = [NanoTools.getLogFile(self, logdir, file_) for file_ in files]
+
+        else:
+          point = chunk_[chunk_.find(self.prodlabel)+len(self.prodlabel)+1:chunk_.find('/nanoFiles')]
+          if self.tag == None:
+            filelist = chunk_ + '/filelist_' + self.prodlabel + '_' + point + '_' + chunk_[chunk_.find('Chunk'):] + '.txt'
+          else:
+            filelist = chunk_ + '/filelist_' + self.prodlabel + '_' + point + '_' + self.tag + '_' + chunk_[chunk_.find('Chunk'):] + '.txt'
+          f = open(filelist)
+          lines = f.readlines()
+
+          files = [chunk_+'/bparknano_{}_nj'.format(self.tag) +str(NanoTools.getStep(self, lines[nj-1]))+'.root' for nj in range(1, n_exp+1)]
+          files_nlog = [chunk_+'/bparknano_{}_nj'.format(self.tag) +str(nj)+'.root' for nj in range(1, n_exp+1)]
+
+          logdir = NanoTools.getLogDir(self, files[0], self.prodlabel, self.tag, self.data, 'mcprivate' if self.mcprivate else '')
+          logfiles = [NanoTools.getLogFile(self, logdir, file_) for file_ in files_nlog]
+
+        for ifile, file_ in enumerate(files):
           # get the log file
-          logdir = NanoTools.getLogDir(self, file_, self.prodlabel, self.tag, self.data)
-          logfile = NanoTools.getLogFile(self, logdir, file_)
+          logfile = logfiles[ifile]
           
           # idle jobs
           if not NanoTools.checkFileExists(self, logfile): 

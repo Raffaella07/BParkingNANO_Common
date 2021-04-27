@@ -8,22 +8,28 @@ class NanoTools(object):
     return [f for f in glob.glob(location+'/*')]
 
 
-  def getNanoDirectories(self, location, prodlabel, dataset):
-    if dataset == None:
-      dirs = [f for f in glob.glob('{loc}/{pl}/*'.format(loc=location, pl=prodlabel))]
+  def getNanoDirectories(self, location, prodlabel, dataset, dirtag=''):
+    if dirtag == 'mcprivate':
+      dirs = [f for f in glob.glob('{loc}/{pl}/*/nanoFiles'.format(loc=location, pl=prodlabel))]
     else:
-      dirs = [f for f in glob.glob('{loc}/{pl}/{ds}'.format(loc=location, pl=prodlabel, ds=dataset))]
+      if dataset == None:
+        dirs = [f for f in glob.glob('{loc}/{pl}/*'.format(loc=location, pl=prodlabel))]
+      else:
+        dirs = [f for f in glob.glob('{loc}/{pl}/{ds}'.format(loc=location, pl=prodlabel, ds=dataset))]
     if len(dirs) == 0:
       raise RuntimeError('No samples with the production label "{pl}" were found in {loc}'.format(pl=prodlabel if dataset==None else dataset+'_'+prodlabel, loc=location))
     return dirs
 
 
-  def getLogDir(self, file_, prodlabel, tag, isData):
+  def getLogDir(self, file_, prodlabel, tag, isData, dirlabel=''):
    #if isData: # probably to be modified for mc
    label = file_[file_.find('/',file_.find(prodlabel))+1:file_.find('Chunk')-1] 
    chunk = file_[file_.find('Chunk'):file_.find('bparknano')-1]
-   #return '/work/anlyon/logs/{}/{}/{}'.format(label, prodlabel, chunk) # this will have to be modified
-   return './logs/{}/{}_{}/{}'.format(label, prodlabel, tag, chunk) # this will have to be modified
+   if dirlabel == 'mcprivate':
+     logdir = './logs/{}/{}/{}'.format(prodlabel, label[0:label.find('/')], chunk) if tag == None else './logs/{}/{}_{}/{}'.format(prodlabel, label[0:label.find('/')], tag, chunk)
+   else:
+     logdir = './logs/{}/{}_{}/{}'.format(label, prodlabel, tag, chunk)
+   return logdir
 
 
   def getFilesLocation(self, dirtag):  
