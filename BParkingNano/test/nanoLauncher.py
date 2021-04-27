@@ -236,14 +236,7 @@ class NanoLauncher(NanoTools):
 
   def launchDumper(self, nfiles, outputdir, logdir, filelist, label, jobId):
     self.writeDumperStarter(nfiles, outputdir, filelist, label)
-    if self.tagnano == None and self.tagflat == None:
-      tag = 0
-    elif self.tagnano != None and self.tagflat == None:
-      tag = self.tagnano
-    elif self.tagnano == None and self.tagflat != None:
-      tag = self.tagflat
-    else:
-      tag = self.tagnano + '_' + self.tagflat
+    tag = NanoTools.getTag(self, self.tagnano, self.tagflat)
 
     if not self.doquick:
       slurm_options = '-p wn --account=t3 -o {ld}/dumperstep.log -e {ld}/dumperstep.log --job-name=dumperstep_{pl} --time=3:00:00 {dp}'.format(
@@ -356,15 +349,7 @@ class NanoLauncher(NanoTools):
       print '\n  --> Creating log directory'
       label1 = self.prodlabel if self.mcprivate else ds_label
       label2 = point if self.mcprivate else self.prodlabel
-      if self.tagnano == None and self.tagflat == None:
-        tag = 0
-      elif self.tagnano != None and self.tagflat == None:
-        tag = self.tagnano
-      elif self.tagnano == None and self.tagflat != None:
-        tag = self.tagflat
-      else:
-        tag = self.tagnano + '_' + self.tagflat
-
+      tag = NanoTools.getTag(self, self.tagnano, self.tagflat)
       logdir = './logs/{}/{}/Chunk{}_n{}'.format(label1, label2, iFile, nfiles) if tag == 0 \
                else './logs/{}/{}_{}/Chunk{}_n{}'.format(label1, label2, tag, iFile, nfiles)
       if not path.exists(logdir):

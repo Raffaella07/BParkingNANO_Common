@@ -98,5 +98,15 @@ class NanoTools(object):
   def getStep(self, file_): 
     return file_[file_.rfind('_nj')+3:file_.rfind('.root')]
 
+
+  def getTag(self, tagnano, tagflat):
+    if tagnano == None and tagflat == None:
+      tag = 0
+    elif tagnano != None and tagflat == None:
+      tag = tagnano
+    elif tagnano == None and tagflat != None:
+      tag = tagflat
+    else:
+      tag = tagnano + '_' + tagflat
     
 

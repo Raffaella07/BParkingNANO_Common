@@ -150,14 +150,7 @@ class NanoMerger(NanoTools):
       self.doChunkMerging(nanoName_tot, mergedName_tot, location)
 
     if self.doflat:
-      if self.tagnano == None and self.tagflat == None:
-        tag = 0
-      if self.tagnano != None and self.tagflat == None:
-        tag = self.tagnano
-      elif self.tagnano == None and self.tagflat != None:
-        tag = self.tagflat
-      else:
-        tag = self.tagnano + '_' + self.tagflat
+      tag = NanoTools.getTag(self, self.tagnano, self.tagflat)
 
       nanoName_flat   = 'flat/flat_bparknano.root' if self.tagnano == None and self.tagflat == None else 'flat/flat_bparknano_{}.root'.format(tag)
       mergedName_flat = 'flat_bparknano.root' if self.tagnano == None and self.tagflat == None else 'flat_bparknano_{}.root'.format(tag)
