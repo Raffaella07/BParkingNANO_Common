@@ -71,9 +71,6 @@ class NanoLauncher(NanoTools):
     self.doquick     = vars(opt)["doquick"]
     self.docompile   = vars(opt)["docompile"]
 
-    if self.donano and self.doflat:
-      self.tagflat = self.tagnano
-
 
   def compile(self):
     import subprocess
@@ -140,7 +137,7 @@ class NanoLauncher(NanoTools):
     for iFile in range(1, nfiles+1):
       file_step = NanoTools.getStep(self, lines[iFile-1]) if self.mcprivate else iFile
       #file_step = iFile
-      run_chain.append('  c->Add("{}/{}_nj{}.root");'.format(outputdir, nanoname, file_step))
+      run_chain.append('  c_run->Add("{}/{}_nj{}.root");'.format(outputdir, nanoname, file_step))
     run_chain.append('  c_run->Process("NanoRunDumper.C+", outFileName);')
     run_chain = '\n'.join(run_chain)
 
@@ -170,7 +167,7 @@ class NanoLauncher(NanoTools):
         )
 
     if self.tagnano != None: command += ' --tagnano {}'.format(self.tagnano)
-    if self.tagflat != None: command += ' --tagflat {}'.format(self.tagflat if self.donano==None else self.tagnano+'_'+self.tagflat)
+    if self.tagflat != None: command += ' --tagflat {}'.format(self.tagflat)
     if filetype == 'nano': command += ' --donano' 
     else: command += ' --doflat'
     
@@ -239,6 +236,14 @@ class NanoLauncher(NanoTools):
 
   def launchDumper(self, nfiles, outputdir, logdir, filelist, label, jobId):
     self.writeDumperStarter(nfiles, outputdir, filelist, label)
+    if self.tagnano == None and self.tagflat == None:
+      tag = 0
+    elif self.tagnano != None and self.tagflat == None:
+      tag = self.tagnano
+    elif self.tagnano == None and self.tagflat != None:
+      tag = self.tagflat
+    else:
+      tag = self.tagnano + '_' + self.tagflat
 
     if not self.doquick:
       slurm_options = '-p wn --account=t3 -o {ld}/dumperstep.log -e {ld}/dumperstep.log --job-name=dumperstep_{pl} --time=3:00:00 {dp}'.format(
@@ -258,7 +263,7 @@ class NanoLauncher(NanoTools):
       pl      = label,
       outdir  = outputdir,
       usr     = os.environ["USER"], 
-      tag     = 0 if self.tagflat == None else (self.tagflat if self.tagnano==None else self.tagnano+'_'+self.tagflat),
+      tag     = tag,
       isMC    = 1 if self.mcprivate or self.mccentral else 0,
       )
 
@@ -318,7 +323,7 @@ class NanoLauncher(NanoTools):
 
     # loop on the files (containing at most 750 samples) 
     for iFile, filelist in enumerate(glob.glob('{}*.txt'.format(filelistname))):
-      if NanoTools.getNFiles(self, filelist) == 0 and self.donano:
+      if NanoTools.getNFiles(self, filelist) == 0:
         print '        WARNING: no files were found with the corresponding production label'
         print '                 Did you set the correct username using --user <username>?'
 
@@ -351,10 +356,16 @@ class NanoLauncher(NanoTools):
       print '\n  --> Creating log directory'
       label1 = self.prodlabel if self.mcprivate else ds_label
       label2 = point if self.mcprivate else self.prodlabel
-      if self.donano: tag = self.tagnano
-      else: tag = self.tagflat if self.tagnano==None else self.tagnano+'_'+self.tagflat
+      if self.tagnano == None and self.tagflat == None:
+        tag = 0
+      elif self.tagnano != None and self.tagflat == None:
+        tag = self.tagnano
+      elif self.tagnano == None and self.tagflat != None:
+        tag = self.tagflat
+      else:
+        tag = self.tagnano + '_' + self.tagflat
 
-      logdir = './logs/{}/{}/Chunk{}_n{}'.format(label1, label2, iFile, nfiles) if tag == None \
+      logdir = './logs/{}/{}/Chunk{}_n{}'.format(label1, label2, iFile, nfiles) if tag == 0 \
                else './logs/{}/{}_{}/Chunk{}_n{}'.format(label1, label2, tag, iFile, nfiles)
       if not path.exists(logdir):
         os.system('mkdir -p {}'.format(logdir))
