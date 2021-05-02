@@ -19,6 +19,7 @@
 #include "DataFormats/PatCandidates/interface/CompositeCandidate.h"
 #include "DataFormats/PatCandidates/interface/Muon.h"
 #include "DataFormats/Math/interface/deltaR.h"
+#include "DataFormats/Math/interface/deltaPhi.h"
 #include "CommonTools/Statistics/interface/ChiSquaredProbability.h"
 #include "helper.h"
 #include <limits>
@@ -263,10 +264,10 @@ void BToMuLPiBuilder<Lepton>::produce(edm::StreamID, edm::Event &evt, edm::Event
         b_cand.addUserFloat("hnl_vtx_ex"             , sqrt(fitter.fitted_vtx_uncertainty().cxx())                             );
         b_cand.addUserFloat("hnl_vtx_ey"             , sqrt(fitter.fitted_vtx_uncertainty().cyy())                             );
         b_cand.addUserFloat("hnl_vtx_ez"             , sqrt(fitter.fitted_vtx_uncertainty().czz())                             );
-        b_cand.addUserFloat("hnl_fitted_lep_pt"       , fitter.daughter_p4(0).pt()                                             ); 
-        b_cand.addUserFloat("hnl_fitted_lep_eta"      , fitter.daughter_p4(0).eta()                                            );
-        b_cand.addUserFloat("hnl_fitted_lep_phi"      , fitter.daughter_p4(0).phi()                                            );
-        b_cand.addUserFloat("hnl_fitted_lep_mass"     , fitter.daughter_p4(0).mass()                                           );
+        b_cand.addUserFloat("hnl_fitted_lep_pt"      , fitter.daughter_p4(0).pt()                                              ); 
+        b_cand.addUserFloat("hnl_fitted_lep_eta"     , fitter.daughter_p4(0).eta()                                             );
+        b_cand.addUserFloat("hnl_fitted_lep_phi"     , fitter.daughter_p4(0).phi()                                             );
+        b_cand.addUserFloat("hnl_fitted_lep_mass"    , fitter.daughter_p4(0).mass()                                            );
         b_cand.addUserFloat("hnl_fitted_pi_pt"       , fitter.daughter_p4(1).pt()                                              ); 
         b_cand.addUserFloat("hnl_fitted_pi_eta"      , fitter.daughter_p4(1).eta()                                             );
         b_cand.addUserFloat("hnl_fitted_pi_phi"      , fitter.daughter_p4(1).phi()                                             );
@@ -297,18 +298,56 @@ void BToMuLPiBuilder<Lepton>::produce(edm::StreamID, edm::Event &evt, edm::Event
           float sel_muon_isMedium = lep_ptr->isMediumMuon()                             ? 1. : 0. ;
           float sel_muon_isLoose  = lep_ptr->isLooseMuon ()                             ? 1. : 0. ;
 
-          b_cand.addUserFloat("sel_muon_isSoft"       , sel_muon_isSoft                            );
-          b_cand.addUserFloat("sel_muon_isTight"      , sel_muon_isTight                           );
-          b_cand.addUserFloat("sel_muon_isMedium"     , sel_muon_isMedium                          );
-          b_cand.addUserFloat("sel_muon_isLoose"      , sel_muon_isLoose                           );
+          b_cand.addUserFloat("sel_muon_isSoft"       , sel_muon_isSoft      );
+          b_cand.addUserFloat("sel_muon_isTight"      , sel_muon_isTight     );
+          b_cand.addUserFloat("sel_muon_isMedium"     , sel_muon_isMedium    );
+          b_cand.addUserFloat("sel_muon_isLoose"      , sel_muon_isLoose     );
         }
 
         
         // adding dR quantities (with fitted quantities)
-        float dR_lep_pi = reco::deltaR(fitter.daughter_p4(0), fitter.daughter_p4(1)); 
-        float dR_trgmu_hnl = reco::deltaR((*trg_mu_ptr), hnl_cand); 
-        b_cand.addUserFloat("dr_lep_pi"              , dR_lep_pi                                 );
-        b_cand.addUserFloat("dr_trgmu_hnl"          , dR_trgmu_hnl                               );
+        float dR_lep_pi    = reco::deltaR(fitter.daughter_p4(0), fitter.daughter_p4(1)); 
+        float dR_trgmu_hnl = reco::deltaR((*trg_mu_ptr), hnl_cand                     ); 
+        float dR_trgmu_lep = reco::deltaR((*trg_mu_ptr), fitter.daughter_p4(0)        ); 
+        float dR_trgmu_pi  = reco::deltaR((*trg_mu_ptr), fitter.daughter_p4(1)        ); 
+        b_cand.addUserFloat("dr_lep_pi"      , dR_lep_pi    );
+        b_cand.addUserFloat("dr_trgmu_hnl"   , dR_trgmu_hnl );
+        b_cand.addUserFloat("dr_trgmu_lep"   , dR_trgmu_lep  );
+        b_cand.addUserFloat("dr_trgmu_pi"    , dR_trgmu_pi  );
+
+        float dPhi_lep_pi    = reco::deltaPhi(fitter.daughter_p4(0).phi(), fitter.daughter_p4(1).phi()); 
+        float dPhi_trgmu_hnl = reco::deltaPhi(trg_mu_ptr->phi(), fit_p4.phi()); 
+        float dPhi_trgmu_lep = reco::deltaPhi(trg_mu_ptr->phi(), fitter.daughter_p4(0).phi()); 
+        float dPhi_trgmu_pi  = reco::deltaPhi(trg_mu_ptr->phi(), fitter.daughter_p4(1).phi()); 
+        b_cand.addUserFloat("dphi_lep_pi"      , dPhi_lep_pi    );
+        b_cand.addUserFloat("dphi_trgmu_hnl"   , dPhi_trgmu_hnl );
+        b_cand.addUserFloat("dphi_trgmu_lep"   , dPhi_trgmu_lep );
+        b_cand.addUserFloat("dphi_trgmu_pi"    , dPhi_trgmu_pi  );
+
+        float dEta_lep_pi    = fitter.daughter_p4(0).eta() - fitter.daughter_p4(1).phi(); 
+        float dEta_trgmu_hnl = trg_mu_ptr->eta() - fit_p4.eta(); 
+        float dEta_trgmu_lep = trg_mu_ptr->eta() - fitter.daughter_p4(0).eta();
+        float dEta_trgmu_pi  = trg_mu_ptr->eta() - fitter.daughter_p4(1).eta();
+        b_cand.addUserFloat("deta_lep_pi"      , dEta_lep_pi    );
+        b_cand.addUserFloat("deta_trgmu_hnl"   , dEta_trgmu_hnl );
+        b_cand.addUserFloat("deta_trgmu_lep"   , dEta_trgmu_lep );
+        b_cand.addUserFloat("deta_trgmu_pi"    , dEta_trgmu_pi  );
+
+        // difference of the kinematics of the objects and their fitted value
+        float dPt_pi_fit_pi   = pi_ptr->pt() - fitter.daughter_p4(1).pt(); 
+        float dPt_lep_fit_lep = lep_ptr->pt() - fitter.daughter_p4(0).pt(); 
+        b_cand.addUserFloat("dpt_pi_fit_pi"   , dPt_pi_fit_pi    );
+        b_cand.addUserFloat("dpt_lep_fit_lep" , dPt_lep_fit_lep  );
+
+        float dEta_pi_fit_pi   = pi_ptr->eta() - fitter.daughter_p4(1).eta(); 
+        float dEta_lep_fit_lep = lep_ptr->eta() - fitter.daughter_p4(0).eta(); 
+        b_cand.addUserFloat("deta_pi_fit_pi"   , dEta_pi_fit_pi    );
+        b_cand.addUserFloat("deta_lep_fit_lep" , dEta_lep_fit_lep  );
+
+        float dPhi_pi_fit_pi = reco::deltaPhi(pi_ptr->phi(), fitter.daughter_p4(1).phi()); 
+        float dPhi_lep_fit_lep = reco::deltaPhi(lep_ptr->phi(), fitter.daughter_p4(0).phi()); 
+        b_cand.addUserFloat("dphi_pi_fit_pi"   , dPhi_pi_fit_pi    );
+        b_cand.addUserFloat("dphi_lep_fit_lep" , dPhi_lep_fit_lep  );
 
 
         // impact parameter variables (with pre-fit quantities)
@@ -352,6 +391,14 @@ void BToMuLPiBuilder<Lepton>::produce(edm::StreamID, edm::Event &evt, edm::Event
         float pi_iso04_close  = 0;
         float hnl_iso03_close = 0;
         float hnl_iso04_close = 0;
+        float lep_iso03_rel_close = 0;
+        float lep_iso04_rel_close = 0;
+        float trg_mu_iso03_rel_close = 0; 
+        float trg_mu_iso04_rel_close = 0;
+        float pi_iso03_rel_close  = 0; 
+        float pi_iso04_rel_close  = 0;
+        float hnl_iso03_rel_close = 0;
+        float hnl_iso04_rel_close = 0;
         
         // nTracks     = iso_tracks->size();
         // totalTracks = nTracks + iso_lostTracks->size();
@@ -417,12 +464,14 @@ void BToMuLPiBuilder<Lepton>::produce(edm::StreamID, edm::Event &evt, edm::Event
           }
         }
 
-        //trg_mu_iso03 /= trg_mu_ptr->pt();
-        //trg_mu_iso04 /= trg_mu_ptr->pt();
-        //sel_mu_iso03 /= fitter.daughter_p4(0).pt();
-        //sel_mu_iso04 /= fitter.daughter_p4(0).pt();
-        //pi_iso03 /= fitter.daughter_p4(1).pt();
-        //pi_iso04 /= fitter.daughter_p4(1).pt();
+        trg_mu_iso03_rel_close = trg_mu_iso03_close / trg_mu_ptr->pt();
+        trg_mu_iso04_rel_close = trg_mu_iso04_close / trg_mu_ptr->pt();
+        lep_iso03_rel_close = lep_iso03_close / lep_ptr->pt();
+        lep_iso04_rel_close = lep_iso04_close / lep_ptr->pt();
+        pi_iso03_rel_close = pi_iso03_close / pi_ptr->pt();
+        pi_iso04_rel_close = pi_iso04_close / pi_ptr->pt();
+        hnl_iso03_rel_close = hnl_iso03_close / fit_p4.pt();
+        hnl_iso04_rel_close = hnl_iso04_close / fit_p4.pt();
 
         b_cand.addUserFloat("trg_mu_iso03", trg_mu_iso03);
         b_cand.addUserFloat("trg_mu_iso04", trg_mu_iso04);
@@ -442,6 +491,14 @@ void BToMuLPiBuilder<Lepton>::produce(edm::StreamID, edm::Event &evt, edm::Event
         b_cand.addUserFloat("pi_iso04_close", pi_iso04_close);
         b_cand.addUserFloat("hnl_iso03_close", hnl_iso03_close);
         b_cand.addUserFloat("hnl_iso04_close", hnl_iso04_close);
+        b_cand.addUserFloat("trg_mu_iso03_rel_close", trg_mu_iso03_rel_close);
+        b_cand.addUserFloat("trg_mu_iso04_rel_close", trg_mu_iso04_rel_close);
+        b_cand.addUserFloat("sel_mu_iso03_rel_close", lep_iso03_rel_close);
+        b_cand.addUserFloat("sel_mu_iso04_rel_close", lep_iso04_rel_close);
+        b_cand.addUserFloat("pi_iso03_rel_close", pi_iso03_rel_close);
+        b_cand.addUserFloat("pi_iso04_rel_close", pi_iso04_rel_close);
+        b_cand.addUserFloat("hnl_iso03_rel_close", hnl_iso03_rel_close);
+        b_cand.addUserFloat("hnl_iso04_rel_close", hnl_iso04_rel_close);
         
 
         // position of the muons / tracks in their own collections
@@ -450,12 +507,16 @@ void BToMuLPiBuilder<Lepton>::produce(edm::StreamID, edm::Event &evt, edm::Event
         b_cand.addUserInt("pi_idx"    , pi_idx    );
 
 
-        // di-lepton (for control channel)
+        // invariant masses
         float dilepton_mass = (fitter.daughter_p4(0) + trg_mu_ptr->p4()).mass();
+        float trgmu_pi_mass = (fitter.daughter_p4(1) + trg_mu_ptr->p4()).mass();
         b_cand.addUserFloat("dilepton_mass", dilepton_mass);
+        b_cand.addUserFloat("trgmu_pi_mass", trgmu_pi_mass);
 
         float dilepton_pt = (fitter.daughter_p4(0) + trg_mu_ptr->p4()).pt();
+        float trgmu_pi_pt = (fitter.daughter_p4(1) + trg_mu_ptr->p4()).pt();
         b_cand.addUserFloat("dilepton_pt", dilepton_pt);
+        b_cand.addUserFloat("trgmu_pi_pt", trgmu_pi_pt);
 
 
         // post fit selection
