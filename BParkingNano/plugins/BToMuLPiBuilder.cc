@@ -324,7 +324,7 @@ void BToMuLPiBuilder<Lepton>::produce(edm::StreamID, edm::Event &evt, edm::Event
         b_cand.addUserFloat("dphi_trgmu_lep"   , dPhi_trgmu_lep );
         b_cand.addUserFloat("dphi_trgmu_pi"    , dPhi_trgmu_pi  );
 
-        float dEta_lep_pi    = fitter.daughter_p4(0).eta() - fitter.daughter_p4(1).phi(); 
+        float dEta_lep_pi    = fitter.daughter_p4(0).eta() - fitter.daughter_p4(1).eta(); 
         float dEta_trgmu_hnl = trg_mu_ptr->eta() - fit_p4.eta(); 
         float dEta_trgmu_lep = trg_mu_ptr->eta() - fitter.daughter_p4(0).eta();
         float dEta_trgmu_pi  = trg_mu_ptr->eta() - fitter.daughter_p4(1).eta();
