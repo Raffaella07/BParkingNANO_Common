@@ -108,5 +108,6 @@ class NanoTools(object):
       tag = tagflat
     else:
       tag = tagnano + '_' + tagflat
+    return tag
     
 

@@ -252,7 +252,11 @@ class NanoProdManager(NanoTools):
             filelist = chunk_ + '/filelist_' + self.prodlabel + '_' + point + '_' + chunk_[chunk_.find('Chunk'):] + '.txt'
           else:
             filelist = chunk_ + '/filelist_' + self.prodlabel + '_' + point + '_' + self.tag + '_' + chunk_[chunk_.find('Chunk'):] + '.txt'
-          f = open(filelist)
+          try: f = open(filelist)
+          except:
+            print ' -> no files found in this chunk'
+            print ' --> skipping'
+            continue
           lines = f.readlines()
 
           files = [chunk_+'/bparknano_{}_nj'.format(self.tag) +str(NanoTools.getStep(self, lines[nj-1]))+'.root' for nj in range(1, n_exp+1)]
