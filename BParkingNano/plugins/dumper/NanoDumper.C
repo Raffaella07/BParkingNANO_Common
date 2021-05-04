@@ -162,10 +162,12 @@ void NanoDumper::SlaveBegin(TTree * /*tree*/)
   control_tree->Branch("l2_istriggering", &the_ctrl_l2_istriggering);
 
   control_tree->Branch("dimu_mass", &the_ctrl_dimu_mass);
+
   control_tree->Branch("sv_x", &the_ctrl_sv_x);
   control_tree->Branch("sv_y", &the_ctrl_sv_y);
   control_tree->Branch("sv_z", &the_ctrl_sv_z);
   control_tree->Branch("sv_lxy", &the_ctrl_sv_lxy);
+  control_tree->Branch("sv_lxysig", &the_ctrl_sv_lxysig);
   control_tree->Branch("sv_prob", &the_ctrl_sv_prob);
 
   control_tree->Branch("ismatched", &the_ctrl_ismatched);
@@ -206,40 +208,111 @@ void NanoDumper::SlaveBegin(TTree * /*tree*/)
   signal_tree->Branch("hnl_cos2d", &the_sig_hnl_cos2d);
   signal_tree->Branch("hnl_iso03", &the_sig_hnl_iso03);
   signal_tree->Branch("hnl_iso03_close", &the_sig_hnl_iso03_close);
+  signal_tree->Branch("hnl_iso03_rel_close", &the_sig_hnl_iso03_rel_close);
   signal_tree->Branch("hnl_iso04", &the_sig_hnl_iso04);
   signal_tree->Branch("hnl_iso04_close", &the_sig_hnl_iso04_close);
+  signal_tree->Branch("hnl_iso04_rel_close", &the_sig_hnl_iso04_rel_close);
 
   signal_tree->Branch("trgmu_pt", &the_sig_trgmu_pt);
   signal_tree->Branch("trgmu_eta", &the_sig_trgmu_eta);
   signal_tree->Branch("trgmu_phi", &the_sig_trgmu_phi);
   signal_tree->Branch("trgmu_charge", &the_sig_trgmu_charge);
   signal_tree->Branch("trgmu_dxy", &the_sig_trgmu_dxy);
+  signal_tree->Branch("trgmu_dxysig", &the_sig_trgmu_dxysig);
   signal_tree->Branch("trgmu_dz", &the_sig_trgmu_dz);
+  signal_tree->Branch("trgmu_dzsig", &the_sig_trgmu_dzsig);
   signal_tree->Branch("trgmu_ip3d", &the_sig_trgmu_ip3d);
   signal_tree->Branch("trgmu_ip3dsig", &the_sig_trgmu_ip3dsig);
+  signal_tree->Branch("trgmu_pfiso03", &the_sig_trgmu_pfiso03);
+  signal_tree->Branch("trgmu_pfiso03_rel", &the_sig_trgmu_pfiso03_rel);
   signal_tree->Branch("trgmu_iso03", &the_sig_trgmu_iso03);
   signal_tree->Branch("trgmu_iso03_close", &the_sig_trgmu_iso03_close);
+  signal_tree->Branch("trgmu_iso03_rel_close", &the_sig_trgmu_iso03_rel_close);
+  signal_tree->Branch("trgmu_pfiso04", &the_sig_trgmu_pfiso04);
+  signal_tree->Branch("trgmu_pfiso04_rel", &the_sig_trgmu_pfiso04_rel);
   signal_tree->Branch("trgmu_iso04", &the_sig_trgmu_iso04);
   signal_tree->Branch("trgmu_iso04_close", &the_sig_trgmu_iso04_close);
+  signal_tree->Branch("trgmu_iso04_rel_close", &the_sig_trgmu_iso04_rel_close);
+  signal_tree->Branch("trgmu_looseid", &the_sig_trgmu_looseid);
+  signal_tree->Branch("trgmu_mediumid", &the_sig_trgmu_mediumid);
+  signal_tree->Branch("trgmu_tightid", &the_sig_trgmu_tightid);
+  signal_tree->Branch("trgmu_softid", &the_sig_trgmu_softid);
+  signal_tree->Branch("trgmu_pfisoid", &the_sig_trgmu_pfisoid);
+  signal_tree->Branch("trgmu_trkisoid", &the_sig_trgmu_trkisoid);
+  signal_tree->Branch("trgmu_triggerlooseid", &the_sig_trgmu_triggerlooseid);
   signal_tree->Branch("trgmu_istriggering", &the_sig_trgmu_istriggering);
+  signal_tree->Branch("trgmu_isPF", &the_sig_trgmu_isPF);
+  signal_tree->Branch("trgmu_isglobalmuon", &the_sig_trgmu_isglobalmuon);
+  signal_tree->Branch("trgmu_istrackermuon", &the_sig_trgmu_istrackermuon);
+  signal_tree->Branch("trgmu_isglobalortrackermuon", &the_sig_trgmu_isglobalortrackermuon);
+  signal_tree->Branch("trgmu_isglobalnottrackermuon", &the_sig_trgmu_isglobalnottrackermuon);
+  signal_tree->Branch("trgmu_istrackernotglobalmuon", &the_sig_trgmu_istrackernotglobalmuon);
+  signal_tree->Branch("trgmu_intimemuon", &the_sig_trgmu_intimemuon);
+  signal_tree->Branch("trgmu_segmentcompatibility", &the_sig_trgmu_segmentcompatibility);
+  signal_tree->Branch("trgmu_calocompatibility", &the_sig_trgmu_calocompatibility);
+  signal_tree->Branch("trgmu_validhitfraction", &the_sig_trgmu_validhitfraction);
+  signal_tree->Branch("trgmu_kinkfinderchi2", &the_sig_trgmu_kinkfinderchi2);
+  signal_tree->Branch("trgmu_globalnormalisedchi2", &the_sig_trgmu_globalnormalisedchi2);
+  signal_tree->Branch("trgmu_localpositionchi2", &the_sig_trgmu_localpositionchi2);
+  signal_tree->Branch("trgmu_trackerhighpurityflag", &the_sig_trgmu_trackerhighpurityflag);
+  signal_tree->Branch("trgmu_numberofvalidmuonhits", &the_sig_trgmu_numberofvalidmuonhits);
+  signal_tree->Branch("trgmu_numberofvalidpixelhits", &the_sig_trgmu_numberofvalidpixelhits);
+  signal_tree->Branch("trgmu_numberoftrackerlayers", &the_sig_trgmu_numberoftrackerlayers);
+  signal_tree->Branch("trgmu_numberofpixellayers", &the_sig_trgmu_numberofpixellayers);
+  signal_tree->Branch("trgmu_numberofstations", &the_sig_trgmu_numberofstations);
 
   signal_tree->Branch("mu_pt", &the_sig_mu_pt);
   signal_tree->Branch("mu_eta", &the_sig_mu_eta);
   signal_tree->Branch("mu_phi", &the_sig_mu_phi);
   signal_tree->Branch("mu_charge", &the_sig_mu_charge);
   signal_tree->Branch("mu_dxy", &the_sig_mu_dxy);
+  signal_tree->Branch("mu_dxysig", &the_sig_mu_dxysig);
   signal_tree->Branch("mu_dz", &the_sig_mu_dz);
+  signal_tree->Branch("mu_dzsig", &the_sig_mu_dzsig);
   signal_tree->Branch("mu_ip3d", &the_sig_mu_ip3d);
   signal_tree->Branch("mu_ip3dsig", &the_sig_mu_ip3dsig);
+  signal_tree->Branch("mu_pfiso03", &the_sig_mu_pfiso03);
+  signal_tree->Branch("mu_pfiso03_rel", &the_sig_mu_pfiso03_rel);
   signal_tree->Branch("mu_iso03", &the_sig_mu_iso03);
   signal_tree->Branch("mu_iso03_close", &the_sig_mu_iso03_close);
+  signal_tree->Branch("mu_iso03_rel_close", &the_sig_mu_iso03_rel_close);
+  signal_tree->Branch("mu_pfiso04", &the_sig_mu_pfiso04);
+  signal_tree->Branch("mu_pfiso04_rel", &the_sig_mu_pfiso04_rel);
   signal_tree->Branch("mu_iso04", &the_sig_mu_iso04);
   signal_tree->Branch("mu_iso04_close", &the_sig_mu_iso04_close);
-  signal_tree->Branch("mu_isloose", &the_sig_mu_isloose);
-  signal_tree->Branch("mu_ismedium", &the_sig_mu_ismedium);
-  signal_tree->Branch("mu_istight", &the_sig_mu_istight);
-  signal_tree->Branch("mu_issoft", &the_sig_mu_issoft);
+  signal_tree->Branch("mu_iso04_rel_close", &the_sig_mu_iso04_rel_close);
+  //signal_tree->Branch("mu_isloose", &the_sig_mu_isloose);
+  //signal_tree->Branch("mu_ismedium", &the_sig_mu_ismedium);
+  //signal_tree->Branch("mu_istight", &the_sig_mu_istight);
+  //signal_tree->Branch("mu_issoft", &the_sig_mu_issoft);
+  //signal_tree->Branch("mu_istriggering", &the_sig_mu_istriggering);
+  signal_tree->Branch("mu_looseid", &the_sig_mu_looseid);
+  signal_tree->Branch("mu_mediumid", &the_sig_mu_mediumid);
+  signal_tree->Branch("mu_tightid", &the_sig_mu_tightid);
+  signal_tree->Branch("mu_softid", &the_sig_mu_softid);
+  signal_tree->Branch("mu_pfisoid", &the_sig_mu_pfisoid);
+  signal_tree->Branch("mu_trkisoid", &the_sig_mu_trkisoid);
+  signal_tree->Branch("mu_triggerlooseid", &the_sig_mu_triggerlooseid);
   signal_tree->Branch("mu_istriggering", &the_sig_mu_istriggering);
+  signal_tree->Branch("mu_isPF", &the_sig_mu_isPF);
+  signal_tree->Branch("mu_isglobalmuon", &the_sig_mu_isglobalmuon);
+  signal_tree->Branch("mu_istrackermuon", &the_sig_mu_istrackermuon);
+  signal_tree->Branch("mu_isglobalortrackermuon", &the_sig_mu_isglobalortrackermuon);
+  signal_tree->Branch("mu_isglobalnottrackermuon", &the_sig_mu_isglobalnottrackermuon);
+  signal_tree->Branch("mu_istrackernotglobalmuon", &the_sig_mu_istrackernotglobalmuon);
+  signal_tree->Branch("mu_intimemuon", &the_sig_mu_intimemuon);
+  signal_tree->Branch("mu_segmentcompatibility", &the_sig_mu_segmentcompatibility);
+  signal_tree->Branch("mu_calocompatibility", &the_sig_mu_calocompatibility);
+  signal_tree->Branch("mu_validhitfraction", &the_sig_mu_validhitfraction);
+  signal_tree->Branch("mu_kinkfinderchi2", &the_sig_mu_kinkfinderchi2);
+  signal_tree->Branch("mu_globalnormalisedchi2", &the_sig_mu_globalnormalisedchi2);
+  signal_tree->Branch("mu_localpositionchi2", &the_sig_mu_localpositionchi2);
+  signal_tree->Branch("mu_trackerhighpurityflag", &the_sig_mu_trackerhighpurityflag);
+  signal_tree->Branch("mu_numberofvalidmuonhits", &the_sig_mu_numberofvalidmuonhits);
+  signal_tree->Branch("mu_numberofvalidpixelhits", &the_sig_mu_numberofvalidpixelhits);
+  signal_tree->Branch("mu_numberoftrackerlayers", &the_sig_mu_numberoftrackerlayers);
+  signal_tree->Branch("mu_numberofpixellayers", &the_sig_mu_numberofpixellayers);
+  signal_tree->Branch("mu_numberofstations", &the_sig_mu_numberofstations);
 
   signal_tree->Branch("pi_pt", &the_sig_pi_pt);
   signal_tree->Branch("pi_eta", &the_sig_pi_eta);
@@ -252,11 +325,17 @@ void NanoDumper::SlaveBegin(TTree * /*tree*/)
   signal_tree->Branch("pi_dzsig", &the_sig_pi_dzsig);
   signal_tree->Branch("pi_iso03", &the_sig_pi_iso03);
   signal_tree->Branch("pi_iso03_close", &the_sig_pi_iso03_close);
+  signal_tree->Branch("pi_iso03_rel_close", &the_sig_pi_iso03_rel_close);
   signal_tree->Branch("pi_iso04", &the_sig_pi_iso04);
   signal_tree->Branch("pi_iso04_close", &the_sig_pi_iso04_close);
+  signal_tree->Branch("pi_iso04_rel_close", &the_sig_pi_iso04_rel_close);
 
-  signal_tree->Branch("dimu_mass", &the_sig_dimu_mass);
-  signal_tree->Branch("dimu_pt", &the_sig_dimu_pt);
+  //signal_tree->Branch("dimu_mass", &the_sig_dimu_mass);
+  //signal_tree->Branch("dimu_pt", &the_sig_dimu_pt);
+  signal_tree->Branch("trgmu_mu_mass", &the_sig_trgmu_mu_mass);
+  signal_tree->Branch("trgmu_mu_pt", &the_sig_trgmu_mu_pt);
+  signal_tree->Branch("trgmu_pi_mass", &the_sig_trgmu_pi_mass);
+  signal_tree->Branch("trgmu_pi_pt", &the_sig_trgmu_pi_pt);
   signal_tree->Branch("dimu_lxy", &the_sig_dimu_lxy);
   signal_tree->Branch("dimu_lxyz", &the_sig_dimu_lxyz);
   signal_tree->Branch("dimu_vxdiff", &the_sig_dimu_vxdiff);
@@ -265,6 +344,23 @@ void NanoDumper::SlaveBegin(TTree * /*tree*/)
 
   signal_tree->Branch("deltar_mu_pi", &the_sig_deltar_mu_pi);
   signal_tree->Branch("deltar_trgmu_hnl", &the_sig_deltar_trgmu_hnl);
+  signal_tree->Branch("deltar_trgmu_mu", &the_sig_deltar_trgmu_mu);
+  signal_tree->Branch("deltar_trgmu_pi", &the_sig_deltar_trgmu_pi);
+  signal_tree->Branch("deltaeta_mu_pi", &the_sig_deltaeta_mu_pi);
+  signal_tree->Branch("deltaeta_trgmu_mu", &the_sig_deltaeta_trgmu_mu);
+  signal_tree->Branch("deltaeta_trgmu_pi", &the_sig_deltaeta_trgmu_pi);
+  signal_tree->Branch("deltaeta_trgmu_hnl", &the_sig_deltaeta_trgmu_hnl);
+  signal_tree->Branch("deltaphi_mu_pi", &the_sig_deltaphi_mu_pi);
+  signal_tree->Branch("deltaphi_trgmu_mu", &the_sig_deltaphi_trgmu_mu);
+  signal_tree->Branch("deltaphi_trgmu_pi", &the_sig_deltaphi_trgmu_pi);
+  signal_tree->Branch("deltaphi_trgmu_hnl", &the_sig_deltaphi_trgmu_hnl);
+  signal_tree->Branch("deltapt_pi_fit_pi", &the_sig_deltapt_pi_fit_pi);
+  signal_tree->Branch("deltapt_mu_fit_mu", &the_sig_deltapt_mu_fit_mu);
+  signal_tree->Branch("deltaeta_pi_fit_pi", &the_sig_deltaeta_pi_fit_pi);
+  signal_tree->Branch("deltaeta_mu_fit_mu", &the_sig_deltaeta_mu_fit_mu);
+  signal_tree->Branch("deltaphi_pi_fit_pi", &the_sig_deltaphi_pi_fit_pi);
+  signal_tree->Branch("deltaphi_mu_fit_mu", &the_sig_deltaphi_mu_fit_mu);
+
   signal_tree->Branch("sv_chi2", &the_sig_sv_chi2);
   signal_tree->Branch("sv_lxy", &the_sig_sv_lxy);
   signal_tree->Branch("sv_pv_lxy", &the_sig_sv_pv_lxy);
@@ -278,6 +374,9 @@ void NanoDumper::SlaveBegin(TTree * /*tree*/)
   signal_tree->Branch("pi_mu_vzdiff", &the_sig_pi_mu_vzdiff);
 
   signal_tree->Branch("ismatched", &the_sig_ismatched);
+  signal_tree->Branch("trgmu_ismatched", &the_sig_trgmu_ismatched);
+  signal_tree->Branch("mu_ismatched", &the_sig_mu_ismatched);
+  signal_tree->Branch("pi_ismatched", &the_sig_pi_ismatched);
   
   if(isMC){
     signal_tree->Branch("gen_trgmu_mu_lxy", &the_gen_trgmu_mu_lxy);
@@ -459,6 +558,7 @@ Bool_t NanoDumper::Process(Long64_t entry)
       the_ctrl_sv_y = BToKMuMu_vtx_x[selectedCandIdx_ctrl];
       the_ctrl_sv_z = BToKMuMu_vtx_x[selectedCandIdx_ctrl];
       the_ctrl_sv_lxy = BToKMuMu_l_xy[selectedCandIdx_ctrl];
+      the_ctrl_sv_lxysig = BToKMuMu_l_xy[selectedCandIdx_ctrl]/BToKMuMu_l_xy_unc[selectedCandIdx_ctrl];
       the_ctrl_sv_prob = BToKMuMu_svprob[selectedCandIdx_ctrl];
 
       the_ctrl_ismatched = BToKMuMu_isMatched[selectedCandIdx_ctrl];
@@ -480,6 +580,7 @@ Bool_t NanoDumper::Process(Long64_t entry)
     // - then privilege OS cand over SS ones
     vector<pair<int,float>> pair_candIdx_desc_cos2d_sig_up = updatePairWithDesc(pair_candIdx_desc_cos2d_sig, BToMuMuPi_hnl_charge);
     sort(pair_candIdx_desc_cos2d_sig_up.begin(), pair_candIdx_desc_cos2d_sig_up.end(), sortcansbydesc_opp);
+    //sort(pair_candIdx_desc_cos2d_sig_up.begin(), pair_candIdx_desc_cos2d_sig_up.end(), sortcansbydesc);
     // - and select the OS cand with the largest cos2d
     UInt_t selectedCandIdx_sig = pair_candIdx_desc_cos2d_sig_up[0].first;
 
@@ -500,8 +601,10 @@ Bool_t NanoDumper::Process(Long64_t entry)
     the_sig_hnl_cos2d = BToMuMuPi_hnl_cos2D[selectedCandIdx_sig];
     the_sig_hnl_iso03 = BToMuMuPi_hnl_iso03[selectedCandIdx_sig];
     the_sig_hnl_iso03_close = BToMuMuPi_hnl_iso03_close[selectedCandIdx_sig];
+    the_sig_hnl_iso03_rel_close = BToMuMuPi_hnl_iso03_rel_close[selectedCandIdx_sig];
     the_sig_hnl_iso04 = BToMuMuPi_hnl_iso04[selectedCandIdx_sig];
     the_sig_hnl_iso04_close = BToMuMuPi_hnl_iso04_close[selectedCandIdx_sig];
+    the_sig_hnl_iso04_rel_close = BToMuMuPi_hnl_iso04_rel_close[selectedCandIdx_sig];
 
     the_sig_trgmu_pt = BToMuMuPi_trg_mu_pt[selectedCandIdx_sig];
     //the_sig_trgmu_pt = Muon_pt[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
@@ -511,32 +614,100 @@ Bool_t NanoDumper::Process(Long64_t entry)
     //the_sig_trgmu_phi = Muon_phi[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
     the_sig_trgmu_charge = Muon_charge[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
     the_sig_trgmu_dxy = BToMuMuPi_trg_mu_dxy[selectedCandIdx_sig];
+    the_sig_trgmu_dxysig = Muon_dxyS[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
     the_sig_trgmu_dz = BToMuMuPi_trg_mu_dz[selectedCandIdx_sig];
+    the_sig_trgmu_dzsig = Muon_dzS[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
     the_sig_trgmu_ip3d = BToMuMuPi_trg_mu_ip3d[selectedCandIdx_sig];
     the_sig_trgmu_ip3dsig = BToMuMuPi_trg_mu_sip3d[selectedCandIdx_sig];
+    the_sig_trgmu_pfiso03 = Muon_pfiso03_all[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
+    the_sig_trgmu_pfiso03_rel = Muon_pfiso03Rel_all[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
     the_sig_trgmu_iso03 = BToMuMuPi_trg_mu_iso03[selectedCandIdx_sig];
     the_sig_trgmu_iso03_close = BToMuMuPi_trg_mu_iso03_close[selectedCandIdx_sig];
+    the_sig_trgmu_iso03_rel_close = BToMuMuPi_trg_mu_iso03_rel_close[selectedCandIdx_sig];
+    the_sig_trgmu_pfiso04 = Muon_pfiso04_all[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
+    the_sig_trgmu_pfiso04_rel = Muon_pfiso04Rel_all[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
     the_sig_trgmu_iso04 = BToMuMuPi_trg_mu_iso04[selectedCandIdx_sig];
     the_sig_trgmu_iso04_close = BToMuMuPi_trg_mu_iso04_close[selectedCandIdx_sig];
+    the_sig_trgmu_iso04_rel_close = BToMuMuPi_trg_mu_iso04_rel_close[selectedCandIdx_sig];
+    the_sig_trgmu_looseid = Muon_looseId[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
+    the_sig_trgmu_mediumid = Muon_mediumId[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
+    the_sig_trgmu_tightid = Muon_tightId[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
+    the_sig_trgmu_softid = Muon_softId[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
+    the_sig_trgmu_pfisoid = Muon_pfIsoId[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
+    the_sig_trgmu_trkisoid = Muon_tkIsoId[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
+    the_sig_trgmu_triggerlooseid = Muon_triggerIdLoose[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
     the_sig_trgmu_istriggering = Muon_isTriggering[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
+    the_sig_trgmu_isPF = Muon_isPF[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
+    the_sig_trgmu_isglobalmuon = Muon_isGlobalMuon[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
+    the_sig_trgmu_istrackermuon = Muon_isTrackerMuon[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
+    the_sig_trgmu_isglobalortrackermuon = Muon_isGlobalOrTrackerMuon[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
+    the_sig_trgmu_isglobalnottrackermuon = Muon_isGlobalNotTrackerMuon[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
+    the_sig_trgmu_istrackernotglobalmuon = Muon_isTrackerNotGlobalMuon[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
+    the_sig_trgmu_intimemuon = Muon_inTimeMuon[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
+    the_sig_trgmu_segmentcompatibility = Muon_segmentCompatibility[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
+    the_sig_trgmu_calocompatibility = Muon_caloCompatibility[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
+    the_sig_trgmu_validhitfraction = Muon_validHitFraction[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
+    the_sig_trgmu_kinkfinderchi2 = Muon_kinkFinderChi2[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
+    the_sig_trgmu_globalnormalisedchi2 = Muon_globalNormalisedChi2[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
+    the_sig_trgmu_localpositionchi2 = Muon_localPositionChi2[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
+    the_sig_trgmu_trackerhighpurityflag = Muon_trackerHighPurityFlag[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
+    the_sig_trgmu_numberofvalidmuonhits = Muon_numberOfValidMuonHits[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
+    the_sig_trgmu_numberofvalidpixelhits = Muon_numberOfValidPixelHits[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
+    the_sig_trgmu_numberoftrackerlayers = Muon_numberOfTrackerLayers[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
+    the_sig_trgmu_numberofpixellayers = Muon_numberOfPixelLayers[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
+    the_sig_trgmu_numberofstations = Muon_numberOfStations[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
 
     the_sig_mu_pt = BToMuMuPi_fit_mu_pt[selectedCandIdx_sig];
     the_sig_mu_eta = BToMuMuPi_fit_mu_eta[selectedCandIdx_sig];
     the_sig_mu_phi = BToMuMuPi_fit_mu_phi[selectedCandIdx_sig]; 
     the_sig_mu_charge = Muon_charge[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
     the_sig_mu_dxy = BToMuMuPi_sel_mu_dxy[selectedCandIdx_sig];
+    the_sig_mu_dxysig = Muon_dxyS[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
     the_sig_mu_dz = BToMuMuPi_sel_mu_dz[selectedCandIdx_sig];
+    the_sig_mu_dzsig = Muon_dz[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
     the_sig_mu_ip3d = BToMuMuPi_sel_mu_ip3d[selectedCandIdx_sig];
     the_sig_mu_ip3dsig = BToMuMuPi_sel_mu_sip3d[selectedCandIdx_sig];
+    the_sig_mu_pfiso03 = Muon_pfiso03_all[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
+    the_sig_mu_pfiso03_rel = Muon_pfiso03Rel_all[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
     the_sig_mu_iso03 = BToMuMuPi_sel_mu_iso03[selectedCandIdx_sig];
     the_sig_mu_iso03_close = BToMuMuPi_sel_mu_iso03_close[selectedCandIdx_sig];
+    the_sig_mu_iso03_rel_close = BToMuMuPi_sel_mu_iso03_rel_close[selectedCandIdx_sig];
+    the_sig_mu_pfiso04 = Muon_pfiso04_all[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
+    the_sig_mu_pfiso04_rel = Muon_pfiso04Rel_all[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
     the_sig_mu_iso04 = BToMuMuPi_sel_mu_iso04[selectedCandIdx_sig];
     the_sig_mu_iso04_close = BToMuMuPi_sel_mu_iso04_close[selectedCandIdx_sig];
-    the_sig_mu_isloose = BToMuMuPi_sel_mu_isLoose[selectedCandIdx_sig];
-    the_sig_mu_ismedium = BToMuMuPi_sel_mu_isMedium[selectedCandIdx_sig];
-    the_sig_mu_istight = BToMuMuPi_sel_mu_isTight[selectedCandIdx_sig];
-    the_sig_mu_issoft = BToMuMuPi_sel_mu_isSoft[selectedCandIdx_sig];
+    the_sig_mu_iso04_rel_close = BToMuMuPi_sel_mu_iso04_rel_close[selectedCandIdx_sig];
+    //the_sig_mu_isloose = BToMuMuPi_sel_mu_isLoose[selectedCandIdx_sig];
+    //the_sig_mu_ismedium = BToMuMuPi_sel_mu_isMedium[selectedCandIdx_sig];
+    //the_sig_mu_istight = BToMuMuPi_sel_mu_isTight[selectedCandIdx_sig];
+    //the_sig_mu_issoft = BToMuMuPi_sel_mu_isSoft[selectedCandIdx_sig];
+    the_sig_mu_looseid = Muon_looseId[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
+    the_sig_mu_mediumid = Muon_mediumId[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
+    the_sig_mu_tightid = Muon_tightId[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
+    the_sig_mu_softid = Muon_softId[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
+    the_sig_mu_pfisoid = Muon_pfIsoId[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
+    the_sig_mu_trkisoid = Muon_tkIsoId[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
+    the_sig_mu_triggerlooseid = Muon_triggerIdLoose[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
     the_sig_mu_istriggering = Muon_isTriggering[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
+    the_sig_mu_isPF = Muon_isPF[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
+    the_sig_mu_isglobalmuon = Muon_isGlobalMuon[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
+    the_sig_mu_istrackermuon = Muon_isTrackerMuon[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
+    the_sig_mu_isglobalortrackermuon = Muon_isGlobalOrTrackerMuon[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
+    the_sig_mu_isglobalnottrackermuon = Muon_isGlobalNotTrackerMuon[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
+    the_sig_mu_istrackernotglobalmuon = Muon_isTrackerNotGlobalMuon[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
+    the_sig_mu_intimemuon = Muon_inTimeMuon[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
+    the_sig_mu_segmentcompatibility = Muon_segmentCompatibility[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
+    the_sig_mu_calocompatibility = Muon_caloCompatibility[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
+    the_sig_mu_validhitfraction = Muon_validHitFraction[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
+    the_sig_mu_kinkfinderchi2 = Muon_kinkFinderChi2[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
+    the_sig_mu_globalnormalisedchi2 = Muon_globalNormalisedChi2[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
+    the_sig_mu_localpositionchi2 = Muon_localPositionChi2[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
+    the_sig_mu_trackerhighpurityflag = Muon_trackerHighPurityFlag[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
+    the_sig_mu_numberofvalidmuonhits = Muon_numberOfValidMuonHits[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
+    the_sig_mu_numberofvalidpixelhits = Muon_numberOfValidPixelHits[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
+    the_sig_mu_numberoftrackerlayers = Muon_numberOfTrackerLayers[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
+    the_sig_mu_numberofpixellayers = Muon_numberOfPixelLayers[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
+    the_sig_mu_numberofstations = Muon_numberOfStations[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
 
     the_sig_pi_pt = BToMuMuPi_fit_pi_pt[selectedCandIdx_sig];
     the_sig_pi_eta = BToMuMuPi_fit_pi_eta[selectedCandIdx_sig];
@@ -549,11 +720,16 @@ Bool_t NanoDumper::Process(Long64_t entry)
     the_sig_pi_dzsig = BToMuMuPi_pi_dzS[selectedCandIdx_sig];
     the_sig_pi_iso03 = BToMuMuPi_pi_iso03[selectedCandIdx_sig];
     the_sig_pi_iso03_close = BToMuMuPi_pi_iso03_close[selectedCandIdx_sig];
+    the_sig_pi_iso03_rel_close = BToMuMuPi_pi_iso03_rel_close[selectedCandIdx_sig];
     the_sig_pi_iso04 = BToMuMuPi_pi_iso04[selectedCandIdx_sig];
     the_sig_pi_iso04_close = BToMuMuPi_pi_iso04_close[selectedCandIdx_sig];
+    the_sig_pi_iso04_rel_close = BToMuMuPi_pi_iso04_rel_close[selectedCandIdx_sig];
 
-    the_sig_dimu_mass = BToMuMuPi_dilepton_mass[selectedCandIdx_sig];
-    the_sig_dimu_pt = BToMuMuPi_dilepton_pt[selectedCandIdx_sig];
+    the_sig_trgmu_mu_mass = BToMuMuPi_trgmu_mu_mass[selectedCandIdx_sig];
+    the_sig_trgmu_mu_pt = BToMuMuPi_trgmu_mu_pt[selectedCandIdx_sig];
+    the_sig_trgmu_pi_mass = BToMuMuPi_trgmu_pi_mass[selectedCandIdx_sig];
+    the_sig_trgmu_pi_pt = BToMuMuPi_trgmu_pi_pt[selectedCandIdx_sig];
+
     the_sig_dimu_lxy = BToMuMuPi_dimu_Lxy[selectedCandIdx_sig];
     the_sig_dimu_lxyz = BToMuMuPi_dimu_Lxyz[selectedCandIdx_sig];
     the_sig_dimu_vxdiff = BToMuMuPi_dimu_vxdiff[selectedCandIdx_sig];
@@ -562,6 +738,24 @@ Bool_t NanoDumper::Process(Long64_t entry)
 
     the_sig_deltar_mu_pi = BToMuMuPi_dr_mu_pi[selectedCandIdx_sig];
     the_sig_deltar_trgmu_hnl = BToMuMuPi_dr_trgmu_hnl[selectedCandIdx_sig];
+    the_sig_deltar_trgmu_mu = BToMuMuPi_dr_trgmu_mu[selectedCandIdx_sig]; 
+    the_sig_deltar_trgmu_pi = BToMuMuPi_dr_trgmu_pi[selectedCandIdx_sig]; 
+    the_sig_deltaeta_mu_pi = BToMuMuPi_deta_mu_pi[selectedCandIdx_sig];
+    the_sig_deltaeta_trgmu_hnl = BToMuMuPi_deta_trgmu_hnl[selectedCandIdx_sig];
+    the_sig_deltaeta_trgmu_mu = BToMuMuPi_deta_trgmu_mu[selectedCandIdx_sig];
+    the_sig_deltaeta_trgmu_pi = BToMuMuPi_deta_trgmu_pi[selectedCandIdx_sig];
+    the_sig_deltaphi_mu_pi = BToMuMuPi_dphi_mu_pi[selectedCandIdx_sig];
+    the_sig_deltaphi_trgmu_hnl = BToMuMuPi_dphi_trgmu_hnl[selectedCandIdx_sig];
+    the_sig_deltaphi_trgmu_mu = BToMuMuPi_dphi_trgmu_mu[selectedCandIdx_sig];
+    the_sig_deltaphi_trgmu_pi = BToMuMuPi_dphi_trgmu_pi[selectedCandIdx_sig];
+    the_sig_deltapt_pi_fit_pi = BToMuMuPi_dpt_pi_fit_pi[selectedCandIdx_sig];
+    the_sig_deltapt_mu_fit_mu = BToMuMuPi_dpt_mu_fit_mu[selectedCandIdx_sig];
+    the_sig_deltaeta_pi_fit_pi = BToMuMuPi_deta_pi_fit_pi[selectedCandIdx_sig];
+    the_sig_deltaeta_mu_fit_mu = BToMuMuPi_deta_mu_fit_mu[selectedCandIdx_sig];
+    the_sig_deltaphi_pi_fit_pi = BToMuMuPi_dphi_pi_fit_pi[selectedCandIdx_sig];
+    the_sig_deltaphi_mu_fit_mu = BToMuMuPi_dphi_mu_fit_mu[selectedCandIdx_sig];
+    //float deltaphi_mu_pi = fabs(BToMuMuPi_fit_mu_phi[selectedCandIdx_sig] - BToMuMuPi_fit_pi_phi[selectedCandIdx_sig]);
+    //the_sig_deltaphi_mu_pi = deltaphi_mu_pi > M_PI ? deltaphi_mu_pi : deltaphi_mu_pi - 2 * M_PI;
 
     the_sig_sv_chi2 = BToMuMuPi_sv_chi2[selectedCandIdx_sig];
     the_sig_sv_lxy = BToMuMuPi_sv_lxy[selectedCandIdx_sig];
@@ -572,6 +766,9 @@ Bool_t NanoDumper::Process(Long64_t entry)
     the_sig_sv_z = BToMuMuPi_sv_z[selectedCandIdx_sig];
 
     the_sig_ismatched = BToMuMuPi_isMatched[selectedCandIdx_sig];
+    the_sig_trgmu_ismatched = BToMuMuPi_trg_mu_isMatched[selectedCandIdx_sig];
+    the_sig_mu_ismatched = BToMuMuPi_sel_mu_isMatched[selectedCandIdx_sig];
+    the_sig_pi_ismatched = BToMuMuPi_pi_isMatched[selectedCandIdx_sig];
 
     // additionnal displacement quantities
     float dist_sv_pv_xy = sqrt((BToMuMuPi_sv_x[selectedCandIdx_sig] - *PV_x) * (BToMuMuPi_sv_x[selectedCandIdx_sig] - *PV_x) + (BToMuMuPi_sv_y[selectedCandIdx_sig] - *PV_y) * (BToMuMuPi_sv_y[selectedCandIdx_sig] - *PV_y));
