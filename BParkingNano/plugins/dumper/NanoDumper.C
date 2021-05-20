@@ -664,7 +664,7 @@ Bool_t NanoDumper::Process(Long64_t entry)
     the_sig_mu_dxy = BToMuMuPi_sel_mu_dxy[selectedCandIdx_sig];
     the_sig_mu_dxysig = Muon_dxyS[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
     the_sig_mu_dz = BToMuMuPi_sel_mu_dz[selectedCandIdx_sig];
-    the_sig_mu_dzsig = Muon_dz[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
+    the_sig_mu_dzsig = Muon_dzS[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
     the_sig_mu_ip3d = BToMuMuPi_sel_mu_ip3d[selectedCandIdx_sig];
     the_sig_mu_ip3dsig = BToMuMuPi_sel_mu_sip3d[selectedCandIdx_sig];
     the_sig_mu_pfiso03 = Muon_pfiso03_all[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
