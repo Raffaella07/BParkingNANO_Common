@@ -57,6 +57,10 @@ class MuonTriggerSelector : public edm::EDProducer {
     edm::EDGetTokenT<std::vector<pat::Muon>> muonSrc_;
     edm::EDGetTokenT<std::vector<reco::Track>> displacedStandaloneMuonSrc_;
 
+    // trigger muon matching
+    const double max_deltaR_;
+    const double max_deltaPtRel_;
+
     //for filter wrt trigger
     const double dzTrg_cleaning_; // selects primary vertex
 
@@ -71,6 +75,8 @@ class MuonTriggerSelector : public edm::EDProducer {
 MuonTriggerSelector::MuonTriggerSelector(const edm::ParameterSet &iConfig):
   muonSrc_( consumes<std::vector<pat::Muon>> ( iConfig.getParameter<edm::InputTag>("muonCollection"))),
   displacedStandaloneMuonSrc_(consumes<std::vector<reco::Track>> (iConfig.getParameter<edm::InputTag>("displacedStandaloneMuonCollection"))),
+  max_deltaR_(iConfig.getParameter<double>("max_deltaR")),
+  max_deltaPtRel_(iConfig.getParameter<double>("max_deltaPtRel")),
   dzTrg_cleaning_(iConfig.getParameter<double>("dzForCleaning_wrtTrgMuon")),
   selmu_ptMin_(iConfig.getParameter<double>("selmu_ptMin")),
   selmu_absEtaMax_(iConfig.getParameter<double>("selmu_absEtaMax")),
@@ -164,7 +170,7 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
                 for(size_t i=0; i<muon.triggerObjectMatches().size();i++){
                   if(debug) std::cout << "muon " << i << " " << cstr << " " <<  muon.triggerObjectMatch(i)->hasPathName(cstr,true,true) << " " << muon.triggerObjectMatch(i)->hasPathName(cstr,false,false) << " " << muon.triggerObjectMatch(i)->hasPathName(cstr,false,true) << " " << muon.triggerObjectMatch(i)->hasPathName(cstr,true,false) << std::endl;
                     // first bool is pathLastFilterAccepted, second is pathL3FilterAccepted
-                    if(muon.triggerObjectMatch(i)!=0 && muon.triggerObjectMatch(i)->hasPathName(cstr,true,true)){
+                    if(muon.triggerObjectMatch(i)!=0 && muon.triggerObjectMatch(i)->hasPathName(cstr,false,false)){
                         //if(abs(muon.triggerObjectMatch(i)->eta())>1.5) std::cout << "eta=" <<muon.triggerObjectMatch(i)->eta();
                         frs[ipath]=1;
                         float dr = reco::deltaR(muon.triggerObjectMatch(i)->p4(), muon.p4()); 
@@ -212,7 +218,7 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
                     }
                 }              
             }
-            if(matcher[iMuo][path]!=1000.){
+            if(matcher[iMuo][path]!=1000. && DR[iMuo][path]<max_deltaR_ && DPT[iMuo][path]<max_deltaPtRel_){
                 muonIsTrigger[iMuo]=1;
                 muonDR[iMuo]=DR[iMuo][path];
                 muonDPT[iMuo]=DPT[iMuo][path];                

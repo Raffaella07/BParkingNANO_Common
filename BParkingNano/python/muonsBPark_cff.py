@@ -7,6 +7,10 @@ Path=["HLT_Mu7_IP4","HLT_Mu8_IP6","HLT_Mu8_IP5","HLT_Mu8_IP3","HLT_Mu8p5_IP3p5",
 muonTrgSelector = cms.EDProducer("MuonTriggerSelector",
                                  muonCollection = cms.InputTag("slimmedMuons"), #same collection as in NanoAOD                                                           
                                  displacedStandaloneMuonCollection = cms.InputTag("displacedStandAloneMuons"), #same collection as in NanoAOD                                                           
+
+                                 # trigger muon matching conditions
+                                 max_deltaR = cms.double(0.15),
+                                 max_deltaPtRel = cms.double(0.15),
                                  
                                  ## for the output selected collection (tag + all compatible in dZ)
                                  # difference of the vz of the trigger muon with selected muon
