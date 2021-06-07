@@ -107,13 +107,13 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
     iEvent.getByToken(displacedStandaloneMuonSrc_, displaced_standalone_muons);
 
     std::vector<int> muonIsTrigger(muons->size(), 0);
-    std::vector<float> muonDR(muons->size(),-1.);
+    std::vector<float> muonDR(muons->size(),10000.);
     std::vector<float> muonDPT(muons->size(),10000.);
     std::vector<int> loose_id(muons->size(),0);
 
     std::vector<int> matched_reco_flag(muons->size(),-1);
     std::vector<int> matched_trg_index(muons->size(),-1);
-    std::vector<float> matched_dr(muons->size(),-1.);
+    std::vector<float> matched_dr(muons->size(),10000.);
     std::vector<float> matched_dpt(muons->size(),-10000.);
     std::vector<std::vector<int>> fires;
     std::vector<std::vector<float>> matcher; 
@@ -218,7 +218,7 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
                     }
                 }              
             }
-            if(matcher[iMuo][path]!=1000. && DR[iMuo][path]<max_deltaR_ && DPT[iMuo][path]<max_deltaPtRel_){
+            if(matcher[iMuo][path]!=1000. && DR[iMuo][path]<max_deltaR_ && fabs(DPT[iMuo][path])<max_deltaPtRel_ && DR[iMuo][path]!=10000){
                 muonIsTrigger[iMuo]=1;
                 muonDR[iMuo]=DR[iMuo][path];
                 muonDPT[iMuo]=DPT[iMuo][path];                
