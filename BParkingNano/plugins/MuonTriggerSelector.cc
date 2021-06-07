@@ -32,6 +32,8 @@
 #include "MagneticField/Engine/interface/MagneticField.h"
 #include "MagneticField/Records/interface/IdealMagneticFieldRecord.h"
 
+#include "DataFormats/Math/interface/deltaR.h"
+
 #include <TLorentzVector.h>
 #include "helper.h"
 
@@ -165,7 +167,7 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
                     if(muon.triggerObjectMatch(i)!=0 && muon.triggerObjectMatch(i)->hasPathName(cstr,true,true)){
                         //if(abs(muon.triggerObjectMatch(i)->eta())>1.5) std::cout << "eta=" <<muon.triggerObjectMatch(i)->eta();
                         frs[ipath]=1;
-                        float dr=TMath::Sqrt(pow(muon.triggerObjectMatch(i)->eta()-muon.eta(),2.)+pow(muon.triggerObjectMatch(i)->phi()-muon.phi(),2.));
+                        float dr = reco::deltaR(muon.triggerObjectMatch(i)->p4(), muon.p4()); 
                         float dpt=(muon.triggerObjectMatch(i)->pt()-muon.pt())/muon.triggerObjectMatch(i)->pt();
                         temp_dr[i]=dr;
                         temp_dpt[i]=dpt;
