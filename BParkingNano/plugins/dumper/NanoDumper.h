@@ -458,6 +458,8 @@ public :
    // additional functions
    virtual vector<pair<int,float>> createPairWithDesc(const UInt_t&, const TTreeReaderArray<Float_t>&);
    virtual vector<pair<int,float>> updatePairWithDesc(vector<pair<int,float>> the_ini_pair, const TTreeReaderArray<Int_t>& charge);
+   virtual Float_t get2Ddisp(const Float_t, const Float_t, const Float_t, const Float_t);
+   virtual Float_t get3Ddisp(const Float_t, const Float_t, const Float_t, const Float_t, const Float_t, const Float_t);
 
    // output file
    TFile* my_file;  
@@ -681,9 +683,21 @@ public :
    Int_t the_sig_mu_ismatched;
    Int_t the_sig_pi_ismatched;
 
+   // these two are from matching information
    Float_t the_gen_trgmu_mu_lxy;
    Float_t the_gen_trgmu_mu_lxyz;
 
+   // these have the gen information, independently on the matching
+   Int_t the_gen_b_pdgid = -99;
+   Float_t the_gen_hnl_ct = -99;
+   Float_t the_gen_hnl_lxy = -99;
+   Float_t the_gen_hnl_lxyz = -99;
+   Float_t the_gen_hnl_pt = -99;
+   Float_t the_gen_hnl_eta = -99;
+   Float_t the_gen_hnl_phi = -99;
+   Float_t the_gen_hnl_mass = -99;
+   ////
+   
    Float_t the_ctrl_b_pt;
    Float_t the_ctrl_b_eta;
    Float_t the_ctrl_b_phi;
