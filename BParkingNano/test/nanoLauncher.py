@@ -205,13 +205,13 @@ class NanoLauncher(NanoTools):
 
   def launchNano(self, nfiles, outputdir, logdir, filelist, label):
     if not self.doquick:
-      slurm_options = '-p wn --account=t3 -o {ld}/nanostep_nj%a.log -e {ld}/nanostep_nj%a.log --job-name=nanostep_nj%a_{pl} --array {ar} --time=5:00:00'.format(
+      slurm_options = '-p standard --account=t3 -o {ld}/nanostep_nj%a.log -e {ld}/nanostep_nj%a.log --job-name=nanostep_nj%a_{pl} --array {ar} --time=5:00:00'.format(
         ld = logdir,
         pl = label,
         ar = '1-{}'.format(nfiles),
         )
     else:
-      slurm_options = '-p quick --account=t3 -o {ld}/nanostep_nj%a.log -e {ld}/nanostep_nj%a.log --job-name=nanostep_nj%a_{pl} --array {ar}'.format(
+      slurm_options = '-p short --account=t3 -o {ld}/nanostep_nj%a.log -e {ld}/nanostep_nj%a.log --job-name=nanostep_nj%a_{pl} --array {ar} --time=1:00:00'.format(
         ld = logdir,
         pl = label,
         ar = '1-{}'.format(nfiles),
@@ -239,13 +239,13 @@ class NanoLauncher(NanoTools):
     tag = NanoTools.getTag(self, self.tagnano, self.tagflat)
 
     if not self.doquick:
-      slurm_options = '-p wn --account=t3 -o {ld}/dumperstep.log -e {ld}/dumperstep.log --job-name=dumperstep_{pl} --time=3:00:00 {dp}'.format(
+      slurm_options = '-p standard --account=t3 -o {ld}/dumperstep.log -e {ld}/dumperstep.log --job-name=dumperstep_{pl} --time=3:00:00 {dp}'.format(
         ld      = logdir,
         pl      = label,
         dp      = '--dependency=afterany:{}'.format(jobId) if jobId != -99 else '',
         )
     else:
-      slurm_options = '-p quick --account=t3 -o {ld}/dumperstep.log -e {ld}/dumperstep.log --job-name=dumperstep_{pl} {dp}'.format(
+      slurm_options = '-p short --account=t3 -o {ld}/dumperstep.log -e {ld}/dumperstep.log --job-name=dumperstep_{pl} {dp} --time=1:00:00'.format(
         ld      = logdir,
         pl      = label,
         dp      = '--dependency=afterany:{}'.format(jobId) if jobId != -99 else '',
@@ -274,14 +274,14 @@ class NanoLauncher(NanoTools):
     self.writeMergerSubmitter(label, filetype)
 
     if not self.doquick:
-      slurm_options = '-p wn --account=t3 -o {ld}/merger{ft}step.log -e {ld}/merger{ft}step.log --job-name=mergerstep_{pl} --time=02:00:00 --dependency=afterany:{jobid}'.format(
+      slurm_options = '-p standard --account=t3 -o {ld}/merger{ft}step.log -e {ld}/merger{ft}step.log --job-name=mergerstep_{pl} --time=02:00:00 --dependency=afterany:{jobid}'.format(
         ld    = logdir,
         ft    = filetype,
         pl    = label,
         jobid = NanoTools.getJobIdsList(self, jobIds),
         )
     else:
-      slurm_options = '-p quick --account=t3 -o {ld}/merger{ft}step.log -e {ld}/merger{ft}step.log --job-name=mergerstep_{pl} --dependency=afterany:{jobid}'.format(
+      slurm_options = '-p short --account=t3 -o {ld}/merger{ft}step.log -e {ld}/merger{ft}step.log --job-name=mergerstep_{pl} --time=1:00:00 --dependency=afterany:{jobid}'.format(
         ld    = logdir,
         ft    = filetype,
         pl    = label,
