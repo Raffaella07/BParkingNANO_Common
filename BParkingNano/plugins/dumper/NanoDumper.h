@@ -684,6 +684,8 @@ public :
    Float_t the_gen_trgmu_mu_lxy;
    Float_t the_gen_trgmu_mu_lxyz;
 
+   Float_t the_gen_hnl_mass = -99.;
+
    Float_t the_ctrl_b_pt;
    Float_t the_ctrl_b_eta;
    Float_t the_ctrl_b_phi;
