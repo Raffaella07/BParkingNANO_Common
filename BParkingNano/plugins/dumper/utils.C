@@ -16,6 +16,17 @@ bool sortcansbydesc_opp(const pair<int, float> &a1, const pair<int, float> &a2){
 }
 
 
+float deltaR(float eta1, float eta2, float phi1, float phi2){
+  float pi = 3.14159265359;
+  float delta_eta = eta1 - eta2;
+  float delta_phi = phi1 - phi2;
+  if(fabs(delta_phi) > pi){
+    delta_phi -= 2*pi;
+  }
+  return sqrt(pow(delta_eta, 2) + pow(delta_phi, 2));
+}
+
+
 bool checkLumi(string lumi_ranges, int lumi, int seed = 1){
   // get boundaries of lumi range
   string range_min = lumi_ranges.substr(lumi_ranges.find("[", seed)+1, int(lumi_ranges.find(",", seed)) - int(lumi_ranges.find("[", seed)+1));

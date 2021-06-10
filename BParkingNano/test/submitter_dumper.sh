@@ -28,6 +28,12 @@ cp ../plugins/dumper/NanoDumper.h $workdir
 cp ../plugins/dumper/NanoRunDumper.C $workdir 
 cp ../plugins/dumper/NanoRunDumper.h $workdir 
 
+echo "copying starter"
+if [ ${4} == 0 ] ; then
+  xrdcp -f ./files/starter_${3}.C root://t3dcachedb.psi.ch:1094/${1}/flat/starter.C
+else
+  xrdcp -f ./files/starter_${3}.C root://t3dcachedb.psi.ch:1094/${1}/flat/starter_${4}.C
+fi
 rm ./files/starter_${3}.C
 
 cd $workdir
@@ -39,11 +45,11 @@ DATE_END_DUMP=`date +%s`
 
 echo "copying the file"
 if [ ${4} == 0 ] ; then
+  echo "xrdcp -f flat_bparknano.root root://t3dcachedb.psi.ch:1094/${1}/flat/flat_bparknano.root"
   xrdcp -f flat_bparknano.root root://t3dcachedb.psi.ch:1094/${1}/flat/flat_bparknano.root
-  xrdcp -f starter.C root://t3dcachedb.psi.ch:1094/${1}/flat/starter.C
 else
+  echo "xrdcp -f flat_bparknano.root root://t3dcachedb.psi.ch:1094/${1}/flat/flat_bparknano_${4}.root"
   xrdcp -f flat_bparknano.root root://t3dcachedb.psi.ch:1094/${1}/flat/flat_bparknano_${4}.root
-  xrdcp -f starter.C root://t3dcachedb.psi.ch:1094/${1}/flat/starter_${4}.C
 fi
 
 echo "content of the workdir"

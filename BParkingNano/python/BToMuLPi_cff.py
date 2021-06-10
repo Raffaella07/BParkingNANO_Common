@@ -17,44 +17,64 @@ BToMuMuPi = cms.EDProducer(
     isMC  = cms.bool(False),
 
     # pre-fitter preselection
-    pionSelection           = cms.string('pt > 0.55 && abs(eta)<2'),  
-    isoTracksSelection      = cms.string('pt > 0.55 && abs(eta)<2'),
-    trgMuonSelection        = cms.string('pt > 5 && abs(eta) < 1.7'),
-    leptonSelection        = cms.string('pt > 1.5 && abs(eta) < 2'),
+    pionSelection = cms.string(' && '.join([
+        #'pt > 0.',
+        'pt > 0.7',
+        'abs(eta)<2.',
+        'abs(userFloat("dz")) > 0.005',
+        'abs(userFloat("dxy")) > 0.005',
+        'abs(userFloat("dzS")) > 1.5',  
+        'abs(userFloat("dxyS")) > 3.',
+        'abs(userFloat("DCASig")) > 5.',
+      ])
+    ),
+    isoTracksSelection = cms.string('pt > 0.7 && abs(eta)<2.'),
+    #isoTracksSelection = cms.string('pt > 0. && abs(eta)<5'),
+    trgMuonSelection   = cms.string('pt > 7 && abs(eta) < 1.5'),
+    #trgMuonSelection   = cms.string('pt > 0 && abs(eta) < 5'),
+    leptonSelection    = cms.string(' && '.join([
+        #'pt > 0.',
+        'pt > 1.5',
+        'abs(eta) < 2.',
+        'abs(userFloat("dz")) > 0.0015',
+        'abs(userFloat("dxy")) > 0.001',
+        'abs(userFloat("dzS")) > 1.',
+        'abs(userFloat("dxyS")) > 1.5',
+        ##'abs(userFloat("sip3d")) > 7',
+      ])
+    ),
     preVtxSelection = cms.string(' & '.join([
-        'pt > 2',
+        'pt > 1',
         'mass > 0.2',        
         'mass < 7.0',        
         ])
-    ), # applied on the HNL cand 
+    ),  
 
     # post-fitter preselection
     postVtxSelection = cms.string(' & '.join([
+        #'userInt("hnl_vtx_OK") == 1',
+        #'userFloat("hnl_fitted_cos_theta_2D") > 0.9',
+        #'mass < 10',
+
         'userInt("hnl_vtx_OK") == 1',
-        'userFloat("hnl_vtx_prob") > 0.0001',
+        ##'abs(userFloat("sel_muon_dz")) > 0.0015',
+        ##'abs(userFloat("sel_muon_dxy")) > 0.001',
+        ##'userFloat("sel_muon_sip3d") > 7',
+        ##'abs(userFloat("pion_dz")) > 0.005',
+        ##'abs(userFloat("pion_dzS")) > 1.5',  
+        ##'abs(userFloat("pion_dxy")) > 0.005',
+        ##'abs(userFloat("pion_dxyS")) > 3',
+        ##'abs(userFloat("pion_DCASig")) > 5',
+        'userFloat("hnl_vtx_prob") > 0.001',
+        'userFloat("hnl_fitted_cos_theta_2D") > 0.99',
+        'userFloat("hnl_ls_xy") > 20',
         'mass < 8',
-        'pt > 11',
-        'abs(eta) < 1.7',
-        'userFloat("hnl_vtx_chi2") < 9',
-        'userFloat("trg_muon_sip3d") > 0.8',
-        ##'userFloat("sel_muon_ip3d") > 0.0015',
-        ##'abs(userFloat("sel_muon_dxy")) > 0.0005',
-        ##'abs(userFloat("pion_dz")) > 0.001',
-        ##'abs(userFloat("pion_dxy")) > 0.0003',
-        'abs(userFloat("pion_dzS")) > 0.5',
-        'abs(userFloat("pion_dxyS")) > 0.2',
-        'abs(userFloat("pion_DCASig")) > 0.3',
-        ##'userFloat("muons_Lxyz") > 0.005',
-        ##'userFloat("pion_muon_vzdiff") > 0.001',
-        ##'userFloat("dr_mu_pi") < 1.8',
-        'userFloat("dr_trgmu_hnl") < 0.8',
-        'userFloat("hnl_fitted_mass") > 0.5',
-        'userFloat("hnl_fitted_mass") < 6.5',
-        'userFloat("hnl_fitted_pt") > 4',
-        'abs(userFloat("hnl_fitted_eta")) < 1.8',
-        'userFloat("hnl_fitted_cos_theta_2D") > 0.95',
+        'userFloat("hnl_fitted_mass")<6.3',
+        ##'abs(userFloat("deta_pi_fit_pi")) < 0.015',
+        ##'abs(userFloat("dphi_pi_fit_pi")) < 0.03',
+        ##'userFloat("dr_trgmu_hnl") < 0.5',
         ])
-    ), # applied on the B cand
+    ), 
 )
     
 BToMuMuPiMC = BToMuMuPi.clone(
@@ -120,8 +140,24 @@ BToMuMuPiTable = cms.EDProducer(
         fit_pi_phi      = ufloat('hnl_fitted_pi_phi' ),
         fit_pi_mass     = ufloat('hnl_fitted_pi_mass'),
         ## dR quantities
-        dr_mu_pi        = ufloat('dr_lep_pi'     ),
-        dr_trgmu_hnl    = ufloat('dr_trgmu_hnl'  ),
+        dr_mu_pi        = ufloat('dr_lep_pi'        ),
+        dr_trgmu_hnl    = ufloat('dr_trgmu_hnl'     ),
+        dr_trgmu_mu     = ufloat('dr_trgmu_lep'     ),
+        dr_trgmu_pi     = ufloat('dr_trgmu_pi'      ),
+        deta_mu_pi      = ufloat('deta_lep_pi'      ),
+        deta_trgmu_hnl  = ufloat('deta_trgmu_hnl'   ),
+        deta_trgmu_mu   = ufloat('deta_trgmu_lep'   ),
+        deta_trgmu_pi   = ufloat('deta_trgmu_pi'    ),
+        dphi_mu_pi      = ufloat('dphi_lep_pi'      ),
+        dphi_trgmu_hnl  = ufloat('dphi_trgmu_hnl'   ),
+        dphi_trgmu_mu   = ufloat('dphi_trgmu_lep'   ),
+        dphi_trgmu_pi   = ufloat('dphi_trgmu_pi'    ),
+        dpt_pi_fit_pi   = ufloat('dpt_pi_fit_pi'    ),
+        dpt_mu_fit_mu   = ufloat('dpt_lep_fit_lep'  ),
+        deta_pi_fit_pi  = ufloat('deta_pi_fit_pi'   ),
+        deta_mu_fit_mu  = ufloat('deta_lep_fit_lep' ),
+        dphi_pi_fit_pi  = ufloat('dphi_pi_fit_pi'   ),
+        dphi_mu_fit_mu  = ufloat('dphi_lep_fit_lep' ),
         # Other quantities
         ## ID WP of the selected muon 
         sel_mu_isSoft   = ufloat('sel_muon_isSoft'   ),
@@ -159,18 +195,34 @@ BToMuMuPiTable = cms.EDProducer(
         pi_iso04_close      = ufloat('pi_iso04_close'     ),
         hnl_iso03_close     = ufloat('hnl_iso03_close'    ),
         hnl_iso04_close     = ufloat('hnl_iso04_close'    ),
-        ## dilepton mass
-        dilepton_mass   = ufloat('dilepton_mass'  ),
-        dilepton_pt     = ufloat('dilepton_pt'    ),
+        trg_mu_iso03_rel_close  = ufloat('trg_mu_iso03_rel_close' ), 
+        trg_mu_iso04_rel_close  = ufloat('trg_mu_iso04_rel_close' ),
+        sel_mu_iso03_rel_close  = ufloat('sel_mu_iso03_rel_close' ),
+        sel_mu_iso04_rel_close  = ufloat('sel_mu_iso04_rel_close' ),
+        pi_iso03_rel_close      = ufloat('pi_iso03_rel_close'     ),
+        pi_iso04_rel_close      = ufloat('pi_iso04_rel_close'     ),
+        hnl_iso03_rel_close     = ufloat('hnl_iso03_rel_close'    ),
+        hnl_iso04_rel_close     = ufloat('hnl_iso04_rel_close'    ),
+        ## invariant mass
+        trgmu_mu_mass   = ufloat('dilepton_mass'  ),
+        trgmu_pi_mass   = ufloat('trgmu_pi_mass'  ),
+        trgmu_mu_pt     = ufloat('dilepton_pt'    ),
+        trgmu_pi_pt     = ufloat('trgmu_pi_pt'    ),
         ## gen-matching
         isMatched                   = Var("userInt('isMatched')"                  , int, mcOnly=True),
+        trg_mu_isMatched            = Var("userInt('trg_mu_isMatched')"           , int, mcOnly=True),
+        sel_mu_isMatched            = Var("userInt('sel_mu_isMatched')"           , int, mcOnly=True),
+        pi_isMatched                = Var("userInt('pi_isMatched')"               , int, mcOnly=True),
         matching_sel_mu_genIdx      = Var("userInt('matching_sel_mu_genIdx')"     , int, mcOnly=True),
         matching_trg_mu_genIdx      = Var("userInt('matching_trg_mu_genIdx')"     , int, mcOnly=True),
         matching_pi_genIdx          = Var("userInt('matching_pi_genIdx')"         , int, mcOnly=True),
         matching_sel_mu_motherPdgId = Var("userInt('matching_sel_mu_motherPdgId')", int, mcOnly=True),
         matching_trg_mu_motherPdgId = Var("userInt('matching_trg_mu_motherPdgId')", int, mcOnly=True),
         matching_pi_motherPdgId     = Var("userInt('matching_pi_motherPdgId')"    , int, mcOnly=True),
-        ## displacement 
+        ## reco/gen relative difference
+        mupi_mass_reco_gen_reldiff = ufloat('mupi_mass_reco_gen_reldiff'),
+        lxy_reco_gen_reldiff = ufloat('lxy_reco_gen_reldiff'),
+        ## gen displacement 
         #fitter_bs_lxy = ufloat('fitter_bs_lxy'), #same as sv_lxy, with more explicit naming
         ##my_fitter_bs_lxy = ufloat('my_fitter_bs_lxy'), 
         ##disp2DFromBS = ufloat('disp2DFromBS'),

@@ -136,7 +136,6 @@ Example of usage:
 ```
 python nanoProdManager.py --pl F1 --dofullreport --doresubmit --data
 ```
-As of today, the tool was not tested on a MC production
 
 #### Note
 
