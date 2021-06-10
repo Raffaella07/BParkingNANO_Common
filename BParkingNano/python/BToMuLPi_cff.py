@@ -18,23 +18,29 @@ BToMuMuPi = cms.EDProducer(
 
     # pre-fitter preselection
     pionSelection = cms.string(' && '.join([
+        #'pt > 0.',
         'pt > 0.7',
-        'abs(eta)<2',
+        'abs(eta)<2.',
         'abs(userFloat("dz")) > 0.005',
-        'abs(userFloat("dzS")) > 1.5',  
         'abs(userFloat("dxy")) > 0.005',
-        'abs(userFloat("dxyS")) > 3',
-        'abs(userFloat("DCASig")) > 5',
+        'abs(userFloat("dzS")) > 1.5',  
+        'abs(userFloat("dxyS")) > 3.',
+        'abs(userFloat("DCASig")) > 5.',
       ])
     ),
-    isoTracksSelection = cms.string('pt > 0.7 && abs(eta)<2'),
+    isoTracksSelection = cms.string('pt > 0.7 && abs(eta)<2.'),
+    #isoTracksSelection = cms.string('pt > 0. && abs(eta)<5'),
     trgMuonSelection   = cms.string('pt > 7 && abs(eta) < 1.5'),
+    #trgMuonSelection   = cms.string('pt > 0 && abs(eta) < 5'),
     leptonSelection    = cms.string(' && '.join([
+        #'pt > 0.',
         'pt > 1.5',
-        'abs(eta) < 2',
+        'abs(eta) < 2.',
         'abs(userFloat("dz")) > 0.0015',
         'abs(userFloat("dxy")) > 0.001',
-        'abs(userFloat("sip3d")) > 7',
+        'abs(userFloat("dzS")) > 1.',
+        'abs(userFloat("dxyS")) > 1.5',
+        ##'abs(userFloat("sip3d")) > 7',
       ])
     ),
     preVtxSelection = cms.string(' & '.join([
@@ -46,19 +52,27 @@ BToMuMuPi = cms.EDProducer(
 
     # post-fitter preselection
     postVtxSelection = cms.string(' & '.join([
+        #'userInt("hnl_vtx_OK") == 1',
+        #'userFloat("hnl_fitted_cos_theta_2D") > 0.9',
+        #'mass < 10',
+
         'userInt("hnl_vtx_OK") == 1',
-        #'abs(userFloat("sel_muon_dz")) > 0.0015',
-        #'abs(userFloat("sel_muon_dxy")) > 0.001',
-        #'userFloat("sel_muon_sip3d") > 7',
-        #'abs(userFloat("pion_dz")) > 0.005',
-        #'abs(userFloat("pion_dzS")) > 1.5',  
-        #'abs(userFloat("pion_dxy")) > 0.005',
-        #'abs(userFloat("pion_dxyS")) > 3',
-        #'abs(userFloat("pion_DCASig")) > 5',
-        'userFloat("dr_trgmu_hnl") < 0.5',
+        ##'abs(userFloat("sel_muon_dz")) > 0.0015',
+        ##'abs(userFloat("sel_muon_dxy")) > 0.001',
+        ##'userFloat("sel_muon_sip3d") > 7',
+        ##'abs(userFloat("pion_dz")) > 0.005',
+        ##'abs(userFloat("pion_dzS")) > 1.5',  
+        ##'abs(userFloat("pion_dxy")) > 0.005',
+        ##'abs(userFloat("pion_dxyS")) > 3',
+        ##'abs(userFloat("pion_DCASig")) > 5',
         'userFloat("hnl_vtx_prob") > 0.001',
         'userFloat("hnl_fitted_cos_theta_2D") > 0.99',
+        'userFloat("hnl_ls_xy") > 20',
         'mass < 8',
+        'userFloat("hnl_fitted_mass")<6.3',
+        ##'abs(userFloat("deta_pi_fit_pi")) < 0.015',
+        ##'abs(userFloat("dphi_pi_fit_pi")) < 0.03',
+        ##'userFloat("dr_trgmu_hnl") < 0.5',
         ])
     ), 
 )
@@ -205,6 +219,9 @@ BToMuMuPiTable = cms.EDProducer(
         matching_sel_mu_motherPdgId = Var("userInt('matching_sel_mu_motherPdgId')", int, mcOnly=True),
         matching_trg_mu_motherPdgId = Var("userInt('matching_trg_mu_motherPdgId')", int, mcOnly=True),
         matching_pi_motherPdgId     = Var("userInt('matching_pi_motherPdgId')"    , int, mcOnly=True),
+        ## reco/gen relative difference
+        mupi_mass_reco_gen_reldiff = ufloat('mupi_mass_reco_gen_reldiff'),
+        lxy_reco_gen_reldiff = ufloat('lxy_reco_gen_reldiff'),
         ## gen displacement 
         #fitter_bs_lxy = ufloat('fitter_bs_lxy'), #same as sv_lxy, with more explicit naming
         ##my_fitter_bs_lxy = ufloat('my_fitter_bs_lxy'), 
