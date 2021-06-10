@@ -381,7 +381,6 @@ void NanoDumper::SlaveBegin(TTree * /*tree*/)
   if(isMC){
     signal_tree->Branch("gen_trgmu_mu_lxy", &the_gen_trgmu_mu_lxy);
     signal_tree->Branch("gen_trgmu_mu_lxyz", &the_gen_trgmu_mu_lxyz);
-    signal_tree->Branch("gen_hnl_mass", &the_gen_hnl_mass);
   }
 
   signal_tree->Branch("pv_npvs", &the_pv_npvs);
@@ -804,16 +803,6 @@ Bool_t NanoDumper::Process(Long64_t entry)
       else{
         the_gen_trgmu_mu_lxy = -99.;
         the_gen_trgmu_mu_lxyz = -99;
-      }
-
-      int gen_hnl_idx(-99);
-      for(unsigned int iGen(0); iGen < nGen; ++iGen){
-        if(abs(GenPart_pdgId[iGen])==9900015){
-          gen_hnl_idx = iGen;
-        }
-      }
-      if(gen_hnl_idx!=-99){
-        the_gen_hnl_mass = GenPart_mass[gen_hnl_idx];
       }
     }
 
