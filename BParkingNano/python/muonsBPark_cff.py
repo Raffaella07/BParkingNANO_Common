@@ -9,7 +9,7 @@ muonTrgSelector = cms.EDProducer("MuonTriggerSelector",
                                  displacedStandaloneMuonCollection = cms.InputTag("displacedStandAloneMuons"), #same collection as in NanoAOD                                                           
 
                                  # trigger muon matching conditions
-                                 max_deltaR = cms.double(0.1),
+                                 max_deltaR = cms.double(0.05),
                                  max_deltaPtRel = cms.double(0.1),
                                  
                                  ## for the output selected collection (tag + all compatible in dZ)
