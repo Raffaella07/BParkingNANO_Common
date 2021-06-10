@@ -120,8 +120,6 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
     std::vector<std::vector<float>> DR;
     std::vector<std::vector<float>> DPT;    
 
-    //std::cout << std::endl;
-
     // proceeding to the trigger muon matching
     // for that, only use slimmedMuons
     for(const pat::Muon &muon : *muons){
@@ -250,6 +248,7 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
     //  //trans_muons_out->emplace_back(muonTT);
     //}
 
+    //std::cout << std::endl;
     //and now save the reco muon triggering or not 
     for(const pat::Muon & muon : *muons){
         unsigned int iMuo(&muon - &(muons->at(0)) );
@@ -266,7 +265,7 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
         const reco::TransientTrack muonTT((*(muon.bestTrack())),&(*bFieldHandle)); //sara:check,why not using inner track for muons? GM: What is this and why do we need this???
         if(!muonTT.isValid()) continue; // GM: and why do we skip this muon if muonTT is invalid? This seems to have no effect so I kept it.
 
-        //std::cout << "muon " << iMuo << " pt " << muon.pt() << std::endl;
+        //std::cout << "muon " << iMuo << " pt " << muon.pt()  << " eta " << muon.eta() << std::endl;
         muons_out->emplace_back(muon);
 
         muons_out->back().addUserFloat("dz", muon.dB(muon.PVDZ));
