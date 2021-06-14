@@ -34,6 +34,7 @@ class BToMuLPiBuilder : public edm::global::EDProducer<> {
   // perhaps we need better structure here (begin run etc)
 public:
   typedef std::vector<Lepton> LeptonCollection;
+  typedef std::vector<pat::ETHMuon> ETHMuonCollection;
   typedef std::vector<reco::TransientTrack> TransientTrackCollection;
 
   explicit BToMuLPiBuilder(const edm::ParameterSet &cfg):
@@ -51,7 +52,7 @@ public:
     //      BParking triggers
     //    * the latter are all muons that pass the preselection (regardless whether they 
     //      fired the trigger). It's a superset of the previous collection
-    trg_muons_         {consumes<pat::MuonCollection>              ( cfg.getParameter<edm::InputTag>("trgMuons"               ) )},
+    trg_muons_         {consumes<ETHMuonCollection>                ( cfg.getParameter<edm::InputTag>("trgMuons"               ) )},
     leptons_           {consumes<LeptonCollection>                 ( cfg.getParameter<edm::InputTag>("leptons"                ) )},
     leptons_ttracks_   {consumes<TransientTrackCollection>         ( cfg.getParameter<edm::InputTag>("leptonsTransientTracks" ) )},
     pions_             {consumes<pat::CompositeCandidateCollection>( cfg.getParameter<edm::InputTag>("pions"                  ) )},
@@ -78,7 +79,7 @@ private:
   // pre-fitter preselection 
   const StringCutObjectSelector<pat::CompositeCandidate> pi_selection_; 
   const StringCutObjectSelector<pat::PackedCandidate> isotrk_selection_;
-  const StringCutObjectSelector<pat::Muon> trgmu_selection_; 
+  const StringCutObjectSelector<pat::ETHMuon> trgmu_selection_; 
   const StringCutObjectSelector<Lepton> lep_selection_; 
   const StringCutObjectSelector<pat::CompositeCandidate> pre_vtx_selection_; 
   // post-fitter preselection 
@@ -87,7 +88,7 @@ private:
   const std::string lepton_type_;
   const bool isMC_;
 
-  const edm::EDGetTokenT<pat::MuonCollection> trg_muons_;
+  const edm::EDGetTokenT<ETHMuonCollection> trg_muons_;
   const edm::EDGetTokenT<LeptonCollection> leptons_;
   const edm::EDGetTokenT<TransientTrackCollection> leptons_ttracks_;
 
@@ -110,8 +111,7 @@ template<typename Lepton>
 void BToMuLPiBuilder<Lepton>::produce(edm::StreamID, edm::Event &evt, edm::EventSetup const &) const {
 
   //input
-
-  edm::Handle<pat::MuonCollection> trg_muons;
+  edm::Handle<ETHMuonCollection> trg_muons;
   evt.getByToken(trg_muons_, trg_muons);
 
   edm::Handle<LeptonCollection> leptons;
@@ -147,21 +147,14 @@ void BToMuLPiBuilder<Lepton>::produce(edm::StreamID, edm::Event &evt, edm::Event
   //evt.getByToken(vertexSrc_, vertexHandle);
   //const reco::Vertex & PV = vertexHandle->front();
   
-  std::cout << std::endl;
-  for(size_t lep_idx = 0; lep_idx < leptons->size(); ++lep_idx) {
-    edm::Ptr<Lepton> lep_ptr(leptons, lep_idx);
-    std::cout << "muon " << lep_idx << " pt " << lep_ptr->pt() << " eta " << lep_ptr->eta() << " phi " << lep_ptr->phi() << " isSlimmed " << lep_ptr->isSlimmedMuon() << std::endl;
-  }
-
   // output
   std::unique_ptr<pat::CompositeCandidateCollection> ret_val(new pat::CompositeCandidateCollection());
 
   for(size_t trg_mu_idx = 0; trg_mu_idx < trg_muons->size(); ++trg_mu_idx) {
+    edm::Ptr<pat::ETHMuon> trg_mu_ptr(trg_muons, trg_mu_idx);
 
-    // To be checked!
-    size_t trg_mu_position = leptons->size()-1; // make it point to just beyond the size of the collection
-    
-    edm::Ptr<pat::Muon> trg_mu_ptr(trg_muons, trg_mu_idx);
+    // only select the trigger muons (are slimmedMuons by construction)
+    if(trg_mu_ptr->userInt("isTriggering") != 1) continue;
 
     // selection on the trigger muon
     if( !trgmu_selection_(*trg_mu_ptr) ) continue;
@@ -183,7 +176,7 @@ void BToMuLPiBuilder<Lepton>::produce(edm::StreamID, edm::Event &evt, edm::Event
       // as well as a B candidate, that is HNL + trg mu
       for(size_t lep_idx = 0; lep_idx < leptons->size(); ++lep_idx) {
         edm::Ptr<Lepton> lep_ptr(leptons, lep_idx);
-        if(lep_ptr->isDSAMuon()) continue;
+        //if(lep_ptr->isDSAMuon()) continue;
        
         // the second muon must be _other_ than the trigger muon
         if(lep_ptr->pt()==trg_mu_ptr->pt()) { // lacking of any better idea for a comparison by pointer... 
@@ -191,7 +184,6 @@ void BToMuLPiBuilder<Lepton>::produce(edm::StreamID, edm::Event &evt, edm::Event
             // trigger muons are a subset of selected muons and selected muons are those that 
             // are saved in the tress eventually (see muonsBPark_cff.py), so
             // find the position of the trigger muon in the collection of selected muons
-            trg_mu_position = lep_idx;
 //             std::cout << __LINE__ << "]\t selected muon pt\t"     << sel_mu_ptr->pt()  << std::endl
 //                                   << "    \t trigger  muon pt\t"  << trg_mu_ptr->pt()  << std::endl
 //                                   << "    \t selected muon eta\t" << sel_mu_ptr->eta() << std::endl
@@ -241,7 +233,7 @@ void BToMuLPiBuilder<Lepton>::produce(edm::StreamID, edm::Event &evt, edm::Event
 
         // B candidate
         pat::CompositeCandidate b_cand;
-        b_cand.setP4(hnl_cand.p4() + trg_mu_ptr->p4());
+        b_cand.setP4(hnl_cand.p4() + trg_mu_ptr->P4());
         b_cand.setCharge(hnl_cand.charge() + trg_mu_ptr->charge());
 
 //         b_cand.addUserCand("trg_mu", trg_mu_ptr);
@@ -364,10 +356,10 @@ void BToMuLPiBuilder<Lepton>::produce(edm::StreamID, edm::Event &evt, edm::Event
 
 
         // impact parameter variables (with pre-fit quantities)
-        b_cand.addUserFloat("trg_muon_ip3d"   , fabs(trg_mu_ptr->dB(pat::Muon::PV3D))                                    );
-        b_cand.addUserFloat("trg_muon_sip3d"  , fabs(trg_mu_ptr->dB(pat::Muon::PV3D) / trg_mu_ptr->edB(pat::Muon::PV3D)) );
-        b_cand.addUserFloat("trg_muon_dxy"    , trg_mu_ptr->dB(pat::Muon::PV2D)                                          );
-        b_cand.addUserFloat("trg_muon_dz"     , trg_mu_ptr->dB(pat::Muon::PVDZ)                                          );
+        //b_cand.addUserFloat("trg_muon_ip3d"   , fabs(trg_mu_ptr->dB(pat::Muon::PV3D))                                    );
+        //b_cand.addUserFloat("trg_muon_sip3d"  , fabs(trg_mu_ptr->dB(pat::Muon::PV3D) / trg_mu_ptr->edB(pat::Muon::PV3D)) );
+        //b_cand.addUserFloat("trg_muon_dxy"    , trg_mu_ptr->dB(pat::Muon::PV2D)                                          );
+        //b_cand.addUserFloat("trg_muon_dz"     , trg_mu_ptr->dB(pat::Muon::PVDZ)                                          );
         
         //if(lepton_type_ == "muon"){
         //  b_cand.addUserFloat("sel_muon_ip3d"   , fabs(lep_ptr->dB(pat::Muon::PV3D))                                 );
@@ -517,9 +509,9 @@ void BToMuLPiBuilder<Lepton>::produce(edm::StreamID, edm::Event &evt, edm::Event
         
 
         // position of the muons / tracks in their own collections
-        b_cand.addUserInt("trg_mu_idx", trg_mu_position);
+        b_cand.addUserInt("trg_mu_idx", trg_mu_idx);
         b_cand.addUserInt("lep_idx", lep_idx);
-        b_cand.addUserInt("pi_idx"    , pi_idx    );
+        b_cand.addUserInt("pi_idx", pi_idx);
 
 
         // invariant masses
@@ -647,7 +639,6 @@ void BToMuLPiBuilder<Lepton>::produce(edm::StreamID, edm::Event &evt, edm::Event
             isMatched = 1;
           }
         }
-        
 
         b_cand.addUserInt("isMatched", isMatched);
         b_cand.addUserInt("trg_mu_isMatched", trg_mu_isMatched);

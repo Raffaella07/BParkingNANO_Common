@@ -3,7 +3,7 @@ from PhysicsTools.BParkingNano.common_cff import uint, ufloat, Var, CandVars
 
 BToMuMuPi = cms.EDProducer(
     'BToMuMuPiBuilder',
-    trgMuons                = cms.InputTag('muonTrgSelector', 'trgMuons'),
+    trgMuons                = cms.InputTag('muonTrgSelector', 'SelectedMuons'),
     leptons                 = cms.InputTag('muonTrgSelector', 'SelectedMuons'), 
     leptonsTransientTracks  = cms.InputTag('muonTrgSelector', 'SelectedTransientMuons'), 
     pions                   = cms.InputTag('tracksBPark', 'SelectedTracks'),
@@ -165,10 +165,10 @@ BToMuMuPiTable = cms.EDProducer(
         #sel_mu_isMedium = ufloat('sel_muon_isMedium' ),
         #sel_mu_isLoose  = ufloat('sel_muon_isLoose'  ),
         ## impact paramaters
-        trg_mu_ip3d     = ufloat('trg_muon_ip3d'  ), 
-        trg_mu_sip3d    = ufloat('trg_muon_sip3d' ), 
-        trg_mu_dxy      = ufloat('trg_muon_dxy'   ), 
-        trg_mu_dz       = ufloat('trg_muon_dz'    ), 
+        #trg_mu_ip3d     = ufloat('trg_muon_ip3d'  ), 
+        #trg_mu_sip3d    = ufloat('trg_muon_sip3d' ), 
+        #trg_mu_dxy      = ufloat('trg_muon_dxy'   ), 
+        #trg_mu_dz       = ufloat('trg_muon_dz'    ), 
         #sel_mu_ip3d     = ufloat('sel_muon_ip3d'  ), 
         #sel_mu_sip3d    = ufloat('sel_muon_sip3d' ), 
         #sel_mu_dxy      = ufloat('sel_muon_dxy'   ), 
