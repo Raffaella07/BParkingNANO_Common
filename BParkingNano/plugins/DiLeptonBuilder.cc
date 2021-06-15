@@ -121,9 +121,9 @@ void DiLeptonBuilder<Lepton>::produce(edm::StreamID, edm::Event &evt, edm::Event
   evt.put(std::move(ret_value));
 }
 
-#include "DataFormats/PatCandidates/interface/Muon.h"
+#include "ETHMuon.h"
 #include "DataFormats/PatCandidates/interface/Electron.h"
-typedef DiLeptonBuilder<pat::Muon> DiMuonBuilder;
+typedef DiLeptonBuilder<pat::ETHMuon> DiMuonBuilder;
 typedef DiLeptonBuilder<pat::Electron> DiElectronBuilder;
 
 #include "FWCore/Framework/interface/MakerMacros.h"
