@@ -30,7 +30,9 @@
 #include <cmath>
 #include <TH2.h>
 #include <TStyle.h>
-#include "TLorentzVector.h"
+//#include "TLorentzVector.h"
+#include "Math/Vector4D.h"
+#include "Math/Vector4Dfwd.h"
 #include "utils.C"
 
 
@@ -63,6 +65,16 @@ vector<pair<int,float>> NanoDumper::updatePairWithDesc(vector<pair<int,float>> t
   return pair_candIdx_desc;
 }
 
+
+Float_t NanoDumper::get3Ddisp(const Float_t vx1, const Float_t vx2, const Float_t vy1, const Float_t vy2, const Float_t vz1, const Float_t vz2)
+{
+    return TMath::Sqrt( (vx1-vx2)*(vx1-vx2) + (vy1-vy2)*(vy1-vy2) + (vz1-vz2)*(vz1-vz2) );
+}
+
+Float_t NanoDumper::get2Ddisp(const Float_t vx1, const Float_t vx2, const Float_t vy1, const Float_t vy2)
+{
+    return TMath::Sqrt( (vx1-vx2)*(vx1-vx2) + (vy1-vy2)*(vy1-vy2) );
+}
 
 void NanoDumper::Begin(TTree * /*tree*/)
 {
@@ -381,6 +393,14 @@ void NanoDumper::SlaveBegin(TTree * /*tree*/)
   if(isMC){
     signal_tree->Branch("gen_trgmu_mu_lxy", &the_gen_trgmu_mu_lxy);
     signal_tree->Branch("gen_trgmu_mu_lxyz", &the_gen_trgmu_mu_lxyz);
+    signal_tree->Branch("gen_b_pdgid", &the_gen_b_pdgid);
+    signal_tree->Branch("gen_hnl_ct", &the_gen_hnl_ct);
+    signal_tree->Branch("gen_hnl_lxy", &the_gen_hnl_lxy);
+    signal_tree->Branch("gen_hnl_lxyz", &the_gen_hnl_lxyz);
+    signal_tree->Branch("gen_hnl_pt", &the_gen_hnl_pt);
+    signal_tree->Branch("gen_hnl_eta", &the_gen_hnl_eta);
+    signal_tree->Branch("gen_hnl_phi", &the_gen_hnl_phi);
+    signal_tree->Branch("gen_hnl_mass", &the_gen_hnl_mass);
   }
 
   signal_tree->Branch("pv_npvs", &the_pv_npvs);
@@ -804,6 +824,54 @@ Bool_t NanoDumper::Process(Long64_t entry)
         the_gen_trgmu_mu_lxy = -99.;
         the_gen_trgmu_mu_lxyz = -99;
       }
+
+      // gen information (no matching)
+
+      // find idx of gen particles of interest
+      int gen_hnl_idx(-99), gen_b_idx(-99), gen_trgmu_idx(-99), gen_lep_idx(-99), gen_pi_idx(-99);
+
+      for(unsigned int iGen(0); iGen < nGen; ++iGen){
+        if(abs(GenPart_pdgId[iGen])==9900015){
+          gen_hnl_idx = iGen;
+          gen_b_idx = GenPart_genPartIdxMother[iGen]; 
+        }
+        if(abs(GenPart_pdgId[iGen])==13 && GenPart_genPartIdxMother[iGen]==gen_b_idx)
+          gen_trgmu_idx = iGen;
+        if((abs(GenPart_pdgId[iGen])==13 || abs(GenPart_pdgId[iGen])==11 || abs(GenPart_pdgId[iGen])==15) && GenPart_genPartIdxMother[iGen]==gen_hnl_idx)
+          gen_lep_idx = iGen;
+        if(abs(GenPart_pdgId[iGen])==211 && GenPart_genPartIdxMother[iGen]==gen_hnl_idx)
+          gen_pi_idx = iGen;
+      }
+
+      // get quantities that need more than one object
+      if(gen_hnl_idx!=-99 && gen_lep_idx!=-99){
+
+        ROOT::Math::PtEtaPhiMVector hnl_p4(GenPart_pt[gen_hnl_idx], GenPart_eta[gen_hnl_idx], GenPart_phi[gen_hnl_idx], GenPart_mass[gen_hnl_idx]);
+        Float_t hnl_betagamma = hnl_p4.Beta() * hnl_p4.Gamma();
+
+        the_gen_hnl_lxyz = get3Ddisp(GenPart_vx[gen_hnl_idx], GenPart_vx[gen_lep_idx],
+                                     GenPart_vy[gen_hnl_idx], GenPart_vy[gen_lep_idx],
+                                     GenPart_vz[gen_hnl_idx], GenPart_vz[gen_lep_idx]);
+
+        the_gen_hnl_lxy  = get2Ddisp(GenPart_vx[gen_hnl_idx], GenPart_vx[gen_lep_idx],
+                                     GenPart_vy[gen_hnl_idx], GenPart_vy[gen_lep_idx]);
+
+        the_gen_hnl_ct = the_gen_hnl_lxyz / hnl_betagamma;
+        //std::cout << "HNL pt,eta,phi,m"<< GenPart_pt[gen_hnl_idx] << " " << GenPart_eta[gen_hnl_idx] << " " << GenPart_phi[gen_hnl_idx] << " " << GenPart_mass[gen_hnl_idx] << std::endl;
+        //std::cout << "HNL beta,gamma=" <<  hnl_p4.Beta() << " " << hnl_p4.Gamma() << std::endl;
+        //std::cout << "HNL Lxy,Lxyz  =" <<  the_gen_hnl_lxy << " " << the_gen_hnl_lxyz << std::endl;
+      }
+
+      // set quantities for each object
+      if(gen_hnl_idx!=-99){
+        the_gen_hnl_pt = GenPart_pt[gen_hnl_idx];
+        the_gen_hnl_eta = GenPart_eta[gen_hnl_idx];
+        the_gen_hnl_phi = GenPart_phi[gen_hnl_idx];
+        the_gen_hnl_mass = GenPart_mass[gen_hnl_idx];
+      }
+      if(gen_b_idx!=-99){
+        the_gen_b_pdgid = GenPart_pdgId[gen_b_idx];
+      }
     }
 
     signal_tree->Fill();
@@ -990,3 +1058,4 @@ void NanoDumper::Terminate()
 
   cout << "- End Nano Dumper -" << endl;
 }
+
