@@ -96,7 +96,7 @@ muonBParkTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
         softId = Var("softId()", int, doc="soft cut-based ID"),
         pfIsoId = Var("pfIsoId()", "uint8", doc="PFIso ID from miniAOD selector (1=PFIsoVeryLoose, 2=PFIsoLoose, 3=PFIsoMedium, 4=PFIsoTight, 5=PFIsoVeryTight, 6=PFIsoVeryVeryTight)"),
         tkIsoId = Var("tkIsoId()", "uint8", doc="TkIso ID (1=TkIsoLoose, 2=TkIsoTight)"),  
-        triggerIdLoose = Var("triggerIdLoose()", bool, doc="TriggerIdLoose ID"),
+        triggerIdLoose = Var("triggerIdLoose()", int, doc="TriggerIdLoose ID"),
         ##highPtId = Var("?passed('CutBasedIdGlobalHighPt')?2:passed('CutBasedIdTrkHighPt')","uint8",doc="high-pT cut-based ID (1 = tracker high pT, 2 = global high pT, which includes tracker high pT)"),
         ##softMvaId = Var("passed('SoftMvaId')",bool,doc="soft MVA ID"),
         ##mvaId = Var("passed('MvaLoose')+passed('MvaMedium')+passed('MvaTight')","uint8",doc="Mva ID from miniAOD selector (1=MvaLoose, 2=MvaMedium, 3=MvaTight)"),
@@ -104,7 +104,7 @@ muonBParkTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
         ##miniIsoId = Var("passed('MiniIsoLoose')+passed('MiniIsoMedium')+passed('MiniIsoTight')+passed('MiniIsoVeryTight')","uint8",doc="MiniIso ID from miniAOD selector (1=MiniIsoLoose, 2=MiniIsoMedium, 3=MiniIsoTight, 4=MiniIsoVeryTight)"),
         ##multiIsoId = Var("?passed('MultiIsoMedium')?2:passed('MultiIsoLoose')","uint8",doc="MultiIsoId from miniAOD selector (1=MultiIsoLoose, 2=MultiIsoMedium)"),
 
-        inTimeMuon = Var("inTimeMuon()", bool, doc="inTimeMuon ID"),
+        inTimeMuon = Var("inTimeMuon()", int, doc="inTimeMuon ID"),
         segmentCompatibility = Var("segmentCompatibility()", float, doc = "muon segment compatibility: propagating the tracker tracks to the muon system and evaluate the number of matched segments and the closeness of the matching", precision=14), # keep higher precision since people have cuts with 3 digits on this
         caloCompatibility = Var("caloCompatibility()", float, doc = "calorimetric compatibility"),
         validHitFraction = Var("validHitFraction()", float, doc = "fraction of hits a tracker track uses (among inner tracker layers it traverses)"),
@@ -140,7 +140,7 @@ muonsBParkMCMatchForTable = cms.EDProducer("MCMatcher",       # cut on deltaR, d
     mcPdgId     = cms.vint32(13),                             # one or more PDG ID (13 = mu); absolute values (see below)
     checkCharge = cms.bool(False),                            # True = require RECO and MC objects to have the same charge
     mcStatus    = cms.vint32(1),                              # PYTHIA status code (1 = stable, 2 = shower, 3 = hard scattering)
-    maxDeltaR   = cms.double(0.1),                            # Minimum deltaR for the match
+    maxDeltaR   = cms.double(0.25),                           # Minimum deltaR for the match
     maxDPtRel   = cms.double(0.25),                           # Minimum deltaPt/Pt for the match
     resolveAmbiguities    = cms.bool(True),                   # Forbid two RECO objects to match to the same GEN object
     resolveByMatchQuality = cms.bool(True),                   # False = just match input in order; True = pick lowest deltaR pair first
