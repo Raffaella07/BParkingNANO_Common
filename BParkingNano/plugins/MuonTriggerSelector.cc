@@ -57,6 +57,7 @@ class MuonTriggerSelector : public edm::EDProducer {
 
     edm::EDGetTokenT<std::vector<pat::Muon>> muonSrc_;
     edm::EDGetTokenT<std::vector<reco::Track>> displacedStandaloneMuonSrc_;
+    const edm::EDGetTokenT<reco::VertexCollection> vertexSrc_;
 
     // trigger muon matching
     const double max_deltaR_;
@@ -71,8 +72,9 @@ class MuonTriggerSelector : public edm::EDProducer {
 
 
 MuonTriggerSelector::MuonTriggerSelector(const edm::ParameterSet &iConfig):
-  muonSrc_( consumes<std::vector<pat::Muon>> ( iConfig.getParameter<edm::InputTag>("muonCollection"))),
+  muonSrc_(consumes<std::vector<pat::Muon>> (iConfig.getParameter<edm::InputTag>("muonCollection"))),
   displacedStandaloneMuonSrc_(consumes<std::vector<reco::Track>> (iConfig.getParameter<edm::InputTag>("displacedStandaloneMuonCollection"))),
+  vertexSrc_( consumes<reco::VertexCollection> (iConfig.getParameter<edm::InputTag>( "vertexCollection"))),
   max_deltaR_(iConfig.getParameter<double>("max_deltaR")),
   max_deltaPtRel_(iConfig.getParameter<double>("max_deltaPtRel")),
   selmu_ptMin_(iConfig.getParameter<double>("selmu_ptMin")),
@@ -104,6 +106,9 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
     edm::Handle<std::vector<reco::Track>> displaced_standalone_muons;
     iEvent.getByToken(displacedStandaloneMuonSrc_, displaced_standalone_muons);
 
+    edm::Handle<reco::VertexCollection> vertexHandle;
+    iEvent.getByToken(vertexSrc_, vertexHandle);
+
     std::vector<int> muonIsTrigger(slimmed_muons->size(), 0);
     std::vector<float> muonDR(slimmed_muons->size(),10000.);
     std::vector<float> muonDPT(slimmed_muons->size(),10000.);
@@ -117,6 +122,9 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
     std::vector<std::vector<float>> matcher; 
     std::vector<std::vector<float>> DR;
     std::vector<std::vector<float>> DPT;    
+
+    // fetching the primary vertex
+    const reco::Vertex & PV = vertexHandle->front();
 
     // proceeding to the trigger muon matching
     // for that, only use slimmedMuons
@@ -250,36 +258,44 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
       ETHmuons_out->back().addUserInt("isTriggering", -1);
       ETHmuons_out->back().addUserFloat("DR", -1.);
       ETHmuons_out->back().addUserFloat("DPT", -1.);
+      ETHmuons_out->back().addUserFloat("dz", muon.dz(PV.position()));
+      ETHmuons_out->back().addUserFloat("dzS", muon.dz(PV.position())/muon.dzError());
+      ETHmuons_out->back().addUserFloat("dxy", muon.dxy(PV.position()));
+      ETHmuons_out->back().addUserFloat("dxyS", muon.dxy(PV.position())/muon.dxyError());
 
       trans_muons_out->emplace_back(muonTT);
     }
 
     // add the slimmed muons to the collection 
     for(const pat::Muon & muon : *slimmed_muons){
-        unsigned int iMuo(&muon - &(slimmed_muons->at(0)) );
-        if(muon.pt()<selmu_ptMin_) continue;
-        if(fabs(muon.eta())>selmu_absEtaMax_) continue;
+      unsigned int iMuo(&muon - &(slimmed_muons->at(0)) );
+      if(muon.pt()<selmu_ptMin_) continue;
+      if(fabs(muon.eta())>selmu_absEtaMax_) continue;
 
-        const reco::TransientTrack muonTT((*(muon.bestTrack())),&(*bFieldHandle)); //sara:check,why not using inner track for muons? GM: What is this and why do we need this???
-        if(!muonTT.isValid()) continue; // GM: and why do we skip this muon if muonTT is invalid? This seems to have no effect so I kept it.
+      const reco::TransientTrack muonTT((*(muon.bestTrack())),&(*bFieldHandle)); //sara:check,why not using inner track for muons? GM: What is this and why do we need this???
+      if(!muonTT.isValid()) continue; // GM: and why do we skip this muon if muonTT is invalid? This seems to have no effect so I kept it.
 
-        //std::cout << "muon " << iMuo << " pt " << muon.pt()  << " eta " << muon.eta() << std::endl;
-        
-        pat::ETHMuon the_muon(muon);
-        ETHmuons_out->emplace_back(the_muon);
+      //std::cout << "muon " << iMuo << " pt " << muon.pt()  << " eta " << muon.eta() << std::endl;
+      
+      pat::ETHMuon the_muon(muon);
+      ETHmuons_out->emplace_back(the_muon);
 
-        for(unsigned int i=0; i<HLTPaths_.size(); i++){
-          ETHmuons_out->back().addUserInt(HLTPaths_[i],fires[iMuo][i]);
-        }
-        ETHmuons_out->back().addUserInt("isTriggering", muonIsTrigger[iMuo]);
-        ETHmuons_out->back().addUserFloat("DR",muonDR[iMuo]);
-        ETHmuons_out->back().addUserFloat("DPT",muonDPT[iMuo]);
+      for(unsigned int i=0; i<HLTPaths_.size(); i++){
+        ETHmuons_out->back().addUserInt(HLTPaths_[i],fires[iMuo][i]);
+      }
+      ETHmuons_out->back().addUserInt("isTriggering", muonIsTrigger[iMuo]);
+      ETHmuons_out->back().addUserFloat("DR", muonDR[iMuo]);
+      ETHmuons_out->back().addUserFloat("DPT" ,muonDPT[iMuo]);
+      ETHmuons_out->back().addUserFloat("dz", muon.dB(muon.PVDZ));
+      ETHmuons_out->back().addUserFloat("dzS", muon.dB(muon.PVDZ)/muon.edB(muon.PVDZ));
+      ETHmuons_out->back().addUserFloat("dxy", muon.dB(muon.PV2D));
+      ETHmuons_out->back().addUserFloat("dxyS", muon.dB(muon.PV2D)/muon.edB(muon.PV2D));
 
-        trans_muons_out->emplace_back(muonTT);
+      trans_muons_out->emplace_back(muonTT);
     }
 
-    iEvent.put(std::move(trgmuons_out),    "trgMuons"); 
-    iEvent.put(std::move(ETHmuons_out),       "SelectedMuons");
+    iEvent.put(std::move(trgmuons_out), "trgMuons"); 
+    iEvent.put(std::move(ETHmuons_out), "SelectedMuons");
     iEvent.put(std::move(trans_muons_out), "SelectedTransientMuons");
 }
 
