@@ -266,7 +266,7 @@ public :
    TTreeReaderArray<Float_t> Muon_dzS = {fReader, "Muon_dzS"};
    TTreeReaderArray<Float_t> Muon_eta = {fReader, "Muon_eta"};
    TTreeReaderArray<Float_t> Muon_globalNormalisedChi2 = {fReader, "Muon_globalNormalisedChi2"};
-   TTreeReaderArray<Float_t> Muon_ip3d = {fReader, "Muon_ip3d"};
+   //TTreeReaderArray<Float_t> Muon_ip3d = {fReader, "Muon_ip3d"};
    TTreeReaderArray<Float_t> Muon_kinkFinderChi2 = {fReader, "Muon_kinkFinderChi2"};
    TTreeReaderArray<Float_t> Muon_localPositionChi2 = {fReader, "Muon_localPositionChi2"};
    TTreeReaderArray<Float_t> Muon_mass = {fReader, "Muon_mass"};
@@ -300,7 +300,7 @@ public :
    TTreeReaderArray<Float_t> Muon_pt = {fReader, "Muon_pt"};
    //TTreeReaderArray<Float_t> Muon_ptErr = {fReader, "Muon_ptErr"};
    TTreeReaderArray<Float_t> Muon_segmentCompatibility = {fReader, "Muon_segmentCompatibility"};
-   TTreeReaderArray<Float_t> Muon_sip3d = {fReader, "Muon_sip3d"};
+   //TTreeReaderArray<Float_t> Muon_sip3d = {fReader, "Muon_sip3d"};
    TTreeReaderArray<Float_t> Muon_validHitFraction = {fReader, "Muon_validHitFraction"};
    TTreeReaderArray<Float_t> Muon_vx = {fReader, "Muon_vx"};
    TTreeReaderArray<Float_t> Muon_vy = {fReader, "Muon_vy"};
@@ -527,8 +527,8 @@ public :
    Float_t the_sig_trgmu_dxysig;
    Float_t the_sig_trgmu_dz;
    Float_t the_sig_trgmu_dzsig;
-   Float_t the_sig_trgmu_ip3d;
-   Float_t the_sig_trgmu_ip3dsig;
+   //Float_t the_sig_trgmu_ip3d;
+   //Float_t the_sig_trgmu_ip3dsig;
    Float_t the_sig_trgmu_pfiso03;
    Float_t the_sig_trgmu_pfiso03_rel;
    Float_t the_sig_trgmu_iso03;
@@ -585,8 +585,8 @@ public :
    Float_t the_sig_mu_dxysig;
    Float_t the_sig_mu_dz;
    Float_t the_sig_mu_dzsig;
-   Float_t the_sig_mu_ip3d;
-   Float_t the_sig_mu_ip3dsig;
+   //Float_t the_sig_mu_ip3d;
+   //Float_t the_sig_mu_ip3dsig;
    Float_t the_sig_mu_pfiso03;
    Float_t the_sig_mu_pfiso03_rel;
    Float_t the_sig_mu_iso03;

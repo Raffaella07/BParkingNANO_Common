@@ -234,8 +234,8 @@ void NanoDumper::SlaveBegin(TTree * /*tree*/)
   signal_tree->Branch("trgmu_dxysig", &the_sig_trgmu_dxysig);
   signal_tree->Branch("trgmu_dz", &the_sig_trgmu_dz);
   signal_tree->Branch("trgmu_dzsig", &the_sig_trgmu_dzsig);
-  signal_tree->Branch("trgmu_ip3d", &the_sig_trgmu_ip3d);
-  signal_tree->Branch("trgmu_ip3dsig", &the_sig_trgmu_ip3dsig);
+  //signal_tree->Branch("trgmu_ip3d", &the_sig_trgmu_ip3d);
+  //signal_tree->Branch("trgmu_ip3dsig", &the_sig_trgmu_ip3dsig);
   signal_tree->Branch("trgmu_pfiso03", &the_sig_trgmu_pfiso03);
   signal_tree->Branch("trgmu_pfiso03_rel", &the_sig_trgmu_pfiso03_rel);
   signal_tree->Branch("trgmu_iso03", &the_sig_trgmu_iso03);
@@ -282,8 +282,8 @@ void NanoDumper::SlaveBegin(TTree * /*tree*/)
   signal_tree->Branch("mu_dxysig", &the_sig_mu_dxysig);
   signal_tree->Branch("mu_dz", &the_sig_mu_dz);
   signal_tree->Branch("mu_dzsig", &the_sig_mu_dzsig);
-  signal_tree->Branch("mu_ip3d", &the_sig_mu_ip3d);
-  signal_tree->Branch("mu_ip3dsig", &the_sig_mu_ip3dsig);
+  //signal_tree->Branch("mu_ip3d", &the_sig_mu_ip3d);
+  //signal_tree->Branch("mu_ip3dsig", &the_sig_mu_ip3dsig);
   signal_tree->Branch("mu_pfiso03", &the_sig_mu_pfiso03);
   signal_tree->Branch("mu_pfiso03_rel", &the_sig_mu_pfiso03_rel);
   signal_tree->Branch("mu_iso03", &the_sig_mu_iso03);
@@ -643,8 +643,8 @@ Bool_t NanoDumper::Process(Long64_t entry)
     the_sig_trgmu_dxysig = Muon_dxyS[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
     the_sig_trgmu_dz = Muon_dz[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
     the_sig_trgmu_dzsig = Muon_dzS[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
-    the_sig_trgmu_ip3d = Muon_ip3d[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
-    the_sig_trgmu_ip3dsig = Muon_sip3d[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
+    //the_sig_trgmu_ip3d = Muon_ip3d[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
+    //the_sig_trgmu_ip3dsig = Muon_sip3d[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
     the_sig_trgmu_pfiso03 = Muon_pfiso03_all[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
     the_sig_trgmu_pfiso03_rel = Muon_pfiso03Rel_all[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
     the_sig_trgmu_iso03 = BToMuMuPi_trg_mu_iso03[selectedCandIdx_sig];
@@ -691,8 +691,8 @@ Bool_t NanoDumper::Process(Long64_t entry)
     the_sig_mu_dxysig = Muon_dxyS[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
     the_sig_mu_dz = Muon_dz[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
     the_sig_mu_dzsig = Muon_dzS[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
-    the_sig_mu_ip3d = Muon_ip3d[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
-    the_sig_mu_ip3dsig = Muon_sip3d[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
+    //the_sig_mu_ip3d = Muon_ip3d[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
+    //the_sig_mu_ip3dsig = Muon_sip3d[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
     the_sig_mu_pfiso03 = Muon_pfiso03_all[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
     the_sig_mu_pfiso03_rel = Muon_pfiso03Rel_all[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
     the_sig_mu_iso03 = BToMuMuPi_sel_mu_iso03[selectedCandIdx_sig];
