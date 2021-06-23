@@ -115,6 +115,7 @@ BToMuMuPiTable = cms.EDProducer(
         sv_lxy          = ufloat('hnl_l_xy'     ),
         sv_lxye         = ufloat('hnl_l_xy_unc' ),
         sv_lxy_sig      = ufloat('hnl_ls_xy'    ),
+        sv_lxyz         = ufloat('hnl_l_xyz'    ),
         sv_x            = ufloat('hnl_vtx_x'    ),
         sv_y            = ufloat('hnl_vtx_y'    ),
         sv_z            = ufloat('hnl_vtx_z'    ),
@@ -127,6 +128,7 @@ BToMuMuPiTable = cms.EDProducer(
         hnl_pt          = ufloat('hnl_fitted_pt'     ),
         hnl_eta         = ufloat('hnl_fitted_eta'    ),
         hnl_phi         = ufloat('hnl_fitted_phi'    ),
+        hnl_ct          = ufloat('hnl_ct'            ),
         hnl_charge      = Var('daughter("hnl").charge()', int),
         hnl_cos2D       = ufloat('hnl_fitted_cos_theta_2D'   ),
         ## daughter muon
@@ -223,6 +225,7 @@ BToMuMuPiTable = cms.EDProducer(
         mupi_mass_reco_gen_reldiff = ufloat('mupi_mass_reco_gen_reldiff'),
         lxy_reco_gen_reldiff = ufloat('lxy_reco_gen_reldiff'),
         ## gen displacement 
+        gen_lxy = ufloat('gen_lxy'),
         #fitter_bs_lxy = ufloat('fitter_bs_lxy'), #same as sv_lxy, with more explicit naming
         ##my_fitter_bs_lxy = ufloat('my_fitter_bs_lxy'), 
         ##disp2DFromBS = ufloat('disp2DFromBS'),

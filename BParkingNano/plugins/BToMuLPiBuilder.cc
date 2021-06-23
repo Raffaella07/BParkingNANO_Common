@@ -277,6 +277,11 @@ void BToMuLPiBuilder<Lepton>::produce(edm::StreamID, edm::Event &evt, edm::Event
         b_cand.addUserFloat("hnl_fitted_pi_eta"      , fitter.daughter_p4(1).eta()                                             );
         b_cand.addUserFloat("hnl_fitted_pi_phi"      , fitter.daughter_p4(1).phi()                                             );
         b_cand.addUserFloat("hnl_fitted_pi_mass"     , fitter.daughter_p4(1).mass()                                            );
+          
+        float hnl_lxyz = sqrt(pow(trg_mu_ptr->vx() - hnl_cand.vx(), 2) + pow(trg_mu_ptr->vy() - hnl_cand.vy(), 2) + pow(trg_mu_ptr->vz() - hnl_cand.vz(), 2));
+        b_cand.addUserFloat("hnl_l_xyz"              , hnl_lxyz                                                                );
+        b_cand.addUserFloat("hnl_ct"                 , hnl_lxyz / (hnl_cand.p4().Beta() * hnl_cand.p4().Gamma())               );
+
       
         // adding trigger muon information to the b candidate
         b_cand.addUserFloat("trg_muon_pt"              , trg_mu_ptr->pt()                                                      );
@@ -531,13 +536,13 @@ void BToMuLPiBuilder<Lepton>::produce(edm::StreamID, edm::Event &evt, edm::Event
 
 
         // gen-matching
-
         int isMatched = 0;
         int trg_mu_isMatched(0), sel_mu_isMatched(0), pi_isMatched(0);
         int trg_mu_genIdx(-1), sel_mu_genIdx(-1), pi_genIdx(-1);
         int genTriggerMuonMother_genPdgId(-1), genMuonMother_genPdgId(-1), genPionMother_genPdgId(-1);
         int triggerMuonMother_genIdx(-1), hnlMother_genIdx(-1);
         float mupi_mass_reldiff(99.), lxy_reldiff(99.);
+        float gen_lxy(-1.);
 
         // for MC only
         if(isMC_ == true){
@@ -569,12 +574,13 @@ void BToMuLPiBuilder<Lepton>::produce(edm::StreamID, edm::Event &evt, edm::Event
             edm::Ptr<reco::GenParticle> genTriggerMuonMother_ptr(genParticles, genTriggerMuonMother_genIdx);
 
             // getting vertices
-            trgmu_vx_gen = genTriggerMuonMother_ptr->vx();
-            trgmu_vy_gen = genTriggerMuonMother_ptr->vy();
+            trgmu_vx_gen = genTriggerMuon_ptr->vx();
+            trgmu_vy_gen = genTriggerMuon_ptr->vy();
 
             // pdgId of the mother particles
             genTriggerMuonMother_genPdgId = genTriggerMuonMother_ptr->pdgId();
 
+            // matching of the trigger muon
             if(fabs(trg_mu_genPdgId) == 13 && (fabs(genTriggerMuonMother_genPdgId) == 511 || fabs(genTriggerMuonMother_genPdgId) == 521 
                   || fabs(genTriggerMuonMother_genPdgId) == 531 || fabs(genTriggerMuonMother_genPdgId) == 541)){
               trg_mu_isMatched = 1;
@@ -599,12 +605,13 @@ void BToMuLPiBuilder<Lepton>::produce(edm::StreamID, edm::Event &evt, edm::Event
             mupi_mass_gen = genMuonMother_ptr->mass();
 
             // getting vertices
-            mu_vx_gen = genMuonMother_ptr->vx();
-            mu_vy_gen = genMuonMother_ptr->vy();
+            mu_vx_gen = genMuon_ptr->vx();
+            mu_vy_gen = genMuon_ptr->vy();
 
             // pdgId of the mother particles
             genMuonMother_genPdgId = genMuonMother_ptr->pdgId();
 
+            // matching of the displaced lepton
             if(fabs(sel_mu_genPdgId) == 13 && fabs(genMuonMother_genPdgId) == 9900015){
                 sel_mu_isMatched = 1;
             }
@@ -624,17 +631,20 @@ void BToMuLPiBuilder<Lepton>::produce(edm::StreamID, edm::Event &evt, edm::Event
             // pdgId of the mother particle
             genPionMother_genPdgId = genPionMother_ptr->pdgId();
 
+            // matching of the displaced pion
             if(fabs(pi_genPdgId) == 211 && fabs(genPionMother_genPdgId) == 9900015){
               pi_isMatched = 1;
             }
           }
 
           // computing displacement at gen level
-          float trgmu_mu_lxy_gen = sqrt(pow(trgmu_vx_gen - mu_vx_gen, 2) + pow(trgmu_vy_gen - mu_vy_gen, 2));
-          float trgmu_mu_lxy_reco = sqrt(pow(trg_mu_ptr->vx() - lep_ptr->vx(), 2) + pow(trg_mu_ptr->vy() - lep_ptr->vy(), 2));
+          float gen_hnl_lxy = sqrt(pow(trgmu_vx_gen - mu_vx_gen, 2) + pow(trgmu_vy_gen - mu_vy_gen, 2));
 
+          // computing relative difference between gen and reco quantities
           mupi_mass_reldiff = fabs(mupi_mass_reco - mupi_mass_gen) / mupi_mass_gen;
-          lxy_reldiff = fabs(trgmu_mu_lxy_reco - trgmu_mu_lxy_gen) / trgmu_mu_lxy_gen;
+          lxy_reldiff = fabs(lxy.value() - gen_hnl_lxy) / gen_hnl_lxy;
+
+          // matching of the full mulpi candidate
           if(trg_mu_isMatched==1 && sel_mu_isMatched==1 && pi_isMatched==1 && mupi_mass_reldiff<0.1 && triggerMuonMother_genIdx==hnlMother_genIdx){
             isMatched = 1;
           }
@@ -652,6 +662,7 @@ void BToMuLPiBuilder<Lepton>::produce(edm::StreamID, edm::Event &evt, edm::Event
         b_cand.addUserInt("matching_pi_motherPdgId", genPionMother_genPdgId);
         b_cand.addUserFloat("mupi_mass_reco_gen_reldiff", mupi_mass_reldiff);
         b_cand.addUserFloat("lxy_reco_gen_reldiff", lxy_reldiff);
+        b_cand.addUserFloat("gen_lxy", gen_lxy);
         
 
         ret_val->push_back(b_cand);
