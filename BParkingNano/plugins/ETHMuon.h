@@ -99,19 +99,19 @@ namespace pat {
         pfIsoId_ = -1;
         tkIsoId_ = -1;
         triggerIdLoose_ = -1;
-        inTimeMuon_ = -1; // to be checked
-        segmentCompatibility_ = -1.; // to be checked
-        caloCompatibility_ = -1.; // to be checked
-        validHitFraction_ = -1.; // to be checked
-        kinkFinderChi2_ =  -1.; // to be checked
-        globalNormalisedChi2_ = -1.; // to be checked
-        localPositionChi2_ = -1.; // to be checked
-        trackerHighPurityFlag_ = -1; // to be checked
-        numberOfValidMuonHits_ = -1; // to be checked
-        numberOfValidPixelHits_ = -1; // to be checked
-        numberOfTrackerLayers_ = -1; // to be checked
-        numberOfPixelLayers_ = -1; // to be checked
-        numberOfStations_ = -1; // to be checked
+        inTimeMuon_ = -1;
+        segmentCompatibility_ = -1.;
+        caloCompatibility_ = -1.;
+        validHitFraction_ = muon.validFraction();
+        kinkFinderChi2_ =  -1.;
+        globalNormalisedChi2_ =  muon.normalizedChi2();
+        localPositionChi2_ = -1.;
+        trackerHighPurityFlag_ =  muon.quality(reco::TrackBase::highPurity);
+        numberOfValidMuonHits_ =  muon.hitPattern().numberOfValidMuonHits();
+        numberOfValidPixelHits_ = muon.hitPattern().numberOfValidPixelHits();
+        numberOfTrackerLayers_ =  muon.hitPattern().trackerLayersWithMeasurement();
+        numberOfPixelLayers_ = muon.hitPattern().pixelLayersWithMeasurement();
+        numberOfStations_ = -1;
       }
 
       // destructor
