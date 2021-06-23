@@ -217,6 +217,7 @@ void NanoDumper::SlaveBegin(TTree * /*tree*/)
   signal_tree->Branch("hnl_phi", &the_sig_hnl_phi);
   signal_tree->Branch("hnl_mass", &the_sig_hnl_mass);
   signal_tree->Branch("hnl_charge", &the_sig_hnl_charge);
+  signal_tree->Branch("hnl_ct", &the_sig_hnl_ct);
   signal_tree->Branch("hnl_cos2d", &the_sig_hnl_cos2d);
   signal_tree->Branch("hnl_iso03", &the_sig_hnl_iso03);
   signal_tree->Branch("hnl_iso03_close", &the_sig_hnl_iso03_close);
@@ -306,6 +307,8 @@ void NanoDumper::SlaveBegin(TTree * /*tree*/)
   signal_tree->Branch("mu_trkisoid", &the_sig_mu_trkisoid);
   signal_tree->Branch("mu_triggerlooseid", &the_sig_mu_triggerlooseid);
   signal_tree->Branch("mu_istriggering", &the_sig_mu_istriggering);
+  signal_tree->Branch("mu_isslimmed", &the_sig_mu_isslimmed);
+  signal_tree->Branch("mu_isdsa", &the_sig_mu_isdsa);
   signal_tree->Branch("mu_isPF", &the_sig_mu_isPF);
   signal_tree->Branch("mu_isglobalmuon", &the_sig_mu_isglobalmuon);
   signal_tree->Branch("mu_istrackermuon", &the_sig_mu_istrackermuon);
@@ -389,6 +392,8 @@ void NanoDumper::SlaveBegin(TTree * /*tree*/)
   signal_tree->Branch("trgmu_ismatched", &the_sig_trgmu_ismatched);
   signal_tree->Branch("mu_ismatched", &the_sig_mu_ismatched);
   signal_tree->Branch("pi_ismatched", &the_sig_pi_ismatched);
+  signal_tree->Branch("mupi_mass_reco_gen_reldiff", &the_sig_mupi_mass_reco_gen_reldiff);
+  signal_tree->Branch("lxy_reco_gen_reldiff", &the_sig_lxy_reco_gen_reldiff);
   
   if(isMC){
     signal_tree->Branch("gen_trgmu_mu_lxy", &the_gen_trgmu_mu_lxy);
@@ -618,6 +623,7 @@ Bool_t NanoDumper::Process(Long64_t entry)
     the_sig_hnl_phi = BToMuMuPi_hnl_phi[selectedCandIdx_sig];
     the_sig_hnl_mass = BToMuMuPi_hnl_mass[selectedCandIdx_sig];
     the_sig_hnl_charge = BToMuMuPi_hnl_charge[selectedCandIdx_sig];
+    the_sig_hnl_ct = BToMuMuPi_hnl_ct[selectedCandIdx_sig];
     the_sig_hnl_cos2d = BToMuMuPi_hnl_cos2D[selectedCandIdx_sig];
     the_sig_hnl_iso03 = BToMuMuPi_hnl_iso03[selectedCandIdx_sig];
     the_sig_hnl_iso03_close = BToMuMuPi_hnl_iso03_close[selectedCandIdx_sig];
@@ -709,6 +715,8 @@ Bool_t NanoDumper::Process(Long64_t entry)
     the_sig_mu_trkisoid = Muon_tkIsoId[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
     the_sig_mu_triggerlooseid = Muon_triggerIdLoose[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
     the_sig_mu_istriggering = Muon_isTriggering[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
+    the_sig_mu_isslimmed = Muon_isSlimmedMuon[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
+    the_sig_mu_isdsa = Muon_isDSAMuon[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
     the_sig_mu_isPF = Muon_isPF[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
     the_sig_mu_isglobalmuon = Muon_isGlobalMuon[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
     the_sig_mu_istrackermuon = Muon_isTrackerMuon[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
@@ -789,6 +797,8 @@ Bool_t NanoDumper::Process(Long64_t entry)
     the_sig_trgmu_ismatched = BToMuMuPi_trg_mu_isMatched[selectedCandIdx_sig];
     the_sig_mu_ismatched = BToMuMuPi_sel_mu_isMatched[selectedCandIdx_sig];
     the_sig_pi_ismatched = BToMuMuPi_pi_isMatched[selectedCandIdx_sig];
+    the_sig_mupi_mass_reco_gen_reldiff = BToMuMuPi_mupi_mass_reco_gen_reldiff[selectedCandIdx_sig];
+    the_sig_lxy_reco_gen_reldiff = BToMuMuPi_lxy_reco_gen_reldiff[selectedCandIdx_sig];
 
     // additionnal displacement quantities
     float dist_sv_pv_xy = sqrt((BToMuMuPi_sv_x[selectedCandIdx_sig] - *PV_x) * (BToMuMuPi_sv_x[selectedCandIdx_sig] - *PV_x) + (BToMuMuPi_sv_y[selectedCandIdx_sig] - *PV_y) * (BToMuMuPi_sv_y[selectedCandIdx_sig] - *PV_y));

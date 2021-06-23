@@ -136,6 +136,7 @@ public :
    TTreeReaderArray<Float_t> BToMuMuPi_fit_pi_phi = {fReader, "BToMuMuPi_fit_pi_phi"};
    TTreeReaderArray<Float_t> BToMuMuPi_fit_pi_pt = {fReader, "BToMuMuPi_fit_pi_pt"};
    TTreeReaderArray<Float_t> BToMuMuPi_hnl_cos2D = {fReader, "BToMuMuPi_hnl_cos2D"};
+   TTreeReaderArray<Float_t> BToMuMuPi_hnl_ct = {fReader, "BToMuMuPi_hnl_ct"};
    TTreeReaderArray<Float_t> BToMuMuPi_hnl_eta = {fReader, "BToMuMuPi_hnl_eta"};
    TTreeReaderArray<Float_t> BToMuMuPi_hnl_iso03 = {fReader, "BToMuMuPi_hnl_iso03"};
    TTreeReaderArray<Float_t> BToMuMuPi_hnl_iso03_close = {fReader, "BToMuMuPi_hnl_iso03_close"};
@@ -212,6 +213,8 @@ public :
    TTreeReaderArray<Int_t> BToMuMuPi_matching_sel_mu_motherPdgId = {fReader, "BToMuMuPi_matching_sel_mu_motherPdgId"};
    TTreeReaderArray<Int_t> BToMuMuPi_matching_trg_mu_genIdx = {fReader, "BToMuMuPi_matching_trg_mu_genIdx"};
    TTreeReaderArray<Int_t> BToMuMuPi_matching_trg_mu_motherPdgId = {fReader, "BToMuMuPi_matching_trg_mu_motherPdgId"};
+   TTreeReaderArray<Float_t> BToMuMuPi_mupi_mass_reco_gen_reldiff = {fReader, "BToMuMuPi_mupi_mass_reco_gen_reldiff"};
+   TTreeReaderArray<Float_t> BToMuMuPi_lxy_reco_gen_reldiff = {fReader, "BToMuMuPi_lxy_reco_gen_reldiff"};
    TTreeReaderArray<Int_t> BToMuMuPi_pdgId = {fReader, "BToMuMuPi_pdgId"};
    TTreeReaderArray<Int_t> BToMuMuPi_pi_idx = {fReader, "BToMuMuPi_pi_idx"};
    TTreeReaderArray<Int_t> BToMuMuPi_sel_mu_idx = {fReader, "BToMuMuPi_sel_mu_idx"};
@@ -254,6 +257,8 @@ public :
    TTreeReaderArray<Bool_t> Muon_triggerIdLoose = {fReader, "Muon_triggerIdLoose"};
    */
 
+   TTreeReaderArray<Int_t> Muon_isSlimmedMuon = {fReader, "Muon_isSlimmedMuon"};
+   TTreeReaderArray<Int_t> Muon_isDSAMuon = {fReader, "Muon_isDSAMuon"};
    TTreeReaderArray<Float_t> Muon_caloCompatibility = {fReader, "Muon_caloCompatibility"};
    TTreeReaderArray<Float_t> Muon_dxy = {fReader, "Muon_dxy"};
    TTreeReaderArray<Float_t> Muon_dxyS = {fReader, "Muon_dxyS"};
@@ -505,6 +510,7 @@ public :
    Float_t the_sig_hnl_phi;
    Float_t the_sig_hnl_mass;
    Int_t the_sig_hnl_charge;
+   Int_t the_sig_hnl_ct;
    Float_t the_sig_hnl_cos2d;
    Float_t the_sig_hnl_iso03;
    Float_t the_sig_hnl_iso03_close;
@@ -599,6 +605,8 @@ public :
    Int_t the_sig_mu_trkisoid;
    Int_t the_sig_mu_triggerlooseid;
    Int_t the_sig_mu_istriggering;
+   Int_t the_sig_mu_isslimmed;
+   Int_t the_sig_mu_isdsa;
    Int_t the_sig_mu_isPF;
    Int_t the_sig_mu_isglobalmuon;
    Int_t the_sig_mu_istrackermuon;
@@ -682,6 +690,8 @@ public :
    Int_t the_sig_trgmu_ismatched;
    Int_t the_sig_mu_ismatched;
    Int_t the_sig_pi_ismatched;
+   Float_t the_sig_mupi_mass_reco_gen_reldiff;
+   Float_t the_sig_lxy_reco_gen_reldiff;
 
    // these two are from matching information
    Float_t the_gen_trgmu_mu_lxy;
