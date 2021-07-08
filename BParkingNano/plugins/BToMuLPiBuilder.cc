@@ -176,7 +176,7 @@ void BToMuLPiBuilder<Lepton>::produce(edm::StreamID, edm::Event &evt, edm::Event
       // as well as a B candidate, that is HNL + trg mu
       for(size_t lep_idx = 0; lep_idx < leptons->size(); ++lep_idx) {
         edm::Ptr<Lepton> lep_ptr(leptons, lep_idx);
-        //if(lep_ptr->isDSAMuon()) continue;
+        if(lep_ptr->isDSAMuon()) continue;
        
         // the second muon must be _other_ than the trigger muon
         if(lep_ptr->pt()==trg_mu_ptr->pt()) { // lacking of any better idea for a comparison by pointer... 
@@ -520,13 +520,13 @@ void BToMuLPiBuilder<Lepton>::produce(edm::StreamID, edm::Event &evt, edm::Event
 
 
         // invariant masses
-        float dilepton_mass = (fitter.daughter_p4(0) + trg_mu_ptr->p4()).mass();
-        float trgmu_pi_mass = (fitter.daughter_p4(1) + trg_mu_ptr->p4()).mass();
+        float dilepton_mass = (fitter.daughter_p4(0) + trg_mu_ptr->polarP4()).mass();
+        float trgmu_pi_mass = (fitter.daughter_p4(1) + trg_mu_ptr->polarP4()).mass();
         b_cand.addUserFloat("dilepton_mass", dilepton_mass);
         b_cand.addUserFloat("trgmu_pi_mass", trgmu_pi_mass);
 
-        float dilepton_pt = (fitter.daughter_p4(0) + trg_mu_ptr->p4()).pt();
-        float trgmu_pi_pt = (fitter.daughter_p4(1) + trg_mu_ptr->p4()).pt();
+        float dilepton_pt = (fitter.daughter_p4(0) + trg_mu_ptr->polarP4()).pt();
+        float trgmu_pi_pt = (fitter.daughter_p4(1) + trg_mu_ptr->polarP4()).pt();
         b_cand.addUserFloat("dilepton_pt", dilepton_pt);
         b_cand.addUserFloat("trgmu_pi_pt", trgmu_pi_pt);
 
