@@ -148,7 +148,7 @@ class NanoProdManager(NanoTools):
     outputdir = failed_files[0][0:failed_files[0].find('bparknano')]
     filelist  = self.writeFileList(failed_files) 
 
-    command = 'sbatch -p wn --account=t3 -o {ld}/nanostep_nj%a.log -e {ld}/nanostep_nj%a.log --job-name=nanostep_nj%a_{pl} --array {ar} --time=03:00:00 submitter.sh {outdir} {usr} {pl} {tag} {isMC} {rmt} {lst} 1'.format(
+    command = 'sbatch -p standard --account=t3 -o {ld}/nanostep_nj%a.log -e {ld}/nanostep_nj%a.log --job-name=nanostep_nj%a_{pl} --array {ar} --time=03:00:00 submitter.sh {outdir} {usr} {pl} {tag} {isMC} {rmt} {lst} 1'.format(
       ld      = logdir,
       pl      = label,
       ar      = self.getArray(failed_files), 
