@@ -319,6 +319,7 @@ class NanoLauncher(NanoTools):
       if NanoTools.getNFiles(self, filelist) == 0:
         print '        WARNING: no files were found with the corresponding production label'
         print '                 Did you set the correct username using --user <username>?'
+        continue
 
       # enforcing max files limit
       if self.maxfiles != None and nfiles_tot >= int(self.maxfiles): continue 
