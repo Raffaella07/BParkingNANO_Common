@@ -32,7 +32,7 @@ outputFileFEVT = cms.untracked.string('_'.join(['BParkFullEvt', extension[option
 if not options.inputFiles:
     #options.inputFiles = ['/store/mc/RunIIAutumn18MiniAOD/QCD_Pt-20to30_MuEnrichedPt5_TuneCP5_13TeV_pythia8/MINIAODSIM/102X_upgrade2018_realistic_v15-v4/110000/A1ADA5DA-4A57-7945-9B9D-6FAC167A1627.root'] if options.isMC else \
     options.inputFiles = ['/store/data/Run2018B/ParkingBPH4/MINIAOD/05May2019-v2/230000/F7E7EF39-476F-1C48-95F7-74CB5C7A542C.root'] if not options.isMC else \
-                         ['file:%s' %i for i in glob('/pnfs/psi.ch/cms/trivcat/store/user/mratti/BHNLsGen/V20_emu/mass3.0_ctau184.0/step4_nj15*.root')]
+                         ['file:%s' %i for i in glob('/pnfs/psi.ch/cms/trivcat/store/user/mratti/BHNLsGen/V20_emu/mass3.0_ctau184.0/step4_nj15.root')]
 
 annotation = '%s nevts:%d' % (outputFileNANO, options.maxEvents)
 
@@ -122,7 +122,7 @@ process = nanoAOD_customizeBToKMuMu          (process, isMC=options.isMC)
 process = nanoAOD_customizeTriggerBitsBPark  (process)
 
 # Path and EndPath definitions
-#process.nanoAOD_general_step = cms.Path(process.nanoSequence)
+process.nanoAOD_general_step = cms.Path(process.nanoSequence)
 process.nanoAOD_MuMuPi_step = cms.Path(process.nanoSequence + process.nanoBMuMuPiSequence + CountBToMuMuPi )
 process.nanoAOD_KMuMu_step  = cms.Path(process.nanoSequence + process.nanoBKMuMuSequence + CountBToKmumu ) 
 
@@ -137,7 +137,7 @@ process.NANOAODoutput_step = cms.EndPath(process.NANOAODoutput)
 
 # Schedule definition
 process.schedule = cms.Schedule(
-    #process.nanoAOD_general_step,
+    process.nanoAOD_general_step,
     process.nanoAOD_MuMuPi_step,
     process.nanoAOD_KMuMu_step, 
     process.endjob_step, 
@@ -146,7 +146,7 @@ process.schedule = cms.Schedule(
     
 if options.wantFullRECO:
     process.schedule = cms.Schedule(
-        #process.nanoAOD_general_step,
+        process.nanoAOD_general_step,
         process.nanoAOD_MuMuPi_step,
         process.nanoAOD_KMuMu_step, 
         process.endjob_step, 
@@ -157,8 +157,9 @@ from PhysicsTools.PatAlgos.tools.helpers import associatePatAlgosToolsTask
 associatePatAlgosToolsTask(process)
 
 process.NANOAODoutput.SelectEvents = cms.untracked.PSet(
-    SelectEvents = cms.vstring('nanoAOD_MuMuPi_step', 'nanoAOD_KMuMu_step') 
-    #SelectEvents = cms.vstring('nanoAOD_MuMuPi_step', 'nanoAOD_KMuMu_step', 'nanoAOD_general_step') 
+    #SelectEvents = cms.vstring('nanoAOD_MuMuPi_step', 'nanoAOD_KMuMu_step') 
+    SelectEvents = cms.vstring('nanoAOD_MuMuPi_step', 'nanoAOD_KMuMu_step', 'nanoAOD_general_step') 
+    #SelectEvents = cms.vstring('nanoAOD_MuMuPi_step', 'nanoAOD_general_step') 
 )
 
 
