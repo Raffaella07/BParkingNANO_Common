@@ -335,6 +335,7 @@ class NanoProdManager(NanoTools):
 
 
       n_tot_perdir = n_good_perdir + n_failed_perdir + n_unfinished_perdir + n_unprocessed_perdir
+      if n_tot_perdir == 0: continue
 
       print '\n'
       print ' --> number of successfull jobs      : {}    {}%'.format(n_good_perdir, round(n_good_perdir/float(n_tot_perdir)*100, 2))
