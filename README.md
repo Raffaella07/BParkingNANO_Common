@@ -85,7 +85,8 @@ Options:
   * --doflat: launch the ntuplising step
   * --domergenano: launch the merging tool automatically after the nano step. Not recommended as doubles the storage space needed
 * --user `<user>`: with --mcprivate only; username where the miniAOD samples are stored
-* --tag `<tag>`: optional, tag to be appended to the rootfile name 
+* --tagnano `<tagnano>`: optional, tag to be appended to the nano rootfile name 
+* --tagflat `<tagflat>`: optional, tag to be appended to the flat rootfile name 
 * --maxfiles `<maxfiles>`: optional, maximum number of files to process
 * --doquick: optional run on slurm quick partition (time/job < 1h)
 * --docompile: optional, compiles the BParkingNano tool before launching
@@ -104,7 +105,7 @@ python nanoLauncher.py --pl V01 --ds /QCD_Pt-15to20_MuEnrichedPt5_TuneCP5_13TeV_
 If not done at launching, you can merge a posteriori the different nano steps by doing
 
 ```
-python nanoMerger.py --pl <prodLabel> --ds <dataset> --tag <tag> --donano --<mcprivate/mccentral/data>
+python nanoMerger.py --pl <prodLabel> --ds <dataset> --tagnano <tagnano> --donano --<mcprivate/mccentral/data>
 ```
 
 Note that the production label and tag have to be consistent with those of the nanoAOD production.
