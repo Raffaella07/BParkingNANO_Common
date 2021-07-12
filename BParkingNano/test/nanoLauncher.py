@@ -356,7 +356,7 @@ class NanoLauncher(NanoTools):
       if not path.exists(logdir):
         os.system('mkdir -p {}'.format(logdir))
 
-      label = '{}_{}_Chunk{}_n{}'.format(label1, label2 if tag==None else label2+'_'+tag, iFile, NanoTools.getNFiles(self, filelist))
+      label = '{}_{}_Chunk{}_n{}'.format(label1, label2 if tag==0 else label2+'_'+tag, iFile, NanoTools.getNFiles(self, filelist))
 
       nano_jobId = -99
 
