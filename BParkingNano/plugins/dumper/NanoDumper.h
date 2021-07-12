@@ -487,16 +487,16 @@ public :
 
    Int_t the_pv_npvs;
 
-   UChar_t the_hlt_mu7_ip4;
-   UChar_t the_hlt_mu8_ip6;
-   UChar_t the_hlt_mu8_ip5;
-   UChar_t the_hlt_mu8_ip3;
-   UChar_t the_hlt_mu8p5_ip3p5;
-   UChar_t the_hlt_mu9_ip6;
-   UChar_t the_hlt_mu9_ip5;
-   UChar_t the_hlt_mu9_ip4;
-   UChar_t the_hlt_mu10p5_ip3p5;
-   UChar_t the_hlt_mu12_ip6;
+   Int_t the_hlt_mu7_ip4;
+   Int_t the_hlt_mu8_ip6;
+   Int_t the_hlt_mu8_ip5;
+   Int_t the_hlt_mu8_ip3;
+   Int_t the_hlt_mu8p5_ip3p5;
+   Int_t the_hlt_mu9_ip6;
+   Int_t the_hlt_mu9_ip5;
+   Int_t the_hlt_mu9_ip4;
+   Int_t the_hlt_mu10p5_ip3p5;
+   Int_t the_hlt_mu12_ip6;
 
    Float_t the_sig_b_pt;
    Float_t the_sig_b_eta;
