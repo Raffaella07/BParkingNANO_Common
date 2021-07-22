@@ -62,6 +62,7 @@ class MuonTriggerSelector : public edm::EDProducer {
     // added
     edm::EDGetTokenT<edm::TriggerResults> triggerBits_;
     edm::EDGetTokenT<std::vector<pat::TriggerObjectStandAlone>> triggerObjects_;
+    edm::EDGetTokenT<pat::PackedTriggerPrescales> triggerPrescales_;
 
     // trigger muon matching
     const double max_deltaR_;
@@ -82,6 +83,7 @@ MuonTriggerSelector::MuonTriggerSelector(const edm::ParameterSet &iConfig):
   // added
   triggerBits_(consumes<edm::TriggerResults>(iConfig.getParameter<edm::InputTag>("bits"))),
   triggerObjects_(consumes<std::vector<pat::TriggerObjectStandAlone>>(iConfig.getParameter<edm::InputTag>("triggerObjects"))),
+  triggerPrescales_(consumes<pat::PackedTriggerPrescales>(iConfig.getParameter<edm::InputTag>("prescales"))),
   //
   max_deltaR_(iConfig.getParameter<double>("max_deltaR")),
   max_deltaPtRel_(iConfig.getParameter<double>("max_deltaPtRel")),
@@ -117,6 +119,13 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
     edm::Handle<reco::VertexCollection> vertexHandle;
     iEvent.getByToken(vertexSrc_, vertexHandle);
 
+    edm::Handle<edm::TriggerResults> triggerBits;
+    iEvent.getByToken(triggerBits_, triggerBits);
+    const edm::TriggerNames &names = iEvent.triggerNames(*triggerBits);
+
+    edm::Handle<pat::PackedTriggerPrescales> triggerPrescales;
+    iEvent.getByToken(triggerPrescales_, triggerPrescales);
+
     std::vector<int> muonIsTrigger(slimmed_muons->size(), 0);
     std::vector<float> muonDR(slimmed_muons->size(),10000.);
     std::vector<float> muonDPT(slimmed_muons->size(),10000.);
@@ -127,6 +136,7 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
     std::vector<float> matched_dr(slimmed_muons->size(),10000.);
     std::vector<float> matched_dpt(slimmed_muons->size(),-10000.);
     std::vector<std::vector<int>> fires;
+    std::vector<std::vector<int>> prescales;
     std::vector<std::vector<float>> matcher; 
     std::vector<std::vector<float>> DR;
     std::vector<std::vector<float>> DPT;    
@@ -145,6 +155,7 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
         //std::cout <<"Muon Pt="<< muon.pt() << " Eta=" << muon.eta() << " Phi=" << muon.phi() << " nTriggerObjectMatch " << muon.triggerObjectMatches().size() << endl;
 
         std::vector<int> frs(HLTPaths_.size(),0); //path fires for each reco muon
+        std::vector<int> prescale(HLTPaths_.size(),-1);
         //std::vector<int> sds(L1Seeds_.size(),0);// L1 Seeds for each L1 muon
         std::vector<float> temp_matched_to(HLTPaths_.size(),1000.);
         std::vector<float> temp_DR(HLTPaths_.size(),1000.);
@@ -217,6 +228,7 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
         //for(unsigned int i(0); i<frs.size(); ++i){
         //  std::cout << "fires " << frs[i] << " deltaR " << temp_DR[i] << " deltaPt " << temp_DPT[i] << std::endl;
         //}
+        prescales.push_back(prescale); //This is used for the initialisation of the prescales.
         matcher.push_back(temp_matched_to); //This is used in order to see if a reco muon is matched with a HLT object. PT of the reco muon is saved in this vector. 
         DR.push_back(temp_DR);
         DPT.push_back(temp_DPT);
@@ -244,11 +256,20 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
                 }              
             }
             if(matcher[iMuo][path]!=1000. && DR[iMuo][path]<max_deltaR_ && fabs(DPT[iMuo][path])<max_deltaPtRel_ && DR[iMuo][path]!=10000){
-                muonIsTrigger[iMuo]=1;
-                muonDR[iMuo]=DR[iMuo][path];
-                muonDPT[iMuo]=DPT[iMuo][path];                
+              muonIsTrigger[iMuo]=1;
+              muonDR[iMuo]=DR[iMuo][path];
+              muonDPT[iMuo]=DPT[iMuo][path];                
+              
+              for (unsigned int i = 0, n = triggerBits->size(); i < n; ++i) {
+                if(names.triggerName(i).find(HLTPaths_[path]) != std::string::npos){
+                  prescales[iMuo][path] = triggerPrescales->getPrescaleForIndex(i);
+                }
+              }
             }
-            else fires[iMuo][path]=0;
+            else{
+              fires[iMuo][path]=0;
+              //prescales[iMuo][path] = -1;
+            }
         }
     }
 
@@ -357,6 +378,7 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
 
       for(unsigned int i=0; i<HLTPaths_.size(); i++){
         ETHmuons_out->back().addUserInt(HLTPaths_[i], -1);
+        ETHmuons_out->back().addUserInt(HLTPaths_[i] + "_prescale", -1);
       }
       ETHmuons_out->back().addUserInt("isTriggering", -1);
       ETHmuons_out->back().addUserFloat("DR", -1.);
@@ -385,8 +407,8 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
 
       std::cout << "is triggering " << muonIsTrigger[iMuo] << std::endl;
       for(unsigned int i=0; i<HLTPaths_.size(); i++){
-        ETHmuons_out->back().addUserInt(HLTPaths_[i],fires[iMuo][i]);
-        std::cout << "muon " << iMuo << " path " << HLTPaths_[i] << " " << fires[iMuo][i] << std::endl;
+        ETHmuons_out->back().addUserInt(HLTPaths_[i], fires[iMuo][i]);
+        ETHmuons_out->back().addUserInt(HLTPaths_[i] + "_prescale", prescales[iMuo][i]);
       }
       ETHmuons_out->back().addUserInt("isTriggering", muonIsTrigger[iMuo]);
       ETHmuons_out->back().addUserFloat("DR", muonDR[iMuo]);
