@@ -59,6 +59,10 @@ class MuonTriggerSelector : public edm::EDProducer {
     edm::EDGetTokenT<std::vector<reco::Track>> displacedStandaloneMuonSrc_;
     const edm::EDGetTokenT<reco::VertexCollection> vertexSrc_;
 
+    // added
+    edm::EDGetTokenT<edm::TriggerResults> triggerBits_;
+    edm::EDGetTokenT<std::vector<pat::TriggerObjectStandAlone>> triggerObjects_;
+
     // trigger muon matching
     const double max_deltaR_;
     const double max_deltaPtRel_;
@@ -75,6 +79,10 @@ MuonTriggerSelector::MuonTriggerSelector(const edm::ParameterSet &iConfig):
   muonSrc_(consumes<std::vector<pat::Muon>> (iConfig.getParameter<edm::InputTag>("muonCollection"))),
   displacedStandaloneMuonSrc_(consumes<std::vector<reco::Track>> (iConfig.getParameter<edm::InputTag>("displacedStandaloneMuonCollection"))),
   vertexSrc_( consumes<reco::VertexCollection> (iConfig.getParameter<edm::InputTag>( "vertexCollection"))),
+  // added
+  triggerBits_(consumes<edm::TriggerResults>(iConfig.getParameter<edm::InputTag>("bits"))),
+  triggerObjects_(consumes<std::vector<pat::TriggerObjectStandAlone>>(iConfig.getParameter<edm::InputTag>("triggerObjects"))),
+  //
   max_deltaR_(iConfig.getParameter<double>("max_deltaR")),
   max_deltaPtRel_(iConfig.getParameter<double>("max_deltaPtRel")),
   selmu_ptMin_(iConfig.getParameter<double>("selmu_ptMin")),
@@ -126,10 +134,15 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
     // fetching the primary vertex
     const reco::Vertex & PV = vertexHandle->front();
 
+    std::cout << std::endl;
+
+    //////////////////////////////
+    /* method 1 */
     // proceeding to the trigger muon matching
     // for that, only use slimmedMuons
     for(const pat::Muon &muon : *slimmed_muons){
-        if(debug) std::cout <<"Muon Pt="<< muon.pt() << " Eta=" << muon.eta() << " Phi=" << muon.phi()  <<endl;
+        if(debug) std::cout <<"Muon Pt="<< muon.pt() << " Eta=" << muon.eta() << " Phi=" << muon.phi() << endl;
+        //std::cout <<"Muon Pt="<< muon.pt() << " Eta=" << muon.eta() << " Phi=" << muon.phi() << " nTriggerObjectMatch " << muon.triggerObjectMatches().size() << endl;
 
         std::vector<int> frs(HLTPaths_.size(),0); //path fires for each reco muon
         //std::vector<int> sds(L1Seeds_.size(),0);// L1 Seeds for each L1 muon
@@ -172,9 +185,11 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
             // Here we find all the HLT objects from each HLT path each time that are matched with the reco muon.
             if(muon.triggerObjectMatches().size()!=0){
                 for(size_t i=0; i<muon.triggerObjectMatches().size();i++){
-                  if(debug) std::cout << "muon " << i << " " << cstr << " " <<  muon.triggerObjectMatch(i)->hasPathName(cstr,true,true) << " " << muon.triggerObjectMatch(i)->hasPathName(cstr,false,false) << " " << muon.triggerObjectMatch(i)->hasPathName(cstr,false,true) << " " << muon.triggerObjectMatch(i)->hasPathName(cstr,true,false) << std::endl;
+                  if(debug) std::cout << "triggerObjMatch " << i << " " << cstr << " " <<  muon.triggerObjectMatch(i)->hasPathName(cstr,true,true) << " " << muon.triggerObjectMatch(i)->hasPathName(cstr,false,false) << " " << muon.triggerObjectMatch(i)->hasPathName(cstr,false,true) << " " << muon.triggerObjectMatch(i)->hasPathName(cstr,true,false) << std::endl;
+                    //std::cout << "trgObjMatch " << i << " " << cstr << " " <<  muon.triggerObjectMatch(i)->hasPathName(cstr,true,true) << " " << muon.triggerObjectMatch(i)->hasPathName(cstr,false,false) << " " << muon.triggerObjectMatch(i)->hasPathName(cstr,false,true) << " " << muon.triggerObjectMatch(i)->hasPathName(cstr,true,false) << std::endl;
                     // first bool is pathLastFilterAccepted, second is pathL3FilterAccepted
                     if(muon.triggerObjectMatch(i)!=0 && muon.triggerObjectMatch(i)->hasPathName(cstr,false,false)){
+                    //if(muon.triggerObjectMatch(i)!=0 && muon.triggerObjectMatch(i)->hasPathName(cstr,false,false) && DR[iMuo][path]<max_deltaR_ && fabs(DPT[iMuo][path])<max_deltaPtRel_ && DR[iMuo][path]!=10000){
                         //if(abs(muon.triggerObjectMatch(i)->eta())>1.5) std::cout << "eta=" <<muon.triggerObjectMatch(i)->eta();
                         frs[ipath]=1;
                         float dr = reco::deltaR(muon.triggerObjectMatch(i)->p4(), muon.p4()); 
@@ -184,8 +199,10 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
                         temp_pt[i]=muon.triggerObjectMatch(i)->pt();                   
                         if(debug)std::cout <<"Path=" <<cstr << endl;
                         if(debug)std::cout <<"HLT  Pt="<<muon.triggerObjectMatch(i)->pt() <<" Eta="<<muon.triggerObjectMatch(i)->eta() <<" Phi="<<muon.triggerObjectMatch(i)->phi() << endl;
+                        //std::cout <<"HLT " << cstr << " Pt="<<muon.triggerObjectMatch(i)->pt() <<" Eta="<<muon.triggerObjectMatch(i)->eta() <<" Phi="<<muon.triggerObjectMatch(i)->phi() << endl;
                         if(debug)std::cout <<"Muon Pt="<< muon.pt() << " Eta=" << muon.eta() << " Phi=" << muon.phi()  <<endl;
                         if(debug)std::cout <<"DR = " << temp_dr[i] <<endl;
+                        //std::cout <<"DR = " << temp_dr[i] << " DPT = " << temp_dpt[i] <<endl;
                     }
                 }
                 // and now we find the real minimum between the reco muon and all its matched HLT objects. 
@@ -197,6 +214,9 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
             }
         //and now since we have found the minimum DR we save a few variables for plots       
         fires.push_back(frs); //This is used in order to see if a reco muon fired a Trigger (1) or not (0).
+        //for(unsigned int i(0); i<frs.size(); ++i){
+        //  std::cout << "fires " << frs[i] << " deltaR " << temp_DR[i] << " deltaPt " << temp_DPT[i] << std::endl;
+        //}
         matcher.push_back(temp_matched_to); //This is used in order to see if a reco muon is matched with a HLT object. PT of the reco muon is saved in this vector. 
         DR.push_back(temp_DR);
         DPT.push_back(temp_DPT);
@@ -208,6 +228,7 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
         for(unsigned int iMuo=0; iMuo<slimmed_muons->size(); iMuo++){
             for(unsigned int im=(iMuo+1); im<slimmed_muons->size(); im++){
                 if(matcher[iMuo][path]!=1000. && matcher[iMuo][path]==matcher[im][path]){
+                //if(matcher[iMuo][path]!=1000. && matcher[iMuo][path]==matcher[im][path] && DR[iMuo][path]<max_deltaR_ && fabs(DPT[iMuo][path])<max_deltaPtRel_ && DR[im][path]<max_deltaR_ && fabs(DPT[im][path])<max_deltaPtRel_){
                     if(DR[iMuo][path]<DR[im][path]){ //Keep the one that has the minimum DR with the HLT object
                         fires[im][path]=0;
                         matcher[im][path]=1000.;
@@ -227,8 +248,90 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
                 muonDR[iMuo]=DR[iMuo][path];
                 muonDPT[iMuo]=DPT[iMuo][path];                
             }
+            else fires[iMuo][path]=0;
         }
     }
+
+    //////////////////////////////
+    /* method 2 */
+
+    /*
+    // we first get the trigger objects
+    edm::Handle<edm::TriggerResults> triggerBits;
+    iEvent.getByToken(triggerBits_, triggerBits);
+    const edm::TriggerNames &names = iEvent.triggerNames(*triggerBits);
+
+    edm::Handle<std::vector<pat::TriggerObjectStandAlone>> triggerObjects;
+    iEvent.getByToken(triggerObjects_, triggerObjects);
+
+
+    // container for the trigger objects, that will be later on matched to reco muons
+    std::vector<pat::TriggerObjectStandAlone> triggeringMuons;
+
+
+    for (pat::TriggerObjectStandAlone obj : *triggerObjects) { // note: not "const &" since we want to call unpackPathNames
+      obj.unpackFilterLabels(iEvent, *triggerBits);
+      obj.unpackPathNames(names);
+
+      bool isTriggerMuon = false;
+      for (unsigned h = 0; h < obj.filterIds().size(); ++h){
+        if(obj.filterIds()[h] == 83){ 
+          isTriggerMuon = true; 
+          break;
+        } 
+      }
+
+      if(!isTriggerMuon) continue; 
+      for (unsigned h = 0; h < obj.filterLabels().size(); ++h){
+        std::string filterName = obj.filterLabels()[h];
+        if(filterName.find("hltL3") != std::string::npos  && filterName.find("Park") != std::string::npos){
+          isTriggerMuon = true;
+          if(debug) std::cout << "\t   Filters:   " << filterName; 
+          break;
+        }
+        else{ isTriggerMuon = false; }
+      }
+
+      if(!isTriggerMuon) continue;
+
+      std::cout << "\tTrigger object:  pt " << obj.pt() << ", eta " << obj.eta() << ", phi " << obj.phi() << std::endl;
+      // Print trigger object collection and type
+      std::cout << "\t   Collection: " << obj.collection() << std::endl;
+      std::cout << "\t   Type IDs:   ";
+
+      for (unsigned h = 0; h < obj.filterIds().size(); ++h) std::cout << " " << obj.filterIds()[h] ;
+      std::cout << std::endl;
+
+      for (unsigned h = 0; h < obj.filterLabels().size(); ++h) std::cout << " " << obj.filterLabels()[h];
+      std::cout << std::endl;
+
+      std::vector pathNamesAll = obj.pathNames(false);
+      std::vector pathNamesLast = obj.pathNames(true);
+
+      std::cout << "\t   Paths (" << pathNamesAll.size()<<"/"<<pathNamesLast.size()<<"):    ";
+
+      for (unsigned h = 0, n = pathNamesAll.size(); h < n; ++h) {
+            bool isBoth = obj.hasPathName( pathNamesAll[h], true, true );
+            bool isL3   = obj.hasPathName( pathNamesAll[h], false, true );
+            bool isLF   = obj.hasPathName( pathNamesAll[h], true, false );
+            bool isNone = obj.hasPathName( pathNamesAll[h], false, false );
+            std::cout << "   " << pathNamesAll[h];
+            if (isBoth) std::cout << "(L,3)";
+            if (isL3 && !isBoth) std::cout << "(*,3)";
+            if (isLF && !isBoth) std::cout << "(L,*)";
+            if (isNone && !isBoth && !isL3 && !isLF) std::cout << "(*,*)";
+      }
+      std::cout << std::endl;
+
+      triggeringMuons.push_back(obj);
+      if(debug){ std::cout << "\tTrigger object:  pt " << obj.pt() << ", eta " << obj.eta() << ", phi " << obj.phi() << std::endl;
+        // Print trigger object collection and type
+        std::cout << "\t   Collection: " << obj.collection() << std::endl;
+      }
+    }//trigger objects
+    */
+
+
     if(debug)std::cout << "number of Muons=" <<slimmed_muons->size() << endl;
     //And now create a collection with all trg muons
     for(const pat::Muon & muon : *slimmed_muons){
@@ -280,8 +383,10 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
       pat::ETHMuon the_muon(muon);
       ETHmuons_out->emplace_back(the_muon);
 
+      std::cout << "is triggering " << muonIsTrigger[iMuo] << std::endl;
       for(unsigned int i=0; i<HLTPaths_.size(); i++){
         ETHmuons_out->back().addUserInt(HLTPaths_[i],fires[iMuo][i]);
+        std::cout << "muon " << iMuo << " path " << HLTPaths_[i] << " " << fires[iMuo][i] << std::endl;
       }
       ETHmuons_out->back().addUserInt("isTriggering", muonIsTrigger[iMuo]);
       ETHmuons_out->back().addUserFloat("DR", muonDR[iMuo]);
