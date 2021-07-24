@@ -36,6 +36,9 @@ def checkParser(opt):
   if opt.mcprivate + opt.mccentral + opt.data > 1:
     raise RuntimeError('Please indicate if you want to run on data or MC by adding only --data or --mcprivate or --mccentral to the command line')
 
+  if opt.data and opt.ds==None:
+    raise RuntimeError('Please indicate the dataset you want to run the tool on using --ds <dataset>')
+
 
 class NanoMerger(NanoTools):
   def __init__(self, opt):
