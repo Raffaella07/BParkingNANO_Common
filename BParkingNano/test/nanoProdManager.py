@@ -16,6 +16,7 @@ def getOptions():
   parser.add_argument('--data'                , dest='data'        , help='run the resubmitter on a data sample'       , action='store_true', default=False)
   parser.add_argument('--dofullreport'        , dest='dofullreport', help='add to report chunks and failure reason'    , action='store_true', default=False)
   parser.add_argument('--dofetchtime'         , dest='dofetchtime' , help='add to report time fetch'                   , action='store_true', default=False)
+  parser.add_argument('--docheckfile'         , dest='docheckfile' , help='check the content of the nano files'        , action='store_true', default=False)
   parser.add_argument('--doresubmit'          , dest='doresubmit'  , help='resubmit failed jobs'                       , action='store_true', default=False)
   return parser.parse_args()
 
@@ -43,6 +44,7 @@ class NanoProdManager(NanoTools):
     self.data         = vars(opt)['data']
     self.dofullreport = vars(opt)['dofullreport'] 
     self.dofetchtime  = vars(opt)['dofetchtime'] 
+    self.docheckfile  = vars(opt)['docheckfile'] 
     self.doresubmit   = vars(opt)['doresubmit'] 
 
 
@@ -125,7 +127,7 @@ class NanoProdManager(NanoTools):
       # close file list
       resubmit_file.close()
 
-      #print 'created {}_nj{}.txt'.format(filename, NanoTools.getStep(self, file_))
+      print 'created {}_nj{}.txt'.format(filename, NanoTools.getStep(self, file_))
 
     return filename 
 
@@ -147,7 +149,7 @@ class NanoProdManager(NanoTools):
     outputdir = failed_files[0][0:failed_files[0].find('bparknano')]
     filelist  = self.writeFileList(chunk, failed_files, label) 
 
-    command = 'sbatch -p standard --account=t3 -o {ld}/nanostep_nj%a.log -e {ld}/nanostep_nj%a.log --job-name=nanostep_nj%a_{pl} --array {ar} --time=03:00:00 submitter.sh {outdir} {usr} {pl} {tag} {isMC} {rmt} {lst} 1'.format(
+    command = 'sbatch -p standard --account=t3 -o {ld}/nanostep_nj%a.log -e {ld}/nanostep_nj%a.log --job-name=nanostep_nj%a_{pl} --array {ar} --time=03:00:00 submitter.sh {outdir} {usr} {pl} {tag} {isMC} {rmt} {lst} 1 {tep}'.format(
       ld      = logdir,
       pl      = label,
       ar      = self.getArray(failed_files), 
@@ -157,6 +159,7 @@ class NanoProdManager(NanoTools):
       isMC    = 1 if self.mcprivate or self.mccentral else 0,
       rmt     = 0 if self.mcprivate else 1,
       lst     =  filelist,
+      tep     = 0, # run the nano tool and not the tag and probe
     )
 
     os.system(command)
@@ -272,7 +275,9 @@ class NanoProdManager(NanoTools):
             n_unprocessed_perchunk += 1
             continue
 
-          if NanoTools.checkFileExists(self, file_): # successfull job
+          extra_cond = NanoTools.checkLocalFile(self, file_, cond=True, branch_check=True, branchname='nBToMuMuPi') if self.docheckfile else 'True'
+          #if NanoTools.checkFileExists(self, file_) and NanoTools.checkLocalFile(self, file_, cond=True): # successfull job
+          if NanoTools.checkFileExists(self, file_) and extra_cond: # successfull job
             n_good_perchunk += 1
 
             if self.dofetchtime:  
