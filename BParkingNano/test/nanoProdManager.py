@@ -127,7 +127,7 @@ class NanoProdManager(NanoTools):
       # close file list
       resubmit_file.close()
 
-      print 'created {}_nj{}.txt'.format(filename, NanoTools.getStep(self, file_))
+      #print 'created {}_nj{}.txt'.format(filename, NanoTools.getStep(self, file_))
 
     return filename 
 
