@@ -142,3 +142,28 @@ python nanoProdManager.py --pl F1 --dofullreport --doresubmit --data
 
 To make contributions to the central code, see intructions in https://github.com/CMSBParking/BParkingNANO
 
+
+# Tool for Tag&Probe studies
+
+```
+cd TagAndProbe/test
+```
+
+## Compute efficiencies
+Configure tagProbeFitTreeAnalyzer_JPsiMuMu_cfg.py and run it
+```
+cmsRun tagProbeFitTreeAnalyzer_JPsiMuMu_cfg.py
+```
+
+## Plot fits and efficiencies
+Adapt the global variables in savePlots.C and run the script
+```
+root -l -b savePlots.C+
+```
+
+## Compute the scale factors
+Adapt the global variables in getScaleFactor.C and run the script
+```
+root -l -b getScaleFactor.C+
+```
+
