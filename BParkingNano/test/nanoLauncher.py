@@ -26,6 +26,7 @@ def getOptions():
   parser.add_argument('--domergenano'       , dest='domergenano' , help='[optional] merge the nanofile steps'                            , action='store_true', default=False)
   parser.add_argument('--doquick'           , dest='doquick'     , help='[optional] run the jobs on the quick partition (t/job<1h)'      , action='store_true', default=False)
   parser.add_argument('--docompile'         , dest='docompile'   , help='[optional] compile the full BParkingNano tool'                  , action='store_true', default=False)
+  parser.add_argument('--dotageprobe'       , dest='dotageprobe' , help='[optional] run the tools for the tag and probe study'           , action='store_true', default=False)
   return parser.parse_args()
 
 
@@ -70,6 +71,7 @@ class NanoLauncher(NanoTools):
     self.domergenano = vars(opt)["domergenano"]
     self.doquick     = vars(opt)["doquick"]
     self.docompile   = vars(opt)["docompile"]
+    self.dotageprobe = vars(opt)["dotageprobe"]
 
 
   def compile(self):
@@ -119,6 +121,7 @@ class NanoLauncher(NanoTools):
 
   def writeDumperStarter(self, nfiles, outputdir, filelist, label):
     nanoname = 'bparknano' if self.tagnano == None else 'bparknano_{}'.format(self.tagnano) 
+    dumpername = 'NanoDumper' if not self.dotageprobe else 'TagAndProbeDumper' 
 
     f = open(filelist)
     lines = f.readlines()
@@ -129,7 +132,7 @@ class NanoLauncher(NanoTools):
       file_step = NanoTools.getStep(self, lines[iFile-1]) if self.mcprivate else iFile
       #file_step = iFile
       event_chain.append('  c->Add("{}/{}_nj{}.root");'.format(outputdir, nanoname, file_step))
-    event_chain.append('  c->Process("NanoDumper.C+", outFileName);')
+    event_chain.append('  c->Process("{name}.C+", outFileName);'.format(name=dumpername))
     event_chain = '\n'.join(event_chain)
 
     run_chain = []
@@ -147,9 +150,9 @@ class NanoLauncher(NanoTools):
       '#include "TProof.h"\n',
       'void starter(){',
       '  TString outFileName = "flat_bparknano.root";',
-      '  {addMC}'.format(addMC = '' if self.data else 'outFileName += "_isMC";'),
+      '  {addMC}'.format(addMC = '' if (self.data or self.dotageprobe) else 'outFileName += "_isMC";'),
       '  {addevt}'.format(addevt = event_chain),
-      '  {addrun}'.format(addrun = '' if self.data else run_chain),
+      '  {addrun}'.format(addrun = '' if (self.data or self.dotageprobe) else run_chain),
       '}',
     ]
     content = '\n'.join(content)
@@ -217,7 +220,7 @@ class NanoLauncher(NanoTools):
         ar = '1-{}'.format(nfiles),
         )
 
-    command = 'sbatch {slurm_opt} submitter.sh {outdir} {usr} {pl} {tag} {isMC} {rmt} {lst} 0'.format(
+    command = 'sbatch {slurm_opt} submitter.sh {outdir} {usr} {pl} {tag} {isMC} {rmt} {lst} 0 {tep}'.format(
       slurm_opt = slurm_options,
       pl        = label,
       outdir    = outputdir,
@@ -226,6 +229,7 @@ class NanoLauncher(NanoTools):
       isMC      = 1 if self.mcprivate or self.mccentral else 0,
       rmt       = 0 if self.mcprivate else 1,
       lst       = filelist,
+      tep       = 1 if self.dotageprobe else 0, 
       )
 
     job = subprocess.check_output(command, shell=True)
@@ -251,13 +255,14 @@ class NanoLauncher(NanoTools):
         dp      = '--dependency=afterany:{}'.format(jobId) if jobId != -99 else '',
         )
 
-    command = 'sbatch {slurm_opt} submitter_dumper.sh {outdir} {usr} {pl} {tag} {isMC}'.format(
+    command = 'sbatch {slurm_opt} submitter_dumper.sh {outdir} {usr} {pl} {tag} {isMC} {tep}'.format(
       slurm_opt = slurm_options,
       pl      = label,
       outdir  = outputdir,
       usr     = os.environ["USER"], 
       tag     = tag,
       isMC    = 1 if self.mcprivate or self.mccentral else 0,
+      tep     = 1 if self.dotageprobe else 0,
       )
 
     job_dump = subprocess.check_output(command, shell=True)
@@ -351,8 +356,10 @@ class NanoLauncher(NanoTools):
       label1 = self.prodlabel if self.mcprivate else ds_label
       label2 = point if self.mcprivate else self.prodlabel
       tag = NanoTools.getTag(self, self.tagnano, self.tagflat)
-      logdir = './logs/{}/{}/Chunk{}_n{}'.format(label1, label2, iFile, nfiles) if tag == 0 \
-               else './logs/{}/{}_{}/Chunk{}_n{}'.format(label1, label2, tag, iFile, nfiles)
+      #logdir = './logs/{}/{}/Chunk{}_n{}'.format(label1, label2, iFile, nfiles) if tag == 0 \
+      #         else './logs/{}/{}_{}/Chunk{}_n{}'.format(label1, label2, tag, iFile, nfiles)
+      logdir = '/work/anlyon/logs/{}/{}/Chunk{}_n{}'.format(label1, label2, iFile, nfiles) if tag == 0 \
+               else '/work/anlyon/logs/{}/{}_{}/Chunk{}_n{}'.format(label1, label2, tag, iFile, nfiles)
       if not path.exists(logdir):
         os.system('mkdir -p {}'.format(logdir))
 

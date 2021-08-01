@@ -7,6 +7,7 @@
 # ${3}:  pl 
 # ${4}:  tag 
 # ${5}:  isMC
+# ${6}:  doTagAndProbe
 #--------------------
 
 if [ ${5} == 1 ] ; then #isMC
@@ -23,10 +24,15 @@ echo "copying ntupliser to workdir"
 cp ./files/starter_${3}.C $workdir/starter.C
 cp ../data/json/golden_2018.json $workdir
 cp ../plugins/dumper/utils.C $workdir 
-cp ../plugins/dumper/NanoDumper.C $workdir 
-cp ../plugins/dumper/NanoDumper.h $workdir 
-cp ../plugins/dumper/NanoRunDumper.C $workdir 
-cp ../plugins/dumper/NanoRunDumper.h $workdir 
+if [ ${6} == 0 ] ; then
+  cp ../plugins/dumper/NanoDumper.C $workdir 
+  cp ../plugins/dumper/NanoDumper.h $workdir 
+  cp ../plugins/dumper/NanoRunDumper.C $workdir 
+  cp ../plugins/dumper/NanoRunDumper.h $workdir 
+else
+  cp ../plugins/dumper/TagAndProbeDumper.C $workdir 
+  cp ../plugins/dumper/TagAndProbeDumper.h $workdir 
+fi
 
 echo "copying starter"
 if [ ${4} == 0 ] ; then

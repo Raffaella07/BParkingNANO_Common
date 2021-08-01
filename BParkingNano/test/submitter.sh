@@ -10,6 +10,7 @@
 # ${6}:  isRemote
 # ${7}:  filelist
 # ${8}:  isResubmission (false if first launch)
+# ${9}:  doTagAndProbe
 #--------------------
 
 
@@ -18,7 +19,11 @@ echo "creating workdir "$workdir
 mkdir -p $workdir
 
 echo "copying driver to workdir"
-cp run_nano_hnl_cfg.py $workdir
+if [ ${9} == 0 ] ; then
+  cp run_nano_hnl_cfg.py $workdir
+else
+  cp tag_and_probe_cfg.py $workdir
+fi
 
 echo "copying the file list(-s) to workdir"
 if [ ${8} == 0 ] ; then
@@ -26,8 +31,10 @@ if [ ${8} == 0 ] ; then
 else # different treatment in case of resubmission
   cp -r ${7}* $workdir
   # copy filelist to pnfs
-  xrdcp -r ${7}*$SLURM_ARRAY_TASK_ID* root://t3dcachedb.psi.ch:1094/${1}
+  #xrdcp -r ${7}*$SLURM_ARRAY_TASK_ID* root://t3dcachedb.psi.ch:1094/${1}
   #rm ${7}*$SLURM_ARRAY_TASK_ID*
+  xrdcp -r ${7}"_"$SLURM_ARRAY_TASK_ID".txt" root://t3dcachedb.psi.ch:1094/${1}
+  rm ${7}"_"$SLURM_ARRAY_TASK_ID".txt"
 fi
 
 cd $workdir
@@ -62,13 +69,21 @@ if [ ${5} == 1 ] ; then #isMC
   if [ ${6} == 0 ] ; then  #private MC
     echo "going to run nano step on "$inputFilename 
     DATE_START=`date +%s`
-    cmsRun run_nano_hnl_cfg.py inputFile=$inputFilename outputFile="bparknano.root" isMC=True
+    if [ ${9} == 0 ] ; then
+      cmsRun run_nano_hnl_cfg.py inputFile=$inputFilename outputFile="bparknano.root" isMC=True
+    else
+      cmsRun tag_and_probe_cfg.py inputFile=$inputFilename outputFile="bparknano.root" isMC=True
+    fi
     DATE_END=`date +%s`
     echo "finished running nano step"
   else # central MC
     echo "going to run nano step on "$inputFilename
     DATE_START=`date +%s`
-    cmsRun run_nano_hnl_cfg.py inputFiles=$inputFilename outputFile="bparknano.root" isMC=True
+    if [ ${9} == 0 ] ; then
+      cmsRun run_nano_hnl_cfg.py inputFiles=$inputFilename outputFile="bparknano.root" isMC=True
+    else
+      cmsRun tag_and_probe_cfg.py inputFiles=$inputFilename outputFile="bparknano.root" isMC=True
+    fi
     DATE_END=`date +%s`
     echo "finished running nano step"
   fi
@@ -77,7 +92,11 @@ else #isData
 
   echo "going to run nano step on "$inputFilename
   DATE_START=`date +%s`
-  cmsRun run_nano_hnl_cfg.py inputFiles=$inputFilename outputFile="bparknano.root" isMC=False
+  if [ ${9} == 0 ] ; then
+    cmsRun run_nano_hnl_cfg.py inputFiles=$inputFilename outputFile="bparknano.root" isMC=False
+  else
+    cmsRun tag_and_probe_cfg.py inputFiles=$inputFilename outputFile="bparknano.root" isMC=False
+  fi
   DATE_END=`date +%s`
   echo "finished running nano step"
 
