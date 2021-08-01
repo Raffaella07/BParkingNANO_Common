@@ -137,6 +137,38 @@ class NanoMerger(NanoTools):
       os.system(command_clean_file)
 
 
+  def doExtMerging(self, mergedName, location):
+    print '\n ---> Merging the extension files'
+
+    no_ext_file = location[:len(location)-4] + '/merged/' + mergedName
+    ext_file = location + '/merged/' + mergedName
+    extmerged_file = location + '/merged/' + mergedName[:len(mergedName)-5] + '_extmerged.root'
+
+    # copying the files in the workdir
+    command_cp_no_ext_file = 'xrdcp {} ./no_ext_file.root'.format(no_ext_file)
+    command_cp_ext_file = 'xrdcp {} ./ext_file.root'.format(ext_file)
+    os.system(command_cp_no_ext_file)
+    os.system(command_cp_ext_file)
+
+    # proceed to the merging
+    command = 'hadd -f extmerged_file.root ext_file.root no_ext_file.root'
+    os.system(command)
+
+    # copy the merged file
+    command_cp_extmerged_file = 'xrdcp -f extmerged_file.root root://t3dcachedb.psi.ch:1094/{}'.format(extmerged_file)
+    os.system(command_cp_extmerged_file)
+
+    # erasing the files
+    command_rm_no_ext_file = 'rm no_ext_file.root' 
+    command_rm_ext_file = 'rm ext_file.root' 
+    command_rm_extmerged_file = 'rm extmerged_file.root' 
+    os.system(command_rm_no_ext_file)
+    os.system(command_rm_ext_file)
+    os.system(command_rm_extmerged_file)
+    
+    print '{} created \n'.format(extmerged_file)
+
+
   def runMergingModule(self, location):
     if self.donano:
       nanoName   = '/bparknano_nj*.root' if self.tagnano == None else '/bparknano_{}_nj*.root'.format(self.tagnano)
@@ -159,6 +191,9 @@ class NanoMerger(NanoTools):
       mergedName_flat = 'flat_bparknano.root' if self.tagnano == None and self.tagflat == None else 'flat_bparknano_{}.root'.format(tag)
 
       self.doChunkMerging(nanoName_flat, mergedName_flat, location, False)
+
+      if self.mccentral and '_ext' in location:
+        self.doExtMerging(mergedName_flat, location)
 
 
   def process(self):
