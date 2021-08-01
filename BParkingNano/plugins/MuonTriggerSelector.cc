@@ -144,7 +144,7 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
     // fetching the primary vertex
     const reco::Vertex & PV = vertexHandle->front();
 
-    std::cout << std::endl;
+    //std::cout << std::endl;
 
     //////////////////////////////
     /* method 1 */
@@ -261,6 +261,7 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
               muonDPT[iMuo]=DPT[iMuo][path];                
               
               for (unsigned int i = 0, n = triggerBits->size(); i < n; ++i) {
+                //if(names.triggerName(i).find(HLTPaths_[path]) != std::string::npos || names.triggerName(i)==HLTPaths_[path]){
                 if(names.triggerName(i).find(HLTPaths_[path]) != std::string::npos){
                   prescales[iMuo][path] = triggerPrescales->getPrescaleForIndex(i);
                 }
