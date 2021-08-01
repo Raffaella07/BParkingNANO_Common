@@ -65,3 +65,28 @@ bool lumiMask(int run, int lumi){
   }
 }
 
+
+float getTriggerScaleFactor(float pt, float eta){
+  // get trigger scale factor file
+  TString filename_sf = "/t3home/anlyon/BHNL/BHNLNano/CMSSW_10_2_15/src/PhysicsTools/BParkingNano/data/trigger_scale_factors/scaleFactor_results_cat_pt_eta_fit_A1.root";
+  TFile* file_sf = TFile::Open(filename_sf);
+  file_sf->cd();
+
+  // get histogram
+  TH2D* hist_sf = (TH2D*) file_sf->Get("hist_scale_factor")->Clone("hist_sf");
+
+  pt = std::max(6., std::min(99.9, double(pt)));
+
+  // get bin
+  int bin_pt = hist_sf->GetXaxis()->FindBin(pt);
+  int bin_eta = hist_sf->GetYaxis()->FindBin(eta);
+
+  // get scale factor
+  Float_t scale_factor = hist_sf->GetBinContent(bin_pt, bin_eta);
+  
+  file_sf->Close();
+
+  return scale_factor;
+}
+
+
