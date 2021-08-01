@@ -2,12 +2,18 @@ import FWCore.ParameterSet.Config as cms
 from PhysicsTools.NanoAOD.common_cff import *
 
 
-Path=["HLT_Mu7_IP4","HLT_Mu8_IP6","HLT_Mu8_IP5","HLT_Mu8_IP3","HLT_Mu8p5_IP3p5","HLT_Mu9_IP6","HLT_Mu9_IP5","HLT_Mu9_IP4","HLT_Mu10p5_IP3p5","HLT_Mu12_IP6"]
+Path=["HLT_Mu7_IP4","HLT_Mu8_IP6","HLT_Mu8_IP5","HLT_Mu8_IP3","HLT_Mu8p5_IP3p5","HLT_Mu9_IP6","HLT_Mu9_IP5","HLT_Mu9_IP4","HLT_Mu10p5_IP3p5","HLT_Mu12_IP6", "HLT_Mu8_v1", "HLT_Mu8_v12", "HLT_Mu7p5_Track7_Jpsi_v11", "HLT_L2Mu23NoVtx_2Cha_v1", "HLT_L2Mu23NoVtx_2Cha_CosmicSeed_v1", "DST_DoubleMu1_noVtx_CaloScouting_v2", "DST_DoubleMu3_noVtx_CaloScouting_v6", "DST_DoubleMu3_noVtx_Mass10_PFScouting_v3", "HLT_BTagMu_AK4DiJet40_Mu5_v13"]
+#Path=["HLT_Mu7_IP4","HLT_Mu8_IP6","HLT_Mu8_IP5","HLT_Mu8_IP3","HLT_Mu8p5_IP3p5","HLT_Mu9_IP6","HLT_Mu9_IP5","HLT_Mu9_IP4","HLT_Mu10p5_IP3p5","HLT_Mu12_IP6"]
 
 muonTrgSelector = cms.EDProducer("MuonTriggerSelector",
                                  muonCollection = cms.InputTag("slimmedMuons"), #same collection as in NanoAOD                                                           
                                  displacedStandaloneMuonCollection = cms.InputTag("displacedStandAloneMuons"), #same collection as in NanoAOD                                                           
                                  vertexCollection = cms.InputTag('offlineSlimmedPrimaryVertices'), 
+
+                                 # added for restoring first trigger matching method
+                                 bits = cms.InputTag("TriggerResults", "", "HLT"), # format: module, label, process
+                                 triggerObjects = cms.InputTag("slimmedPatTrigger"),
+                                 prescales = cms.InputTag("patTrigger"),
 
                                  # trigger muon matching conditions
                                  max_deltaR = cms.double(0.05),
@@ -132,6 +138,34 @@ muonBParkTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
         fired_HLT_Mu9_IP4 = Var("userInt('HLT_Mu9_IP4')", int, doc="reco muon fired this trigger"),
         fired_HLT_Mu10p5_IP3p5 = Var("userInt('HLT_Mu10p5_IP3p5')", int, doc="reco muon fired this trigger"),
         fired_HLT_Mu12_IP6 = Var("userInt('HLT_Mu12_IP6')", int, doc="reco muon fired this trigger"),
+        fired_HLT_Mu8_v1 = Var("userInt('HLT_Mu8_v1')", int, doc="reco muon fired this trigger"),
+        fired_HLT_Mu8_v12 = Var("userInt('HLT_Mu8_v12')", int, doc="reco muon fired this trigger"),
+        fired_HLT_Mu7p5_Track7_Jpsi_v11 = Var("userInt('HLT_Mu7p5_Track7_Jpsi_v11')", int, doc="reco muon fired this trigger"),
+        fired_HLT_L2Mu23NoVtx_2Cha_v1 = Var("userInt('HLT_L2Mu23NoVtx_2Cha_v1')", int, doc="reco muon fired this trigger"),
+        fired_HLT_L2Mu23NoVtx_2Cha_CosmicSeed_v1 = Var("userInt('HLT_L2Mu23NoVtx_2Cha_CosmicSeed_v1')", int, doc="reco muon fired this trigger"),
+        fired_DST_DoubleMu1_noVtx_CaloScouting_v2 = Var("userInt('DST_DoubleMu1_noVtx_CaloScouting_v2')", int, doc="reco muon fired this trigger"),
+        fired_DST_DoubleMu3_noVtx_CaloScouting_v6 = Var("userInt('DST_DoubleMu3_noVtx_CaloScouting_v6')", int, doc="reco muon fired this trigger"),
+        fired_DST_DoubleMu3_noVtx_Mass10_PFScouting_v3 = Var("userInt('DST_DoubleMu3_noVtx_Mass10_PFScouting_v3')", int, doc="reco muon fired this trigger"),
+        fired_HLT_BTagMu_AK4DiJet40_Mu5_v13 = Var("userInt('HLT_BTagMu_AK4DiJet40_Mu5_v13')", int, doc="reco muon fired this trigger"),
+        prescale_HLT_Mu7_IP4 = Var("userInt('HLT_Mu7_IP4_prescale')", int, doc="reco muon prescale this trigger"),
+        prescale_HLT_Mu8_IP6 = Var("userInt('HLT_Mu8_IP6_prescale')", int, doc="reco muon prescale this trigger"),
+        prescale_HLT_Mu8_IP5 = Var("userInt('HLT_Mu8_IP5_prescale')", int, doc="reco muon prescale this trigger"),
+        prescale_HLT_Mu8_IP3 = Var("userInt('HLT_Mu8_IP3_prescale')", int, doc="reco muon prescale this trigger"),
+        prescale_HLT_Mu8p5_IP3p5 = Var("userInt('HLT_Mu8p5_IP3p5_prescale')", int, doc="reco muon prescale this trigger"),
+        prescale_HLT_Mu9_IP6 = Var("userInt('HLT_Mu9_IP6_prescale')", int, doc="reco muon prescale this trigger"),
+        prescale_HLT_Mu9_IP5 = Var("userInt('HLT_Mu9_IP5_prescale')", int, doc="reco muon prescale this trigger"),
+        prescale_HLT_Mu9_IP4 = Var("userInt('HLT_Mu9_IP4_prescale')", int, doc="reco muon prescale this trigger"),
+        prescale_HLT_Mu10p5_IP3p5 = Var("userInt('HLT_Mu10p5_IP3p5_prescale')", int, doc="reco muon prescale this trigger"),
+        prescale_HLT_Mu12_IP6 = Var("userInt('HLT_Mu12_IP6_prescale')", int, doc="reco muon prescale this trigger"),
+        prescale_HLT_Mu8_v1 = Var("userInt('HLT_Mu8_v1_prescale')", int, doc="reco muon prescale this trigger"),
+        prescale_HLT_Mu8_v12 = Var("userInt('HLT_Mu8_v12_prescale')", int, doc="reco muon prescale this trigger"),
+        prescale_HLT_Mu7p5_Track7_Jpsi_v11 = Var("userInt('HLT_Mu7p5_Track7_Jpsi_v11_prescale')", int, doc="reco muon prescale this trigger"),
+        prescale_HLT_L2Mu23NoVtx_2Cha_v1 = Var("userInt('HLT_L2Mu23NoVtx_2Cha_v1_prescale')", int, doc="reco muon prescale this trigger"),
+        prescale_HLT_L2Mu23NoVtx_2Cha_CosmicSeed_v1 = Var("userInt('HLT_L2Mu23NoVtx_2Cha_CosmicSeed_v1_prescale')", int, doc="reco muon prescale this trigger"),
+        prescale_DST_DoubleMu1_noVtx_CaloScouting_v2 = Var("userInt('DST_DoubleMu1_noVtx_CaloScouting_v2_prescale')", int, doc="reco muon prescale this trigger"),
+        prescale_DST_DoubleMu3_noVtx_CaloScouting_v6 = Var("userInt('DST_DoubleMu3_noVtx_CaloScouting_v6_prescale')", int, doc="reco muon prescale this trigger"),
+        prescale_DST_DoubleMu3_noVtx_Mass10_PFScouting_v3 = Var("userInt('DST_DoubleMu3_noVtx_Mass10_PFScouting_v3_prescale')", int, doc="reco muon fired this trigger"),
+        prescale_HLT_BTagMu_AK4DiJet40_Mu5_v13 = Var("userInt('HLT_BTagMu_AK4DiJet40_Mu5_v13_prescale')", int, doc="reco muon prescale this trigger"),
     ),
 )
 
