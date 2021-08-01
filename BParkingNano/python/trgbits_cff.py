@@ -18,13 +18,6 @@ trgTable = cms.EDProducer( "TrgBitTableProducer",
                                              "HLT_Mu9_IP4",    
                                              "HLT_Mu10p5_IP3p5",
                                              "HLT_Mu12_IP6",
-                                             "HLT_Mu7p5_L2Mu2_Jpsi_v10",
-                                             "HLT_Mu7p5_Track2_Jpsi_v11",
-                                             "HLT_Mu7p5_Track7_Jpsi_v11",
-                                             "HLT_Mu8_TrkIsoVVL_v12",
-                                             "HLT_Mu8_v12",
-                                             "HLT_Mu17_v13",
-                                             "HLT_Mu19_v4",
                                               ),
                            #add interesting seeds
                            seeds     = cms.vstring(
