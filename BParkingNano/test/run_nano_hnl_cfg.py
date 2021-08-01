@@ -122,7 +122,7 @@ process = nanoAOD_customizeBToKMuMu          (process, isMC=options.isMC)
 process = nanoAOD_customizeTriggerBitsBPark  (process)
 
 # Path and EndPath definitions
-process.nanoAOD_general_step = cms.Path(process.nanoSequence)
+#process.nanoAOD_general_step = cms.Path(process.nanoSequence)
 process.nanoAOD_MuMuPi_step = cms.Path(process.nanoSequence + process.nanoBMuMuPiSequence + CountBToMuMuPi )
 process.nanoAOD_KMuMu_step  = cms.Path(process.nanoSequence + process.nanoBKMuMuSequence + CountBToKmumu ) 
 
@@ -137,7 +137,7 @@ process.NANOAODoutput_step = cms.EndPath(process.NANOAODoutput)
 
 # Schedule definition
 process.schedule = cms.Schedule(
-    process.nanoAOD_general_step,
+    #process.nanoAOD_general_step,
     process.nanoAOD_MuMuPi_step,
     process.nanoAOD_KMuMu_step, 
     process.endjob_step, 
@@ -146,7 +146,7 @@ process.schedule = cms.Schedule(
     
 if options.wantFullRECO:
     process.schedule = cms.Schedule(
-        process.nanoAOD_general_step,
+        #process.nanoAOD_general_step,
         process.nanoAOD_MuMuPi_step,
         process.nanoAOD_KMuMu_step, 
         process.endjob_step, 
@@ -158,7 +158,8 @@ associatePatAlgosToolsTask(process)
 
 process.NANOAODoutput.SelectEvents = cms.untracked.PSet(
     #SelectEvents = cms.vstring('nanoAOD_MuMuPi_step', 'nanoAOD_KMuMu_step') 
-    SelectEvents = cms.vstring('nanoAOD_MuMuPi_step', 'nanoAOD_KMuMu_step', 'nanoAOD_general_step') 
+    #SelectEvents = cms.vstring('nanoAOD_MuMuPi_step', 'nanoAOD_KMuMu_step', 'nanoAOD_general_step') 
+    SelectEvents = cms.vstring('nanoAOD_MuMuPi_step', 'nanoAOD_KMuMu_step') 
     #SelectEvents = cms.vstring('nanoAOD_MuMuPi_step', 'nanoAOD_general_step') 
 )
 
