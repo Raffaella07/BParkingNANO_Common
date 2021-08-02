@@ -519,7 +519,7 @@ Bool_t NanoDumper::Process(Long64_t entry)
   if(!isMC && lumiMask(*run, *luminosityBlock) == false) return false;
 
   // number of candidates in the event
-  UInt_t nCand_ctrl = *nBToKMuMu; 
+  //UInt_t nCand_ctrl = *nBToKMuMu; 
   UInt_t nCand_sig = *nBToMuMuPi; 
 
   // branches common to signal and control channels
@@ -543,6 +543,7 @@ Bool_t NanoDumper::Process(Long64_t entry)
 
   //   ----- Control Channel -----  //
 
+  /*
   int ncand_ctrl(0);
   int ncand_istriggering(0);
 
@@ -642,6 +643,7 @@ Bool_t NanoDumper::Process(Long64_t entry)
       } // bparking line is fired
     } // l1 is triggering
   }// end at least one candidate in the event
+  */
 
 
   //   ----- Signal Channel -----  //
@@ -653,12 +655,17 @@ Bool_t NanoDumper::Process(Long64_t entry)
     vector<pair<int,float>> pair_candIdx_desc_cos2d_sig = createPairWithDesc(nCand_sig, BToMuMuPi_hnl_cos2D);
     // - sort it in decreasing cos2d
     sort(pair_candIdx_desc_cos2d_sig.begin(), pair_candIdx_desc_cos2d_sig.end(), sortcansbydesc);
+
     // - then privilege OS cand over SS ones
-    vector<pair<int,float>> pair_candIdx_desc_cos2d_sig_up = updatePairWithDesc(pair_candIdx_desc_cos2d_sig, BToMuMuPi_hnl_charge);
-    sort(pair_candIdx_desc_cos2d_sig_up.begin(), pair_candIdx_desc_cos2d_sig_up.end(), sortcansbydesc_opp);
-    //sort(pair_candIdx_desc_cos2d_sig_up.begin(), pair_candIdx_desc_cos2d_sig_up.end(), sortcansbydesc);
+    vector<pair<int,float>> pair_candIdx_desc_cos2d_sign_sig = updatePairWithDesc(pair_candIdx_desc_cos2d_sig, BToMuMuPi_hnl_charge);
+    sort(pair_candIdx_desc_cos2d_sign_sig.begin(), pair_candIdx_desc_cos2d_sign_sig.end(), sortcansbydesc_opp);
+
+    // - for signal, priviledge matched candidates
+    vector<pair<int,float>> pair_candIdx_desc_cos2d_sign_matched_sig = updatePairWithDesc(pair_candIdx_desc_cos2d_sign_sig, BToMuMuPi_isMatched);
+    sort(pair_candIdx_desc_cos2d_sign_matched_sig.begin(), pair_candIdx_desc_cos2d_sign_matched_sig.end(), sortcansbydesc);
+
     // - and select the OS cand with the largest cos2d
-    UInt_t selectedCandIdx_sig = pair_candIdx_desc_cos2d_sig_up[0].first;
+    UInt_t selectedCandIdx_sig = pair_candIdx_desc_cos2d_sign_matched_sig[0].first;
 
     // make sure that a BParking line is fired
     if(Muon_fired_HLT_Mu7_IP4[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]] == 1 ||
@@ -968,6 +975,7 @@ Bool_t NanoDumper::Process(Long64_t entry)
 
   //   ----- Histograms -----  //
 
+  /*
   if(do_fillhistograms){
 
     // number of matched candidates in the event (only saved if nCand non zero)
@@ -1116,6 +1124,7 @@ Bool_t NanoDumper::Process(Long64_t entry)
       }
     } // end at least one candidate
   } // end fill histograms
+  */
 
   return kTRUE;
 }
