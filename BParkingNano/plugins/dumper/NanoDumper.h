@@ -29,6 +29,7 @@ public :
    TTreeReaderValue<UInt_t> run = {fReader, "run"};
    TTreeReaderValue<UInt_t> luminosityBlock = {fReader, "luminosityBlock"};
    TTreeReaderValue<ULong64_t> event = {fReader, "event"};
+   /*
    TTreeReaderValue<UInt_t> nBToKMuMu = {fReader, "nBToKMuMu"};
    TTreeReaderArray<Float_t> BToKMuMu_b_iso03 = {fReader, "BToKMuMu_b_iso03"};
    TTreeReaderArray<Float_t> BToKMuMu_b_iso03_close = {fReader, "BToKMuMu_b_iso03_close"};
@@ -96,6 +97,7 @@ public :
    TTreeReaderArray<Int_t> BToKMuMu_n_l1_used = {fReader, "BToKMuMu_n_l1_used"};
    TTreeReaderArray<Int_t> BToKMuMu_n_l2_used = {fReader, "BToKMuMu_n_l2_used"};
    TTreeReaderArray<Int_t> BToKMuMu_pdgId = {fReader, "BToKMuMu_pdgId"};
+   */
    TTreeReaderValue<UInt_t> nBToMuMuPi = {fReader, "nBToMuMuPi"};
    //TTreeReaderArray<Float_t> BToMuMuPi_dilepton_mass = {fReader, "BToMuMuPi_dilepton_mass"};
    //TTreeReaderArray<Float_t> BToMuMuPi_dilepton_pt = {fReader, "BToMuMuPi_dilepton_pt"};
@@ -181,6 +183,7 @@ public :
    TTreeReaderArray<Float_t> BToMuMuPi_sv_lxy = {fReader, "BToMuMuPi_sv_lxy"};
    TTreeReaderArray<Float_t> BToMuMuPi_sv_lxy_sig = {fReader, "BToMuMuPi_sv_lxy_sig"};
    TTreeReaderArray<Float_t> BToMuMuPi_sv_lxye = {fReader, "BToMuMuPi_sv_lxye"};
+   TTreeReaderArray<Float_t> BToMuMuPi_sv_lxyz = {fReader, "BToMuMuPi_sv_lxyz"};
    TTreeReaderArray<Float_t> BToMuMuPi_sv_prob = {fReader, "BToMuMuPi_sv_prob"};
    TTreeReaderArray<Float_t> BToMuMuPi_sv_x = {fReader, "BToMuMuPi_sv_x"};
    TTreeReaderArray<Float_t> BToMuMuPi_sv_xe = {fReader, "BToMuMuPi_sv_xe"};
@@ -701,6 +704,10 @@ public :
    Float_t the_gen_trgmu_mu_lxyz= -99.;
 
    // these have the gen information, independently on the matching
+   Float_t the_gen_b_pt = -99.;
+   Float_t the_gen_b_eta = -99.;
+   Float_t the_gen_b_phi = -99.;
+   Float_t the_gen_b_mass = -99.;
    Int_t the_gen_b_pdgid = -99;
    Float_t the_gen_hnl_ct = -99.;
    Float_t the_gen_hnl_lxy = -99.;
@@ -709,7 +716,27 @@ public :
    Float_t the_gen_hnl_eta = -99.;
    Float_t the_gen_hnl_phi = -99.;
    Float_t the_gen_hnl_mass = -99.;
-   ////
+   Float_t the_gen_hnl_vx = -99.;
+   Float_t the_gen_hnl_vy = -99.;
+   Float_t the_gen_hnl_vz = -99.;
+   Float_t the_gen_trgmu_pt = -99.;
+   Float_t the_gen_trgmu_eta = -99.;
+   Float_t the_gen_trgmu_phi = -99.;
+   Float_t the_gen_trgmu_vx = -99.;
+   Float_t the_gen_trgmu_vy = -99.;
+   Float_t the_gen_trgmu_vz = -99.;
+   Float_t the_gen_mu_pt = -99.;
+   Float_t the_gen_mu_eta = -99.;
+   Float_t the_gen_mu_phi = -99.;
+   Float_t the_gen_mu_vx = -99.;
+   Float_t the_gen_mu_vy = -99.;
+   Float_t the_gen_mu_vz = -99.;
+   Float_t the_gen_pi_pt = -99.;
+   Float_t the_gen_pi_eta = -99.;
+   Float_t the_gen_pi_phi = -99.;
+   Float_t the_gen_pi_vx = -99.;
+   Float_t the_gen_pi_vy = -99.;
+   Float_t the_gen_pi_vz = -99.;
    
    Float_t the_ctrl_b_pt= -99.;
    Float_t the_ctrl_b_eta= -99.;

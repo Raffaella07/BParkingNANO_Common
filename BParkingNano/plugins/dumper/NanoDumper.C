@@ -404,6 +404,7 @@ void NanoDumper::SlaveBegin(TTree * /*tree*/)
   signal_tree->Branch("sv_pv_lxy", &the_sig_sv_pv_lxy);
   signal_tree->Branch("sv_pv_lxyz", &the_sig_sv_pv_lxyz);
   signal_tree->Branch("sv_lxysig", &the_sig_sv_lxysig);
+  signal_tree->Branch("sv_lxyz", &the_sig_sv_lxyz);
   signal_tree->Branch("sv_prob", &the_sig_sv_prob);
   signal_tree->Branch("sv_x", &the_sig_sv_x);
   signal_tree->Branch("sv_y", &the_sig_sv_y);
@@ -423,6 +424,10 @@ void NanoDumper::SlaveBegin(TTree * /*tree*/)
   if(isMC){
     signal_tree->Branch("gen_trgmu_mu_lxy", &the_gen_trgmu_mu_lxy);
     signal_tree->Branch("gen_trgmu_mu_lxyz", &the_gen_trgmu_mu_lxyz);
+    signal_tree->Branch("gen_b_pt", &the_gen_b_pt);
+    signal_tree->Branch("gen_b_eta", &the_gen_b_eta);
+    signal_tree->Branch("gen_b_phi", &the_gen_b_phi);
+    signal_tree->Branch("gen_b_mass", &the_gen_b_mass);
     signal_tree->Branch("gen_b_pdgid", &the_gen_b_pdgid);
     signal_tree->Branch("gen_hnl_ct", &the_gen_hnl_ct);
     signal_tree->Branch("gen_hnl_lxy", &the_gen_hnl_lxy);
@@ -431,6 +436,27 @@ void NanoDumper::SlaveBegin(TTree * /*tree*/)
     signal_tree->Branch("gen_hnl_eta", &the_gen_hnl_eta);
     signal_tree->Branch("gen_hnl_phi", &the_gen_hnl_phi);
     signal_tree->Branch("gen_hnl_mass", &the_gen_hnl_mass);
+    signal_tree->Branch("gen_hnl_vx", &the_gen_hnl_vx);
+    signal_tree->Branch("gen_hnl_vy", &the_gen_hnl_vy);
+    signal_tree->Branch("gen_hnl_vz", &the_gen_hnl_vz);
+    signal_tree->Branch("gen_trgmu_pt", &the_gen_trgmu_pt);
+    signal_tree->Branch("gen_trgmu_eta", &the_gen_trgmu_eta);
+    signal_tree->Branch("gen_trgmu_phi", &the_gen_trgmu_phi);
+    signal_tree->Branch("gen_trgmu_vx", &the_gen_trgmu_vx);
+    signal_tree->Branch("gen_trgmu_vy", &the_gen_trgmu_vy);
+    signal_tree->Branch("gen_trgmu_vz", &the_gen_trgmu_vz);
+    signal_tree->Branch("gen_mu_pt", &the_gen_mu_pt);
+    signal_tree->Branch("gen_mu_eta", &the_gen_mu_eta);
+    signal_tree->Branch("gen_mu_phi", &the_gen_mu_phi);
+    signal_tree->Branch("gen_mu_vx", &the_gen_mu_vx);
+    signal_tree->Branch("gen_mu_vy", &the_gen_mu_vy);
+    signal_tree->Branch("gen_mu_vz", &the_gen_mu_vz);
+    signal_tree->Branch("gen_pi_pt", &the_gen_pi_pt);
+    signal_tree->Branch("gen_pi_eta", &the_gen_pi_eta);
+    signal_tree->Branch("gen_pi_phi", &the_gen_pi_phi);
+    signal_tree->Branch("gen_pi_vx", &the_gen_pi_vx);
+    signal_tree->Branch("gen_pi_vy", &the_gen_pi_vy);
+    signal_tree->Branch("gen_pi_vz", &the_gen_pi_vz);
   }
 
   signal_tree->Branch("pv_npvs", &the_pv_npvs);
@@ -649,7 +675,6 @@ Bool_t NanoDumper::Process(Long64_t entry)
   //   ----- Signal Channel -----  //
 
   if(nCand_sig > 0){ // at least one candidate per event
-
     // selecting the candidate as the one having the largest hnl pt
     // - create candIdx - cos2d pairs
     vector<pair<int,float>> pair_candIdx_desc_cos2d_sig = createPairWithDesc(nCand_sig, BToMuMuPi_hnl_cos2D);
@@ -868,6 +893,7 @@ Bool_t NanoDumper::Process(Long64_t entry)
         the_sig_sv_chi2 = BToMuMuPi_sv_chi2[selectedCandIdx_sig];
         the_sig_sv_lxy = BToMuMuPi_sv_lxy[selectedCandIdx_sig];
         the_sig_sv_lxysig = BToMuMuPi_sv_lxy_sig[selectedCandIdx_sig];
+        the_sig_sv_lxyz = BToMuMuPi_sv_lxyz[selectedCandIdx_sig];
         the_sig_sv_prob = BToMuMuPi_sv_prob[selectedCandIdx_sig];
         the_sig_sv_x = BToMuMuPi_sv_x[selectedCandIdx_sig];
         the_sig_sv_y = BToMuMuPi_sv_y[selectedCandIdx_sig];
@@ -918,33 +944,36 @@ Bool_t NanoDumper::Process(Long64_t entry)
           // gen information (no matching)
 
           // find idx of gen particles of interest
-          int gen_hnl_idx(-99), gen_b_idx(-99), gen_trgmu_idx(-99), gen_lep_idx(-99), gen_pi_idx(-99);
+          int gen_hnl_idx(-99), gen_b_idx(-99), gen_trgmu_idx(-99), gen_mu_idx(-99), gen_pi_idx(-99);
 
           for(unsigned int iGen(0); iGen < nGen; ++iGen){
             if(abs(GenPart_pdgId[iGen])==9900015){
               gen_hnl_idx = iGen;
               gen_b_idx = GenPart_genPartIdxMother[iGen]; 
+              break;
             }
+          }
+          for(unsigned int iGen(0); iGen < nGen; ++iGen){
             if(abs(GenPart_pdgId[iGen])==13 && GenPart_genPartIdxMother[iGen]==gen_b_idx)
               gen_trgmu_idx = iGen;
-            if((abs(GenPart_pdgId[iGen])==13 || abs(GenPart_pdgId[iGen])==11 || abs(GenPart_pdgId[iGen])==15) && GenPart_genPartIdxMother[iGen]==gen_hnl_idx)
-              gen_lep_idx = iGen;
+            if((abs(GenPart_pdgId[iGen])==13) && GenPart_genPartIdxMother[iGen]==gen_hnl_idx)
+              gen_mu_idx = iGen;
             if(abs(GenPart_pdgId[iGen])==211 && GenPart_genPartIdxMother[iGen]==gen_hnl_idx)
               gen_pi_idx = iGen;
           }
 
           // get quantities that need more than one object
-          if(gen_hnl_idx!=-99 && gen_lep_idx!=-99){
+          if(gen_hnl_idx!=-99 && gen_mu_idx!=-99){
 
             ROOT::Math::PtEtaPhiMVector hnl_p4(GenPart_pt[gen_hnl_idx], GenPart_eta[gen_hnl_idx], GenPart_phi[gen_hnl_idx], GenPart_mass[gen_hnl_idx]);
             Float_t hnl_betagamma = hnl_p4.Beta() * hnl_p4.Gamma();
 
-            the_gen_hnl_lxyz = get3Ddisp(GenPart_vx[gen_hnl_idx], GenPart_vx[gen_lep_idx],
-                GenPart_vy[gen_hnl_idx], GenPart_vy[gen_lep_idx],
-                GenPart_vz[gen_hnl_idx], GenPart_vz[gen_lep_idx]);
+            the_gen_hnl_lxyz = get3Ddisp(GenPart_vx[gen_hnl_idx], GenPart_vx[gen_mu_idx],
+                GenPart_vy[gen_hnl_idx], GenPart_vy[gen_mu_idx],
+                GenPart_vz[gen_hnl_idx], GenPart_vz[gen_mu_idx]);
 
-            the_gen_hnl_lxy  = get2Ddisp(GenPart_vx[gen_hnl_idx], GenPart_vx[gen_lep_idx],
-                GenPart_vy[gen_hnl_idx], GenPart_vy[gen_lep_idx]);
+            the_gen_hnl_lxy  = get2Ddisp(GenPart_vx[gen_hnl_idx], GenPart_vx[gen_mu_idx],
+                GenPart_vy[gen_hnl_idx], GenPart_vy[gen_mu_idx]);
 
             the_gen_hnl_ct = the_gen_hnl_lxyz / hnl_betagamma;
             //std::cout << "HNL pt,eta,phi,m"<< GenPart_pt[gen_hnl_idx] << " " << GenPart_eta[gen_hnl_idx] << " " << GenPart_phi[gen_hnl_idx] << " " << GenPart_mass[gen_hnl_idx] << std::endl;
@@ -953,14 +982,45 @@ Bool_t NanoDumper::Process(Long64_t entry)
           }
 
           // set quantities for each object
+          if(gen_b_idx!=-99){
+            the_gen_b_pt = GenPart_pt[gen_b_idx];
+            the_gen_b_eta = GenPart_eta[gen_b_idx];
+            the_gen_b_phi = GenPart_phi[gen_b_idx];
+            the_gen_b_mass = GenPart_mass[gen_b_idx];
+            the_gen_b_pdgid = GenPart_pdgId[gen_b_idx];
+          }
           if(gen_hnl_idx!=-99){
             the_gen_hnl_pt = GenPart_pt[gen_hnl_idx];
             the_gen_hnl_eta = GenPart_eta[gen_hnl_idx];
             the_gen_hnl_phi = GenPart_phi[gen_hnl_idx];
             the_gen_hnl_mass = GenPart_mass[gen_hnl_idx];
+            the_gen_hnl_vx = GenPart_vx[gen_hnl_idx];
+            the_gen_hnl_vy = GenPart_vy[gen_hnl_idx];
+            the_gen_hnl_vz = GenPart_vz[gen_hnl_idx];
           }
-          if(gen_b_idx!=-99){
-            the_gen_b_pdgid = GenPart_pdgId[gen_b_idx];
+          if(gen_trgmu_idx!=-99){
+            the_gen_trgmu_pt = GenPart_pt[gen_trgmu_idx];
+            the_gen_trgmu_eta = GenPart_eta[gen_trgmu_idx];
+            the_gen_trgmu_phi = GenPart_phi[gen_trgmu_idx];
+            the_gen_trgmu_vx = GenPart_vx[gen_trgmu_idx];
+            the_gen_trgmu_vy = GenPart_vy[gen_trgmu_idx];
+            the_gen_trgmu_vz = GenPart_vz[gen_trgmu_idx];
+          }
+          if(gen_mu_idx!=-99){
+            the_gen_mu_pt = GenPart_pt[gen_mu_idx];
+            the_gen_mu_eta = GenPart_eta[gen_mu_idx];
+            the_gen_mu_phi = GenPart_phi[gen_mu_idx];
+            the_gen_mu_vx = GenPart_vx[gen_mu_idx];
+            the_gen_mu_vy = GenPart_vy[gen_mu_idx];
+            the_gen_mu_vz = GenPart_vz[gen_mu_idx];
+          }
+          if(gen_pi_idx!=-99){
+            the_gen_pi_pt = GenPart_pt[gen_pi_idx];
+            the_gen_pi_eta = GenPart_eta[gen_pi_idx];
+            the_gen_pi_phi = GenPart_phi[gen_pi_idx];
+            the_gen_pi_vx = GenPart_vx[gen_pi_idx];
+            the_gen_pi_vy = GenPart_vy[gen_pi_idx];
+            the_gen_pi_vz = GenPart_vz[gen_pi_idx];
           }
         }
 
@@ -975,7 +1035,6 @@ Bool_t NanoDumper::Process(Long64_t entry)
 
   //   ----- Histograms -----  //
 
-  /*
   if(do_fillhistograms){
 
     // number of matched candidates in the event (only saved if nCand non zero)
@@ -1124,7 +1183,6 @@ Bool_t NanoDumper::Process(Long64_t entry)
       }
     } // end at least one candidate
   } // end fill histograms
-  */
 
   return kTRUE;
 }
