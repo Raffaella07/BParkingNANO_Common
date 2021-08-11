@@ -28,6 +28,7 @@
 #include "TagAndProbeDumper.h"
 #include <TH2.h>
 #include <TStyle.h>
+#include <TSystem.h>
 #include "utils.C"
 
 void TagAndProbeDumper::Begin(TTree * /*tree*/)
@@ -50,7 +51,18 @@ void TagAndProbeDumper::SlaveBegin(TTree * /*tree*/)
 
   TString option = GetOption();
   TString outFileName = option;
-  my_file = new TFile(outFileName, "RECREATE");  
+
+  if(outFileName.Contains("isMC")){
+    outFileName.Resize(outFileName.Length()-5);
+  }
+
+  // check if outputfile exists
+  if(gSystem->AccessPathName(outFileName)){
+    my_file = new TFile(outFileName, "RECREATE");  
+  }
+  else{
+    my_file = new TFile(outFileName, "UPDATE");  
+  }
   my_file->cd();
 
   tree = new TTree("tree", "tree");
