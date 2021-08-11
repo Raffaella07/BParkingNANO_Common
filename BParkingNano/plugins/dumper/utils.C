@@ -1,3 +1,6 @@
+#ifndef utils
+#define utils
+
 #include "boost/property_tree/ptree.hpp"
 #include "boost/property_tree/json_parser.hpp"
 
@@ -13,6 +16,52 @@ bool sortcansbydesc(const pair<int, float> &a1, const pair<int, float> &a2){
 
 bool sortcansbydesc_opp(const pair<int, float> &a1, const pair<int, float> &a2){
   return a1.second < a2.second;
+}
+
+
+vector<pair<int,float>> createPairWithDesc(const UInt_t& nCand, const TTreeReaderArray<Float_t>& desc){
+  vector<pair<int,float>> pair_candIdx_desc;
+  for(unsigned int iCand(0); iCand < nCand; ++iCand){
+    pair<int, float> pair_candIdx_desc_tmp;
+    pair_candIdx_desc_tmp.first  = iCand;
+    pair_candIdx_desc_tmp.second = desc[iCand] ;
+    pair_candIdx_desc.push_back(pair_candIdx_desc_tmp);
+  }
+  return pair_candIdx_desc;
+}
+
+
+vector<pair<int,float>> updatePairWithDesc(vector<pair<int,float>> the_ini_pair, const TTreeReaderArray<Int_t>& quantity){
+  vector<pair<int,float>> pair_candIdx_desc;
+  for(unsigned int iCand(0); iCand < the_ini_pair.size(); ++iCand){
+    pair<int, float> pair_candIdx_desc_tmp;
+    pair_candIdx_desc_tmp.first = the_ini_pair[iCand].first;
+    pair_candIdx_desc_tmp.second = fabs(quantity[the_ini_pair[iCand].first]); // taking the abs of the quantity
+    pair_candIdx_desc.push_back(pair_candIdx_desc_tmp);
+  }
+  return pair_candIdx_desc;
+}
+
+
+vector<pair<int,float>> updatePairWithDesc(vector<pair<int,float>> the_ini_pair, const TTreeReaderArray<Float_t>& quantity){
+  vector<pair<int,float>> pair_candIdx_desc;
+  for(unsigned int iCand(0); iCand < the_ini_pair.size(); ++iCand){
+    pair<int, float> pair_candIdx_desc_tmp;
+    pair_candIdx_desc_tmp.first = the_ini_pair[iCand].first;
+    pair_candIdx_desc_tmp.second = fabs(quantity[the_ini_pair[iCand].first]); // taking the abs of the quantity
+    pair_candIdx_desc.push_back(pair_candIdx_desc_tmp);
+  }
+  return pair_candIdx_desc;
+}
+
+
+Float_t get3Ddisp(const Float_t vx1, const Float_t vx2, const Float_t vy1, const Float_t vy2, const Float_t vz1, const Float_t vz2){
+  return TMath::Sqrt( (vx1-vx2)*(vx1-vx2) + (vy1-vy2)*(vy1-vy2) + (vz1-vz2)*(vz1-vz2) );
+}
+
+
+Float_t get2Ddisp(const Float_t vx1, const Float_t vx2, const Float_t vy1, const Float_t vy2){
+  return TMath::Sqrt( (vx1-vx2)*(vx1-vx2) + (vy1-vy2)*(vy1-vy2) );
 }
 
 
@@ -89,4 +138,4 @@ float getTriggerScaleFactor(float pt, float eta){
   return scale_factor;
 }
 
-
+#endif
