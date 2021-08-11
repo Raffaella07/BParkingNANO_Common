@@ -7,7 +7,10 @@
 # ${3}:  pl 
 # ${4}:  tag 
 # ${5}:  isMC
-# ${6}:  doTagAndProbe
+# ${6}:  dosignal
+# ${7}:  docontrol
+# ${8}:  dohnl
+# ${9}:  doTagAndProbe
 #--------------------
 
 if [ ${5} == 1 ] ; then #isMC
@@ -24,12 +27,23 @@ echo "copying ntupliser to workdir"
 cp ./files/starter_${3}.C $workdir/starter.C
 cp ../data/json/golden_2018.json $workdir
 cp ../plugins/dumper/utils.C $workdir 
-if [ ${6} == 0 ] ; then
-  cp ../plugins/dumper/NanoDumper.C $workdir 
-  cp ../plugins/dumper/NanoDumper.h $workdir 
+if [ ${5} == 1 ] ; then
   cp ../plugins/dumper/NanoRunDumper.C $workdir 
   cp ../plugins/dumper/NanoRunDumper.h $workdir 
-else
+fi
+if [ ${6} == 1 ] ; then
+  cp ../plugins/dumper/BToMuMuPiDumper.C $workdir 
+  cp ../plugins/dumper/BToMuMuPiDumper.h $workdir 
+fi
+if [ ${7} == 1 ] ; then
+  cp ../plugins/dumper/BToKMuMuDumper.C $workdir 
+  cp ../plugins/dumper/BToKMuMuDumper.h $workdir 
+fi
+if [ ${8} == 1 ] ; then
+  cp ../plugins/dumper/HNLToMuPiDumper.C $workdir 
+  cp ../plugins/dumper/HNLToMuPiDumper.h $workdir 
+fi
+if [ ${9} == 1 ] ; then
   cp ../plugins/dumper/TagAndProbeDumper.C $workdir 
   cp ../plugins/dumper/TagAndProbeDumper.h $workdir 
 fi

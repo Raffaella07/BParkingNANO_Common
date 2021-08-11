@@ -6,10 +6,13 @@ from glob import glob
 options = VarParsing('python')
 
 options.register('isMC'           ,  True           , VarParsing.multiplicity.singleton, VarParsing.varType.bool  , "Run this on real data"                  )
+options.register('doSignal'       ,  True           , VarParsing.multiplicity.singleton, VarParsing.varType.bool  , "Run the BToMuMuPiBuilder"               )
+options.register('doControl'      ,  True           , VarParsing.multiplicity.singleton, VarParsing.varType.bool  , "Run the BToKMuMuBuilder"                )
+options.register('doHNL'          ,  False          , VarParsing.multiplicity.singleton, VarParsing.varType.bool  , "Run the HNLToMuPiBuilder"               )
+options.register('doTagAndProbe'  ,  False          , VarParsing.multiplicity.singleton, VarParsing.varType.bool  , "Run the TagAndProbeJpsiToMuMu"          )
 options.register('skipDuplicated' ,  True           , VarParsing.multiplicity.singleton, VarParsing.varType.bool  , "Skip duplicated events. True by default")
 options.register('globalTag'      , 'NOTSET'        , VarParsing.multiplicity.singleton, VarParsing.varType.string, "Set global tag"                         )
 options.register('wantSummary'    ,  True           , VarParsing.multiplicity.singleton, VarParsing.varType.bool  , "Run this on real data"                  )
-options.register('wantFullRECO'   ,  False          , VarParsing.multiplicity.singleton, VarParsing.varType.bool  , "Run this on real data"                  )
 options.register('reportEvery'    ,  1000           , VarParsing.multiplicity.singleton, VarParsing.varType.int   , "report every N events"                  )
 options.register('skip'           ,  0              , VarParsing.multiplicity.singleton, VarParsing.varType.int   , "skip first N events"                    )
 options.register('inputFile'      , None            , VarParsing.multiplicity.singleton, VarParsing.varType.string, "inputFile name"                         )
@@ -32,7 +35,8 @@ outputFileFEVT = cms.untracked.string('_'.join(['BParkFullEvt', extension[option
 if not options.inputFiles:
     #options.inputFiles = ['/store/mc/RunIIAutumn18MiniAOD/QCD_Pt-20to30_MuEnrichedPt5_TuneCP5_13TeV_pythia8/MINIAODSIM/102X_upgrade2018_realistic_v15-v4/110000/A1ADA5DA-4A57-7945-9B9D-6FAC167A1627.root'] if options.isMC else \
     options.inputFiles = ['/store/data/Run2018B/ParkingBPH4/MINIAOD/05May2019-v2/230000/F7E7EF39-476F-1C48-95F7-74CB5C7A542C.root'] if not options.isMC else \
-                         ['file:%s' %i for i in glob('/pnfs/psi.ch/cms/trivcat/store/user/mratti/BHNLsGen/V20_emu/mass3.0_ctau184.0/step4_nj15.root')]
+                         ['file:%s' %i for i in glob('/pnfs/psi.ch/cms/trivcat/store/user/mratti/BHNLsGen/V20_test/mass3.0_ctau184.256851021/step4_enrichedV2_nj15.root')]
+                         #['file:%s' %i for i in glob('/pnfs/psi.ch/cms/trivcat/store/user/mratti/BHNLsGen/V20_emu/mass3.0_ctau184.0/step4_nj15.root')]
 
 annotation = '%s nevts:%d' % (outputFileNANO, options.maxEvents)
 
@@ -115,16 +119,19 @@ from Configuration.AlCa.GlobalTag import GlobalTag
 process.GlobalTag = GlobalTag(process.GlobalTag, globaltag, '')
 
 from PhysicsTools.BParkingNano.nanoBPark_cff import *
-process = nanoAOD_customizeMuonTriggerBPark  (process)
-process = nanoAOD_customizeTrackFilteredBPark(process)
-process = nanoAOD_customizeBToMuMuPi         (process, isMC=options.isMC)
-process = nanoAOD_customizeBToKMuMu          (process, isMC=options.isMC) 
-process = nanoAOD_customizeTriggerBitsBPark  (process)
+process = nanoAOD_customizeMuonTriggerBPark      (process)
+process = nanoAOD_customizeTrackFilteredBPark    (process)
+process = nanoAOD_customizeBToMuMuPi             (process, isMC=options.isMC)
+process = nanoAOD_customizeBToKMuMu              (process, isMC=options.isMC) 
+process = nanoAOD_customizeHNLToMuPi             (process, isMC=options.isMC)
+process = nanoAOD_customizeTagAndProbeJPsiToMuMu (process, isMC=options.isMC) 
+process = nanoAOD_customizeTriggerBitsBPark      (process)
 
 # Path and EndPath definitions
-#process.nanoAOD_general_step = cms.Path(process.nanoSequence)
 process.nanoAOD_MuMuPi_step = cms.Path(process.nanoSequence + process.nanoBMuMuPiSequence + CountBToMuMuPi )
 process.nanoAOD_KMuMu_step  = cms.Path(process.nanoSequence + process.nanoBKMuMuSequence + CountBToKmumu ) 
+process.nanoAOD_HNLToMuPi_step = cms.Path(process.nanoSequence + process.nanoHNLToMuPiSequence + CountHNLToMuPi )
+process.nanoAOD_JPsiToMuMu_step  = cms.Path(process.nanoSequence + process.nanoJPsiToMuMuSequence + CountJPsiToMuMu ) 
 
 # customisation of the process.
 if options.isMC:
@@ -137,32 +144,40 @@ process.NANOAODoutput_step = cms.EndPath(process.NANOAODoutput)
 
 # Schedule definition
 process.schedule = cms.Schedule(
-    #process.nanoAOD_general_step,
-    process.nanoAOD_MuMuPi_step,
-    process.nanoAOD_KMuMu_step, 
+)
+if options.doSignal:
+  process.schedule += cms.Schedule(
+      process.nanoAOD_MuMuPi_step,
+  )
+if options.doControl:
+  process.schedule += cms.Schedule(
+      process.nanoAOD_KMuMu_step, 
+  )
+if options.doHNL:
+  process.schedule += cms.Schedule(
+      process.nanoAOD_HNLToMuPi_step, 
+  )
+if options.doTagAndProbe:
+  process.schedule += cms.Schedule(
+      process.nanoAOD_JPsiToMuMu_step, 
+  )
+process.schedule += cms.Schedule(
     process.endjob_step, 
     process.NANOAODoutput_step
 )
     
-if options.wantFullRECO:
-    process.schedule = cms.Schedule(
-        #process.nanoAOD_general_step,
-        process.nanoAOD_MuMuPi_step,
-        process.nanoAOD_KMuMu_step, 
-        process.endjob_step, 
-        process.FEVTDEBUGHLToutput_step, 
-        process.NANOAODoutput_step
-    )
 from PhysicsTools.PatAlgos.tools.helpers import associatePatAlgosToolsTask
 associatePatAlgosToolsTask(process)
 
-process.NANOAODoutput.SelectEvents = cms.untracked.PSet(
-    #SelectEvents = cms.vstring('nanoAOD_MuMuPi_step', 'nanoAOD_KMuMu_step') 
-    #SelectEvents = cms.vstring('nanoAOD_MuMuPi_step', 'nanoAOD_KMuMu_step', 'nanoAOD_general_step') 
-    SelectEvents = cms.vstring('nanoAOD_MuMuPi_step', 'nanoAOD_KMuMu_step') 
-    #SelectEvents = cms.vstring('nanoAOD_MuMuPi_step', 'nanoAOD_general_step') 
-)
+process_string = cms.vstring()
+if options.doSignal: process_string.append('nanoAOD_MuMuPi_step')
+if options.doControl: process_string.append('nanoAOD_KMuMu_step')
+if options.doHNL: process_string.append('nanoAOD_HNLToMuPi_step')
+if options.doTagAndProbe: process_string.append('nanoAOD_JPsiToMuMu_step')
 
+process.NANOAODoutput.SelectEvents = cms.untracked.PSet(
+    SelectEvents = process_string
+)
 
 ### from https://hypernews.cern.ch/HyperNews/CMS/get/physics-validation/3287/1/1/1/1/1.html
 process.add_(cms.Service('InitRootHandlers', EnableIMT = cms.untracked.bool(False)))
