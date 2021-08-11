@@ -406,7 +406,6 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
       pat::ETHMuon the_muon(muon);
       ETHmuons_out->emplace_back(the_muon);
 
-      std::cout << "is triggering " << muonIsTrigger[iMuo] << std::endl;
       for(unsigned int i=0; i<HLTPaths_.size(); i++){
         ETHmuons_out->back().addUserInt(HLTPaths_[i], fires[iMuo][i]);
         ETHmuons_out->back().addUserInt(HLTPaths_[i] + "_prescale", prescales[iMuo][i]);
