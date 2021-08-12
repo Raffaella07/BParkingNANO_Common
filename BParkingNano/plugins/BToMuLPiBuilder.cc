@@ -156,6 +156,11 @@ void BToMuLPiBuilder<Lepton>::produce(edm::StreamID, edm::Event &evt, edm::Event
     // only select the trigger muons (are slimmedMuons by construction)
     if(trg_mu_ptr->userInt("isTriggering") != 1) continue;
 
+    // make sure it fires a bParking line
+    if(trg_mu_ptr->userInt("HLT_Mu7_IP4") != 1 && trg_mu_ptr->userInt("HLT_Mu8_IP3") != 1 && trg_mu_ptr->userInt("HLT_Mu8_IP5") != 1 && trg_mu_ptr->userInt("HLT_Mu8_IP6") != 1 && 
+       trg_mu_ptr->userInt("HLT_Mu8p5_IP3p5") != 1 && trg_mu_ptr->userInt("HLT_Mu9_IP4") != 1 && trg_mu_ptr->userInt("HLT_Mu9_IP5") != 1 && trg_mu_ptr->userInt("HLT_Mu9_IP6") != 1 && 
+       trg_mu_ptr->userInt("HLT_Mu10p5_IP3p5") != 1 && trg_mu_ptr->userInt("HLT_Mu12_IP6") != 1) continue;
+
     // selection on the trigger muon
     if( !trgmu_selection_(*trg_mu_ptr) ) continue;
 

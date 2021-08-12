@@ -355,15 +355,18 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
 
 
     if(debug)std::cout << "number of Muons=" <<slimmed_muons->size() << endl;
-    //And now create a collection with all trg muons
+    //And now create a collection with trg muons from bParking line (10 first elements of HLTPaths)
     for(const pat::Muon & muon : *slimmed_muons){
         unsigned int iMuo(&muon -&(slimmed_muons->at(0)));
-        if(muonIsTrigger[iMuo]==1){
+        if(muonIsTrigger[iMuo]==1 && (fires[iMuo][0]==1 || fires[iMuo][1]==1 || fires[iMuo][2]==1 || 
+          fires[iMuo][3]==1 || fires[iMuo][4]==1 || fires[iMuo][5]==1 || fires[iMuo][6]==1 || 
+          fires[iMuo][7]==1 || fires[iMuo][8]==1 || fires[iMuo][9]==1)){
             pat::Muon recoTriggerMuonCand(muon);
             trgmuons_out->emplace_back(recoTriggerMuonCand);
         }
     }
 
+    /*
     // add the displaced standalone muons to the collection
     for(const reco::Track & muon : *displaced_standalone_muons){
       if(muon.pt()<selmu_ptMin_) continue;
@@ -384,6 +387,8 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
       ETHmuons_out->back().addUserInt("isTriggering", -1);
       ETHmuons_out->back().addUserFloat("DR", -1.);
       ETHmuons_out->back().addUserFloat("DPT", -1.);
+      ETHmuons_out->back().addUserInt("isDSAMuon", 1);
+      ETHmuons_out->back().addUserInt("isSlimmedMuon", 0);
       ETHmuons_out->back().addUserFloat("dz", muon.dz(PV.position()));
       ETHmuons_out->back().addUserFloat("dzS", muon.dz(PV.position())/muon.dzError());
       ETHmuons_out->back().addUserFloat("dxy", muon.dxy(PV.position()));
@@ -391,6 +396,7 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
 
       trans_muons_out->emplace_back(muonTT);
     }
+    */
 
     // add the slimmed muons to the collection 
     for(const pat::Muon & muon : *slimmed_muons){
@@ -413,6 +419,8 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
       ETHmuons_out->back().addUserInt("isTriggering", muonIsTrigger[iMuo]);
       ETHmuons_out->back().addUserFloat("DR", muonDR[iMuo]);
       ETHmuons_out->back().addUserFloat("DPT" ,muonDPT[iMuo]);
+      ETHmuons_out->back().addUserInt("isDSAMuon", 0);
+      ETHmuons_out->back().addUserInt("isSlimmedMuon", 1);
       ETHmuons_out->back().addUserFloat("dz", muon.dB(muon.PVDZ));
       ETHmuons_out->back().addUserFloat("dzS", muon.dB(muon.PVDZ)/muon.edB(muon.PVDZ));
       ETHmuons_out->back().addUserFloat("dxy", muon.dB(muon.PV2D));
