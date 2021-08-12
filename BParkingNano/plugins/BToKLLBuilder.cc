@@ -20,6 +20,7 @@
 #include <limits>
 #include <algorithm>
 #include "KinVtxFitter.h"
+#include "ETHMuon.h"
 
 class BToKLLBuilder : public edm::global::EDProducer<> {
 
@@ -96,15 +97,12 @@ void BToKLLBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
   evt.getByToken(isotracksToken_, iso_tracks);
   edm::Handle<pat::PackedCandidateCollection> iso_lostTracks;
   evt.getByToken(isolostTracksToken_, iso_lostTracks);
-  unsigned int nTracks     = iso_tracks->size();
-  unsigned int totalTracks = nTracks + iso_lostTracks->size();
 
   std::vector<int> used_lep1_id, used_lep2_id, used_trk_id;
 
-
   // output
   std::unique_ptr<pat::CompositeCandidateCollection> ret_val(new pat::CompositeCandidateCollection());
-  
+
   for(size_t k_idx = 0; k_idx < kaons->size(); ++k_idx) {
     edm::Ptr<pat::CompositeCandidate> k_ptr(kaons, k_idx);
     if( !k_selection_(*k_ptr) ) continue;
@@ -123,8 +121,15 @@ void BToKLLBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
       int l1_idx = ll_ptr->userInt("l1_idx");
       int l2_idx = ll_ptr->userInt("l2_idx");
     
+      math::PtEtaPhiMLorentzVector ll_p4(
+        ll_ptr->pt(), 
+        ll_ptr->eta(),
+        ll_ptr->phi(),
+        ll_ptr->mass()
+        );
+
       pat::CompositeCandidate cand;
-      cand.setP4(ll_ptr->p4() + k_p4);
+      cand.setP4(ll_p4 + k_p4);
       cand.setCharge(ll_ptr->charge() + k_ptr->charge());
       // Use UserCands as they should not use memory but keep the Ptr itself
       // Put the lepton passing the corresponding selection
@@ -149,7 +154,8 @@ void BToKLLBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
         {l1_ptr->mass(), l2_ptr->mass(), K_MASS},
         {LEP_SIGMA, LEP_SIGMA, K_SIGMA} //some small sigma for the lepton mass
         );
-      if(!fitter.success()) continue; // hardcoded, but do we need otherwise?
+      if(!fitter.success()) continue;
+
       cand.setVertex( 
         reco::Candidate::Point( 
           fitter.fitted_vtx().x(),
@@ -220,6 +226,10 @@ void BToKLLBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
       float b_iso03_close = 0; 
       float b_iso04_close = 0; 
 
+      /*
+      unsigned int nTracks     = iso_tracks->size();
+      unsigned int totalTracks = nTracks + iso_lostTracks->size();
+
       for( unsigned int iTrk=0; iTrk<totalTracks; ++iTrk ) {
       
         const pat::PackedCandidate & trk = (iTrk < nTracks) ? (*iso_tracks)[iTrk] : (*iso_lostTracks)[iTrk-nTracks];
@@ -276,6 +286,7 @@ void BToKLLBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
           if (dr_to_b < 0.3) b_iso03_close += trk.pt();
         }
       }
+      */
 
       cand.addUserFloat("l1_iso03", l1_iso03);
       cand.addUserFloat("l1_iso04", l1_iso04);
@@ -304,7 +315,6 @@ void BToKLLBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
       // for MC only
       if(isMC_ == true){
 
-
         // pdgId of the gen particle to which the final-state particles are matched
         int l1_genPdgId = ll_ptr->userInt("l1_mcMatch");
         int l2_genPdgId = ll_ptr->userInt("l2_mcMatch");
@@ -315,37 +325,38 @@ void BToKLLBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
         l2_genIdx = ll_ptr->userInt("l2_mcMatchIndex"); 
         k_genIdx  = k_ptr->userInt("mcMatchIndex"); 
 
-        if(l1_genIdx == -1 || l2_genIdx == -1 || k_genIdx == -1) continue;
+        if(l1_genIdx != -1 && l2_genIdx != -1 && k_genIdx != -1){
 
-        // getting the associated gen particles
-        edm::Ptr<reco::GenParticle> genMuon1_ptr(genParticles, l1_genIdx);
-        edm::Ptr<reco::GenParticle> genMuon2_ptr(genParticles, l2_genIdx);
-        edm::Ptr<reco::GenParticle> genKaon_ptr(genParticles, k_genIdx);
+          // getting the associated gen particles
+          edm::Ptr<reco::GenParticle> genMuon1_ptr(genParticles, l1_genIdx);
+          edm::Ptr<reco::GenParticle> genMuon2_ptr(genParticles, l2_genIdx);
+          edm::Ptr<reco::GenParticle> genKaon_ptr(genParticles, k_genIdx);
 
-        // index of the associated mother particle
-        int genMuon1Mother_genIdx = -1;
-        int genMuon2Mother_genIdx = -1;
-        int genKaonMother_genIdx  = -1;
-        if(genMuon1_ptr->numberOfMothers()>0) genMuon1Mother_genIdx = genMuon1_ptr->motherRef(0).key();
-        if(genMuon2_ptr->numberOfMothers()>0) genMuon2Mother_genIdx = genMuon2_ptr->motherRef(0).key();
-        if(genKaon_ptr->numberOfMothers()>0) genKaonMother_genIdx = genKaon_ptr->motherRef(0).key();
+          // index of the associated mother particle
+          int genMuon1Mother_genIdx = -1;
+          int genMuon2Mother_genIdx = -1;
+          int genKaonMother_genIdx  = -1;
+          if(genMuon1_ptr->numberOfMothers()>0) genMuon1Mother_genIdx = genMuon1_ptr->motherRef(0).key();
+          if(genMuon2_ptr->numberOfMothers()>0) genMuon2Mother_genIdx = genMuon2_ptr->motherRef(0).key();
+          if(genKaon_ptr->numberOfMothers()>0) genKaonMother_genIdx = genKaon_ptr->motherRef(0).key();
 
-        // getting the mother particles
-        edm::Ptr<reco::GenParticle> genMuon1Mother_ptr(genParticles, genMuon1Mother_genIdx);
-        edm::Ptr<reco::GenParticle> genMuon2Mother_ptr(genParticles, genMuon2Mother_genIdx);
-        edm::Ptr<reco::GenParticle> genKaonMother_ptr(genParticles, genKaonMother_genIdx);
+          // getting the mother particles
+          edm::Ptr<reco::GenParticle> genMuon1Mother_ptr(genParticles, genMuon1Mother_genIdx);
+          edm::Ptr<reco::GenParticle> genMuon2Mother_ptr(genParticles, genMuon2Mother_genIdx);
+          edm::Ptr<reco::GenParticle> genKaonMother_ptr(genParticles, genKaonMother_genIdx);
 
-        // pdgId of the mother particles
-        genMuon1Mother_genPdgId = genMuon1Mother_ptr->pdgId();
-        genMuon2Mother_genPdgId = genMuon2Mother_ptr->pdgId();
-        genKaonMother_genPdgId  = genKaonMother_ptr->pdgId();
+          // pdgId of the mother particles
+          genMuon1Mother_genPdgId = genMuon1Mother_ptr->pdgId();
+          genMuon2Mother_genPdgId = genMuon2Mother_ptr->pdgId();
+          genKaonMother_genPdgId  = genKaonMother_ptr->pdgId();
 
-        if(
-           fabs(l1_genPdgId) == 13 && fabs(genMuon1Mother_genPdgId) == 443 && 
-           fabs(l2_genPdgId) == 13 && fabs(genMuon2Mother_genPdgId) == 443 && 
-           fabs(k_genPdgId) == 321 && fabs(genKaonMother_genPdgId) == 521
-          ){
-            isMatched = 1;
+          if(
+             fabs(l1_genPdgId) == 13 && fabs(genMuon1Mother_genPdgId) == 443 && 
+             fabs(l2_genPdgId) == 13 && fabs(genMuon2Mother_genPdgId) == 443 && 
+             fabs(k_genPdgId) == 321 && fabs(genKaonMother_genPdgId) == 521
+            ){
+              isMatched = 1;
+          }
         }
       }
 
