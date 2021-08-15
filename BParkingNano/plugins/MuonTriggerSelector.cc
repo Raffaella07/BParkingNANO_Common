@@ -366,7 +366,6 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
         }
     }
 
-    /*
     // add the displaced standalone muons to the collection
     for(const reco::Track & muon : *displaced_standalone_muons){
       if(muon.pt()<selmu_ptMin_) continue;
@@ -396,7 +395,6 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
 
       trans_muons_out->emplace_back(muonTT);
     }
-    */
 
     // add the slimmed muons to the collection 
     for(const pat::Muon & muon : *slimmed_muons){
