@@ -464,16 +464,8 @@ Bool_t BToMuMuPiDumper::Process(Long64_t entry)
       std::cout << "idx " << pair_candIdx_desc_cos2d_sign_matched_sig[i].first << " cos2D " << BToMuMuPi_hnl_cos2D[pair_candIdx_desc_cos2d_sign_matched_sig[i].first] << " isOS " << BToMuMuPi_hnl_charge[pair_candIdx_desc_cos2d_sign_matched_sig[i].first] << " isMatched " << BToMuMuPi_isMatched[pair_candIdx_desc_cos2d_sign_matched_sig[i].first] << " massreldiff " << BToMuMuPi_mupi_mass_reco_gen_reldiff[pair_candIdx_desc_cos2d_sign_matched_sig[i].first]  << std::endl;
     }
 
-    // - in case there is more than one matched candidate (unresolved matching), take the one with the most accurate fitted mass
-    vector<pair<int,float>> pair_candIdx_desc_cos2d_sign_matched_mass_sig = updatePairWithDesc(pair_candIdx_desc_cos2d_sign_matched_sig, BToMuMuPi_mupi_mass_reco_gen_reldiff);
-    stable_sort(pair_candIdx_desc_cos2d_sign_matched_sig.begin(), pair_candIdx_desc_cos2d_sign_matched_sig.end(), sortcansbydesc_opp);
-    std::cout << "after mass " << std::endl;
-    for(unsigned int i(0); i<pair_candIdx_desc_cos2d_sign_matched_mass_sig.size(); ++i){
-      std::cout << "idx " << pair_candIdx_desc_cos2d_sign_matched_mass_sig[i].first << " cos2D " << BToMuMuPi_hnl_cos2D[pair_candIdx_desc_cos2d_sign_matched_mass_sig[i].first] << " isOS " << BToMuMuPi_hnl_charge[pair_candIdx_desc_cos2d_sign_matched_mass_sig[i].first] << " isMatched " << BToMuMuPi_isMatched[pair_candIdx_desc_cos2d_sign_matched_mass_sig[i].first] << " massreldiff " << BToMuMuPi_mupi_mass_reco_gen_reldiff[pair_candIdx_desc_cos2d_sign_matched_mass_sig[i].first]  << std::endl;
-    }
-
     // - and select the candidate
-    UInt_t selectedCandIdx_sig = pair_candIdx_desc_cos2d_sign_matched_mass_sig[0].first;
+    UInt_t selectedCandIdx_sig = pair_candIdx_desc_cos2d_sign_matched_sig[0].first;
     //std::cout << "idx " << selectedCandIdx_sig << std::endl;
 
     // make sure that a BParking line is fired
