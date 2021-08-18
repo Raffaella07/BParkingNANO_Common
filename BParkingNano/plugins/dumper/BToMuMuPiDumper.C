@@ -406,7 +406,7 @@ Bool_t BToMuMuPiDumper::Process(Long64_t entry)
   // The return value is currently not used.
 
   fReader.SetLocalEntry(entry);
-  cout << endl << "--- Entry " << entry << " ---" << endl;
+  //cout << endl << "--- Entry " << entry << " ---" << endl;
 
   // for data, we skip the event in case it doesn't pass the lumi mask
   if(!isMC && lumiMask(*run, *luminosityBlock) == false) return false;
@@ -437,36 +437,19 @@ Bool_t BToMuMuPiDumper::Process(Long64_t entry)
     // selecting the candidate as the one having the largest hnl pt
     // - create candIdx - cos2d pairs
     vector<pair<int,float>> pair_candIdx_desc_cos2d_sig = createPairWithDesc(nCand_sig, BToMuMuPi_hnl_cos2D);
-    std::cout << "initial " << std::endl;
-    for(unsigned int i(0); i<pair_candIdx_desc_cos2d_sig.size(); ++i){
-      std::cout << "idx " << pair_candIdx_desc_cos2d_sig[i].first << " cos2D " << BToMuMuPi_hnl_cos2D[pair_candIdx_desc_cos2d_sig[i].first] << " isOS " << BToMuMuPi_hnl_charge[pair_candIdx_desc_cos2d_sig[i].first] << " isMatched " << BToMuMuPi_isMatched[pair_candIdx_desc_cos2d_sig[i].first] << " massreldiff " << BToMuMuPi_mupi_mass_reco_gen_reldiff[pair_candIdx_desc_cos2d_sig[i].first]  << std::endl;
-    }
     // - sort it in decreasing cos2d
     stable_sort(pair_candIdx_desc_cos2d_sig.begin(), pair_candIdx_desc_cos2d_sig.end(), sortcansbydesc);
-    std::cout << "after cos2D " << std::endl;
-    for(unsigned int i(0); i<pair_candIdx_desc_cos2d_sig.size(); ++i){
-      std::cout << "idx " << pair_candIdx_desc_cos2d_sig[i].first << " cos2D " << BToMuMuPi_hnl_cos2D[pair_candIdx_desc_cos2d_sig[i].first] << " isOS " << BToMuMuPi_hnl_charge[pair_candIdx_desc_cos2d_sig[i].first] << " isMatched " << BToMuMuPi_isMatched[pair_candIdx_desc_cos2d_sig[i].first] << " massreldiff " << BToMuMuPi_mupi_mass_reco_gen_reldiff[pair_candIdx_desc_cos2d_sig[i].first]  << std::endl;
-    }
 
     // - then privilege OS cand over SS ones
     vector<pair<int,float>> pair_candIdx_desc_cos2d_sign_sig = updatePairWithDesc(pair_candIdx_desc_cos2d_sig, BToMuMuPi_hnl_charge);
     stable_sort(pair_candIdx_desc_cos2d_sign_sig.begin(), pair_candIdx_desc_cos2d_sign_sig.end(), sortcansbydesc_opp);
-    std::cout << "after charge " << std::endl;
-    for(unsigned int i(0); i<pair_candIdx_desc_cos2d_sign_sig.size(); ++i){
-      std::cout << "idx " << pair_candIdx_desc_cos2d_sign_sig[i].first << " cos2D " << BToMuMuPi_hnl_cos2D[pair_candIdx_desc_cos2d_sign_sig[i].first] << " isOS " << BToMuMuPi_hnl_charge[pair_candIdx_desc_cos2d_sign_sig[i].first] << " isMatched " << BToMuMuPi_isMatched[pair_candIdx_desc_cos2d_sign_sig[i].first] << " massreldiff " << BToMuMuPi_mupi_mass_reco_gen_reldiff[pair_candIdx_desc_cos2d_sign_sig[i].first]  << std::endl;
-    }
 
     // - for signal, priviledge matched candidates
     vector<pair<int,float>> pair_candIdx_desc_cos2d_sign_matched_sig = updatePairWithDesc(pair_candIdx_desc_cos2d_sign_sig, BToMuMuPi_isMatched);
     stable_sort(pair_candIdx_desc_cos2d_sign_matched_sig.begin(), pair_candIdx_desc_cos2d_sign_matched_sig.end(), sortcansbydesc);
-    std::cout << "after matched " << std::endl;
-    for(unsigned int i(0); i<pair_candIdx_desc_cos2d_sign_matched_sig.size(); ++i){
-      std::cout << "idx " << pair_candIdx_desc_cos2d_sign_matched_sig[i].first << " cos2D " << BToMuMuPi_hnl_cos2D[pair_candIdx_desc_cos2d_sign_matched_sig[i].first] << " isOS " << BToMuMuPi_hnl_charge[pair_candIdx_desc_cos2d_sign_matched_sig[i].first] << " isMatched " << BToMuMuPi_isMatched[pair_candIdx_desc_cos2d_sign_matched_sig[i].first] << " massreldiff " << BToMuMuPi_mupi_mass_reco_gen_reldiff[pair_candIdx_desc_cos2d_sign_matched_sig[i].first]  << std::endl;
-    }
 
     // - and select the candidate
     UInt_t selectedCandIdx_sig = pair_candIdx_desc_cos2d_sign_matched_sig[0].first;
-    //std::cout << "idx " << selectedCandIdx_sig << std::endl;
 
     // make sure that a BParking line is fired
     if(Muon_fired_HLT_Mu7_IP4[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]] == 1 ||
