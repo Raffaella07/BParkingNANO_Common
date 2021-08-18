@@ -38,14 +38,18 @@ public:
   typedef std::vector<reco::TransientTrack> TransientTrackCollection;
 
   explicit BToMuLPiBuilder(const edm::ParameterSet &cfg):
-    pi_selection_      {cfg.getParameter<std::string>("pionSelection"     )},
-    isotrk_selection_  {cfg.getParameter<std::string>("isoTracksSelection")},
-    trgmu_selection_   {cfg.getParameter<std::string>("trgMuonSelection"  )},
-    lep_selection_     {cfg.getParameter<std::string>("leptonSelection"  )},
-    pre_vtx_selection_ {cfg.getParameter<std::string>("preVtxSelection"   )},
-    post_vtx_selection_{cfg.getParameter<std::string>("postVtxSelection"  )},
-    lepton_type_       {cfg.getParameter<std::string>("label")},
-    isMC_              {cfg.getParameter<bool>("isMC")},
+    pi_selection_ {cfg.getParameter<std::string>("pionSelection")},
+    pi_selection_dsa_ {cfg.getParameter<std::string>("pionSelection_dsa" )},
+    isotrk_selection_ {cfg.getParameter<std::string>("isoTracksSelection")},
+    trgmu_selection_ {cfg.getParameter<std::string>("trgMuonSelection")},
+    trgmu_selection_dsa_ {cfg.getParameter<std::string>("trgMuonSelection_dsa")},
+    lep_selection_ {cfg.getParameter<std::string>("leptonSelection")},
+    lep_selection_dsa_ {cfg.getParameter<std::string>("leptonSelection_dsa")},
+    pre_vtx_selection_ {cfg.getParameter<std::string>("preVtxSelection")},
+    post_vtx_selection_ {cfg.getParameter<std::string>("postVtxSelection")},
+    post_vtx_selection_dsa_ {cfg.getParameter<std::string>("postVtxSelection_dsa")},
+    lepton_type_ {cfg.getParameter<std::string>("label")},
+    isMC_ {cfg.getParameter<bool>("isMC")},
 
     // these two collections are ideally created beforehand by MuonTriggerSelector.cc
     //    * the former are muons that pass the preselection defined there AND match one of the 
@@ -78,12 +82,16 @@ public:
 private:
   // pre-fitter preselection 
   const StringCutObjectSelector<pat::CompositeCandidate> pi_selection_; 
+  const StringCutObjectSelector<pat::CompositeCandidate> pi_selection_dsa_; 
   const StringCutObjectSelector<pat::PackedCandidate> isotrk_selection_;
   const StringCutObjectSelector<pat::ETHMuon> trgmu_selection_; 
+  const StringCutObjectSelector<pat::ETHMuon> trgmu_selection_dsa_; 
   const StringCutObjectSelector<Lepton> lep_selection_; 
+  const StringCutObjectSelector<Lepton> lep_selection_dsa_; 
   const StringCutObjectSelector<pat::CompositeCandidate> pre_vtx_selection_; 
   // post-fitter preselection 
   const StringCutObjectSelector<pat::CompositeCandidate> post_vtx_selection_; 
+  const StringCutObjectSelector<pat::CompositeCandidate> post_vtx_selection_dsa_; 
 
   const std::string lepton_type_;
   const bool isMC_;
@@ -162,7 +170,7 @@ void BToMuLPiBuilder<Lepton>::produce(edm::StreamID, edm::Event &evt, edm::Event
        trg_mu_ptr->userInt("HLT_Mu10p5_IP3p5") != 1 && trg_mu_ptr->userInt("HLT_Mu12_IP6") != 1) continue;
 
     // selection on the trigger muon
-    if( !trgmu_selection_(*trg_mu_ptr) ) continue;
+    //if( !trgmu_selection_(*trg_mu_ptr) ) continue;
 
     math::PtEtaPhiMLorentzVector trg_mu_p4(
       trg_mu_ptr->pt(), 
@@ -175,7 +183,7 @@ void BToMuLPiBuilder<Lepton>::produce(edm::StreamID, edm::Event &evt, edm::Event
       edm::Ptr<pat::CompositeCandidate> pi_ptr(pions, pi_idx);
 
       // selection on the pion
-      if( !pi_selection_(*pi_ptr) ) continue;
+      //if( !pi_selection_(*pi_ptr) ) continue;
       
       math::PtEtaPhiMLorentzVector pi_p4(
         pi_ptr->pt(), 
@@ -206,8 +214,15 @@ void BToMuLPiBuilder<Lepton>::produce(edm::StreamID, edm::Event &evt, edm::Event
             continue;
         }
 
+        // selection on the trigger muon
+        if( lep_ptr->userInt("isDSAMuon")!=1 && !trgmu_selection_(*trg_mu_ptr) ) continue;
+        if( lep_ptr->userInt("isDSAMuon")==1 && !trgmu_selection_dsa_(*trg_mu_ptr) ) continue;
+        // selection on the pion
+        if( lep_ptr->userInt("isDSAMuon")!=1 && !pi_selection_(*pi_ptr) ) continue;
+        if( lep_ptr->userInt("isDSAMuon")==1 && !pi_selection_dsa_(*pi_ptr) ) continue;
         // selection on the lepton
-        if( !lep_selection_(*lep_ptr) ) continue;
+        if( lep_ptr->userInt("isDSAMuon")!=1 && !lep_selection_(*lep_ptr) ) continue;
+        if( lep_ptr->userInt("isDSAMuon")==1 && !lep_selection_dsa_(*lep_ptr) ) continue;
 
         math::PtEtaPhiMLorentzVector lep_p4(
           lep_ptr->pt(), 
@@ -394,7 +409,8 @@ void BToMuLPiBuilder<Lepton>::produce(edm::StreamID, edm::Event &evt, edm::Event
         b_cand.addUserFloat("pion_DCASig"     , pi_ptr->userFloat("DCASig") );
 
         // post fit selection
-        if( !post_vtx_selection_(b_cand) ) continue;        
+        if( lep_ptr->userInt("isDSAMuon")!=1 && !post_vtx_selection_(b_cand) ) continue;        
+        if( lep_ptr->userInt("isDSAMuon")==1 && !post_vtx_selection_dsa_(b_cand) ) continue;        
 
         // isolation
         float trg_mu_iso03 = 0; 
