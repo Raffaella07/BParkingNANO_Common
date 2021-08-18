@@ -177,12 +177,9 @@ muonsBParkMCMatchForTable = cms.EDProducer("MCMatcher",       # cut on deltaR, d
     mcStatus    = cms.vint32(1),                              # PYTHIA status code (1 = stable, 2 = shower, 3 = hard scattering)
     maxDeltaR   = cms.double(0.25),                           # Minimum deltaR for the match
     maxDPtRel   = cms.double(0.25),                           # Minimum deltaPt/Pt for the match
-    resolveAmbiguities    = cms.bool(True),                   # Forbid two RECO objects to match to the same GEN object
+    resolveAmbiguities    = cms.bool(False),                   # Forbid two RECO objects to match to the same GEN object
     resolveByMatchQuality = cms.bool(True),                   # False = just match input in order; True = pick lowest deltaR pair first
-    #minPt = muonTrgSelector.selmu_ptMin,
-    #maxEta = muonTrgSelector.selmu_absEtaMax,
-    minPt = cms.double(0.1),
-    maxEta = cms.double(10.),
+    motherPdgId = cms.vint32(9900015, 443, 511, 521, 531, 541),
 )
 
 muonBParkMCTable = cms.EDProducer("CandMCMatchTableProducerBPark",
@@ -213,6 +210,7 @@ muonTriggerBParkTable = muonBParkTable.clone(
    )
 )
 
+# not used in the end
 muonsTriggerBParkMCMatchForTable = cms.EDProducer("MCMatcher",# cut on deltaR, deltaPt/Pt; pick best by deltaR
     src         = muonTriggerBParkTable.src,                  # final reco collection
     matched     = cms.InputTag("finalGenParticlesBPark"),     # final mc-truth particle collection
@@ -223,8 +221,7 @@ muonsTriggerBParkMCMatchForTable = cms.EDProducer("MCMatcher",# cut on deltaR, d
     maxDPtRel   = cms.double(0.25),                           # Minimum deltaPt/Pt for the match
     resolveAmbiguities    = cms.bool(True),                   # Forbid two RECO objects to match to the same GEN object
     resolveByMatchQuality = cms.bool(True),                   # False = just match input in order; True = pick lowest deltaR pair first
-    minPt = cms.double(0.1),
-    maxEta = cms.double(10.),
+    motherPdgId = cms.vint32(511, 521, 531, 541),
 )
 
 muonTriggerBParkMCTable = cms.EDProducer("CandMCMatchTableProducerBPark",
@@ -242,9 +239,9 @@ triggerMuonsMCMatchEmbedded = cms.EDProducer(
     matching = cms.InputTag('muonsTriggerBParkMCMatchForTable')
 )
 
-muonBParkSequence = cms.Sequence(muonTrgSelector * countTrgMuons)
-#muonBParkSequence = cms.Sequence(muonTrgSelector)
-muonBParkMC = cms.Sequence(muonTrgSelector + muonsBParkMCMatchForTable + selectedMuonsMCMatchEmbedded + muonBParkMCTable + muonsTriggerBParkMCMatchForTable + triggerMuonsMCMatchEmbedded + muonTriggerBParkMCTable* countTrgMuons)
-#muonBParkMC = cms.Sequence(muonTrgSelector + muonsBParkMCMatchForTable + selectedMuonsMCMatchEmbedded + muonBParkMCTable + muonsTriggerBParkMCMatchForTable + triggerMuonsMCMatchEmbedded + muonTriggerBParkMCTable)
+#muonBParkSequence = cms.Sequence(muonTrgSelector * countTrgMuons)
+muonBParkSequence = cms.Sequence(muonTrgSelector)
+#muonBParkMC = cms.Sequence(muonTrgSelector + muonsBParkMCMatchForTable + selectedMuonsMCMatchEmbedded + muonBParkMCTable + muonsTriggerBParkMCMatchForTable + triggerMuonsMCMatchEmbedded + muonTriggerBParkMCTable* countTrgMuons)
+muonBParkMC = cms.Sequence(muonTrgSelector + muonsBParkMCMatchForTable + selectedMuonsMCMatchEmbedded + muonBParkMCTable + muonsTriggerBParkMCMatchForTable + triggerMuonsMCMatchEmbedded + muonTriggerBParkMCTable)
 muonBParkTables = cms.Sequence(muonBParkTable)
 muonTriggerMatchedTables = cms.Sequence(muonTriggerBParkTable)
