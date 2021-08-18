@@ -545,7 +545,7 @@ Bool_t NanoDumper::Process(Long64_t entry)
   if(!isMC && lumiMask(*run, *luminosityBlock) == false) return false;
 
   // number of candidates in the event
-  //UInt_t nCand_ctrl = *nBToKMuMu; 
+  UInt_t nCand_ctrl = *nBToKMuMu; 
   UInt_t nCand_sig = *nBToMuMuPi; 
 
   // branches common to signal and control channels
@@ -569,7 +569,6 @@ Bool_t NanoDumper::Process(Long64_t entry)
 
   //   ----- Control Channel -----  //
 
-  /*
   int ncand_ctrl(0);
   int ncand_istriggering(0);
 
@@ -669,7 +668,6 @@ Bool_t NanoDumper::Process(Long64_t entry)
       } // bparking line is fired
     } // l1 is triggering
   }// end at least one candidate in the event
-  */
 
 
   //   ----- Signal Channel -----  //

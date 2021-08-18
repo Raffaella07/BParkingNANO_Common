@@ -29,7 +29,6 @@ public :
    TTreeReaderValue<UInt_t> run = {fReader, "run"};
    TTreeReaderValue<UInt_t> luminosityBlock = {fReader, "luminosityBlock"};
    TTreeReaderValue<ULong64_t> event = {fReader, "event"};
-   /*
    TTreeReaderValue<UInt_t> nBToKMuMu = {fReader, "nBToKMuMu"};
    TTreeReaderArray<Float_t> BToKMuMu_b_iso03 = {fReader, "BToKMuMu_b_iso03"};
    TTreeReaderArray<Float_t> BToKMuMu_b_iso03_close = {fReader, "BToKMuMu_b_iso03_close"};
@@ -97,7 +96,6 @@ public :
    TTreeReaderArray<Int_t> BToKMuMu_n_l1_used = {fReader, "BToKMuMu_n_l1_used"};
    TTreeReaderArray<Int_t> BToKMuMu_n_l2_used = {fReader, "BToKMuMu_n_l2_used"};
    TTreeReaderArray<Int_t> BToKMuMu_pdgId = {fReader, "BToKMuMu_pdgId"};
-   */
    TTreeReaderValue<UInt_t> nBToMuMuPi = {fReader, "nBToMuMuPi"};
    //TTreeReaderArray<Float_t> BToMuMuPi_dilepton_mass = {fReader, "BToMuMuPi_dilepton_mass"};
    //TTreeReaderArray<Float_t> BToMuMuPi_dilepton_pt = {fReader, "BToMuMuPi_dilepton_pt"};
@@ -679,6 +677,7 @@ public :
 
    Float_t the_sig_sv_chi2= -99.;
    Float_t the_sig_sv_lxy= -99.;
+   Float_t the_sig_sv_lxyz= -99.;
    Float_t the_sig_sv_pv_lxy= -99.;
    Float_t the_sig_sv_pv_lxyz= -99.;
    Float_t the_sig_sv_lxysig= -99.;
