@@ -10,6 +10,12 @@ cmsenv
 git cms-init
 ```
 
+Add the BParkingNano tool
+
+```
+git clone git@github.com:BParkHNLs/BParkingNANO.git ./PhysicsTools
+```
+
 Import the BParking modifications on the TransientTracks, KinematicVertexFitter, ElectronRegression and GBRForest
 ```
 git cms-merge-topic -u amlyon:BHNLNano
@@ -27,11 +33,9 @@ mkdir -p $CMSSW_BASE/src/RecoEgamma/ElectronIdentification/data/LowPtElectrons
 cp $CMSSW_BASE/external/$SCRAM_ARCH/data/RecoEgamma/ElectronIdentification/data/LowPtElectrons/LowPtElectrons_ID_2020Sept15.root $CMSSW_BASE/src/RecoEgamma/ElectronIdentification/data/LowPtElectrons
 ```
 
-Add the BParkingNano tool and build everything
+Build everything
 
 ```
-git clone git@github.com:BParkHNLs/BParkingNANO.git ./PhysicsTools
-git cms-addpkg PhysicsTools/NanoAOD
 scram b -j 8
 ```
 
