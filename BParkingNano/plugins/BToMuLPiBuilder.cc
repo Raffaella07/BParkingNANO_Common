@@ -164,6 +164,13 @@ void BToMuLPiBuilder<Lepton>::produce(edm::StreamID, edm::Event &evt, edm::Event
     // selection on the trigger muon
     if( !trgmu_selection_(*trg_mu_ptr) ) continue;
 
+    math::PtEtaPhiMLorentzVector trg_mu_p4(
+      trg_mu_ptr->pt(), 
+      trg_mu_ptr->eta(),
+      trg_mu_ptr->phi(),
+      trg_mu_ptr->mass()
+      );
+
     for(size_t pi_idx = 0; pi_idx < pions->size(); ++pi_idx) {
       edm::Ptr<pat::CompositeCandidate> pi_ptr(pions, pi_idx);
 
@@ -240,7 +247,7 @@ void BToMuLPiBuilder<Lepton>::produce(edm::StreamID, edm::Event &evt, edm::Event
 
         // B candidate
         pat::CompositeCandidate b_cand;
-        b_cand.setP4(hnl_cand.p4() + trg_mu_ptr->P4());
+        b_cand.setP4(hnl_cand.p4() + trg_mu_p4);
         b_cand.setCharge(hnl_cand.charge() + trg_mu_ptr->charge());
 
 //         b_cand.addUserCand("trg_mu", trg_mu_ptr);
@@ -527,13 +534,13 @@ void BToMuLPiBuilder<Lepton>::produce(edm::StreamID, edm::Event &evt, edm::Event
 
 
         // invariant masses
-        float dilepton_mass = (fitter.daughter_p4(0) + trg_mu_ptr->polarP4()).mass();
-        float trgmu_pi_mass = (fitter.daughter_p4(1) + trg_mu_ptr->polarP4()).mass();
+        float dilepton_mass = (fitter.daughter_p4(0) + trg_mu_p4).mass();
+        float trgmu_pi_mass = (fitter.daughter_p4(1) + trg_mu_p4).mass();
         b_cand.addUserFloat("dilepton_mass", dilepton_mass);
         b_cand.addUserFloat("trgmu_pi_mass", trgmu_pi_mass);
 
-        float dilepton_pt = (fitter.daughter_p4(0) + trg_mu_ptr->polarP4()).pt();
-        float trgmu_pi_pt = (fitter.daughter_p4(1) + trg_mu_ptr->polarP4()).pt();
+        float dilepton_pt = (fitter.daughter_p4(0) + trg_mu_p4).pt();
+        float trgmu_pi_pt = (fitter.daughter_p4(1) + trg_mu_p4).pt();
         b_cand.addUserFloat("dilepton_pt", dilepton_pt);
         b_cand.addUserFloat("trgmu_pi_pt", trgmu_pi_pt);
 

@@ -118,6 +118,7 @@ void HNLToMuPiBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup c
   float gen_pi_pt(0.);
   float gen_pi_eta(0.);
 
+  /*
   if(isMC_ == true){
 
     unsigned int hnl_idx(-99);
@@ -162,8 +163,11 @@ void HNLToMuPiBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup c
       }
     }
   }
+  */
 
 
+  //std::cout << "HNL builder" << std::endl;
+  //std::cout << "pion size " << pions->size() << " muon size " << leptons->size() << std::endl;
 
 
   for(size_t pi_idx = 0; pi_idx < pions->size(); ++pi_idx) {
@@ -179,7 +183,7 @@ void HNLToMuPiBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup c
         PI_MASS
         );
 
-    //if(pi_ptr->pt()<2.4){
+    //if(pi_ptr->pt()<9.5){
     //  continue;
     //}
     //else std::cout << "reco pion pt " << pi_ptr->pt() << " eta " << pi_ptr->eta() << std::endl;
@@ -192,7 +196,14 @@ void HNLToMuPiBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup c
       // selection on the lepton
       if( !lep_selection_(*lep_ptr) ) continue;
 
-      //if(lep_ptr->pt()<14.3){
+      math::PtEtaPhiMLorentzVector lep_p4(
+        lep_ptr->pt(), 
+        lep_ptr->eta(),
+        lep_ptr->phi(),
+        lep_ptr->mass()
+        );
+
+      //if(lep_ptr->pt()<3.3){
       //  continue;
       //}
       //else std::cout << "reco muon pt " << lep_ptr->pt() << " eta " << lep_ptr->eta() << " isDSA " << lep_ptr->isDSAMuon() << std::endl;
@@ -202,12 +213,8 @@ void HNLToMuPiBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup c
 
       // HNL candidate
       pat::CompositeCandidate hnl_cand;
-      if(lepton_type_ == "muon"){
-        hnl_cand.setP4(lep_ptr->P4() + pi_p4);
-      }
-      else{
-        hnl_cand.setP4(lep_ptr->p4() + pi_p4);
-      }
+      hnl_cand.setP4(lep_p4 + pi_p4);
+      //hnl_cand.setP4(lep_ptr->P4() + pi_p4);
       hnl_cand.setCharge(lep_ptr->charge() + pi_ptr->charge());
 
       hnl_cand.addUserCand("lep", lep_ptr);
@@ -215,6 +222,7 @@ void HNLToMuPiBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup c
 
       // check if pass pre vertex cut
       if( !pre_vtx_selection_(hnl_cand) ) continue;
+      //std::cout << "passed prefitter selection" << std::endl;
 
       //std::cout << "pt " << lep_ptr->pt() - leptons_ttracks->at(lep_idx).track().pt() << " isDSA " << lep_ptr->isDSAMuon() << std::endl;
 
@@ -284,7 +292,7 @@ void HNLToMuPiBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup c
       //std::cout << "mass 1 " << fitter.fitted_candidate().mass() << " mass 2 " << fitter.fitted_p4().mass() << std::endl;
 
       // post fit selection
-      //if( !post_vtx_selection_(hnl_cand) ) continue;        
+      if( !post_vtx_selection_(hnl_cand) ) continue;        
 
       // position of the muons / tracks in their own collections
       hnl_cand.addUserInt("lep_idx", lep_idx);
@@ -384,12 +392,12 @@ void HNLToMuPiBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup c
         if(sel_mu_isMatched==1 && pi_isMatched==1 && mupi_mass_reldiff<0.15 && lxy_reldiff<0.5){
         //if(sel_mu_isMatched==1 && pi_isMatched==1 && lxy_reldiff<0.5){
           isMatched = 1;
-          if(gen_mu_pt>1 && fabs(gen_mu_eta)<2.5 && gen_pi_pt>1 && fabs(gen_pi_eta)<2.5){
-            std::cout << "fill h num " << std::endl;
-            std::cout << "found a hnl pt " << gen_hnl_pt << " eta " << gen_hnl_eta << " mass " << gen_hnl_mass << " reco fitted mass " << mupi_mass_reco << " reco mass " << reco_hnl_mass << " vx " << hnl_cand.vx() << " vz " << hnl_cand.vz() << std::endl;
-            std::cout << "found a muon pt " << lep_ptr->pt() << " eta " << lep_ptr->eta() << " isDSA " << lep_ptr->isDSAMuon() << std::endl;
-            std::cout << "found a pion pt " << pi_ptr->pt() << " eta " << pi_ptr->eta() << std::endl;
-          }
+          //if(gen_mu_pt>1 && fabs(gen_mu_eta)<2.5 && gen_pi_pt>1 && fabs(gen_pi_eta)<2.5){
+          //  std::cout << "fill h num " << std::endl;
+          //  std::cout << "found a hnl pt " << gen_hnl_pt << " eta " << gen_hnl_eta << " mass " << gen_hnl_mass << " reco fitted mass " << mupi_mass_reco << " reco mass " << reco_hnl_mass << " vx " << hnl_cand.vx() << " vz " << hnl_cand.vz() << std::endl;
+          //  std::cout << "found a muon pt " << lep_ptr->pt() << " eta " << lep_ptr->eta() << " isDSA " << lep_ptr->isDSAMuon() << std::endl;
+          //  std::cout << "found a pion pt " << pi_ptr->pt() << " eta " << pi_ptr->eta() << std::endl;
+          //}
         }
       }
 
