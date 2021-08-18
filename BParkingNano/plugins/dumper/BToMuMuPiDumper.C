@@ -250,6 +250,10 @@ void BToMuMuPiDumper::SlaveBegin(TTree * /*tree*/)
   signal_tree->Branch("pi_iso04", &the_sig_pi_iso04);
   signal_tree->Branch("pi_iso04_close", &the_sig_pi_iso04_close);
   signal_tree->Branch("pi_iso04_rel_close", &the_sig_pi_iso04_rel_close);
+  signal_tree->Branch("pi_ispacked", &the_sig_pi_ispacked);
+  signal_tree->Branch("pi_islost", &the_sig_pi_islost);
+  signal_tree->Branch("pi_trgmu_dr", &the_sig_pi_trgmu_dr);
+  signal_tree->Branch("pi_ismatchedtomuon", &the_sig_pi_ismatchedtomuon);
 
   //signal_tree->Branch("dimu_mass", &the_sig_dimu_mass);
   //signal_tree->Branch("dimu_pt", &the_sig_dimu_pt);
@@ -617,6 +621,10 @@ Bool_t BToMuMuPiDumper::Process(Long64_t entry)
         the_sig_pi_iso04 = BToMuMuPi_pi_iso04[selectedCandIdx_sig];
         the_sig_pi_iso04_close = BToMuMuPi_pi_iso04_close[selectedCandIdx_sig];
         the_sig_pi_iso04_rel_close = BToMuMuPi_pi_iso04_rel_close[selectedCandIdx_sig];
+        the_sig_pi_ispacked = ProbeTracks_isPacked[BToMuMuPi_pi_idx[selectedCandIdx_sig]];
+        the_sig_pi_islost = ProbeTracks_isLostTrk[BToMuMuPi_pi_idx[selectedCandIdx_sig]];
+        the_sig_pi_trgmu_dr = ProbeTracks_drTrg[BToMuMuPi_pi_idx[selectedCandIdx_sig]];
+        the_sig_pi_ismatchedtomuon = ProbeTracks_isMatchedToMuon[BToMuMuPi_pi_idx[selectedCandIdx_sig]];
 
         the_sig_trgmu_mu_mass = BToMuMuPi_trgmu_mu_mass[selectedCandIdx_sig];
         the_sig_trgmu_mu_pt = BToMuMuPi_trgmu_mu_pt[selectedCandIdx_sig];
