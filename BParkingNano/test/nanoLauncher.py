@@ -52,7 +52,7 @@ def checkParser(opt):
     raise RuntimeError('Please indicate if you want to run the nano tool (--donano) and/or the ntupliser (--doflat)')
 
   if opt.dosignal==False and opt.docontrol==False and opt.dohnl==False and opt.dotageprobe==False:
-    raise RuntimeError('Please indicate the process you want to run (--dosignal and/or --docontrol and/or --dohnl and/or --dotageprobe')
+    raise RuntimeError('Please indicate the process you want to run (--dosignal and/or --docontrol and/or --dohnl and/or --dotageprobe)')
 
   if opt.mcprivate==False and opt.mccentral==False and opt.data==False:
     raise RuntimeError('Please indicate if you want to run on data or MC by adding either --data or--mcprivate or --mccentral to the command line')
