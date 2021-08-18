@@ -243,9 +243,12 @@ Bool_t BToKMuMuDumper::Process(Long64_t entry)
     // - create candIdx - b pt pair
     vector<pair<int,float>> pair_candIdx_desc_bpt_ctrl = createPairWithDesc(nCand_ctrl, BToKMuMu_fit_pt);
     // - sort pair with decreasing b pt
-    sort(pair_candIdx_desc_bpt_ctrl.begin(), pair_candIdx_desc_bpt_ctrl.end(), sortcansbydesc);
-    // - fetch candIdx associated to the largest b pt
-    UInt_t selectedCandIdx_ctrl = pair_candIdx_desc_bpt_ctrl[0].first;
+    stable_sort(pair_candIdx_desc_bpt_ctrl.begin(), pair_candIdx_desc_bpt_ctrl.end(), sortcansbydesc);
+    // - for signal, priviledge matched candidates
+    vector<pair<int,float>> pair_candIdx_desc_bpt_matched_ctrl = updatePairWithDesc(pair_candIdx_desc_bpt_ctrl, BToKMuMu_isMatched);
+    stable_sort(pair_candIdx_desc_bpt_matched_ctrl.begin(), pair_candIdx_desc_bpt_matched_ctrl.end(), sortcansbydesc);
+    // - fetch candIdx associated to the largest b pt and the best matching
+    UInt_t selectedCandIdx_ctrl = pair_candIdx_desc_bpt_matched_ctrl[0].first;
 
     // temporary - we manually ask l1 to be the triggering muon
     if(Muon_isTriggering[BToKMuMu_l1Idx[selectedCandIdx_ctrl]] == 1){

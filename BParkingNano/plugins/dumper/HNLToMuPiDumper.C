@@ -228,23 +228,19 @@ Bool_t HNLToMuPiDumper::Process(Long64_t entry)
     // - create candIdx - cos2d pairs
     vector<pair<int,float>> pair_candIdx_desc_cos2d_sig = createPairWithDesc(nCand_sig, HNLToMuPi_hnl_cos2D);
     // - sort it in decreasing cos2d
-    sort(pair_candIdx_desc_cos2d_sig.begin(), pair_candIdx_desc_cos2d_sig.end(), sortcansbydesc);
+    stable_sort(pair_candIdx_desc_cos2d_sig.begin(), pair_candIdx_desc_cos2d_sig.end(), sortcansbydesc);
 
     // - then privilege OS cand over SS ones
     vector<pair<int,float>> pair_candIdx_desc_cos2d_sign_sig = updatePairWithDesc(pair_candIdx_desc_cos2d_sig, HNLToMuPi_hnl_charge);
-    sort(pair_candIdx_desc_cos2d_sign_sig.begin(), pair_candIdx_desc_cos2d_sign_sig.end(), sortcansbydesc_opp);
-    //std::cout << std::endl << "After sign: " << std::endl;
-    //for(unsigned int i(0); i<pair_candIdx_desc_cos2d_sign_sig.size(); ++i){
-    //  std::cout << pair_candIdx_desc_cos2d_sign_sig[i].first << " " << pair_candIdx_desc_cos2d_sign_sig[i].second << std::endl;
-    //}
+    stable_sort(pair_candIdx_desc_cos2d_sign_sig.begin(), pair_candIdx_desc_cos2d_sign_sig.end(), sortcansbydesc_opp);
 
     // - for signal, priviledge matched candidates
     vector<pair<int,float>> pair_candIdx_desc_cos2d_sign_matched_sig = updatePairWithDesc(pair_candIdx_desc_cos2d_sign_sig, HNLToMuPi_isMatched);
-    sort(pair_candIdx_desc_cos2d_sign_matched_sig.begin(), pair_candIdx_desc_cos2d_sign_matched_sig.end(), sortcansbydesc);
+    stable_sort(pair_candIdx_desc_cos2d_sign_matched_sig.begin(), pair_candIdx_desc_cos2d_sign_matched_sig.end(), sortcansbydesc);
 
     // - finally priviledge candidate with the smallest deltaMassRelDiff(reco, gen)
     vector<pair<int,float>> pair_candIdx_desc_cos2d_sign_matched_mass_sig = updatePairWithDesc(pair_candIdx_desc_cos2d_sign_matched_sig, HNLToMuPi_mupi_mass_reco_gen_reldiff);
-    sort(pair_candIdx_desc_cos2d_sign_matched_sig.begin(), pair_candIdx_desc_cos2d_sign_matched_sig.end(), sortcansbydesc_opp);
+    stable_sort(pair_candIdx_desc_cos2d_sign_matched_sig.begin(), pair_candIdx_desc_cos2d_sign_matched_sig.end(), sortcansbydesc_opp);
 
     // - and select the OS cand with the largest cos2d
     UInt_t selectedCandIdx_sig = pair_candIdx_desc_cos2d_sign_matched_mass_sig[0].first;
