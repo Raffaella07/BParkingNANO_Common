@@ -366,36 +366,6 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
         }
     }
 
-    // add the displaced standalone muons to the collection
-    for(const reco::Track & muon : *displaced_standalone_muons){
-      if(muon.pt()<selmu_ptMin_) continue;
-      if(fabs(muon.eta())>selmu_absEtaMax_) continue;
-
-      // add the muon to the transient track collection
-      // one has to make sure that the indices in the muon and transient track collections match
-      const reco::TransientTrack muonTT((*(&muon)),&(*bFieldHandle)); 
-      if(!muonTT.isValid()) continue; 
-
-      pat::ETHMuon the_muon(muon);
-      ETHmuons_out->emplace_back(the_muon);
-
-      for(unsigned int i=0; i<HLTPaths_.size(); i++){
-        ETHmuons_out->back().addUserInt(HLTPaths_[i], -1);
-        ETHmuons_out->back().addUserInt(HLTPaths_[i] + "_prescale", -1);
-      }
-      ETHmuons_out->back().addUserInt("isTriggering", -1);
-      ETHmuons_out->back().addUserFloat("DR", -1.);
-      ETHmuons_out->back().addUserFloat("DPT", -1.);
-      ETHmuons_out->back().addUserInt("isDSAMuon", 1);
-      ETHmuons_out->back().addUserInt("isSlimmedMuon", 0);
-      ETHmuons_out->back().addUserFloat("dz", muon.dz(PV.position()));
-      ETHmuons_out->back().addUserFloat("dzS", muon.dz(PV.position())/muon.dzError());
-      ETHmuons_out->back().addUserFloat("dxy", muon.dxy(PV.position()));
-      ETHmuons_out->back().addUserFloat("dxyS", muon.dxy(PV.position())/muon.dxyError());
-
-      trans_muons_out->emplace_back(muonTT);
-    }
-
     // add the slimmed muons to the collection 
     for(const pat::Muon & muon : *slimmed_muons){
       unsigned int iMuo(&muon - &(slimmed_muons->at(0)) );
@@ -426,6 +396,37 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
 
       trans_muons_out->emplace_back(muonTT);
     }
+
+    // add the displaced standalone muons to the collection
+    for(const reco::Track & muon : *displaced_standalone_muons){
+      if(muon.pt()<selmu_ptMin_) continue;
+      if(fabs(muon.eta())>selmu_absEtaMax_) continue;
+
+      // add the muon to the transient track collection
+      // one has to make sure that the indices in the muon and transient track collections match
+      const reco::TransientTrack muonTT((*(&muon)),&(*bFieldHandle)); 
+      if(!muonTT.isValid()) continue; 
+
+      pat::ETHMuon the_muon(muon);
+      ETHmuons_out->emplace_back(the_muon);
+
+      for(unsigned int i=0; i<HLTPaths_.size(); i++){
+        ETHmuons_out->back().addUserInt(HLTPaths_[i], -1);
+        ETHmuons_out->back().addUserInt(HLTPaths_[i] + "_prescale", -1);
+      }
+      ETHmuons_out->back().addUserInt("isTriggering", -1);
+      ETHmuons_out->back().addUserFloat("DR", -1.);
+      ETHmuons_out->back().addUserFloat("DPT", -1.);
+      ETHmuons_out->back().addUserInt("isDSAMuon", 1);
+      ETHmuons_out->back().addUserInt("isSlimmedMuon", 0);
+      ETHmuons_out->back().addUserFloat("dz", muon.dz(PV.position()));
+      ETHmuons_out->back().addUserFloat("dzS", muon.dz(PV.position())/muon.dzError());
+      ETHmuons_out->back().addUserFloat("dxy", muon.dxy(PV.position()));
+      ETHmuons_out->back().addUserFloat("dxyS", muon.dxy(PV.position())/muon.dxyError());
+
+      trans_muons_out->emplace_back(muonTT);
+    }
+
 
     iEvent.put(std::move(trgmuons_out), "trgMuons"); 
     iEvent.put(std::move(ETHmuons_out), "SelectedMuons");
