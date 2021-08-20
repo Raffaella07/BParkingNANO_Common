@@ -257,7 +257,7 @@ class NanoLauncher(NanoTools):
     tag = NanoTools.getTag(self, self.tagnano, self.tagflat)
 
     if not self.doquick:
-      slurm_options = '-p standard --account=t3 -o {ld}/dumperstep.log -e {ld}/dumperstep.log --job-name=dumperstep_{pl} --time=3:00:00 {dp}'.format(
+      slurm_options = '-p standard --account=t3 -o {ld}/dumperstep.log -e {ld}/dumperstep.log --job-name=dumperstep_{pl} --time=10:00:00 {dp}'.format(
         ld      = logdir,
         pl      = label,
         dp      = '--dependency=afterany:{}'.format(jobId) if jobId != -99 else '',
