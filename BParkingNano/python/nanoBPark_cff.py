@@ -22,7 +22,10 @@ from PhysicsTools.BParkingNano.tracksBPark_cff import *
 ## B collections
 from PhysicsTools.BParkingNano.BToMuLPi_cff import BToMuMuPi, BToMuMuPiMC, BToMuMuPiTable, BToMuMuPiSequence, BToMuMuPiSequenceMC, CountBToMuMuPi
 from PhysicsTools.BParkingNano.BToKLL_cff import *
+from PhysicsTools.BParkingNano.HNLToMuPi_cff import HNLToMuPi, HNLToMuPiMC, HNLToMuPiTable, HNLToMuPiSequence, HNLToMuPiSequenceMC, CountHNLToMuPi
 from PhysicsTools.BParkingNano.BToKstarLL_cff import *
+from PhysicsTools.BParkingNano.TagAndProbeJPsiToMuMu_cff import * 
+
 
 
 nanoSequenceOnlyFullSim = cms.Sequence(triggerObjectBParkTables + l1bits)
@@ -62,6 +65,13 @@ def nanoAOD_customizeBToMuMuPi(process, isMC=False):
       process.nanoBMuMuPiSequence = cms.Sequence( BToMuMuPiSequenceMC + BToMuMuPiTable )
     return process
 
+def nanoAOD_customizeHNLToMuPi(process, isMC=False):
+    if isMC == False:
+      process.nanoHNLToMuPiSequence = cms.Sequence( HNLToMuPiSequence + HNLToMuPiTable )
+    else:
+      process.nanoHNLToMuPiSequence = cms.Sequence( HNLToMuPiSequenceMC + HNLToMuPiTable )
+    return process
+
 def nanoAOD_customizeBToKMuMu(process, isMC=False):
     if isMC == False:
       process.nanoBKMuMuSequence = cms.Sequence( BToKMuMuSequence + BToKmumuTable )
@@ -72,6 +82,13 @@ def nanoAOD_customizeBToKMuMu(process, isMC=False):
 def nanoAOD_customizeBToKLL(process):
     process.nanoBKeeSequence   = cms.Sequence( process.nanoBKeeSequence + BToKEESequence    + BToKeeTable   )
     process.nanoBKMuMuSequence = cms.Sequence( BToKMuMuSequence + BToKmumuTable )
+    return process
+
+def nanoAOD_customizeTagAndProbeJPsiToMuMu(process, isMC=False):
+    if isMC == False:
+      process.nanoJPsiToMuMuSequence = cms.Sequence( JPsiToMuMuSequence + JPsiToMuMuTable )
+    else:
+      process.nanoJPsiToMuMuSequence = cms.Sequence( JPsiToMuMuSequenceMC + JPsiToMuMuTable )
     return process
 
 #three possibilities for K*LL
@@ -102,6 +119,12 @@ def nanoAOD_customizeMC(process, ancestor_particles=[511, 521, 531, 541, 9900015
         
         # make the BToKMuMuTable/count talk to the correct producer
         massSearchReplaceAnyInputTag(path, 'BToKmumu', 'BToKmumuMC')
+
+        # make the HNLToMuPiTable/count talk to the correct producer
+        massSearchReplaceAnyInputTag(path, 'HNLToMuPi', 'HNLToMuPiMC')
+
+        # make the JPsiToMuMuTable/count talk to the correct producer
+        massSearchReplaceAnyInputTag(path, 'JPsiToMuMu', 'JPsiToMuMuMC')
 
         # save the all descendants of ancestor_particles
         to_save = ' || '.join(['abs(pdgId) == %d'%ipdg for ipdg in ancestor_particles])

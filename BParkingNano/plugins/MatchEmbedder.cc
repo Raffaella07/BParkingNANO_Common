@@ -81,8 +81,10 @@ void MatchEmbedder<PATOBJ>::produce(edm::StreamID, edm::Event &evt, edm::EventSe
   evt.put(std::move(out));
 }
 
+#include "ETHMuon.h"
+typedef MatchEmbedder<pat::ETHMuon> MuonMatchEmbedder;
+
 #include "DataFormats/PatCandidates/interface/Muon.h"
-typedef MatchEmbedder<pat::Muon> MuonMatchEmbedder;
 typedef MatchEmbedder<pat::Muon> TriggerMuonMatchEmbedder;
 
 #include "DataFormats/PatCandidates/interface/Electron.h"

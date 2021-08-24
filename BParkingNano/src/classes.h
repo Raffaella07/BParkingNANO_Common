@@ -4,6 +4,7 @@
 #include "DataFormats/Common/interface/Wrapper.h"
 #include "TrackingTools/TransientTrack/interface/TransientTrack.h"
 #include "PhysicsTools/BParkingNano/plugins/KinVtxFitter.h"
+#include "PhysicsTools/BParkingNano/plugins/ETHMuon.h"
 #include <vector>
 
 
@@ -12,6 +13,7 @@ namespace {
       std::vector<reco::TransientTrack> ttv;
       edm::Wrapper<std::vector<reco::TransientTrack> > wttv; 
       edm::Wrapper<std::vector<KinVtxFitter> > wkv;
+      edm::Wrapper<std::vector<pat::ETHMuon> > muv;
   };
 }
 

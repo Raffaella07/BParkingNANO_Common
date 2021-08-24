@@ -26,9 +26,11 @@ class NanoTools(object):
    label = file_[file_.find('/',file_.find(prodlabel))+1:file_.find('Chunk')-1] 
    chunk = file_[file_.find('Chunk'):file_.find('bparknano')-1]
    if dirlabel == 'mcprivate':
-     logdir = './logs/{}/{}/{}'.format(prodlabel, label[0:label.find('/')], chunk) if tag == None else './logs/{}/{}_{}/{}'.format(prodlabel, label[0:label.find('/')], tag, chunk)
+     #logdir = './logs/{}/{}/{}'.format(prodlabel, label[0:label.find('/')], chunk) if tag == None else './logs/{}/{}_{}/{}'.format(prodlabel, label[0:label.find('/')], tag, chunk)
+     logdir = '/work/anlyon/logs/{}/{}/{}'.format(prodlabel, label[0:label.find('/')], chunk) if tag == None else '/work/anlyon/logs/{}/{}_{}/{}'.format(prodlabel, label[0:label.find('/')], tag, chunk)
    else:
-     logdir = './logs/{}/{}_{}/{}'.format(label, prodlabel, tag, chunk)
+     #logdir = './logs/{}/{}_{}/{}'.format(label, prodlabel, tag, chunk)
+     logdir = '/work/anlyon/logs/{}/{}_{}/{}'.format(label, prodlabel, tag, chunk)
    return logdir
 
 
@@ -50,11 +52,19 @@ class NanoTools(object):
     return [f for f in glob.glob(pointdir+'/step4_nj*.root')]
 
 
-  def checkLocalFile(self, nanofile, cond=True):
+  def checkLocalFile(self, nanofile, cond=True, branch_check=False, branchname=''):
     rootFile = ROOT.TNetXNGFile.Open(nanofile, 'r')
     if not rootFile: return False
     if cond and not rootFile.GetListOfKeys().Contains('Events'): return False
-    else: return True
+    else:
+      if not branch_check: return True
+      else:
+        f = ROOT.TFile.Open(nanofile)
+        tree = f.Get('Events')
+        for branch in tree.GetListOfBranches():
+          if(branch.GetName() == branchname):
+            return True
+        return False
 
 
   def checkFileExists(self, file_):

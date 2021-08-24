@@ -36,6 +36,9 @@ def checkParser(opt):
   if opt.mcprivate + opt.mccentral + opt.data > 1:
     raise RuntimeError('Please indicate if you want to run on data or MC by adding only --data or --mcprivate or --mccentral to the command line')
 
+  if opt.data and opt.ds==None:
+    raise RuntimeError('Please indicate the dataset you want to run the tool on using --ds <dataset>')
+
 
 class NanoMerger(NanoTools):
   def __init__(self, opt):
@@ -82,8 +85,7 @@ class NanoMerger(NanoTools):
           if iFile%100 == 0:              print '     --> checked {}% of the files'.format(round(float(iFile)/len(nanoFiles)*100, 1))
           elif iFile == len(nanoFiles)-1: print '     --> checked 100% of the files'
 
-          if not NanoTools.checkLocalFile(self, fileName, cond): continue
-
+          if not NanoTools.checkLocalFile(self, fileName, cond, branch_check=True, branchname='nMuon'): continue
           command = command + ' {}'.format(fileName)
 
         print '\n-> Start of the merge'
@@ -109,8 +111,8 @@ class NanoMerger(NanoTools):
     filesValid = []
     print "\n-> Checking the files"
     for fileName in nanoFiles:
-      if not NanoTools.checkLocalFile(self, fileName, cond): continue
-
+      if cond and not NanoTools.checkLocalFile(self, fileName, cond, branch_check=True, branchname='nMuon'): continue
+      elif not cond and not NanoTools.checkLocalFile(self, fileName, cond): continue
       filesValid.append(fileName)
 
     print '\n-> Start of the merge'
@@ -132,6 +134,38 @@ class NanoMerger(NanoTools):
     for f in glob.glob(locationSE+'/Chunk*/merged/'):
       command_clean_file = 'rm -rf root://t3dcachedb.psi.ch:1094/{}/{}'.format(f, mergedName)
       os.system(command_clean_file)
+
+
+  def doExtMerging(self, mergedName, location):
+    print '\n ---> Merging the extension files'
+
+    no_ext_file = location[:len(location)-4] + '/merged/' + mergedName
+    ext_file = location + '/merged/' + mergedName
+    extmerged_file = location + '/merged/' + mergedName[:len(mergedName)-5] + '_extmerged.root'
+
+    # copying the files in the workdir
+    command_cp_no_ext_file = 'xrdcp {} ./no_ext_file.root'.format(no_ext_file)
+    command_cp_ext_file = 'xrdcp {} ./ext_file.root'.format(ext_file)
+    os.system(command_cp_no_ext_file)
+    os.system(command_cp_ext_file)
+
+    # proceed to the merging
+    command = 'hadd -f extmerged_file.root ext_file.root no_ext_file.root'
+    os.system(command)
+
+    # copy the merged file
+    command_cp_extmerged_file = 'xrdcp -f extmerged_file.root root://t3dcachedb.psi.ch:1094/{}'.format(extmerged_file)
+    os.system(command_cp_extmerged_file)
+
+    # erasing the files
+    command_rm_no_ext_file = 'rm no_ext_file.root' 
+    command_rm_ext_file = 'rm ext_file.root' 
+    command_rm_extmerged_file = 'rm extmerged_file.root' 
+    os.system(command_rm_no_ext_file)
+    os.system(command_rm_ext_file)
+    os.system(command_rm_extmerged_file)
+    
+    print '{} created \n'.format(extmerged_file)
 
 
   def runMergingModule(self, location):
@@ -156,6 +190,9 @@ class NanoMerger(NanoTools):
       mergedName_flat = 'flat_bparknano.root' if self.tagnano == None and self.tagflat == None else 'flat_bparknano_{}.root'.format(tag)
 
       self.doChunkMerging(nanoName_flat, mergedName_flat, location, False)
+
+      if self.mccentral and '_ext' in location:
+        self.doExtMerging(mergedName_flat, location)
 
 
   def process(self):
