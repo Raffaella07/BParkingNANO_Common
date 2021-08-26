@@ -30,7 +30,7 @@ class NanoTools(object):
      logdir = '/work/anlyon/logs/{}/{}/{}'.format(prodlabel, label[0:label.find('/')], chunk) if tag == None else '/work/anlyon/logs/{}/{}_{}/{}'.format(prodlabel, label[0:label.find('/')], tag, chunk)
    else:
      #logdir = './logs/{}/{}_{}/{}'.format(label, prodlabel, tag, chunk)
-     logdir = '/work/anlyon/logs/{}/{}_{}/{}'.format(label, prodlabel, tag, chunk)
+     logdir = '/work/anlyon/logs/{}/{}/{}'.format(label, prodlabel, chunk) if tag == None else '/work/anlyon/logs/{}/{}_{}/{}'.format(label, prodlabel, tag, chunk)
    return logdir
 
 
