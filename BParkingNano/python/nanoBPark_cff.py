@@ -21,6 +21,7 @@ from PhysicsTools.BParkingNano.tracksBPark_cff import *
 
 ## B collections
 from PhysicsTools.BParkingNano.BToMuLPi_cff import * # BToMuMuPi, BToMuMuPiMC, BToMuMuPiTable, BToMuMuPiSequence, BToMuMuPiSequenceMC, CountBToMuMuPi
+from PhysicsTools.BParkingNano.BToMuLPiHD_cff import * # BToMuMuPi, BToMuMuPiMC, BToMuMuPiTable, BToMuMuPiSequence, BToMuMuPiSequenceMC, CountBToMuMuPi
 from PhysicsTools.BParkingNano.BToKLL_cff import *
 from PhysicsTools.BParkingNano.BToKstarLL_cff import *
 
@@ -60,9 +61,12 @@ def nanoAOD_customizeBToMuLPi(process, isMC=False):
    if isMC == False:
      process.nanoBMuMuPiSequence = cms.Sequence( BToMuMuPiSequence + BToMuMuPiTable + CountBToMuMuPi)
      process.nanoBMuEPiSequence  = cms.Sequence( BToMuEPiSequence  + BToMuEPiTable  + CountBToMuEPi)
+#     process.nanoBMuMuPi_HDSequence = cms.Sequence( BToMuMuPi_HDSequence + BToMuMuPi_HDTable + CountBToMuMuPi_HD)
+     process.nanoBMuEPiHDSequence  = cms.Sequence( BToMuEPiHDSequence  + BToMuEPiHDTable  + CountBToMuEPiHD)
    else:
      process.nanoBMuMuPiSequence = cms.Sequence( BToMuMuPiSequenceMC + BToMuMuPiMCTable + CountBToMuMuPiMC)
      process.nanoBMuEPiSequence  = cms.Sequence( BToMuEPiSequenceMC  + BToMuEPiMCTable  + CountBToMuEPiMC)
+     process.nanoBMuEPiHDSequence  = cms.Sequence( BToMuEPiHDSequence  + BToMuEPiHDTable  + CountBToMuEPiHD)
    return process
 
 def nanoAOD_customizeBToKMuMu(process, isMC=False):

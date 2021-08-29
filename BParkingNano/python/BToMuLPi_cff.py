@@ -17,10 +17,10 @@ BToMuMuPi = cms.EDProducer(
     isMC  = cms.bool(False),
 
     # pre-fitter preselection
-    pionSelection           = cms.string('pt > 0.5 && abs(eta)<2.4'),  
-    isoTracksSelection      = cms.string('pt > 0.5 && abs(eta)<2.4'),
-    trgMuonSelection        = cms.string('pt > 0.5 && abs(eta) < 2.4'),
-    leptonSelection        = cms.string('pt > 2 && abs(eta) < 2.4'),
+    pionSelection           = cms.string('pt > 0.7 && abs(eta)<2 '),  
+    isoTracksSelection      = cms.string('pt > 0.7 && abs(eta)<2 '),
+    trgMuonSelection        = cms.string('pt > 7 && abs(eta) < 1.5'),
+    leptonSelection        = cms.string('pt > 1.5 && abs(eta) < 2 '),
     preVtxSelection = cms.string(' & '.join([
 #        'pt > 2',
         'mass > 0.2',        
