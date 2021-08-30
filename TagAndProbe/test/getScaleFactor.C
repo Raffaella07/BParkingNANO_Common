@@ -1,0 +1,172 @@
+// usage: root -l -b getScaleFactor()
+
+#include<iostream>
+#include<fstream>
+#include "TFile.h"
+#include "TCanvas.h"
+#include "TKey.h"
+#include "TStyle.h"
+#include "TH2D.h"
+#include "TH1D.h"
+#include "TGraphAsymmErrors.h"
+
+// ------- Global Variables ------- //
+
+TString dataFileName = "results_tag_and_probe_v2_tag_fired_DST_DoubleMu1_data_A1_6_forplots.root";
+TString mcFileName = "results_tag_and_probe_v2_tag_fired_DST_DoubleMu1_mc_forplots.root";
+string dirLabel = "tag_and_probe_v2_tag_fired_DST_DoubleMu1_A1_6_forplots";
+
+
+// -------------------------------- //
+
+void  write2DScaleFactor(TH2F* h, string name){
+  string name_fortable = name + ".txt";
+  ofstream outFile(name_fortable);
+
+  TString name_forhist = name.c_str();
+  TFile* root_file = TFile::Open(name_forhist + ".root", "RECREATE");
+  TH2D* hist_scale_factor = (TH2D*)h->Clone("hist_scale_factor");
+  TCanvas* c = new TCanvas("c", "c", 800, 700);
+
+  int nX = h->GetNbinsX();
+  int nY = h->GetNbinsY();
+
+  for(int i=1; i<=nX; ++i) {
+    Double_t pT0 = h->GetXaxis()->GetBinLowEdge(i);
+    Double_t pT1 = h->GetXaxis()->GetBinLowEdge(i+1);
+
+    for(int j=1; j<=nY; ++j) {
+      Double_t x = h->GetBinContent(i,j);
+      Double_t dx = h->GetBinError(i,j);
+      Double_t err = (dx/x)*100;
+      Double_t eta0 = h->GetYaxis()->GetBinLowEdge(j);
+      Double_t eta1 = h->GetYaxis()->GetBinLowEdge(j+1);
+
+      outFile << pT0 << " " << pT1 << " " << eta0 << " " << eta1 << " " << x << " " << dx << " " << err << "%"<< std::endl;
+
+      hist_scale_factor->SetBinContent(i, j, x);
+      hist_scale_factor->SetBinError(i, j, dx);
+    }
+  }
+
+  hist_scale_factor->GetZaxis()->SetTitle("Scale Factor");
+  hist_scale_factor->SetOption("colztexte");
+  hist_scale_factor->Write();
+  hist_scale_factor->Draw();
+  c->SaveAs(name_forhist + ".pdf");
+  root_file->Close();
+}
+
+
+void  write1DScaleFactor(TH1F* h, string name){
+  string name_fortable = name + ".txt";
+  ofstream outFile(name_fortable);
+
+  TString name_forhist = name.c_str();
+  TFile* root_file = TFile::Open(name_forhist + ".root", "RECREATE");
+  TH1D* hist_scale_factor = (TH1D*)h->Clone("hist_scale_factor");
+  TCanvas* c = new TCanvas("c", "c", 800, 700);
+
+  int nX = h->GetNbinsX();
+
+  for(int i=1; i<=nX; ++i) {
+    Double_t pT0 = h->GetXaxis()->GetBinLowEdge(i);
+    Double_t pT1 = h->GetXaxis()->GetBinLowEdge(i+1);
+
+    Double_t x = h->GetBinContent(i);
+    Double_t dx = h->GetBinError(i);
+    Double_t err = (dx/x)*100;
+
+    outFile << pT0 << " " << pT1 << " " << x << " " << dx << " " << err << "%"<< std::endl;
+
+    hist_scale_factor->SetBinContent(i, x);
+    hist_scale_factor->SetBinError(i, dx);
+  }
+
+  hist_scale_factor->GetYaxis()->SetTitle("Scale Factor");
+  hist_scale_factor->Write();
+  hist_scale_factor->Draw();
+  c->SaveAs(name_forhist + ".png");
+  root_file->Close();
+}
+
+
+void process(string dir, string subdir, string outdir, string method, TFile* fData, TFile* fMC, TString canvasname, string dim){
+  TCanvas* c;
+
+  TString results_dir = dir + "/" + subdir + "/" + method + "_eff_plots/";
+  std::cout << results_dir << std::endl;
+  fData->cd(results_dir);
+
+  c = (TCanvas*) gDirectory->Get(canvasname);
+  TH2F* hData2D = 0;
+  TH1F* hData1D = 0;
+  if(dim == "2D") hData2D = (TH2F*) c->FindObject(canvasname);
+  else if(dim == "1D") hData1D = (TH1F*) c->FindObject(canvasname);
+
+
+  fMC->cd(results_dir);
+  c = (TCanvas*) gDirectory->Get(canvasname);
+  TH2F* hMC2D = 0;
+  TH1F* hMC1D = 0;
+  if(dim == "2D") hMC2D = (TH2F*) c->FindObject(canvasname);
+  else if(dim == "1D") hMC1D = (TH1F*) c->FindObject(canvasname);
+
+  string name = outdir + "scaleFactor_" + dir + "_" + subdir + "_" + method;
+  if(dim == "2D") hData2D->Divide(hMC2D);
+  else if(dim == "1D") hData1D->Divide(hMC1D);
+  if(dim == "2D"){
+    write2DScaleFactor(hData2D, name);
+  }
+  else if(dim == "1D"){
+    write1DScaleFactor(hData1D, name);
+  }
+
+
+  std::cout << name << ".txt created " << std::endl;
+  std::cout << name << ".root created " << std::endl;
+  std::cout << name << ".png created " << std::endl;
+
+}
+
+
+void  getScaleFactor(string dir="results"){
+
+
+  string outdir = "./results/" + dirLabel + "/";
+  system(Form("mkdir -p %s", outdir.c_str()));
+
+  TFile* fData = new TFile(dataFileName);
+  TFile* fMC = new TFile(mcFileName);
+
+  process(dir, "cat_pt_eta", outdir, "fit", fData, fMC, "probe_pt_probe_eta_PLOT", "2D"); 
+  process(dir, "cat_pt_eta", outdir, "cnt", fData, fMC, "probe_pt_probe_eta_PLOT", "2D"); 
+
+  //process(dir, "cat_pt_eta_2", outdir, "fit", fData, fMC, "probe_pt_probe_eta_PLOT", "2D"); 
+  //process(dir, "cat_pt_eta_2", outdir, "cnt", fData, fMC, "probe_pt_probe_eta_PLOT", "2D"); 
+
+  //process(dir, "cat_pt_eta_3", outdir, "fit", fData, fMC, "probe_pt_probe_eta_PLOT", "2D"); 
+  //process(dir, "cat_pt_eta_3", outdir, "cnt", fData, fMC, "probe_pt_probe_eta_PLOT", "2D"); 
+
+  //process(dir, "cat_pt_dxysig", outdir, "fit", fData, fMC, "probe_pt_probe_dxy_sig_PLOT", "2D"); 
+  //process(dir, "cat_pt_dxysig", outdir, "cnt", fData, fMC, "probe_pt_probe_dxy_sig_PLOT", "2D"); 
+
+  //process(dir, "cat_pt_dxysig_2", outdir, "fit", fData, fMC, "probe_pt_probe_dxy_sig_PLOT", "2D"); 
+  //process(dir, "cat_pt_dxysig_2", outdir, "cnt", fData, fMC, "probe_pt_probe_dxy_sig_PLOT", "2D"); 
+
+  //process(dir, "cat_pt_dxysig_3", outdir, "fit", fData, fMC, "probe_pt_probe_dxy_sig_PLOT", "2D"); 
+  //process(dir, "cat_pt_dxysig_3", outdir, "cnt", fData, fMC, "probe_pt_probe_dxy_sig_PLOT", "2D"); 
+
+  //process(dir, "cat_pt", outdir, "fit", fData, fMC, "probe_pt_PLOT", "1D"); 
+  //process(dir, "cat_pt", outdir, "cnt", fData, fMC, "probe_pt_PLOT", "1D"); 
+ 
+  fData->Close();
+  fMC->Close();
+  delete fData;
+  delete fMC;
+
+  std::cout << "Done " << std::endl;
+}
+
+
+

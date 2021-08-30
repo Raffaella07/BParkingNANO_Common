@@ -8,27 +8,38 @@ class NanoTools(object):
     return [f for f in glob.glob(location+'/*')]
 
 
-  def getNanoDirectories(self, location, prodlabel, dataset):
-    if dataset == None:
-      dirs = [f for f in glob.glob('{loc}/{pl}/*'.format(loc=location, pl=prodlabel))]
+  def getNanoDirectories(self, location, prodlabel, dataset, dirtag=''):
+    if dirtag == 'mcprivate':
+      dirs = [f for f in glob.glob('{loc}/{pl}/*/nanoFiles'.format(loc=location, pl=prodlabel))]
     else:
-      dirs = [f for f in glob.glob('{loc}/{pl}/{ds}'.format(loc=location, pl=prodlabel, ds=dataset))]
+      if dataset == None:
+        dirs = [f for f in glob.glob('{loc}/{pl}/*'.format(loc=location, pl=prodlabel))]
+      else:
+        dirs = [f for f in glob.glob('{loc}/{pl}/{ds}'.format(loc=location, pl=prodlabel, ds=dataset))]
     if len(dirs) == 0:
       raise RuntimeError('No samples with the production label "{pl}" were found in {loc}'.format(pl=prodlabel if dataset==None else dataset+'_'+prodlabel, loc=location))
     return dirs
 
 
-  def getLogDir(self, file_, prodlabel, isData):
-   if isData: # probably to be modified for mc
-     label = file_[file_.find('/',file_.find(prodlabel))+1:file_.find('Chunk')-1] 
-     chunk = file_[file_.find('Chunk'):file_.find('bparknano')-1]
-   return '/work/anlyon/logs/{}/{}/{}'.format(label, prodlabel, chunk) # this will have to be modified
+  def getLogDir(self, file_, prodlabel, tag, isData, dirlabel=''):
+   #if isData: # probably to be modified for mc
+   label = file_[file_.find('/',file_.find(prodlabel))+1:file_.find('Chunk')-1] 
+   chunk = file_[file_.find('Chunk'):file_.find('bparknano')-1]
+   if dirlabel == 'mcprivate':
+     #logdir = './logs/{}/{}/{}'.format(prodlabel, label[0:label.find('/')], chunk) if tag == None else './logs/{}/{}_{}/{}'.format(prodlabel, label[0:label.find('/')], tag, chunk)
+     logdir = '/work/anlyon/logs/{}/{}/{}'.format(prodlabel, label[0:label.find('/')], chunk) if tag == None else '/work/anlyon/logs/{}/{}_{}/{}'.format(prodlabel, label[0:label.find('/')], tag, chunk)
+   else:
+     #logdir = './logs/{}/{}_{}/{}'.format(label, prodlabel, tag, chunk)
+     logdir = '/work/anlyon/logs/{}/{}_{}/{}'.format(label, prodlabel, tag, chunk)
+   return logdir
 
 
-  def getFilesLocation(self, isData):  
+  def getFilesLocation(self, dirtag):  
     location = '/pnfs/psi.ch/cms/trivcat/store/user/{usr}/BHNLsGen'.format(usr=os.environ["USER"])
-    if isData:
+    if dirtag == 'data':
       location += '/data'
+    elif dirtag == 'mccentral': 
+      location += '/mc_central'
     return location
   
 
@@ -41,11 +52,19 @@ class NanoTools(object):
     return [f for f in glob.glob(pointdir+'/step4_nj*.root')]
 
 
-  def checkLocalFile(self, nanofile, cond=True):
+  def checkLocalFile(self, nanofile, cond=True, branch_check=False, branchname=''):
     rootFile = ROOT.TNetXNGFile.Open(nanofile, 'r')
     if not rootFile: return False
     if cond and not rootFile.GetListOfKeys().Contains('Events'): return False
-    else: return True
+    else:
+      if not branch_check: return True
+      else:
+        f = ROOT.TFile.Open(nanofile)
+        tree = f.Get('Events')
+        for branch in tree.GetListOfBranches():
+          if(branch.GetName() == branchname):
+            return True
+        return False
 
 
   def checkFileExists(self, file_):
@@ -89,5 +108,16 @@ class NanoTools(object):
   def getStep(self, file_): 
     return file_[file_.rfind('_nj')+3:file_.rfind('.root')]
 
+
+  def getTag(self, tagnano, tagflat):
+    if tagnano == None and tagflat == None:
+      tag = 0
+    elif tagnano != None and tagflat == None:
+      tag = tagnano
+    elif tagnano == None and tagflat != None:
+      tag = tagflat
+    else:
+      tag = tagnano + '_' + tagflat
+    return tag
     
 

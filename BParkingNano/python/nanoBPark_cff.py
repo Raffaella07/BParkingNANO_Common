@@ -21,8 +21,12 @@ from PhysicsTools.BParkingNano.tracksBPark_cff import *
 
 ## B collections
 from PhysicsTools.BParkingNano.BToMuLPi_cff import * # BToMuMuPi, BToMuMuPiMC, BToMuMuPiTable, BToMuMuPiSequence, BToMuMuPiSequenceMC, CountBToMuMuPi
+from PhysicsTools.BParkingNano.BToMuLPiHD_cff import * # BToMuMuPi, BToMuMuPiMC, BToMuMuPiTable, BToMuMuPiSequence, BToMuMuPiSequenceMC, CountBToMuMuPi
 from PhysicsTools.BParkingNano.BToKLL_cff import *
+from PhysicsTools.BParkingNano.HNLToMuPi_cff import HNLToMuPi, HNLToMuPiMC, HNLToMuPiTable, HNLToMuPiSequence, HNLToMuPiSequenceMC, CountHNLToMuPi
 from PhysicsTools.BParkingNano.BToKstarLL_cff import *
+from PhysicsTools.BParkingNano.TagAndProbeJPsiToMuMu_cff import * 
+
 
 
 nanoSequenceOnlyFullSim = cms.Sequence(triggerObjectBParkTables + l1bits)
@@ -60,10 +64,20 @@ def nanoAOD_customizeBToMuLPi(process, isMC=False):
    if isMC == False:
      process.nanoBMuMuPiSequence = cms.Sequence( BToMuMuPiSequence + BToMuMuPiTable + CountBToMuMuPi)
      process.nanoBMuEPiSequence  = cms.Sequence( BToMuEPiSequence  + BToMuEPiTable  + CountBToMuEPi)
+#     process.nanoBMuMuPi_HDSequence = cms.Sequence( BToMuMuPi_HDSequence + BToMuMuPi_HDTable + CountBToMuMuPi_HD)
+     process.nanoBMuEPiHDSequence  = cms.Sequence( BToMuEPiHDSequence  + BToMuEPiHDTable  + CountBToMuEPiHD)
    else:
      process.nanoBMuMuPiSequence = cms.Sequence( BToMuMuPiSequenceMC + BToMuMuPiMCTable + CountBToMuMuPiMC)
      process.nanoBMuEPiSequence  = cms.Sequence( BToMuEPiSequenceMC  + BToMuEPiMCTable  + CountBToMuEPiMC)
+     process.nanoBMuEPiHDSequence  = cms.Sequence( BToMuEPiHDSequence  + BToMuEPiHDTable  + CountBToMuEPiHD)
    return process
+
+def nanoAOD_customizeHNLToMuPi(process, isMC=False):
+    if isMC == False:
+      process.nanoHNLToMuPiSequence = cms.Sequence( HNLToMuPiSequence + HNLToMuPiTable )
+    else:
+      process.nanoHNLToMuPiSequence = cms.Sequence( HNLToMuPiSequenceMC + HNLToMuPiTable )
+    return process
 
 def nanoAOD_customizeBToKMuMu(process, isMC=False):
     if isMC == False:
@@ -76,6 +90,13 @@ def nanoAOD_customizeBToKMuMu(process, isMC=False):
 def nanoAOD_customizeBToKLL(process):
     process.nanoBKeeSequence   = cms.Sequence( process.nanoBKeeSequence + BToKEESequence    + BToKeeTable   )
     process.nanoBKMuMuSequence = cms.Sequence( BToKMuMuSequence + BToKmumuTable )
+    return process
+
+def nanoAOD_customizeTagAndProbeJPsiToMuMu(process, isMC=False):
+    if isMC == False:
+      process.nanoJPsiToMuMuSequence = cms.Sequence( JPsiToMuMuSequence + JPsiToMuMuTable )
+    else:
+      process.nanoJPsiToMuMuSequence = cms.Sequence( JPsiToMuMuSequenceMC + JPsiToMuMuTable )
     return process
 
 #three possibilities for K*LL
@@ -109,6 +130,11 @@ def nanoAOD_customizeMC(process, ancestor_particles=[511, 521, 531, 541, 9900015
 
         # make the BToMuEPiTable/count talk to the correct producer
         massSearchReplaceAnyInputTag(path, 'BToMuEPi', 'BToMuEPiMC') #adding electron channel
+        # make the HNLToMuPiTable/count talk to the correct producer
+        massSearchReplaceAnyInputTag(path, 'HNLToMuPi', 'HNLToMuPiMC')
+
+        # make the JPsiToMuMuTable/count talk to the correct producer
+        massSearchReplaceAnyInputTag(path, 'JPsiToMuMu', 'JPsiToMuMuMC')
 
         # save the all descendants of ancestor_particles
         to_save = ' || '.join(['abs(pdgId) == %d'%ipdg for ipdg in ancestor_particles])

@@ -8,6 +8,7 @@ void starter(TString isMC){
   TString inFileName = "bparknano.root";
 
   TString outFileName = "flat_bparknano.root";
+  if(isMC) outFileName += "_isMC";
 
   TChain* c = new TChain("Events");
   c->Add(inFileName);
