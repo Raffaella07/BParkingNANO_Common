@@ -10,6 +10,10 @@
 # ${6}:  isRemote
 # ${7}:  filelist
 # ${8}:  isResubmission (false if first launch)
+# ${9}:  dosignal
+# ${10}: docontrol
+# ${11}: dohnl
+# ${12}: doTagAndProbe
 #--------------------
 
 
@@ -25,7 +29,11 @@ if [ ${8} == 0 ] ; then
   cp ${7} $workdir/filelist.txt
 else # different treatment in case of resubmission
   cp -r ${7}* $workdir
+  # copy filelist to pnfs
+  #xrdcp -r ${7}*$SLURM_ARRAY_TASK_ID* root://t3dcachedb.psi.ch:1094/${1}
   #rm ${7}*$SLURM_ARRAY_TASK_ID*
+  xrdcp -r ${7}"_"$SLURM_ARRAY_TASK_ID".txt" root://t3dcachedb.psi.ch:1094/${1}
+  rm ${7}"_"$SLURM_ARRAY_TASK_ID".txt"
 fi
 
 cd $workdir
@@ -60,13 +68,13 @@ if [ ${5} == 1 ] ; then #isMC
   if [ ${6} == 0 ] ; then  #private MC
     echo "going to run nano step on "$inputFilename 
     DATE_START=`date +%s`
-    cmsRun run_nano_hnl_cfg.py inputFile=$inputFilename outputFile="bparknano.root" isMC=True
+    cmsRun run_nano_hnl_cfg.py inputFile=$inputFilename outputFile="bparknano.root" isMC=True doSignal=${9} doControl=${10} doHNL=${11} doTagAndProbe=${12}
     DATE_END=`date +%s`
     echo "finished running nano step"
   else # central MC
     echo "going to run nano step on "$inputFilename
     DATE_START=`date +%s`
-    cmsRun run_nano_hnl_cfg.py inputFiles=$inputFilename outputFile="bparknano.root" isMC=True
+    cmsRun run_nano_hnl_cfg.py inputFiles=$inputFilename outputFile="bparknano.root" isMC=True doSignal=${9} doControl=${10} doHNL=${11} doTagAndProbe=${12}
     DATE_END=`date +%s`
     echo "finished running nano step"
   fi
@@ -75,7 +83,7 @@ else #isData
 
   echo "going to run nano step on "$inputFilename
   DATE_START=`date +%s`
-  cmsRun run_nano_hnl_cfg.py inputFiles=$inputFilename outputFile="bparknano.root" isMC=False
+  cmsRun run_nano_hnl_cfg.py inputFiles=$inputFilename outputFile="bparknano.root" isMC=False doSignal=${9} doControl=${10} doHNL=${11} doTagAndProbe=${12}
   DATE_END=`date +%s`
   echo "finished running nano step"
 
