@@ -34,9 +34,9 @@ public:
     post_vtx_selection_{cfg.getParameter<std::string>("postVtxSelection")},
     src_{consumes<LeptonCollection>( cfg.getParameter<edm::InputTag>("src") )},
     isMC_{cfg.getParameter<bool>("isMC")},
+    lepton_type_{cfg.getParameter<std::string>("label")},
     ttracks_src_{consumes<TransientTrackCollection>( cfg.getParameter<edm::InputTag>("transientTracksSrc") )} {
-       produces<pat::CompositeCandidateCollection>("SelectedDiLeptons");
-       produces<std::vector<KinVtxFitter> >("SelectedDiLeptonKinVtxs");
+       produces<pat::CompositeCandidateCollection>();
     }
 
   ~DiLeptonBuilder() override {}
@@ -52,6 +52,7 @@ private:
   const StringCutObjectSelector<pat::CompositeCandidate> post_vtx_selection_; // cut on the di-lepton after the SV fit
   const edm::EDGetTokenT<LeptonCollection> src_;
   const bool isMC_;
+  const std::string lepton_type_;
   const edm::EDGetTokenT<TransientTrackCollection> ttracks_src_;
 };
 
@@ -67,18 +68,36 @@ void DiLeptonBuilder<Lepton>::produce(edm::StreamID, edm::Event &evt, edm::Event
 
   // output
   std::unique_ptr<pat::CompositeCandidateCollection> ret_value(new pat::CompositeCandidateCollection());
-  std::unique_ptr<std::vector<KinVtxFitter> > kinVtx_out( new std::vector<KinVtxFitter> );
   
   for(size_t l1_idx = 0; l1_idx < leptons->size(); ++l1_idx) {
     edm::Ptr<Lepton> l1_ptr(leptons, l1_idx);
     if(!l1_selection_(*l1_ptr)) continue; 
+    if(lepton_type_=="muon" && l1_ptr->userInt("isDSAMuon") == 1) continue;
+    // ask the first lepton to be triggering
+    if(lepton_type_=="muon" && l1_ptr->userInt("isTriggering") != 1) continue;
+    if(lepton_type_=="muon" && l1_ptr->userInt("HLT_Mu7_IP4") != 1 && l1_ptr->userInt("HLT_Mu8_IP3") != 1 && l1_ptr->userInt("HLT_Mu8_IP5") != 1 && l1_ptr->userInt("HLT_Mu8_IP6") != 1 && l1_ptr->userInt("HLT_Mu8p5_IP3p5") != 1 && l1_ptr->userInt("HLT_Mu9_IP4") != 1 && l1_ptr->userInt("HLT_Mu9_IP5") != 1 && l1_ptr->userInt("HLT_Mu9_IP6") != 1 && l1_ptr->userInt("HLT_Mu10p5_IP3p5") != 1 && l1_ptr->userInt("HLT_Mu12_IP6") != 1) continue;
+
+    math::PtEtaPhiMLorentzVector l1_p4(
+      l1_ptr->pt(), 
+      l1_ptr->eta(),
+      l1_ptr->phi(),
+      l1_ptr->mass()
+      );
     
     for(size_t l2_idx = l1_idx + 1; l2_idx < leptons->size(); ++l2_idx) {
       edm::Ptr<Lepton> l2_ptr(leptons, l2_idx);
       if(!l2_selection_(*l2_ptr)) continue;
+      if(l2_ptr->userInt("isDSAMuon") == 1) continue;
+
+      math::PtEtaPhiMLorentzVector l2_p4(
+        l2_ptr->pt(), 
+        l2_ptr->eta(),
+        l2_ptr->phi(),
+        l2_ptr->mass()
+        );
 
       pat::CompositeCandidate lepton_pair;
-      lepton_pair.setP4(l1_ptr->p4() + l2_ptr->p4());
+      lepton_pair.setP4(l1_p4 + l2_p4);
       lepton_pair.setCharge(l1_ptr->charge() + l2_ptr->charge());
       lepton_pair.addUserFloat("lep_deltaR", reco::deltaR(*l1_ptr, *l2_ptr));
       int nlowpt=0;
@@ -107,6 +126,8 @@ void DiLeptonBuilder<Lepton>::produce(edm::StreamID, edm::Event &evt, edm::Event
         {l1_ptr->mass(), l2_ptr->mass()},
         {LEP_SIGMA, LEP_SIGMA} //some small sigma for the particle mass
         );
+      if(!fitter.success()) continue;
+
       lepton_pair.addUserFloat("sv_chi2", fitter.chi2());
       lepton_pair.addUserFloat("sv_ndof", fitter.dof()); // float??
       lepton_pair.addUserFloat("sv_prob", fitter.prob());
@@ -117,17 +138,15 @@ void DiLeptonBuilder<Lepton>::produce(edm::StreamID, edm::Event &evt, edm::Event
       // cut on the SV info
       if( !post_vtx_selection_(lepton_pair) ) continue;
       ret_value->push_back(lepton_pair);
-      kinVtx_out->push_back(fitter);
     }
   }
   
-  evt.put(std::move(ret_value), "SelectedDiLeptons");
-  evt.put(std::move(kinVtx_out), "SelectedDiLeptonKinVtxs");
+  evt.put(std::move(ret_value));
 }
 
-#include "DataFormats/PatCandidates/interface/Muon.h"
+#include "ETHMuon.h"
 #include "DataFormats/PatCandidates/interface/Electron.h"
-typedef DiLeptonBuilder<pat::Muon> DiMuonBuilder;
+typedef DiLeptonBuilder<pat::ETHMuon> DiMuonBuilder;
 typedef DiLeptonBuilder<pat::Electron> DiElectronBuilder;
 
 #include "FWCore/Framework/interface/MakerMacros.h"

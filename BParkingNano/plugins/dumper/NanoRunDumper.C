@@ -28,6 +28,7 @@
 #include "NanoRunDumper.h"
 #include <TH2.h>
 #include <TStyle.h>
+#include <TSystem.h>
 
 void NanoRunDumper::Begin(TTree * /*tree*/)
 {
@@ -51,7 +52,15 @@ void NanoRunDumper::SlaveBegin(TTree * /*tree*/)
   TString option = GetOption();
   TString outFileName = option;
 
-  my_file = new TFile(outFileName, "UPDATE");  
+  outFileName.Resize(outFileName.Length()-5);
+
+  // check if outputfile exists
+  if(gSystem->AccessPathName(outFileName)){
+    my_file = new TFile(outFileName, "RECREATE");  
+  }
+  else{
+    my_file = new TFile(outFileName, "UPDATE");  
+  }
   my_file->cd();
 
   run_tree = new TTree("run_tree", "run_tree");
@@ -105,7 +114,7 @@ void NanoRunDumper::Terminate()
   // a query. It always runs on the client, it can be used to present
   // the results graphically or save the results to file.
 
-  my_file->Write();
+  run_tree->Write("", TObject::kOverwrite);
   my_file->Close();
 
   cout << "- End Run Nano Dumper -" << endl;
