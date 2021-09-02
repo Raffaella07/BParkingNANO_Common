@@ -13,10 +13,11 @@ options.register('wantFullRECO'   ,  False          , VarParsing.multiplicity.si
 options.register('reportEvery'    ,  1000           , VarParsing.multiplicity.singleton, VarParsing.varType.int   , "report every N events"                  )
 options.register('skip'           ,  0              , VarParsing.multiplicity.singleton, VarParsing.varType.int   , "skip first N events"                    )
 options.register('inputFile'      , None            , VarParsing.multiplicity.singleton, VarParsing.varType.string, "inputFile name"                         )
-options.register('outFile'        , 'bparknano.root', VarParsing.multiplicity.singleton, VarParsing.varType.string, "outputFile name"                        )
+options.register('outFile'        , False           , VarParsing.multiplicity.singleton, VarParsing.varType.string, "outputFile name"                        )
 
 
-options.setDefault('maxEvents', -1)
+options.setDefault('maxEvents', 100)
+options.setDefault('tag', '10215')
 options.parseArguments()
 
 
@@ -30,10 +31,16 @@ outputFileFEVT = cms.untracked.string('_'.join(['BParkFullEvt', extension[option
 
 
 if not options.inputFiles:
-    options.inputFiles = ['root://xrootd-cms.infn.it///store/user/ratramon/HNLGen_ntuples/private_BToDMuN_HalfMu_Halfe_mass3p0_ctau184p0/step4_nj999.root'
-		#	'/store/data/Run2018B/ParkingBPH4/MINIAOD/05May2019-v2/230000/F7E7EF39-476F-1C48-95F7-74CB5C7A542C.root'
+    options.inputFiles = [
+			#'root://xrootd-cms.infn.it///store/user/ratramon/HNLGen_ntuples/private_BToDMuN_HalfMu_Halfe_mass3p0_ctau184p0/step4_nj999.root'
+			'/store/data/Run2018A/ParkingBPH1/MINIAOD/05May2019-v1/00000/0B14F6F4-5DD5-B04B-A7EF-7D2B80AD33FA.root'
 			] if not options.isMC else \
-                         ['root://xrootd-cms.infn.it///store/user/ratramon/HNLGen_ntuples/private_BToDMuN_HalfMu_Halfe_mass3p0_ctau184p0/step4_nj1.root']
+                         [#'/store/mc/RunIIAutumn18MiniAOD/QCD_Pt-20to30_EMEnriched_TuneCP5_13TeV_pythia8/MINIAODSIM/102X_upgrade2018_realistic_v15-v1/100000/0D2BBEDD-FFDA-E843-8620-D9B51558138C.root'
+			'root://xrootd-cms.infn.it///store/user/ratramon/HNLGen_ntuples/private_BToDMuN_HalfMu_Halfe_mass3p0_ctau184p0/step4_nj1.root',
+                        # 'root://xrootd-cms.infn.it///store/user/ratramon/HNLGen_ntuples/private_BToDMuN_HalfMu_Halfe_mass3p0_ctau184p0/step4_nj278.root',
+                        # 'root://xrootd-cms.infn.it///store/user/ratramon/HNLGen_ntuples/private_BToDMuN_HalfMu_Halfe_mass3p0_ctau184p0/step4_nj45.root',
+                        # 'root://xrootd-cms.infn.it///store/user/ratramon/HNLGen_ntuples/private_BToDMuN_HalfMu_Halfe_mass3p0_ctau184p0/step4_nj898.root'
+			]
 
 annotation = '%s nevts:%d' % (outputFileNANO, options.maxEvents)
 
@@ -225,14 +232,16 @@ from PhysicsTools.BParkingNano.nanoBPark_cff import*# nanoAOD_customizeMuonTrigg
 process = nanoAOD_customizeMuonTriggerBPark  (process)
 process = nanoAOD_customizeTrackFilteredBPark(process)
 process = nanoAOD_customizeBToMuLPi         (process, isMC=options.isMC)
+#process = nanoAOD_customizeBToMuLPi_HD         (process, isMC=options.isMC)
 process = nanoAOD_customizeBToKMuMu          (process, isMC=options.isMC) 
 process = nanoAOD_customizeTriggerBitsBPark  (process)
 process = nanoAOD_customizeElectronFilteredBPark(process)
 
 # Path and EndPath definitions
 process.nanoAOD_MuMuPi_step = cms.Path(process.nanoSequence + process.nanoBMuMuPiSequence  ) #candidate counter has been included in the sequence definition
+process.nanoAOD_MuTrkPi_step = cms.Path(process.nanoSequence + process.nanoeSequence + process.nanoBMuEPiHDSequence  ) #candidate counter has been included in the sequence definition
 process.nanoAOD_MuEPi_step = cms.Path(process.nanoSequence + process.nanoeSequence + process.nanoBMuEPiSequence  ) #candidate counter has been included in the sequence definition
-process.nanoAOD_KMuMu_step  = cms.Path(process.nanoSequence + process.nanoBKMuMuSequence + CountBToKmumu ) 
+#process.nanoAOD_KMuMu_step  = cms.Path(process.nanoSequence + process.nanoBKMuMuSequence + CountBToKmumu ) 
 
 # customisation of the process.
 if options.isMC:
@@ -247,7 +256,8 @@ process.NANOAODoutput_step = cms.EndPath(process.NANOAODoutput)
 process.schedule = cms.Schedule(
     process.nanoAOD_MuMuPi_step,
     process.nanoAOD_MuEPi_step,
-    process.nanoAOD_KMuMu_step, 
+    process.nanoAOD_MuTrkPi_step,
+  #  process.nanoAOD_KMuMu_step, 
     process.endjob_step, 
     process.NANOAODoutput_step
 )
@@ -256,7 +266,8 @@ if options.wantFullRECO:
     process.schedule = cms.Schedule(
         process.nanoAOD_MuMuPi_step,
         process.nanoAOD_MuEPi_step,
-        process.nanoAOD_KMuMu_step, 
+        process.nanoAOD_MuTrkPi_step,
+ #       process.nanoAOD_KMuMu_step, 
         process.endjob_step, 
         process.FEVTDEBUGHLToutput_step, 
         process.NANOAODoutput_step
@@ -265,7 +276,7 @@ from PhysicsTools.PatAlgos.tools.helpers import associatePatAlgosToolsTask
 associatePatAlgosToolsTask(process)
 
 process.NANOAODoutput.SelectEvents = cms.untracked.PSet(
-    SelectEvents = cms.vstring('nanoAOD_MuMuPi_step', 'nanoAOD_KMuMu_step','nanoAOD_MuEPi_step') 
+    SelectEvents = cms.vstring('nanoAOD_MuMuPi_step','nanoAOD_MuEPi_step','nanoAOD_MuTrkPi_step') 
 )
 
 

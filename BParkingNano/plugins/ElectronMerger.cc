@@ -187,6 +187,10 @@ void ElectronMerger::produce(edm::StreamID, edm::Event &evt, edm::EventSetup con
    ele.addUserFloat("chargeMode", ele.charge());
    ele.addUserInt("isPFoverlap", 0);
    ele.addUserFloat("dzTrg", dzTrg);
+   ele.addUserFloat("ip3d", fabs(ele.dB(pat::Electron::PV3D)));
+   ele.addUserFloat("sip3d", fabs(ele.dB(pat::Electron::PV3D)/ele.edB(pat::Electron::PV3D)));
+   ele.addUserFloat("dxy", fabs(ele.dB(pat::Electron::PV2D)));
+   ele.addUserFloat("dz", fabs(ele.dB(pat::Electron::PVDZ)));
 
    // Attempt to match electrons to conversions in "gsfTracksOpenConversions" collection (NO MATCHES EXPECTED)
    ConversionInfo info;
@@ -290,6 +294,10 @@ void ElectronMerger::produce(edm::StreamID, edm::Event &evt, edm::EventSetup con
    ele.addUserFloat("mvaId", mva_id);
    ele.addUserFloat("pfmvaId", 20.);
    ele.addUserFloat("dzTrg", dzTrg);
+   ele.addUserFloat("ip3d", fabs(ele.dB(pat::Electron::PV3D)));
+   ele.addUserFloat("sip3d", fabs(ele.dB(pat::Electron::PV3D)/ele.edB(pat::Electron::PV3D)));
+   ele.addUserFloat("dxy", fabs(ele.dB(pat::Electron::PV2D)));
+   ele.addUserFloat("dz", fabs(ele.dB(pat::Electron::PVDZ)));
 
    // Attempt to match electrons to conversions in "gsfTracksOpenConversions" collection
    ConversionInfo info;
