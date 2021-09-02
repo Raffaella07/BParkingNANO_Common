@@ -393,12 +393,14 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
       ETHmuons_out->back().addUserFloat("dzS", muon.dB(muon.PVDZ)/muon.edB(muon.PVDZ));
       ETHmuons_out->back().addUserFloat("dxy", muon.dB(muon.PV2D));
       ETHmuons_out->back().addUserFloat("dxyS", muon.dB(muon.PV2D)/muon.edB(muon.PV2D));
+      ETHmuons_out->back().addUserFloat("ip3d", fabs(muon.dB(muon.PV3D)));
+      ETHmuons_out->back().addUserFloat("sip3d", fabs( muon.dB(muon.PV3D)/muon.edB(muon.PV3D)));
 
       trans_muons_out->emplace_back(muonTT);
     }
 
     // add the displaced standalone muons to the collection
-    for(const reco::Track & muon : *displaced_standalone_muons){
+   /* for(const reco::Track & muon : *displaced_standalone_muons){
       if(muon.pt()<selmu_ptMin_) continue;
       if(fabs(muon.eta())>selmu_absEtaMax_) continue;
 
@@ -424,9 +426,9 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
       ETHmuons_out->back().addUserFloat("dxy", muon.dxy(PV.position()));
       ETHmuons_out->back().addUserFloat("dxyS", muon.dxy(PV.position())/muon.dxyError());
 
-      trans_muons_out->emplace_back(muonTT);
-    }
 
+      trans_muons_out->emplace_back(muonTT);
+    }*/
 
     iEvent.put(std::move(trgmuons_out), "trgMuons"); 
     iEvent.put(std::move(ETHmuons_out), "SelectedMuons");

@@ -175,8 +175,8 @@ muonsBParkMCMatchForTable = cms.EDProducer("MCMatcher",       # cut on deltaR, d
     mcPdgId     = cms.vint32(13),                             # one or more PDG ID (13 = mu); absolute values (see below)
     checkCharge = cms.bool(False),                            # True = require RECO and MC objects to have the same charge
     mcStatus    = cms.vint32(1),                              # PYTHIA status code (1 = stable, 2 = shower, 3 = hard scattering)
-    maxDeltaR   = cms.double(0.03),                           # Minimum deltaR for the match
-    maxDPtRel   = cms.double(0.5),                            # Minimum deltaPt/Pt for the match
+    maxDeltaR   = cms.double(0.25),                           # Minimum deltaR for the match
+    maxDPtRel   = cms.double(0.25),                            # Minimum deltaPt/Pt for the match
     resolveAmbiguities    = cms.bool(False),                   # Forbid two RECO objects to match to the same GEN object
     resolveByMatchQuality = cms.bool(True),                   # False = just match input in order; True = pick lowest deltaR pair first
     motherPdgId = cms.vint32(9900015, 443, 511, 521, 531, 541),
@@ -232,7 +232,6 @@ muonTriggerBParkMCTable = cms.EDProducer("CandMCMatchTableProducerBPark",
     branchName = cms.string("genPart"),
     docString = cms.string("MC matching to status==1 muons"),
 )
-
 triggerMuonsMCMatchEmbedded = cms.EDProducer(
     'TriggerMuonMatchEmbedder',
     src = cms.InputTag('muonTrgSelector', 'trgMuons'),

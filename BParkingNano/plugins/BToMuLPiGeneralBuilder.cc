@@ -38,7 +38,7 @@ public:
     pi_selection_      {cfg.getParameter<std::string>("pionSelection"     )},
     isotrk_selection_  {cfg.getParameter<std::string>("isoTracksSelection")},
     trgmu_selection_   {cfg.getParameter<std::string>("trgMuonSelection"  )},
-    selLep_selection_   {cfg.getParameter<std::string>("selLeptonSelection"  )},
+    selLep_selection_  {cfg.getParameter<std::string>("selLeptonSelection")},
     pre_vtx_selection_ {cfg.getParameter<std::string>("preVtxSelection"   )},
     post_vtx_selection_{cfg.getParameter<std::string>("postVtxSelection"  )},
     isMC_              {cfg.getParameter<bool>("isMC")},
@@ -107,6 +107,8 @@ private:
 template<typename Lepton>
 void BToMuLPiGeneralBuilder<Lepton>::produce(edm::StreamID, edm::Event &evt, edm::EventSetup const &) const {
 
+
+  bool debug = false;
   //input
 
   edm::Handle<pat::MuonCollection> trg_muons;
@@ -172,11 +174,9 @@ void BToMuLPiGeneralBuilder<Lepton>::produce(edm::StreamID, edm::Event &evt, edm
   
       // loop on selected muons and for a mu-pi candidate 
       // as well as a B candidate, that is HNL + trg mu
-      
       for(size_t lep_idx = 0; lep_idx < leptons->size(); ++lep_idx) {
         edm::Ptr<Lepton> lep_ptr(leptons, lep_idx);
-        
-
+	if( debug) std::cout << "in the loop, before trg mu " << std::endl;
         // the second muon must be _other_ than the trigger muon
         if(lep_ptr->pt()==trg_mu_ptr->pt()) { // lacking of any better idea for a comparison by pointer... 
             // save anyways the position in the collection
@@ -194,24 +194,41 @@ void BToMuLPiGeneralBuilder<Lepton>::produce(edm::StreamID, edm::Event &evt, edm
             continue;
         }else{
 	
+	if( debug) std::cout << "before lep selection" << std::endl;
 	trg_mu_position = trg_mu_idx;
 	}
 	
+	if( debug) std::cout << "before lep selection" << std::endl;
+	if( debug) std::cout << "lepton pt " << lep_ptr->pt() << "lepton eta " << fabs(lep_ptr->eta())<< std::endl;
         // selection on the lepton
+        //if( lep_ptr->pt()>0.5 && fabs(lep_ptr->eta())<2 ) continue;
         if( !selLep_selection_(*lep_ptr) ) continue;
 
+	if( debug) std::cout << "after lep selection" << std::endl;
 	int sel_lep_idx = lep_idx;
         // HNL candidate
+        math::PtEtaPhiMLorentzVector lep_p4(
+        lep_ptr->pt(), 
+        lep_ptr->eta(),
+        lep_ptr->phi(),
+        lep_ptr->mass()
+        );
         pat::CompositeCandidate hnl_cand;
-        hnl_cand.setP4(lep_ptr->p4() + pi_p4);
+        hnl_cand.setP4(lep_p4 + pi_p4);
         hnl_cand.setCharge(lep_ptr->charge() + pi_ptr->charge());
 
         hnl_cand.addUserCand("lep", lep_ptr);
         hnl_cand.addUserCand("pi", pi_ptr);
 
+	if( debug) std::cout << "before pre vtx" << std::endl;
+	if( debug) std::cout << "lepton pt " << lep_ptr->pt() << "lepton eta " << lep_ptr->eta()<< std::endl;
+	if( debug) std::cout << "trgmu pt " << trg_mu_ptr->pt() << "lepton eta " << trg_mu_ptr->eta()<< std::endl;
+	if( debug) std::cout << "pi pt " << pi_ptr->pt() << "lepton eta " << pi_ptr->eta()<< std::endl;
+	if( debug) std::cout << "hnl pt " << hnl_cand.pt() << "hnl mass " << hnl_cand.mass()<< std::endl;
         // check if pass pre vertex cut
         if( !pre_vtx_selection_(hnl_cand) ) continue;
         // fit the mu-pi vertex
+	if( debug) std::cout << "after pre vtx" << std::endl;
         KinVtxFitter fitter(
           {leptons_ttracks->at(lep_idx), pions_ttracks->at(pi_idx)},
           {lep_ptr->mass()             , PI_MASS                  },
@@ -226,6 +243,7 @@ void BToMuLPiGeneralBuilder<Lepton>::produce(edm::StreamID, edm::Event &evt, edm
           )  
         );
 
+	if( debug) std::cout << "after fit" << std::endl;
         auto fit_p4 = fitter.fitted_p4();
         auto lxy    = l_xy(fitter, *beamspot);
 
@@ -458,12 +476,11 @@ void BToMuLPiGeneralBuilder<Lepton>::produce(edm::StreamID, edm::Event &evt, edm
 
         // for MC only-- should work for both muon and electron final states now
         if(isMC_ == true){
-
+	std::cout << "in gen matching" << std::endl;
           // pdgId of the gen particle to which the final-state particles are matched
           int trg_mu_genPdgId = trg_mu_ptr->userInt("mcMatch");
           int sel_lep_genPdgId = lep_ptr->userInt("mcMatch");
           int pi_genPdgId     = pi_ptr->userInt("mcMatch");
-          
           // index of the gen particle to which the final-state particles are matched
           trg_mu_genIdx   = trg_mu_ptr->userInt("mcMatchIndex"); 
           sel_lep_genIdx   = lep_ptr->userInt("mcMatchIndex"); 
@@ -493,6 +510,7 @@ void BToMuLPiGeneralBuilder<Lepton>::produce(edm::StreamID, edm::Event &evt, edm
             genTriggerMuonMother_genPdgId = genTriggerMuonMother_ptr->pdgId();
             genLeptonMother_genPdgId        = genLeptonMother_ptr->pdgId();
             genPionMother_genPdgId        = genPionMother_ptr->pdgId();
+		
 	   std::cout << "sel lep pdgId "<<sel_lep_genPdgId << " Lep mother pdgId " << genLeptonMother_genPdgId <<std::endl; 
 	    std::cout << "sel pi pdgId "<<pi_genPdgId << " pi mother pdgId " << genPionMother_genPdgId <<std::endl; 
 	    std::cout << "trg mu pdgId "<< trg_mu_genPdgId << " trgmu  mother pdgId " << genTriggerMuonMother_genPdgId <<std::endl; 
