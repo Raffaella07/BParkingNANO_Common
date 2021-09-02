@@ -12,8 +12,8 @@ production_tag = datetime.date.today().strftime('%Y%b%d')
 
 config = config()
 config.section_("General")
-config.General.requestName = "privateHNL_nano%s" % production_tag
-config.General.workArea = 'crab_privateMCnano'
+config.General.requestName = "privateHNL_nano_Unresolved_Mass3_%s" % production_tag
+config.General.workArea = 'crab_privateMCnano_Unresolved_Mass3'
 config.General.transferOutputs = True
 config.General.transferLogs = True
 
@@ -33,7 +33,7 @@ config.JobType.inputFiles = [
 config.JobType.maxMemoryMB = 2500
 
 config.section_("Data")
-config.Data.outputPrimaryDataset = 'private_BtoDMuN_NtoL_nano'
+config.Data.outputPrimaryDataset = 'private_BtoDMuN_NtoL_nano_Unresolved_Mass3'
 config.Data.userInputFiles = open("nanoIn_eMu.txt").readlines() #implementing input through list of file: works wherever when path file is wired through xrootd  
 #config.Data.splitting = 'EventBased'
 config.Data.splitting = 'FileBased'

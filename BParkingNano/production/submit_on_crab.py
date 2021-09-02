@@ -15,20 +15,22 @@ config.General.workArea = 'BParkingNANO_%s' % production_tag
 
 config.section_('Data')
 config.Data.publication = False
-config.Data.outLFNDirBase = '/store/group/phys_bphys/bpark/nanoaod_RK2021/%s' % (config.General.workArea)
+config.Data.outLFNDirBase = '/store/user/ratramon/HNLGen_ntuples/' #change this to output file: if output is to be sent to a local tier registered on xrootd, the path has to be in the form "/store/.."
 config.Data.inputDBS = 'global'
 
 config.section_('JobType')
 config.JobType.pluginName = 'Analysis'
-config.JobType.psetName = '../test/run_nano_cfg.py'
+config.JobType.psetName = '../test/run_nano_HNLToL_cfg.py'
 config.JobType.maxJobRuntimeMin = 3000
 config.JobType.allowUndistributedCMSSW = True
 config.JobType.inputFiles = ["../test/lowPtEleReg_2018_02062020_nv.db"]
 
 config.section_('User')
 config.section_('Site')
-config.Site.storageSite = 'T2_CH_CERN'
-
+config.Site.storageSite = 'T2_IT_Rome'
+config.Site.blacklist = ['T2_US_Caltech']
+config.section_("Debug")
+config.Debug.extraJDL = ['+CMS_ALLOW_OVERFLOW=False']
 if __name__ == '__main__':
 
   from CRABAPI.RawCommand import crabCommand
