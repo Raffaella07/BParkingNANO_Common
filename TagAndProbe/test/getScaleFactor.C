@@ -12,9 +12,10 @@
 
 // ------- Global Variables ------- //
 
-TString dataFileName = "results_tag_and_probe_v2_tag_fired_DST_DoubleMu1_data_A1_6_forplots.root";
-TString mcFileName = "results_tag_and_probe_v2_tag_fired_DST_DoubleMu1_mc_forplots.root";
-string dirLabel = "tag_and_probe_v2_tag_fired_DST_DoubleMu1_A1_6_forplots";
+//TString dataFileName = "results_tag_and_probe_v2_tag_fired_DST_DoubleMu1_data_A1_extraptbin.root";
+TString dataFileName = "results_tag_and_probe_v2_tag_fired_DST_DoubleMu1_mc_test3dbinning.root";
+TString mcFileName = "results_tag_and_probe_v2_tag_fired_DST_DoubleMu1_mc_test3dbinning.root";
+string dirLabel = "tag_and_probe_v2_tag_fired_DST_DoubleMu1_mc_test3dbinning";
 
 
 // -------------------------------- //
@@ -91,7 +92,7 @@ void  write1DScaleFactor(TH1F* h, string name){
 }
 
 
-void process(string dir, string subdir, string outdir, string method, TFile* fData, TFile* fMC, TString canvasname, string dim){
+void process(string dir, string subdir, string outdir, string method, TFile* fData, TFile* fMC, TString canvasname, TString extraname, string dim){
   TCanvas* c;
 
   TString results_dir = dir + "/" + subdir + "/" + method + "_eff_plots/";
@@ -101,7 +102,7 @@ void process(string dir, string subdir, string outdir, string method, TFile* fDa
   c = (TCanvas*) gDirectory->Get(canvasname);
   TH2F* hData2D = 0;
   TH1F* hData1D = 0;
-  if(dim == "2D") hData2D = (TH2F*) c->FindObject(canvasname);
+  if(dim == "2D" || dim == "3D") hData2D = (TH2F*) c->FindObject(canvasname);
   else if(dim == "1D") hData1D = (TH1F*) c->FindObject(canvasname);
 
 
@@ -109,13 +110,14 @@ void process(string dir, string subdir, string outdir, string method, TFile* fDa
   c = (TCanvas*) gDirectory->Get(canvasname);
   TH2F* hMC2D = 0;
   TH1F* hMC1D = 0;
-  if(dim == "2D") hMC2D = (TH2F*) c->FindObject(canvasname);
+  if(dim == "2D" || dim == "3D") hMC2D = (TH2F*) c->FindObject(canvasname);
   else if(dim == "1D") hMC1D = (TH1F*) c->FindObject(canvasname);
 
   string name = outdir + "scaleFactor_" + dir + "_" + subdir + "_" + method;
-  if(dim == "2D") hData2D->Divide(hMC2D);
+  if(dim == "3D") name += "_" + extraname;
+  if(dim == "2D" || dim == "3D") hData2D->Divide(hMC2D);
   else if(dim == "1D") hData1D->Divide(hMC1D);
-  if(dim == "2D"){
+  if(dim == "2D" || dim == "3D"){
     write2DScaleFactor(hData2D, name);
   }
   else if(dim == "1D"){
@@ -132,33 +134,40 @@ void process(string dir, string subdir, string outdir, string method, TFile* fDa
 
 void  getScaleFactor(string dir="results"){
 
-
   string outdir = "./results/" + dirLabel + "/";
   system(Form("mkdir -p %s", outdir.c_str()));
 
   TFile* fData = new TFile(dataFileName);
   TFile* fMC = new TFile(mcFileName);
 
-  process(dir, "cat_pt_eta", outdir, "fit", fData, fMC, "probe_pt_probe_eta_PLOT", "2D"); 
-  process(dir, "cat_pt_eta", outdir, "cnt", fData, fMC, "probe_pt_probe_eta_PLOT", "2D"); 
+  //process(dir, "cat_pt_eta", outdir, "fit", fData, fMC, "probe_pt_probe_eta_PLOT", "", "2D"); 
+  //process(dir, "cat_pt_eta", outdir, "cnt", fData, fMC, "probe_pt_probe_eta_PLOT", "", "2D"); 
 
-  //process(dir, "cat_pt_eta_2", outdir, "fit", fData, fMC, "probe_pt_probe_eta_PLOT", "2D"); 
-  //process(dir, "cat_pt_eta_2", outdir, "cnt", fData, fMC, "probe_pt_probe_eta_PLOT", "2D"); 
+  // make sure that the eta categories are correct
+  process(dir, "cat_pt_dxysig_eta", outdir, "fit", fData, fMC, "probe_pt_probe_dxy_sig_PLOT_probe_eta_bin0", "eta_0p00_0p50", "3D"); 
+  process(dir, "cat_pt_dxysig_eta", outdir, "cnt", fData, fMC, "probe_pt_probe_dxy_sig_PLOT_probe_eta_bin0", "eta_0p00_0p50", "3D"); 
+  process(dir, "cat_pt_dxysig_eta", outdir, "fit", fData, fMC, "probe_pt_probe_dxy_sig_PLOT_probe_eta_bin1", "eta_0p50_1p00", "3D"); 
+  process(dir, "cat_pt_dxysig_eta", outdir, "cnt", fData, fMC, "probe_pt_probe_dxy_sig_PLOT_probe_eta_bin1", "eta_0p50_1p00", "3D"); 
+  process(dir, "cat_pt_dxysig_eta", outdir, "fit", fData, fMC, "probe_pt_probe_dxy_sig_PLOT_probe_eta_bin2", "eta_1p00_2p00", "3D"); 
+  process(dir, "cat_pt_dxysig_eta", outdir, "cnt", fData, fMC, "probe_pt_probe_dxy_sig_PLOT_probe_eta_bin2", "eta_1p00_2p00", "3D"); 
 
-  //process(dir, "cat_pt_eta_3", outdir, "fit", fData, fMC, "probe_pt_probe_eta_PLOT", "2D"); 
-  //process(dir, "cat_pt_eta_3", outdir, "cnt", fData, fMC, "probe_pt_probe_eta_PLOT", "2D"); 
+  //process(dir, "cat_pt_eta_2", outdir, "fit", fData, fMC, "probe_pt_probe_eta_PLOT", "", "2D"); 
+  //process(dir, "cat_pt_eta_2", outdir, "cnt", fData, fMC, "probe_pt_probe_eta_PLOT", "", "2D"); 
 
-  //process(dir, "cat_pt_dxysig", outdir, "fit", fData, fMC, "probe_pt_probe_dxy_sig_PLOT", "2D"); 
-  //process(dir, "cat_pt_dxysig", outdir, "cnt", fData, fMC, "probe_pt_probe_dxy_sig_PLOT", "2D"); 
+  //process(dir, "cat_pt_eta_3", outdir, "fit", fData, fMC, "probe_pt_probe_eta_PLOT", "", "2D"); 
+  //process(dir, "cat_pt_eta_3", outdir, "cnt", fData, fMC, "probe_pt_probe_eta_PLOT", "", "2D"); 
 
-  //process(dir, "cat_pt_dxysig_2", outdir, "fit", fData, fMC, "probe_pt_probe_dxy_sig_PLOT", "2D"); 
-  //process(dir, "cat_pt_dxysig_2", outdir, "cnt", fData, fMC, "probe_pt_probe_dxy_sig_PLOT", "2D"); 
+  //process(dir, "cat_pt_dxysig", outdir, "fit", fData, fMC, "probe_pt_probe_dxy_sig_PLOT", "", "2D"); 
+  //process(dir, "cat_pt_dxysig", outdir, "cnt", fData, fMC, "probe_pt_probe_dxy_sig_PLOT", "", "2D"); 
 
-  //process(dir, "cat_pt_dxysig_3", outdir, "fit", fData, fMC, "probe_pt_probe_dxy_sig_PLOT", "2D"); 
-  //process(dir, "cat_pt_dxysig_3", outdir, "cnt", fData, fMC, "probe_pt_probe_dxy_sig_PLOT", "2D"); 
+  //process(dir, "cat_pt_dxysig_2", outdir, "fit", fData, fMC, "probe_pt_probe_dxy_sig_PLOT", "", "2D"); 
+  //process(dir, "cat_pt_dxysig_2", outdir, "cnt", fData, fMC, "probe_pt_probe_dxy_sig_PLOT", "", "2D"); 
 
-  //process(dir, "cat_pt", outdir, "fit", fData, fMC, "probe_pt_PLOT", "1D"); 
-  //process(dir, "cat_pt", outdir, "cnt", fData, fMC, "probe_pt_PLOT", "1D"); 
+  //process(dir, "cat_pt_dxysig_3", outdir, "fit", fData, fMC, "probe_pt_probe_dxy_sig_PLOT", "", "2D"); 
+  //process(dir, "cat_pt_dxysig_3", outdir, "cnt", fData, fMC, "probe_pt_probe_dxy_sig_PLOT", "", "2D"); 
+
+  //process(dir, "cat_pt", outdir, "fit", fData, fMC, "probe_pt_PLOT", "", "1D"); 
+  //process(dir, "cat_pt", outdir, "cnt", fData, fMC, "probe_pt_PLOT", "", "1D"); 
  
   fData->Close();
   fMC->Close();
