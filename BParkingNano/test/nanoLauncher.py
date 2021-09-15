@@ -29,6 +29,7 @@ def getOptions():
   parser.add_argument('--dohnl'             , dest='dohnl'       , help='run the HNLToMuMuPi process'                                    , action='store_true', default=False)
   parser.add_argument('--dotageprobe'       , dest='dotageprobe' , help='run the JpsiToMuMu process (tag and probe study)'               , action='store_true', default=False)
   parser.add_argument('--doquick'           , dest='doquick'     , help='[optional] run the jobs on the quick partition (t/job<1h)'      , action='store_true', default=False)
+  parser.add_argument('--dosplitflat'       , dest='dosplitflat' , help='[optional] run the dumper with one job per nano file'           , action='store_true', default=False)
   parser.add_argument('--docompile'         , dest='docompile'   , help='[optional] compile the full BParkingNano tool'                  , action='store_true', default=False)
   return parser.parse_args()
 
@@ -80,6 +81,7 @@ class NanoLauncher(NanoTools):
     self.dohnl       = vars(opt)["dohnl"]
     self.dotageprobe = vars(opt)["dotageprobe"]
     self.doquick     = vars(opt)["doquick"]
+    self.dosplitflat = vars(opt)["dosplitflat"]
     self.docompile   = vars(opt)["docompile"]
 
 
@@ -141,6 +143,7 @@ class NanoLauncher(NanoTools):
       #file_step = iFile
       event_chain.append('  c->Add("{}/{}_nj{}.root");'.format(outputdir, nanoname, file_step))
     if self.dosignal:    event_chain.append('  c->Process("BToMuMuPiDumper.C+", outFileName);')
+    #if self.dosignal:    event_chain.append('  c->Process("NanoDumper.C+", outFileName);')
     if self.docontrol:   event_chain.append('  c->Process("BToKMuMuDumper.C+", outFileName);')
     if self.dohnl:       event_chain.append('  c->Process("HNLToMuPiDumper.C+", outFileName);')
     if self.dotageprobe: event_chain.append('  c->Process("TagAndProbeDumper.C+", outFileName);')
@@ -168,10 +171,47 @@ class NanoLauncher(NanoTools):
     ]
     content = '\n'.join(content)
           
-    starter_name = './files/starter_{}.C'.format(label)
-    dumper_starter = open(starter_name, 'w+')
-    dumper_starter.write(content)
-    dumper_starter.close()
+    if not self.dosplitflat:
+      starter_name = './files/starter_{}.C'.format(label)
+      dumper_starter = open(starter_name, 'w+')
+      dumper_starter.write(content)
+      dumper_starter.close()
+    else:
+      for iFile in range(1, nfiles+1):
+        file_step = NanoTools.getStep(self, lines[iFile-1]) if self.mcprivate else iFile
+
+        event_chain = []
+        event_chain.append('TChain* c = new TChain("Events");')
+        event_chain.append('  c->Add("{}/{}_nj{}.root");'.format(outputdir, nanoname, file_step))
+        if self.dosignal:    event_chain.append('  c->Process("BToMuMuPiDumper.C+", outFileName);')
+        if self.docontrol:   event_chain.append('  c->Process("BToKMuMuDumper.C+", outFileName);')
+        if self.dohnl:       event_chain.append('  c->Process("HNLToMuPiDumper.C+", outFileName);')
+        if self.dotageprobe: event_chain.append('  c->Process("TagAndProbeDumper.C+", outFileName);')
+        event_chain = '\n'.join(event_chain)
+
+        run_chain = []
+        run_chain.append('TChain* c_run = new TChain("Runs");')
+        run_chain.append('  c_run->Add("{}/{}_nj{}.root");'.format(outputdir, nanoname, file_step))
+        run_chain.append('  c_run->Process("NanoRunDumper.C+", outFileName);')
+        run_chain = '\n'.join(run_chain)
+
+        content = [
+          '#include "TChain.h"',
+          '#include <iostream>',
+          '#include "TProof.h"\n',
+          'void starter(){',
+          '  TString outFileName = "flat_bparknano.root";',
+          '  {addMC}'.format(addMC = '' if (self.data or self.dotageprobe) else 'outFileName += "_isMC";'),
+          '  {addevt}'.format(addevt = event_chain),
+          '  {addrun}'.format(addrun = '' if (self.data or self.dotageprobe) else run_chain),
+          '}',
+        ]
+        content = '\n'.join(content)
+
+        starter_name = './files/starter_{}_nj{}.C'.format(label, iFile)
+        dumper_starter = open(starter_name, 'w+')
+        dumper_starter.write(content)
+        dumper_starter.close()
 
 
   def writeMergerSubmitter(self, label, filetype):
@@ -188,6 +228,8 @@ class NanoLauncher(NanoTools):
     if self.mcprivate: command += ' --mcprivate'
     if self.mccentral: command += ' --ds {} --mccentral'.format(self.dataset)
     if self.data: command += ' --ds {} --data'.format(self.dataset)
+
+    if filetype == 'flat' and self.dosplitflat: command += ' --dosplitflat'
 
     # defining the workdir
     dirlabel = label
@@ -218,18 +260,13 @@ class NanoLauncher(NanoTools):
 
 
   def launchNano(self, nfiles, outputdir, logdir, filelist, label):
-    if not self.doquick:
-      slurm_options = '-p standard --account=t3 -o {ld}/nanostep_nj%a.log -e {ld}/nanostep_nj%a.log --job-name=nanostep_nj%a_{pl} --array {ar} --time=5:00:00'.format(
-        ld = logdir,
-        pl = label,
-        ar = '1-{}'.format(nfiles),
-        )
-    else:
-      slurm_options = '-p short --account=t3 -o {ld}/nanostep_nj%a.log -e {ld}/nanostep_nj%a.log --job-name=nanostep_nj%a_{pl} --array {ar} --time=1:00:00'.format(
-        ld = logdir,
-        pl = label,
-        ar = '1-{}'.format(nfiles),
-        )
+    slurm_options = '-p {part} --account=t3 -o {ld}/nanostep_nj%a.log -e {ld}/nanostep_nj%a.log --job-name=nanostep_nj%a_{pl} --array {ar} --time={hh}:00:00'.format(
+      part = 'standard' if not self.doquick else 'short', 
+      ld = logdir,
+      pl = label,
+      ar = '1-{}'.format(nfiles),
+      hh = 5 is not self.doquick else 1,
+      )
 
     command = 'sbatch {slurm_opt} submitter.sh {outdir} {usr} {pl} {tag} {isMC} {rmt} {lst} 0 {dosig} {doctrl} {dohnl} {dotep}'.format(
       slurm_opt = slurm_options,
@@ -256,20 +293,16 @@ class NanoLauncher(NanoTools):
     self.writeDumperStarter(nfiles, outputdir, filelist, label)
     tag = NanoTools.getTag(self, self.tagnano, self.tagflat)
 
-    if not self.doquick:
-      slurm_options = '-p standard --account=t3 -o {ld}/dumperstep.log -e {ld}/dumperstep.log --job-name=dumperstep_{pl} --time=10:00:00 {dp}'.format(
-        ld      = logdir,
-        pl      = label,
-        dp      = '--dependency=afterany:{}'.format(jobId) if jobId != -99 else '',
-        )
-    else:
-      slurm_options = '-p short --account=t3 -o {ld}/dumperstep.log -e {ld}/dumperstep.log --job-name=dumperstep_{pl} {dp} --time=1:00:00'.format(
-        ld      = logdir,
-        pl      = label,
-        dp      = '--dependency=afterany:{}'.format(jobId) if jobId != -99 else '',
-        )
+    slurm_options = '-p {part} --account=t3 -o {ld}/{ln} -e {ld}/{ln} --job-name=dumperstep_{pl} --time={hh}:00:00 {dp}'.format(
+      part    = 'standard' if not self.doquick else 'short', 
+      ln      = 'dumperstep.log' if not self.dosplitflat else 'dumperstep_nj%a.log',
+      ld      = logdir,
+      pl      = label if not self.dosplitflat else label+'%a',
+      hh      = 1 if not self.doquick else 10,
+      dp      = ('--dependency=afterany:{}'.format(jobId) if jobId != -99 else '') if not self.dosplitflat else '--array 1-{}'.format(nfiles),
+      )
 
-    command = 'sbatch {slurm_opt} submitter_dumper.sh {outdir} {usr} {pl} {tag} {isMC} {dosig} {doctrl} {dohnl} {dotep}'.format(
+    command = 'sbatch {slurm_opt} submitter_dumper.sh {outdir} {usr} {pl} {tag} {isMC} {dosig} {doctrl} {dohnl} {dotep} {splt}'.format(
       slurm_opt = slurm_options,
       pl      = label,
       outdir  = outputdir,
@@ -280,6 +313,7 @@ class NanoLauncher(NanoTools):
       doctrl  = 1 if self.docontrol else 0,
       dohnl   = 1 if self.dohnl else 0,
       dotep   = 1 if self.dotageprobe else 0,
+      splt    = 0 if not self.dosplitflat else 1,
       )
 
     job_dump = subprocess.check_output(command, shell=True)
@@ -295,20 +329,14 @@ class NanoLauncher(NanoTools):
   def launchMerger(self, logdir, label, jobIds, filetype):
     self.writeMergerSubmitter(label, filetype)
 
-    if not self.doquick:
-      slurm_options = '-p standard --account=t3 -o {ld}/merger{ft}step.log -e {ld}/merger{ft}step.log --job-name=mergerstep_{pl} --time=02:00:00 --dependency=afterany:{jobid}'.format(
-        ld    = logdir,
-        ft    = filetype,
-        pl    = label,
-        jobid = NanoTools.getJobIdsList(self, jobIds),
-        )
-    else:
-      slurm_options = '-p short --account=t3 -o {ld}/merger{ft}step.log -e {ld}/merger{ft}step.log --job-name=mergerstep_{pl} --time=1:00:00 --dependency=afterany:{jobid}'.format(
-        ld    = logdir,
-        ft    = filetype,
-        pl    = label,
-        jobid = NanoTools.getJobIdsList(self, jobIds),
-        )
+    slurm_options = '-p {part} --account=t3 -o {ld}/merger{ft}step.log -e {ld}/merger{ft}step.log --job-name=mergerstep_{pl} --time={hh}:00:00 --dependency=afterany:{jobid}'.format(
+      part    = 'standard' if not self.doquick else 'short', 
+      ld    = logdir,
+      ft    = filetype,
+      pl    = label,
+      hh    = 2 is not self.doquick else 1,
+      jobid = NanoTools.getJobIdsList(self, jobIds),
+      )
 
     command_merge = 'sbatch {slurm_opt} submitter_merger.sh'.format(
         slurm_opt = slurm_options,
@@ -336,7 +364,7 @@ class NanoLauncher(NanoTools):
     print '\n  --> Fetching the files'
     filelistname = self.writeFileList(maxfiles_perchunk, point)
 
-    # loop on the files (containing at most 750 samples) 
+    # loop on the files (containing at most 500 samples) 
     for iFile, filelist in enumerate(glob.glob('{}*.txt'.format(filelistname))):
       if NanoTools.getNFiles(self, filelist) == 0:
         print '        WARNING: no files were found with the corresponding production label'

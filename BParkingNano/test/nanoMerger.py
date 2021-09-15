@@ -10,16 +10,17 @@ from nanoTools import NanoTools
 def getOptions():
   from argparse import ArgumentParser
   parser = ArgumentParser(description='Script to merge the nanoAOD files resulting from a multijob production', add_help=True)
-  parser.add_argument('--pl'     , type=str, dest='pl'       , help='label of the nano sample production'                                    , default='V01_n9000000_njt300')
-  parser.add_argument('--ds'     , type=str, dest='ds'       , help='[data-mccentral] name of the dataset'                                   , default=None)
-  parser.add_argument('--tagnano', type=str, dest='tagnano'  , help='[optional] tag to be added on the outputfile name of the nano sample'   , default=None)
-  parser.add_argument('--tagflat', type=str, dest='tagflat'  , help='[optional] tag to be added on the outputfile name of the flat sample'   , default=None)
-  parser.add_argument('--mcprivate'        , dest='mcprivate', help='run the BParking nano tool on a private MC sample' , action='store_true', default=False)
-  parser.add_argument('--mccentral'        , dest='mccentral', help='run the BParking nano tool on a central MC sample' , action='store_true', default=False)
-  parser.add_argument('--data'             , dest='data'     , help='run the BParking nano tool on a data sample'       , action='store_true', default=False)
-  parser.add_argument('--donano'           , dest='donano'   , help='merge nano files'                                  , action='store_true', default=False)
-  parser.add_argument('--doflat'           , dest='doflat'   , help='merge flat files'                                  , action='store_true', default=False)
-  parser.add_argument('--dobatch'          , dest='dobatch'  , help='to be turned on if running the script on the batch', action='store_true', default=False)
+  parser.add_argument('--pl'     , type=str, dest='pl'         , help='label of the nano sample production'                                    , default='V01_n9000000_njt300')
+  parser.add_argument('--ds'     , type=str, dest='ds'         , help='[data-mccentral] name of the dataset'                                   , default=None)
+  parser.add_argument('--tagnano', type=str, dest='tagnano'    , help='[optional] tag to be added on the outputfile name of the nano sample'   , default=None)
+  parser.add_argument('--tagflat', type=str, dest='tagflat'    , help='[optional] tag to be added on the outputfile name of the flat sample'   , default=None)
+  parser.add_argument('--mcprivate'        , dest='mcprivate'  , help='run the BParking nano tool on a private MC sample' , action='store_true', default=False)
+  parser.add_argument('--mccentral'        , dest='mccentral'  , help='run the BParking nano tool on a central MC sample' , action='store_true', default=False)
+  parser.add_argument('--data'             , dest='data'       , help='run the BParking nano tool on a data sample'       , action='store_true', default=False)
+  parser.add_argument('--donano'           , dest='donano'     , help='merge nano files'                                  , action='store_true', default=False)
+  parser.add_argument('--doflat'           , dest='doflat'     , help='merge flat files'                                  , action='store_true', default=False)
+  parser.add_argument('--dosplitflat'      , dest='dosplitflat', help='[optional] flat files processed in multi steps'    , action='store_true', default=False)
+  parser.add_argument('--dobatch'          , dest='dobatch'    , help='to be turned on if running the script on the batch', action='store_true', default=False)
   return parser.parse_args()
 
 
@@ -42,16 +43,17 @@ def checkParser(opt):
 
 class NanoMerger(NanoTools):
   def __init__(self, opt):
-    self.prodlabel = vars(opt)['pl']
-    self.dataset   = vars(opt)['ds']
-    self.tagnano   = vars(opt)['tagnano']
-    self.tagflat   = vars(opt)['tagflat']
-    self.mcprivate = vars(opt)['mcprivate']
-    self.mccentral = vars(opt)['mccentral']
-    self.data      = vars(opt)['data']
-    self.donano    = vars(opt)["donano"]
-    self.doflat    = vars(opt)["doflat"]
-    self.dobatch   = vars(opt)["dobatch"]
+    self.prodlabel   = vars(opt)['pl']
+    self.dataset     = vars(opt)['ds']
+    self.tagnano     = vars(opt)['tagnano']
+    self.tagflat     = vars(opt)['tagflat']
+    self.mcprivate   = vars(opt)['mcprivate']
+    self.mccentral   = vars(opt)['mccentral']
+    self.data        = vars(opt)['data']
+    self.donano      = vars(opt)["donano"]
+    self.doflat      = vars(opt)["doflat"]
+    self.dosplitflat = vars(opt)["dosplitflat"]
+    self.dobatch     = vars(opt)["dobatch"]
 
 
   def doMerging(self, nanoName, mergedName, locationSE, outputdir, cond):
@@ -85,7 +87,8 @@ class NanoMerger(NanoTools):
           if iFile%100 == 0:              print '     --> checked {}% of the files'.format(round(float(iFile)/len(nanoFiles)*100, 1))
           elif iFile == len(nanoFiles)-1: print '     --> checked 100% of the files'
 
-          if not NanoTools.checkLocalFile(self, fileName, cond, branch_check=True, branchname='nMuon'): continue
+          if cond and not NanoTools.checkLocalFile(self, fileName, cond, branch_check=True, branchname='nMuon'): continue
+          elif not cond and not NanoTools.checkLocalFile(self, fileName, cond): continue
           command = command + ' {}'.format(fileName)
 
         print '\n-> Start of the merge'
@@ -186,8 +189,13 @@ class NanoMerger(NanoTools):
     if self.doflat:
       tag = NanoTools.getTag(self, self.tagnano, self.tagflat)
 
-      nanoName_flat   = 'flat/flat_bparknano.root' if self.tagnano == None and self.tagflat == None else 'flat/flat_bparknano_{}.root'.format(tag)
-      mergedName_flat = 'flat_bparknano.root' if self.tagnano == None and self.tagflat == None else 'flat_bparknano_{}.root'.format(tag)
+      nanoName_flat_step = '/flat/flat_bparknano_nj*.root' if self.tagnano == None and self.tagflat == None else '/flat/flat_bparknano_{}_nj*.root'.format(tag)
+      nanoName_flat      = 'flat/flat_bparknano.root' if self.tagnano == None and self.tagflat == None else 'flat/flat_bparknano_{}.root'.format(tag)
+      mergedName_flat    = 'flat_bparknano.root' if self.tagnano == None and self.tagflat == None else 'flat_bparknano_{}.root'.format(tag)
+      outputdir          = '/flat'
+
+      if self.dosplitflat:
+        self.doMerging(nanoName_flat_step, mergedName_flat, location, outputdir, False)
 
       self.doChunkMerging(nanoName_flat, mergedName_flat, location, False)
 
