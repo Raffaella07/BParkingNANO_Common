@@ -265,7 +265,7 @@ class NanoLauncher(NanoTools):
       ld = logdir,
       pl = label,
       ar = '1-{}'.format(nfiles),
-      hh = 5 is not self.doquick else 1,
+      hh = 5 if not self.doquick else 1,
       )
 
     command = 'sbatch {slurm_opt} submitter.sh {outdir} {usr} {pl} {tag} {isMC} {rmt} {lst} 0 {dosig} {doctrl} {dohnl} {dotep}'.format(
@@ -334,7 +334,7 @@ class NanoLauncher(NanoTools):
       ld    = logdir,
       ft    = filetype,
       pl    = label,
-      hh    = 2 is not self.doquick else 1,
+      hh    = 2 if not self.doquick else 1,
       jobid = NanoTools.getJobIdsList(self, jobIds),
       )
 
