@@ -298,7 +298,7 @@ class NanoLauncher(NanoTools):
       ln      = 'dumperstep.log' if not self.dosplitflat else 'dumperstep_nj%a.log',
       ld      = logdir,
       pl      = label if not self.dosplitflat else label+'%a',
-      hh      = 1 if not self.doquick else 10,
+      hh      = 10 if not self.doquick else 1,
       dp      = ('--dependency=afterany:{}'.format(jobId) if jobId != -99 else '') if not self.dosplitflat else '--array 1-{}'.format(nfiles),
       )
 
