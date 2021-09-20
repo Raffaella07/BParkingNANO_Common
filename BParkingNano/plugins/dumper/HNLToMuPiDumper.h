@@ -156,6 +156,7 @@ public :
    TTreeReaderArray<Int_t> Muon_isTrackerMuon = {fReader, "Muon_isTrackerMuon"};
    TTreeReaderArray<Int_t> Muon_isTrackerNotGlobalMuon = {fReader, "Muon_isTrackerNotGlobalMuon"};
    TTreeReaderArray<Int_t> Muon_isTriggering = {fReader, "Muon_isTriggering"};
+   TTreeReaderArray<Int_t> Muon_isTriggeringBPark = {fReader, "Muon_isTriggeringBPark"};
    TTreeReaderArray<Int_t> Muon_looseId = {fReader, "Muon_looseId"};
    TTreeReaderArray<Int_t> Muon_mediumId = {fReader, "Muon_mediumId"};
    TTreeReaderArray<Int_t> Muon_numberOfPixelLayers = {fReader, "Muon_numberOfPixelLayers"};
