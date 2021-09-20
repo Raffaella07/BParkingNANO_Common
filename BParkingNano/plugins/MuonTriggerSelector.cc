@@ -127,6 +127,7 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
     iEvent.getByToken(triggerPrescales_, triggerPrescales);
 
     std::vector<int> muonIsTrigger(slimmed_muons->size(), 0);
+    std::vector<int> muonIsTriggerBPark(slimmed_muons->size(), 0);
     std::vector<float> muonDR(slimmed_muons->size(),10000.);
     std::vector<float> muonDPT(slimmed_muons->size(),10000.);
     std::vector<int> loose_id(slimmed_muons->size(),0);
@@ -257,6 +258,8 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
             }
             if(matcher[iMuo][path]!=1000. && DR[iMuo][path]<max_deltaR_ && fabs(DPT[iMuo][path])<max_deltaPtRel_ && DR[iMuo][path]!=10000){
               muonIsTrigger[iMuo]=1;
+              // BParking trigger lines correspond to the 10 first element (0 to 9) of the HLTPaths vector
+              if(path < 10) muonIsTriggerBPark[iMuo]=1;
               muonDR[iMuo]=DR[iMuo][path];
               muonDPT[iMuo]=DPT[iMuo][path];                
               
@@ -355,7 +358,7 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
 
 
     if(debug)std::cout << "number of Muons=" <<slimmed_muons->size() << endl;
-    //And now create a collection with trg muons from bParking line (10 first elements of HLTPaths)
+    // And now create a collection with trg muons from bParking line (10 first elements of HLTPaths)
     for(const pat::Muon & muon : *slimmed_muons){
         unsigned int iMuo(&muon -&(slimmed_muons->at(0)));
         if(muonIsTrigger[iMuo]==1 && (fires[iMuo][0]==1 || fires[iMuo][1]==1 || fires[iMuo][2]==1 || 
@@ -385,6 +388,7 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
         ETHmuons_out->back().addUserInt(HLTPaths_[i] + "_prescale", prescales[iMuo][i]);
       }
       ETHmuons_out->back().addUserInt("isTriggering", muonIsTrigger[iMuo]);
+      ETHmuons_out->back().addUserInt("isTriggeringBPark", muonIsTriggerBPark[iMuo]);
       ETHmuons_out->back().addUserFloat("DR", muonDR[iMuo]);
       ETHmuons_out->back().addUserFloat("DPT" ,muonDPT[iMuo]);
       ETHmuons_out->back().addUserInt("isDSAMuon", 0);
@@ -415,6 +419,7 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
         ETHmuons_out->back().addUserInt(HLTPaths_[i] + "_prescale", -1);
       }
       ETHmuons_out->back().addUserInt("isTriggering", -1);
+      ETHmuons_out->back().addUserInt("isTriggeringBPark", -1);
       ETHmuons_out->back().addUserFloat("DR", -1.);
       ETHmuons_out->back().addUserFloat("DPT", -1.);
       ETHmuons_out->back().addUserInt("isDSAMuon", 1);

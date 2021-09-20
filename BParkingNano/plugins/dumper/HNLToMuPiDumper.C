@@ -266,7 +266,7 @@ Bool_t HNLToMuPiDumper::Process(Long64_t entry)
     the_mu_mediumid = Muon_mediumId[HNLToMuPi_sel_mu_idx[selectedCandIdx_sig]];
     the_mu_tightid = Muon_tightId[HNLToMuPi_sel_mu_idx[selectedCandIdx_sig]];
     the_mu_softid = Muon_softId[HNLToMuPi_sel_mu_idx[selectedCandIdx_sig]];
-    the_mu_istriggering = Muon_isTriggering[HNLToMuPi_sel_mu_idx[selectedCandIdx_sig]];
+    the_mu_istriggering = Muon_isTriggeringBPark[HNLToMuPi_sel_mu_idx[selectedCandIdx_sig]];
     the_mu_isslimmed = Muon_isSlimmedMuon[HNLToMuPi_sel_mu_idx[selectedCandIdx_sig]];
     the_mu_isdsa = Muon_isDSAMuon[HNLToMuPi_sel_mu_idx[selectedCandIdx_sig]];
 
