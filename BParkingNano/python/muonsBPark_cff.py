@@ -21,8 +21,7 @@ muonTrgSelector = cms.EDProducer("MuonTriggerSelector",
 
                                  # DSA to slimmed muon matching conditions
                                  max_deltaR_dsaToSlimmed_matching = cms.double(0.2),
-                                 #max_deltaPtRel_dsaToSlimmed_matching = cms.double(0.2),
-                                 max_deltaPtRel_dsaToSlimmed_matching = cms.double(100.),
+                                 max_deltaPtRel_dsaToSlimmed_matching = cms.double(0.2),
                                  
                                  # selection for the selected muon
                                  selmu_ptMin = cms.double(1.),
