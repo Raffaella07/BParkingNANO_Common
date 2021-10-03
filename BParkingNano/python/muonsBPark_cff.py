@@ -2,8 +2,8 @@ import FWCore.ParameterSet.Config as cms
 from PhysicsTools.NanoAOD.common_cff import *
 
 
+# make sure that the BPark HLT lines correspond to the 10 first elements
 Path=["HLT_Mu7_IP4","HLT_Mu8_IP6","HLT_Mu8_IP5","HLT_Mu8_IP3","HLT_Mu8p5_IP3p5","HLT_Mu9_IP6","HLT_Mu9_IP5","HLT_Mu9_IP4","HLT_Mu10p5_IP3p5","HLT_Mu12_IP6", "HLT_Mu8_v1", "HLT_Mu8_v12", "HLT_Mu7p5_Track7_Jpsi_v11", "HLT_L2Mu23NoVtx_2Cha_v1", "HLT_L2Mu23NoVtx_2Cha_CosmicSeed_v1", "DST_DoubleMu1_noVtx_CaloScouting_v2", "DST_DoubleMu3_noVtx_CaloScouting_v6", "DST_DoubleMu3_noVtx_Mass10_PFScouting_v3", "HLT_BTagMu_AK4DiJet40_Mu5_v13"]
-#Path=["HLT_Mu7_IP4","HLT_Mu8_IP6","HLT_Mu8_IP5","HLT_Mu8_IP3","HLT_Mu8p5_IP3p5","HLT_Mu9_IP6","HLT_Mu9_IP5","HLT_Mu9_IP4","HLT_Mu10p5_IP3p5","HLT_Mu12_IP6"]
 
 muonTrgSelector = cms.EDProducer("MuonTriggerSelector",
                                  muonCollection = cms.InputTag("slimmedMuons"), #same collection as in NanoAOD                                                           
@@ -126,6 +126,7 @@ muonBParkTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
         numberOfStations = Var("numberOfStations()", int, doc = "number of matched stations with default arbitration (segment & track)"),
 
         isTriggering = Var("userInt('isTriggering')", int, doc="flag the reco muon is also triggering"),
+        isTriggeringBPark = Var("userInt('isTriggeringBPark')", int, doc="flag the reco muon is also triggering (only for BPark lines)"),
         matched_dr = Var("userFloat('DR')", float, doc="dr with the matched triggering muon" ),
         matched_dpt = Var("userFloat('DPT')", float, doc="dpt/pt with the matched triggering muon" ),   
         fired_HLT_Mu7_IP4 = Var("userInt('HLT_Mu7_IP4')", int, doc="reco muon fired this trigger"),
