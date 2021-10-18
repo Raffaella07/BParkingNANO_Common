@@ -252,6 +252,7 @@ Bool_t BToKMuMuDumper::Process(Long64_t entry)
 
     // temporary - we manually ask l1 to be the triggering muon
     if(Muon_isTriggeringBPark[BToKMuMu_l1Idx[selectedCandIdx_ctrl]] == 1){
+
       ncand_istriggering = 1; 
 
       // fill the control_tree
@@ -284,7 +285,7 @@ Bool_t BToKMuMuDumper::Process(Long64_t entry)
       the_ctrl_l1_iso03_close = BToKMuMu_l1_iso03_close[selectedCandIdx_ctrl];
       the_ctrl_l1_iso04 = BToKMuMu_l1_iso04[selectedCandIdx_ctrl];
       the_ctrl_l1_iso04_close = BToKMuMu_l1_iso04_close[selectedCandIdx_ctrl];
-      the_ctrl_l1_istriggering = Muon_isTriggeringBpark[BToKMuMu_l1Idx[selectedCandIdx_ctrl]];
+      the_ctrl_l1_istriggering = Muon_isTriggeringBPark[BToKMuMu_l1Idx[selectedCandIdx_ctrl]];
       the_ctrl_l1_fired_hlt_mu7_ip4 = Muon_fired_HLT_Mu7_IP4[BToKMuMu_l1Idx[selectedCandIdx_ctrl]];
       the_ctrl_l1_fired_hlt_mu8_ip3 = Muon_fired_HLT_Mu8_IP3[BToKMuMu_l1Idx[selectedCandIdx_ctrl]];
       the_ctrl_l1_fired_hlt_mu8_ip5 = Muon_fired_HLT_Mu8_IP5[BToKMuMu_l1Idx[selectedCandIdx_ctrl]];
