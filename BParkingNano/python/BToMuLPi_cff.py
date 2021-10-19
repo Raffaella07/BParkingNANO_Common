@@ -2,10 +2,10 @@ import FWCore.ParameterSet.Config as cms
 from PhysicsTools.BParkingNano.common_cff import uint, ufloat, Var, CandVars
 
 BToMuMuPi = cms.EDProducer(
-    'BToMuMuPiGeneralBuilder',
+    'BToMuMuPiBuilder',
     trgMuons                = cms.InputTag('muonTrgSelector', 'trgMuons'),
-    selLeptons                = cms.InputTag('muonTrgSelector', 'SelectedMuons'), 
-    selLeptonsTransientTracks = cms.InputTag('muonTrgSelector', 'SelectedTransientMuons'), 
+    leptons                = cms.InputTag('muonTrgSelector', 'SelectedMuons'), 
+    leptonsTransientTracks = cms.InputTag('muonTrgSelector', 'SelectedTransientMuons'), 
     pions                   = cms.InputTag('tracksBPark', 'SelectedTracks'),
     pionsTransientTracks    = cms.InputTag('tracksBPark', 'SelectedTransientTracks'),
     tracks                  = cms.InputTag("packedPFCandidates"), 
@@ -19,7 +19,7 @@ BToMuMuPi = cms.EDProducer(
     pionSelection           = cms.string('pt > 0.55 && abs(eta)<2'), # pion preselection to be modified here 
     isoTracksSelection      = cms.string('pt > 0.55 && abs(eta)<2'),
     trgMuonSelection        = cms.string('pt > 5 && abs(eta) < 1.7'),
-    selLeptonSelection        = cms.string('pt > 1.5 && abs(eta) < 2'),
+    leptonSelection        = cms.string('pt > 1.5 && abs(eta) < 2'),
     preVtxSelection = cms.string(' & '.join([
         'pt > 2',
         'mass > 0.2',        
@@ -35,7 +35,7 @@ BToMuMuPi = cms.EDProducer(
         'pt > 11',
         'abs(eta) < 1.7',
         'userFloat("hnl_vtx_chi2") < 9',
-        'userFloat("trg_muon_sip3d") > 0.8',
+#        'userFloat("trg_muon_sip3d") > 0.8',
         ##'userFloat("sel_muon_ip3d") > 0.0015',
         ##'abs(userFloat("sel_muon_dxy")) > 0.0005',
         ##'abs(userFloat("pion_dz")) > 0.001',
@@ -73,20 +73,20 @@ BToMuMuPiTable = cms.EDProducer(
         # pre-fit quantities
         CandVars,
         trg_mu_idx      = uint('trg_mu_idx'),
-        sel_mu_idx      = uint('sel_lep_idx'), 
+        sel_mu_idx      = uint('lep_idx'),
         pi_idx          = uint('pi_idx'    ), 
         ## trigger muon
         trg_mu_pt       = ufloat('trg_muon_pt'   ), 
         trg_mu_eta      = ufloat('trg_muon_eta'  ), 
         trg_mu_phi      = ufloat('trg_muon_phi'  ), 
         ## vertex difference between the two muons
-        dimu_vxdiff     = ufloat('dimuon_vxdiff' ),
-        dimu_vydiff     = ufloat('dimuon_vydiff' ),
-        dimu_vzdiff     = ufloat('dimuon_vzdiff' ),
-        dimu_Lxy        = ufloat('dimuon_Lxy'    ),
-        dimu_Lxyz       = ufloat('dimuon_Lxyz'   ),
+        #dimu_vxdiff     = ufloat('dimuon_vxdiff' ),
+        #dimu_vydiff     = ufloat('dimuon_vydiff' ),
+        #dimu_vzdiff     = ufloat('dimuon_vzdiff' ),
+        #dimu_Lxy        = ufloat('dimuon_Lxy'    ),
+        #dimu_Lxyz       = ufloat('dimuon_Lxyz'   ),
         ## vertex difference between the trigger muon and pion
-        pi_mu_vzdiff    = ufloat('pion_muon_vzdiff'  ),
+    #    pi_mu_vzdiff    = ufloat('pion_muon_vzdiff'  ),
         # post-fit quantities
         ## vertex information 
         sv_chi2         = ufloat('hnl_vtx_chi2' ),
@@ -128,8 +128,8 @@ BToMuMuPiTable = cms.EDProducer(
   #     sel_mu_isMedium = ufloat('sel_muon_isMedium' ),
   #     sel_mu_isLoose  = ufloat('sel_muon_isLoose'  ),
         ## impact paramaters
-        trg_mu_ip3d     = ufloat('trg_muon_ip3d'  ), 
-        trg_mu_sip3d    = ufloat('trg_muon_sip3d' ), 
+   #     trg_mu_ip3d     = ufloat('trg_muon_ip3d'  ), 
+    #    trg_mu_sip3d    = ufloat('trg_muon_sip3d' ), 
         trg_mu_dxy      = ufloat('trg_muon_dxy'   ), 
         trg_mu_dz       = ufloat('trg_muon_dz'    ), 
         sel_mu_ip3d     = ufloat('sel_lep_ip3d'  ), 
@@ -142,23 +142,23 @@ BToMuMuPiTable = cms.EDProducer(
         pi_dxyS         = ufloat('pion_dxyS'      ), 
         pi_DCASig       = ufloat('pion_DCASig'    ), 
         ## isolation
-        trg_mu_iso03    = ufloat('trg_mu_iso03'   ), 
-        trg_mu_iso04    = ufloat('trg_mu_iso04'   ),
-        sel_mu_iso03    = ufloat('sel_lep_iso03'   ),
-        sel_mu_iso04    = ufloat('sel_lep_iso04'   ),
-        pi_iso03        = ufloat('pi_iso03'       ),
-        pi_iso04        = ufloat('pi_iso04'       ),
-        hnl_iso03       = ufloat('hnl_iso03'      ),
-        hnl_iso04       = ufloat('hnl_iso04'      ),
-        trg_mu_iso03_close  = ufloat('trg_mu_iso03_close' ), 
-        trg_mu_iso04_close  = ufloat('trg_mu_iso04_close' ),
-        sel_mu_iso03_close  = ufloat('sel_lep_iso03_close' ),
-        sel_mu_iso04_close  = ufloat('sel_lep_iso04_close' ),
-        pi_iso03_close      = ufloat('pi_iso03_close'     ),
-        pi_iso04_close      = ufloat('pi_iso04_close'     ),
-        hnl_iso03_close     = ufloat('hnl_iso03_close'    ),
-        hnl_iso04_close     = ufloat('hnl_iso04_close'    ),
-        ## dilepton mass
+ #      trg_mu_iso03    = ufloat('trg_mu_iso03'   ), 
+ #      trg_mu_iso04    = ufloat('trg_mu_iso04'   ),
+ #      sel_mu_iso03    = ufloat('sel_lep_iso03'   ),
+ #      sel_mu_iso04    = ufloat('sel_lep_iso04'   ),
+ #      pi_iso03        = ufloat('pi_iso03'       ),
+ #      pi_iso04        = ufloat('pi_iso04'       ),
+ #      hnl_iso03       = ufloat('hnl_iso03'      ),
+ #      hnl_iso04       = ufloat('hnl_iso04'      ),
+ #  #   trg_mu_iso03_close  = ufloat('trg_mu_iso03_close' ), 
+    #   trg_mu_iso04_close  = ufloat('trg_mu_iso04_close' ),
+    #   sel_mu_iso03_close  = ufloat('sel_lep_iso03_close' ),
+    #   sel_mu_iso04_close  = ufloat('sel_lep_iso04_close' ),
+    #   pi_iso03_close      = ufloat('pi_iso03_close'     ),
+    #   pi_iso04_close      = ufloat('pi_iso04_close'     ),
+    #   hnl_iso03_close     = ufloat('hnl_iso03_close'    ),
+    #   hnl_iso04_close     = ufloat('hnl_iso04_close'    ),
+    #   ## dilepton mass
         dilepton_mass   = ufloat('dilepton_mass'  ),
         dilepton_pt     = ufloat('dilepton_pt'    ),
         ## gen-matching
@@ -181,10 +181,10 @@ BToMuMuPiTable = cms.EDProducer(
 
 #count Mu
 BToMuEPi = cms.EDProducer(
-    'BToMuEPiGeneralBuilder',
+    'BToMuEPiBuilder',
     trgMuons                = cms.InputTag('muonTrgSelector', 'trgMuons'),
-    selLeptons                 = cms.InputTag('electronsForAnalysis', 'SelectedElectrons'), 
-    selLeptonsTransientTracks  = cms.InputTag('electronsForAnalysis','SelectedTransientElectrons'), 
+    leptons                 = cms.InputTag('electronsForAnalysis', 'SelectedElectrons'), 
+    leptonsTransientTracks  = cms.InputTag('electronsForAnalysis','SelectedTransientElectrons'), 
     pions                   = cms.InputTag('tracksBPark', 'SelectedTracks'),
     pionsTransientTracks    = cms.InputTag('tracksBPark', 'SelectedTransientTracks'),
     tracks                  = cms.InputTag("packedPFCandidates"), 
@@ -198,7 +198,7 @@ BToMuEPi = cms.EDProducer(
     pionSelection           = cms.string('pt > 0.7 && abs(eta)<2'), # pion preselection to be modified here 
     isoTracksSelection      = cms.string('pt > 0.7 && abs(eta)<2'),
     trgMuonSelection        = cms.string('pt > 7 && abs(eta) < 1.5'),
-    selLeptonSelection        = cms.string('pt > 0.5 && abs(eta) < 2'),
+    leptonSelection        = cms.string('pt > 1.5 && abs(eta) < 2'),
     preVtxSelection = cms.string(' & '.join([
     #    'pt > 2',
         'mass > 0.2',        
@@ -253,20 +253,20 @@ BToMuEPiTable = cms.EDProducer(
         # pre-fit quantities
         CandVars,
         trg_mu_idx      = uint('trg_mu_idx'),
-        sel_ele_idx      = uint('sel_lep_idx'), 
+        sel_ele_idx      = uint('lep_idx'), 
         pi_idx          = uint('pi_idx'    ), 
         ## trigger muon
         trg_mu_pt       = ufloat('trg_muon_pt'   ), 
         trg_mu_eta      = ufloat('trg_muon_eta'  ), 
         trg_mu_phi      = ufloat('trg_muon_phi'  ), 
         ## vertex difference between the two muons
-        dimu_vxdiff     = ufloat('dimuon_vxdiff' ),
-        dimu_vydiff     = ufloat('dimuon_vydiff' ),
-        dimu_vzdiff     = ufloat('dimuon_vzdiff' ),
-        dimu_Lxy        = ufloat('dimuon_Lxy'    ),
-        dimu_Lxyz       = ufloat('dimuon_Lxyz'   ),
+       #dimu_vxdiff     = ufloat('dimuon_vxdiff' ),
+       #dimu_vydiff     = ufloat('dimuon_vydiff' ),
+       #dimu_vzdiff     = ufloat('dimuon_vzdiff' ),
+       #dimu_Lxy        = ufloat('dimuon_Lxy'    ),
+       #dimu_Lxyz       = ufloat('dimuon_Lxyz'   ),
         ## vertex difference between the trigger muon and pion
-        pi_mu_vzdiff    = ufloat('pion_muon_vzdiff'  ),
+        #pi_mu_vzdiff    = ufloat('pion_muon_vzdiff'  ),
         # post-fit quantities
         ## vertex information 
         sv_chi2         = ufloat('hnl_vtx_chi2' ),
@@ -304,8 +304,8 @@ BToMuEPiTable = cms.EDProducer(
         # Other quantities
         ## ID WP of the selected ele 
         ## impact paramaters
-        trg_mu_ip3d     = ufloat('trg_muon_ip3d'  ), 
-        trg_mu_sip3d    = ufloat('trg_muon_sip3d' ), 
+        #trg_mu_ip3d     = ufloat('trg_muon_ip3d'  ), 
+        #trg_mu_sip3d    = ufloat('trg_muon_sip3d' ), 
         trg_mu_dxy      = ufloat('trg_muon_dxy'   ), 
         trg_mu_dz       = ufloat('trg_muon_dz'    ), 
         sel_ele_ip3d     = ufloat('sel_lep_ip3d'  ), 
@@ -318,23 +318,23 @@ BToMuEPiTable = cms.EDProducer(
         pi_dxyS         = ufloat('pion_dxyS'      ), 
         pi_DCASig       = ufloat('pion_DCASig'    ), 
         ## isolation
-        trg_mu_iso03    = ufloat('trg_mu_iso03'   ), 
-        trg_mu_iso04    = ufloat('trg_mu_iso04'   ),
-        sel_mu_iso03    = ufloat('sel_lep_iso03'   ),
-        sel_mu_iso04    = ufloat('sel_lep_iso04'   ),
-        pi_iso03        = ufloat('pi_iso03'       ),
-        pi_iso04        = ufloat('pi_iso04'       ),
-        hnl_iso03       = ufloat('hnl_iso03'      ),
-        hnl_iso04       = ufloat('hnl_iso04'      ),
-        trg_mu_iso03_close  = ufloat('trg_mu_iso03_close' ), 
-        trg_mu_iso04_close  = ufloat('trg_mu_iso04_close' ),
-        sel_ele_iso03_close  = ufloat('sel_lep_iso03_close' ),
-        sel_ele_iso04_close  = ufloat('sel_lep_iso04_close' ),
-        pi_iso03_close      = ufloat('pi_iso03_close'     ),
-        pi_iso04_close      = ufloat('pi_iso04_close'     ),
-        hnl_iso03_close     = ufloat('hnl_iso03_close'    ),
-        hnl_iso04_close     = ufloat('hnl_iso04_close'    ),
-        ## dilepton mass
+     #  trg_mu_iso03    = ufloat('trg_mu_iso03'   ), 
+     #  trg_mu_iso04    = ufloat('trg_mu_iso04'   ),
+     #  sel_mu_iso03    = ufloat('sel_lep_iso03'   ),
+     #  sel_mu_iso04    = ufloat('sel_lep_iso04'   ),
+     #  pi_iso03        = ufloat('pi_iso03'       ),
+     #  pi_iso04        = ufloat('pi_iso04'       ),
+     #  hnl_iso03       = ufloat('hnl_iso03'      ),
+     #  hnl_iso04       = ufloat('hnl_iso04'      ),
+     #  trg_mu_iso03_close  = ufloat('trg_mu_iso03_close' ), 
+     #  trg_mu_iso04_close  = ufloat('trg_mu_iso04_close' ),
+     #  sel_ele_iso03_close  = ufloat('sel_lep_iso03_close' ),
+     #  sel_ele_iso04_close  = ufloat('sel_lep_iso04_close' ),
+     #  pi_iso03_close      = ufloat('pi_iso03_close'     ),
+     #  pi_iso04_close      = ufloat('pi_iso04_close'     ),
+     #  hnl_iso03_close     = ufloat('hnl_iso03_close'    ),
+     #  hnl_iso04_close     = ufloat('hnl_iso04_close'    ),
+     #  ## dilepton mass
         dilepton_mass   = ufloat('dilepton_mass'  ),
         dilepton_pt     = ufloat('dilepton_pt'    ),
         ## gen-matching

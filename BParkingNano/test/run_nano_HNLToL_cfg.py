@@ -5,7 +5,7 @@ from glob import glob
 
 options = VarParsing('python')
 
-options.register('isMC'           ,  True           , VarParsing.multiplicity.singleton, VarParsing.varType.bool  , "Run this on real data"                  )
+options.register('isMC'           ,  False           , VarParsing.multiplicity.singleton, VarParsing.varType.bool  , "Run this on real data"                  )
 options.register('skipDuplicated' ,  True           , VarParsing.multiplicity.singleton, VarParsing.varType.bool  , "Skip duplicated events. True by default")
 options.register('globalTag'      , 'NOTSET'        , VarParsing.multiplicity.singleton, VarParsing.varType.string, "Set global tag"                         )
 options.register('wantSummary'    ,  True           , VarParsing.multiplicity.singleton, VarParsing.varType.bool  , "Run this on real data"                  )
@@ -36,8 +36,9 @@ if not options.inputFiles:
 			'/store/data/Run2018A/ParkingBPH1/MINIAOD/05May2019-v1/00000/0B14F6F4-5DD5-B04B-A7EF-7D2B80AD33FA.root'
 			] if not options.isMC else \
                          [#'/store/mc/RunIIAutumn18MiniAOD/QCD_Pt-20to30_EMEnriched_TuneCP5_13TeV_pythia8/MINIAODSIM/102X_upgrade2018_realistic_v15-v1/100000/0D2BBEDD-FFDA-E843-8620-D9B51558138C.root'
-			'root://xrootd-cms.infn.it///store/user/ratramon/HNLGen_ntuples/private_BToDMuN_HalfMu_Halfe_mass3p0_ctau184p0/step4_nj1.root',
-                        # 'root://xrootd-cms.infn.it///store/user/ratramon/HNLGen_ntuples/private_BToDMuN_HalfMu_Halfe_mass3p0_ctau184p0/step4_nj278.root',
+		#	'root://xrootd-cms.infn.it///store/user/ratramon/HNLGen_ntuples/private_BToDMuN_HalfMu_Halfe_mass3p0_ctau184p0/step4_nj1.root',
+                        ' /store/mc/RunIIAutumn18MiniAOD/QCD_Pt-15to20_MuEnrichedPt5_TuneCP5_13TeV_pythia8/MINIAODSIM/102X_upgrade2018_realistic_v15-v3/100000/0BF89559-F5F7-4D41-A1B6-4037F80E9A4A.root'
+			 # 'root://xrootd-cms.infn.it///store/user/ratramon/HNLGen_ntuples/private_BToDMuN_HalfMu_Halfe_mass3p0_ctau184p0/step4_nj278.root',
                         # 'root://xrootd-cms.infn.it///store/user/ratramon/HNLGen_ntuples/private_BToDMuN_HalfMu_Halfe_mass3p0_ctau184p0/step4_nj45.root',
                         # 'root://xrootd-cms.infn.it///store/user/ratramon/HNLGen_ntuples/private_BToDMuN_HalfMu_Halfe_mass3p0_ctau184p0/step4_nj898.root'
 			]
