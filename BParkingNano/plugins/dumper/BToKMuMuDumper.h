@@ -70,6 +70,7 @@ public :
    TTreeReaderArray<Float_t> BToKMuMu_minDR = {fReader, "BToKMuMu_minDR"};
    TTreeReaderArray<Float_t> BToKMuMu_mllErr_llfit = {fReader, "BToKMuMu_mllErr_llfit"};
    TTreeReaderArray<Float_t> BToKMuMu_mll_fullfit = {fReader, "BToKMuMu_mll_fullfit"};
+   TTreeReaderArray<Float_t> BToKMuMu_ll_sv_prob = {fReader, "BToKMuMu_ll_sv_prob"};
    TTreeReaderArray<Float_t> BToKMuMu_mll_llfit = {fReader, "BToKMuMu_mll_llfit"};
    TTreeReaderArray<Float_t> BToKMuMu_mll_raw = {fReader, "BToKMuMu_mll_raw"};
    TTreeReaderArray<Float_t> BToKMuMu_phi = {fReader, "BToKMuMu_phi"};
@@ -331,10 +332,21 @@ public :
    Float_t the_ctrl_l1_eta= -99.;
    Float_t the_ctrl_l1_phi= -99.;
    Int_t the_ctrl_l1_charge= -99;
+   Float_t the_ctrl_l1_dxy = -99.;
+   Float_t the_ctrl_l1_dxysig = -99.;
+   Float_t the_ctrl_l1_dz = -99.;
+   Float_t the_ctrl_l1_dzsig = -99.;
    Float_t the_ctrl_l1_iso03= -99.;
    Float_t the_ctrl_l1_iso03_close= -99.;
    Float_t the_ctrl_l1_iso04= -99.;
    Float_t the_ctrl_l1_iso04_close= -99.;
+   Int_t the_ctrl_l1_looseid = -99;
+   Int_t the_ctrl_l1_mediumid = -99;
+   Int_t the_ctrl_l1_tightid = -99;
+   Int_t the_ctrl_l1_softid = -99;
+   Int_t the_ctrl_l1_pfisoid = -99;
+   Int_t the_ctrl_l1_trkisoid = -99;
+   Int_t the_ctrl_l1_triggerlooseid = -99;
    Float_t the_ctrl_l1_istriggering= -99.;
    Int_t the_ctrl_l1_fired_hlt_mu7_ip4= -99;
    Int_t the_ctrl_l1_fired_hlt_mu8_ip6= -99;
@@ -351,13 +363,25 @@ public :
    Float_t the_ctrl_l2_eta= -99.;
    Float_t the_ctrl_l2_phi= -99.;
    Int_t the_ctrl_l2_charge= -99;
+   Float_t the_ctrl_l2_dxy = -99.;
+   Float_t the_ctrl_l2_dxysig = -99.;
+   Float_t the_ctrl_l2_dz = -99.;
+   Float_t the_ctrl_l2_dzsig = -99.;
    Float_t the_ctrl_l2_iso03= -99.;
    Float_t the_ctrl_l2_iso03_close= -99.;
    Float_t the_ctrl_l2_iso04= -99.;
    Float_t the_ctrl_l2_iso04_close= -99.;
+   Int_t the_ctrl_l2_looseid = -99;
+   Int_t the_ctrl_l2_mediumid = -99;
+   Int_t the_ctrl_l2_tightid = -99;
+   Int_t the_ctrl_l2_softid = -99;
+   Int_t the_ctrl_l2_pfisoid = -99;
+   Int_t the_ctrl_l2_trkisoid = -99;
+   Int_t the_ctrl_l2_triggerlooseid = -99;
    Float_t the_ctrl_l2_istriggering= -99.;
 
    Float_t the_ctrl_dimu_mass= -99.;
+   Float_t the_ctrl_dimu_sv_prob= -99.;
 
    Float_t the_ctrl_sv_x= -99.;
    Float_t the_ctrl_sv_y= -99.;
@@ -369,6 +393,8 @@ public :
    Int_t the_ctrl_ismatched= -99;
 
    Float_t the_ctrl_weight_hlt= -99.;
+
+
 
    // histograms
    TH1F* ctrlhist_ncand_perevent;

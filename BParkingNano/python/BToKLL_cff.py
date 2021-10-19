@@ -1,6 +1,7 @@
 import FWCore.ParameterSet.Config as cms
 from PhysicsTools.BParkingNano.common_cff import *
 
+# NOT USED
 electronPairsForKee = cms.EDProducer(
     'DiElectronBuilder',
     src = cms.InputTag('electronsForAnalysis', 'SelectedElectrons'),
@@ -15,7 +16,7 @@ electronPairsForKee = cms.EDProducer(
     postVtxSelection = cms.string('userFloat("sv_chi2") < 998 && userFloat("sv_prob") > 1.e-5'),
 )
 
-
+# NOT USED
 BToKee = cms.EDProducer(
     'BToKLLBuilder',
     dileptons = cms.InputTag('electronPairsForKee'),
@@ -36,16 +37,38 @@ BToKee = cms.EDProducer(
     )
 )
 
+# Di-muons for JPSi reconstruction
 muonPairsForKmumu = cms.EDProducer(
     'DiMuonBuilder',
-    src = cms.InputTag('muonTrgSelector', 'SelectedMuons'),
     isMC = cms.bool(False),
+    src = cms.InputTag('muonTrgSelector', 'SelectedMuons'),
     transientTracksSrc = cms.InputTag('muonTrgSelector', 'SelectedTransientMuons'),
-    lep1Selection = cms.string('pt > 1.5'),
-    lep2Selection = cms.string(''),
-    preVtxSelection = cms.string('abs(userCand("l1").vz - userCand("l2").vz) <= 1. && mass() < 5 '
-                                 '&& mass() > 0 && charge() == 0 && userFloat("lep_deltaR") > 0.03'),
-    postVtxSelection = electronPairsForKee.postVtxSelection,
+    lep1Selection = cms.string(' && '.join([
+        'pt > 7',                       # we require l1 to be the triggering one
+        'abs(eta) < 2.'
+      ])
+    ),
+    lep2Selection = cms.string(' && '.join([
+        'pt > 1.0',
+        'abs(eta) < 2.'
+      ])
+    ),
+    preVtxSelection = cms.string(' && '.join([
+        'abs(userCand("l1").vz - userCand("l2").vz) <= 1.',
+        'mass() < 5',
+        'mass() > 0',
+        'charge() == 0',
+        'userFloat("lep_deltaR") > 0.03',
+      ])
+    ),
+    postVtxSelection = cms.string(' && '.join([
+        #'userInt("sv_OK") == 1',        # hard-coded in builder
+        #'userFloat("sv_chi2") < 998',   # arbitrary, was removed
+        'userFloat("sv_prob") > 0.01',   # can be tightened
+        'userFloat("fitted_mass") > 2.', # can be tightened
+        'userFloat("fitted_mass") < 4.', # can be tightened
+      ])
+    ),
     label = cms.string('muon'),
 )
 
@@ -59,8 +82,8 @@ BToKmumu = cms.EDProducer(
     'BToKLLBuilder',
     dileptons = cms.InputTag('muonPairsForKmumu'),
     leptonTransientTracks = muonPairsForKmumu.transientTracksSrc,
-    kaons = BToKee.kaons,
-    kaonsTransientTracks = BToKee.kaonsTransientTracks,
+    kaons = cms.InputTag('tracksBPark', 'SelectedTracks'),
+    kaonsTransientTracks = cms.InputTag('tracksBPark', 'SelectedTransientTracks'),
     genParticles = cms.InputTag("finalGenParticlesBPark"),
     beamSpot = cms.InputTag("offlineBeamSpot"),
     isMC = cms.bool(False),
@@ -121,6 +144,7 @@ BToKeeTable = cms.EDProducer(
         mll_llfit = Var('userCand("dilepton").userFloat("fitted_mass")', float), # this might not work
         mllErr_llfit = Var('userCand("dilepton").userFloat("fitted_massErr")', float), # this might not work
         mll_fullfit = ufloat('fitted_mll'),
+        ll_sv_prob = ufloat('ll_sv_prob'), # probability of dimuon fit
         # Cos(theta)
         cos2D = ufloat('cos_theta_2D'),
         fit_cos2D = ufloat('fitted_cos_theta_2D'),

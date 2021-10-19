@@ -204,7 +204,9 @@ void BToKLLBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
       cand.addUserFloat("fitted_k_pt"  , fitter.daughter_p4(2).pt()); 
       cand.addUserFloat("fitted_k_eta" , fitter.daughter_p4(2).eta());
       cand.addUserFloat("fitted_k_phi" , fitter.daughter_p4(2).phi());
-    
+   
+      cand.addUserFloat("ll_sv_prob", ll_ptr->userFloat("sv_prob"));
+
       if( !post_vtx_selection_(cand) ) continue;        
 
       //compute isolation
