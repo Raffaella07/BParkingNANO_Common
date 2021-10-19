@@ -8,7 +8,7 @@
 #include "TrackingTools/TransientTrack/interface/TransientTrack.h"
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h" 
 
-#include "ETHMuon.h"
+#include "PhysicsTools/BParkingNano/interface/ETHMuon.h"
 #include <vector>
 #include <memory>
 #include <map>
@@ -24,7 +24,7 @@
 #include "helper.h"
 #include <limits>
 #include <algorithm>
-#include "KinVtxFitter.h"
+#include "PhysicsTools/BParkingNano/interface/KinVtxFitter.h"
 
 template<typename Lepton>
 class BToMuLPiGeneralBuilder : public edm::global::EDProducer<> {

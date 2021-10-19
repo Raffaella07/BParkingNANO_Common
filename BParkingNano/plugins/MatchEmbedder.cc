@@ -81,7 +81,7 @@ void MatchEmbedder<PATOBJ>::produce(edm::StreamID, edm::Event &evt, edm::EventSe
   evt.put(std::move(out));
 }
 
-#include "ETHMuon.h"
+#include "PhysicsTools/BParkingNano/interface/ETHMuon.h"
 typedef MatchEmbedder<pat::ETHMuon> MuonMatchEmbedder;
 
 #include "DataFormats/PatCandidates/interface/Muon.h"

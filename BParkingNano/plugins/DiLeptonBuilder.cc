@@ -17,7 +17,7 @@
 #include "helper.h"
 #include <limits>
 #include <algorithm>
-#include "KinVtxFitter.h"
+#include "PhysicsTools/BParkingNano/interface/KinVtxFitter.h"
 
 template<typename Lepton>
 class DiLeptonBuilder : public edm::global::EDProducer<> {
@@ -143,7 +143,7 @@ void DiLeptonBuilder<Lepton>::produce(edm::StreamID, edm::Event &evt, edm::Event
   evt.put(std::move(ret_value));
 }
 
-#include "ETHMuon.h"
+#include "PhysicsTools/BParkingNano/interface/ETHMuon.h"
 #include "DataFormats/PatCandidates/interface/Electron.h"
 typedef DiLeptonBuilder<pat::ETHMuon> DiMuonBuilder;
 typedef DiLeptonBuilder<pat::Electron> DiElectronBuilder;

@@ -23,7 +23,7 @@
 #include "helper.h"
 #include <limits>
 #include <algorithm>
-#include "KinVtxFitter.h"
+#include "PhysicsTools/BParkingNano/interface/KinVtxFitter.h"
 
 template<typename Lepton>
 class BToMuLPiHighDisplacementBuilder : public edm::global::EDProducer<> {
