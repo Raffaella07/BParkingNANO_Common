@@ -22,7 +22,7 @@
 #include "helper.h"
 #include <limits>
 #include <algorithm>
-#include "KinVtxFitter.h"
+#include "PhysicsTools/BParkingNano/interface/KinVtxFitter.h"
 
 
 

@@ -17,8 +17,8 @@
 #include "helper.h"
 #include <limits>
 #include <algorithm>
-#include "KinVtxFitter.h"
-#include "ETHMuon.h"
+#include "PhysicsTools/BParkingNano/interface/KinVtxFitter.h"
+#include "PhysicsTools/BParkingNano/interface/ETHMuon.h"
 
 //template<typename Lepton>
 class TagAndProbeJPsiToMuMuBuilder : public edm::global::EDProducer<> {
@@ -208,7 +208,7 @@ void TagAndProbeJPsiToMuMuBuilder::produce(edm::StreamID, edm::Event &evt, edm::
   evt.put(std::move(ret_value));
 }
 
-//#include "ETHMuon.h"
+//#include "PhysicsTools/BParkingNano/interface/ETHMuon.h"
 //typedef TagAndProbeJPsiToLLBuilder<pat::ETHMuon> TagAndProbeJPsiToMuMuBuilder;
 
 #include "FWCore/Framework/interface/MakerMacros.h"

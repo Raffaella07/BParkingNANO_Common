@@ -28,15 +28,17 @@
 #include "DataFormats/PatCandidates/interface/TriggerEvent.h"
 #include "DataFormats/PatCandidates/interface/TriggerAlgorithm.h"
 
+#include "TrackingTools/TransientTrack/interface/TransientTrack.h"
 #include "MagneticField/Engine/interface/MagneticField.h"
 #include "MagneticField/Records/interface/IdealMagneticFieldRecord.h"
 
 #include "DataFormats/Math/interface/deltaR.h"
 
-#include "ETHMuon.h"
+#include "PhysicsTools/BParkingNano/interface/KinVtxFitter.h"
+
+#include "PhysicsTools/BParkingNano/interface/ETHMuon.h"
 
 #include <TLorentzVector.h>
-#include "helper.h"
 
 using namespace std;
 
@@ -46,6 +48,7 @@ class MuonTriggerSelector : public edm::EDProducer {
 
   public:
 
+    typedef std::vector<reco::TransientTrack> TransientTrackCollection;
     explicit MuonTriggerSelector(const edm::ParameterSet &iConfig);
 
     ~MuonTriggerSelector() override {};
@@ -365,6 +368,7 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
           fires[iMuo][3]==1 || fires[iMuo][4]==1 || fires[iMuo][5]==1 || fires[iMuo][6]==1 || 
           fires[iMuo][7]==1 || fires[iMuo][8]==1 || fires[iMuo][9]==1)){
             pat::Muon recoTriggerMuonCand(muon);
+	    recoTriggerMuonCand.addUserInt("isTriggeringBPark",1);
             trgmuons_out->emplace_back(recoTriggerMuonCand);
         }
     }
