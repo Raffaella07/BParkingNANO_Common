@@ -309,6 +309,7 @@ public :
 
    Float_t the_ctrl_b_pt= -99.;
    Float_t the_ctrl_b_eta= -99.;
+   Float_t the_ctrl_b_y= -99.;
    Float_t the_ctrl_b_phi= -99.;
    Float_t the_ctrl_b_mass= -99.;
    Int_t the_ctrl_b_charge= -99;

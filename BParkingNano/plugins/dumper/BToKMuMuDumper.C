@@ -86,6 +86,7 @@ void BToKMuMuDumper::SlaveBegin(TTree * /*tree*/)
 
   control_tree->Branch("b_pt", &the_ctrl_b_pt);
   control_tree->Branch("b_eta", &the_ctrl_b_eta);
+  control_tree->Branch("b_y", &the_ctrl_b_y);
   control_tree->Branch("b_phi", &the_ctrl_b_phi);
   control_tree->Branch("b_mass", &the_ctrl_b_mass);
   control_tree->Branch("b_charge", &the_ctrl_b_charge);
@@ -276,6 +277,16 @@ Bool_t BToKMuMuDumper::Process(Long64_t entry)
     if(Muon_isTriggeringBPark[BToKMuMu_l1Idx[selectedCandIdx_ctrl]] == 1){
 
       ncand_istriggering = 1; 
+
+      // calculate the rapidity
+      ROOT::Math::PtEtaPhiMVector b_p4(
+        BToKMuMu_fit_pt[selectedCandIdx_ctrl],
+        BToKMuMu_fit_eta[selectedCandIdx_ctrl],
+        BToKMuMu_fit_phi[selectedCandIdx_ctrl],
+        BToKMuMu_fit_mass[selectedCandIdx_ctrl],
+      );
+      the_ctrl_b_y = (b_p4.E()-b_p4.Pz())!=0 ? 0.5 * TMath::Log( (b_p4.E()+b_p4.Pz()) / (b_p4.E()-b_p4.Pz()) ) : -99;
+      
 
       // fill the control_tree
       the_ctrl_b_pt = BToKMuMu_fit_pt[selectedCandIdx_ctrl];
