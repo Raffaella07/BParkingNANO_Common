@@ -117,7 +117,7 @@ bool lumiMask(int run, int lumi){
 
 float getTriggerScaleFactor(float pt, float eta){
   // get trigger scale factor file
-  TString filename_sf = "/t3home/anlyon/BHNL/BHNLNano/CMSSW_10_2_15/src/PhysicsTools/BParkingNano/data/trigger_scale_factors/scaleFactor_results_cat_pt_eta_fit_A1.root";
+  TString filename_sf = "/t3home/anlyon/BHNL/BHNLNano/CMSSW_10_2_15/src/PhysicsTools/BParkingNano/data/trigger_scale_factors/scaleFactor_results_cat_pt_eta_fit_A1_v2.root"
   TFile* file_sf = TFile::Open(filename_sf);
   file_sf->cd();
 
