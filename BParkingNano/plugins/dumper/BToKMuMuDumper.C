@@ -168,6 +168,9 @@ void BToKMuMuDumper::SlaveBegin(TTree * /*tree*/)
   control_tree->Branch("sv_prob", &the_ctrl_sv_prob);
 
   control_tree->Branch("ismatched", &the_ctrl_ismatched);
+  control_tree->Branch("matched_b_pt", &the_ctrl_matched_b_pt);
+  control_tree->Branch("matched_b_eta", &the_ctrl_matched_b_eta);
+  control_tree->Branch("matched_b_y", &the_ctrl_matched_b_y);
 
   control_tree->Branch("pv_npvs", &the_pv_npvs);
 
@@ -283,7 +286,7 @@ Bool_t BToKMuMuDumper::Process(Long64_t entry)
         BToKMuMu_fit_pt[selectedCandIdx_ctrl],
         BToKMuMu_fit_eta[selectedCandIdx_ctrl],
         BToKMuMu_fit_phi[selectedCandIdx_ctrl],
-        BToKMuMu_fit_mass[selectedCandIdx_ctrl],
+        BToKMuMu_fit_mass[selectedCandIdx_ctrl]
       );
       the_ctrl_b_y = (b_p4.E()-b_p4.Pz())!=0 ? 0.5 * TMath::Log( (b_p4.E()+b_p4.Pz()) / (b_p4.E()-b_p4.Pz()) ) : -99;
       
@@ -372,7 +375,20 @@ Bool_t BToKMuMuDumper::Process(Long64_t entry)
       the_ctrl_sv_lxysig = BToKMuMu_l_xy[selectedCandIdx_ctrl]/BToKMuMu_l_xy_unc[selectedCandIdx_ctrl];
       the_ctrl_sv_prob = BToKMuMu_svprob[selectedCandIdx_ctrl];
 
+      // gen-matching information
       the_ctrl_ismatched = BToKMuMu_isMatched[selectedCandIdx_ctrl];
+      the_ctrl_matched_b_pt = BToKMuMu_matched_b_pt[selectedCandIdx_ctrl];
+      the_ctrl_matched_b_eta = BToKMuMu_matched_b_eta[selectedCandIdx_ctrl];
+
+      ROOT::Math::PtEtaPhiMVector matched_b_p4(
+        BToKMuMu_matched_b_pt[selectedCandIdx_ctrl],
+        BToKMuMu_matched_b_eta[selectedCandIdx_ctrl],
+        BToKMuMu_matched_b_phi[selectedCandIdx_ctrl],
+        BToKMuMu_matched_b_mass[selectedCandIdx_ctrl]
+      );
+      the_ctrl_matched_b_y = ( (matched_b_p4.E()-matched_b_p4.Pz())!=0 && the_ctrl_ismatched==1 )
+            ? 0.5 * TMath::Log( (matched_b_p4.E()+matched_b_p4.Pz()) / (matched_b_p4.E()-matched_b_p4.Pz()) ) 
+            : -99;
 
       // trigger scale factor
       the_ctrl_weight_hlt = isMC ? getTriggerScaleFactor(the_ctrl_l1_pt, fabs(the_ctrl_l1_eta)) : 1.;

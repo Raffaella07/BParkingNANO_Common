@@ -189,6 +189,24 @@ BToKeeTable = cms.EDProducer(
         matching_l1_motherPdgId = Var("userInt('matching_l1_motherPdgId')", int, mcOnly=True),
         matching_l2_motherPdgId = Var("userInt('matching_l2_motherPdgId')", int, mcOnly=True),
         matching_k_motherPdgId = Var("userInt('matching_k_motherPdgId')", int, mcOnly=True),
+        matched_b_pt = Var("userFloat('matched_b_pt')", float, mcOnly=True),
+        matched_b_eta = Var("userFloat('matched_b_eta')", float, mcOnly=True),
+        matched_b_phi = Var("userFloat('matched_b_phi')", float, mcOnly=True),
+        matched_b_mass = Var("userFloat('matched_b_mass')", float, mcOnly=True),
+        matched_l1_pt = Var("userFloat('matched_l1_pt')", float, mcOnly=True),
+        matched_l1_eta = Var("userFloat('matched_l1_eta')", float, mcOnly=True),
+        matched_l1_phi = Var("userFloat('matched_l1_phi')", float, mcOnly=True),
+        matched_l1_mass = Var("userFloat('matched_l1_mass')", float, mcOnly=True),
+        matched_l2_pt = Var("userFloat('matched_l2_pt')", float, mcOnly=True),
+        matched_l2_eta = Var("userFloat('matched_l2_eta')", float, mcOnly=True),
+        matched_l2_phi = Var("userFloat('matched_l2_phi')", float, mcOnly=True),
+        matched_l2_mass = Var("userFloat('matched_l2_mass')", float, mcOnly=True),
+        matched_k_pt = Var("userFloat('matched_k_pt')", float, mcOnly=True),
+        matched_k_eta = Var("userFloat('matched_k_eta')", float, mcOnly=True),
+        matched_k_phi = Var("userFloat('matched_k_phi')", float, mcOnly=True),
+        matched_k_mass = Var("userFloat('matched_k_mass')", float, mcOnly=True),
+
+        
     )
 )
 
