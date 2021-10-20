@@ -188,6 +188,13 @@ void BToMuMuPiDumper::SlaveBegin(TTree * /*tree*/)
   signal_tree->Branch("mu_dxysig", &the_sig_mu_dxysig);
   signal_tree->Branch("mu_dz", &the_sig_mu_dz);
   signal_tree->Branch("mu_dzsig", &the_sig_mu_dzsig);
+  signal_tree->Branch("mu_ismatchedtoslimmedmuon", &the_sig_mu_ismatchedtoslimmedmuon);
+  signal_tree->Branch("mu_indexmatchedslimmedmuon", &the_sig_mu_indexmatchedslimmedmuon);
+  signal_tree->Branch("mu_dsatoslimmedmatching_deltar", &the_sig_mu_dsatoslimmedmatching_deltar);
+  signal_tree->Branch("mu_dsatoslimmedmatching_deltaptrel", &the_sig_mu_dsatoslimmedmatching_deltaptrel);
+  signal_tree->Branch("mu_dsatoslimmedmatching_deltadxyrel", &the_sig_mu_dsatoslimmedmatching_deltadxyrel);
+  signal_tree->Branch("mu_dsatoslimmedmatching_deltadzrel", &the_sig_mu_dsatoslimmedmatching_deltadzrel);
+  signal_tree->Branch("mu_passdsaid", &the_sig_mu_passdsaid);
   //signal_tree->Branch("mu_ip3d", &the_sig_mu_ip3d);
   //signal_tree->Branch("mu_ip3dsig", &the_sig_mu_ip3dsig);
   signal_tree->Branch("mu_pfiso03", &the_sig_mu_pfiso03);
@@ -367,6 +374,7 @@ void BToMuMuPiDumper::SlaveBegin(TTree * /*tree*/)
 
     sighist_ncand_perevent = new TH1F("sighist_ncand_perevent", "sighist_ncand_perevent", 10, 0, 10);
     sighist_ncand_matched_perevent = new TH1F("sighist_ncand_matched_perevent", "sighist_ncand_matched__perevent", 10, 0, 10);
+
     sighist_selection_efficiency_hnlpt_allevents = new TH1F("sighist_selection_efficiency_hnlpt_allevents", "Efficiency of selection of candidate with largest hnl pT (all events)", 2, 0, 2);
     sighist_selection_efficiency_hnlpt_eventswithmultcands = new TH1F("sighist_selection_efficiency_hnlpt_eventswithmultcands", "Efficiency of selection of candidate with largest hnl pT (events with multiple candidates)", 2, 0, 2);
     sighist_selection_efficiency_bpt_allevents = new TH1F("sighist_selection_efficiency_bpt_allevents", "Efficiency of selection of candidate with largest b pT (all events)", 2, 0, 2);
@@ -415,6 +423,7 @@ Bool_t BToMuMuPiDumper::Process(Long64_t entry)
   // for data, we skip the event in case it doesn't pass the lumi mask
   if(!isMC && lumiMask(*run, *luminosityBlock) == false) return false;
 
+
   // number of candidates in the event
   UInt_t nCand_sig = *nBToMuMuPi; 
 
@@ -452,6 +461,10 @@ Bool_t BToMuMuPiDumper::Process(Long64_t entry)
     vector<pair<int,float>> pair_candIdx_desc_cos2d_sign_matched_sig = updatePairWithDesc(pair_candIdx_desc_cos2d_sign_sig, BToMuMuPi_isMatched);
     stable_sort(pair_candIdx_desc_cos2d_sign_matched_sig.begin(), pair_candIdx_desc_cos2d_sign_matched_sig.end(), sortcansbydesc);
 
+    // - priviledge slimmed over dsa candidates
+    vector<pair<int,float>> pair_candIdx_desc_cos2d_sign_matched_muon_sig = updatePairWithDesc(pair_candIdx_desc_cos2d_sign_sig, BToMuMuPi_sel_mu_idx, Muon_isDSAMuon);
+    stable_sort(pair_candIdx_desc_cos2d_sign_matched_muon_sig.begin(), pair_candIdx_desc_cos2d_sign_matched_muon_sig.end(), sortcansbydesc_opp);
+
     // - and select the candidate
     UInt_t selectedCandIdx_sig = pair_candIdx_desc_cos2d_sign_matched_sig[0].first;
 
@@ -470,6 +483,9 @@ Bool_t BToMuMuPiDumper::Process(Long64_t entry)
       // fill the signal_tree
       //std::cout << "check " << BToMuMuPi_trg_mu_pt[selectedCandIdx_sig]-Muon_pt[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]] << std::endl;
       if(BToMuMuPi_trg_mu_pt[selectedCandIdx_sig] == Muon_pt[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]]){ // temporary condition, skip events with faulty indexing
+
+        //if(Muon_isDSAMuon[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]]==1) return false;
+
         the_sig_b_pt = BToMuMuPi_pt[selectedCandIdx_sig];
         the_sig_b_eta = BToMuMuPi_eta[selectedCandIdx_sig];
         the_sig_b_phi = BToMuMuPi_phi[selectedCandIdx_sig];
@@ -560,6 +576,13 @@ Bool_t BToMuMuPiDumper::Process(Long64_t entry)
         the_sig_mu_dxysig = Muon_dxyS[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
         the_sig_mu_dz = Muon_dz[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
         the_sig_mu_dzsig = Muon_dzS[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
+        the_sig_mu_ismatchedtoslimmedmuon = Muon_isMatchedToSlimmedMuon[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
+        the_sig_mu_indexmatchedslimmedmuon = Muon_indexMatchedSlimmedMuon[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
+        the_sig_mu_dsatoslimmedmatching_deltar = Muon_dsaToSlimmedMatching_deltaR[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
+        the_sig_mu_dsatoslimmedmatching_deltaptrel = Muon_dsaToSlimmedMatching_deltaPtRel[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
+        the_sig_mu_dsatoslimmedmatching_deltadxyrel = Muon_dsaToSlimmedMatching_deltadxyRel[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
+        the_sig_mu_dsatoslimmedmatching_deltadzrel = Muon_dsaToSlimmedMatching_deltadzRel[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
+        the_sig_mu_passdsaid = Muon_passDSAMuonID[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
         //the_sig_mu_ip3d = Muon_ip3d[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
         //the_sig_mu_ip3dsig = Muon_sip3d[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
         the_sig_mu_pfiso03 = Muon_pfiso03_all[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
@@ -684,6 +707,7 @@ Bool_t BToMuMuPiDumper::Process(Long64_t entry)
 
 
         // getting the displacement at gen level
+        /*
         if(isMC){
           UInt_t nGen = *nGenPart;
 
@@ -791,9 +815,12 @@ Bool_t BToMuMuPiDumper::Process(Long64_t entry)
             the_gen_pi_vz = GenPart_vz[gen_pi_idx];
           }
         }
+        */
 
         // trigger scale factor
+        //the_sig_weight_hlt = isMC ? getTriggerScaleFactor(the_sig_trgmu_pt, fabs(the_sig_trgmu_dxysig), fabs(the_sig_trgmu_eta)) : 1.;
         the_sig_weight_hlt = isMC ? getTriggerScaleFactor(the_sig_trgmu_pt, fabs(the_sig_trgmu_eta)) : 1.;
+        //the_sig_weight_hlt = isMC ? getTriggerScaleFactor(the_sig_trgmu_pt, fabs(the_sig_trgmu_dxysig)) : 1.;
 
         signal_tree->Fill();
       } // end bpark line fired
