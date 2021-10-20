@@ -156,6 +156,13 @@ public :
    TTreeReaderValue<UInt_t> nMuon = {fReader, "nMuon"};
    TTreeReaderArray<Int_t> Muon_isSlimmedMuon = {fReader, "Muon_isSlimmedMuon"};
    TTreeReaderArray<Int_t> Muon_isDSAMuon = {fReader, "Muon_isDSAMuon"};
+   TTreeReaderArray<Int_t> Muon_isMatchedToSlimmedMuon = {fReader, "Muon_isMatchedToSlimmedMuon"};
+   TTreeReaderArray<Int_t> Muon_indexMatchedSlimmedMuon = {fReader, "Muon_indexMatchedSlimmedMuon"};
+   TTreeReaderArray<Int_t> Muon_passDSAMuonID = {fReader, "Muon_passDSAMuonID"};
+   TTreeReaderArray<Float_t> Muon_dsaToSlimmedMatching_deltaR = {fReader, "Muon_dsaToSlimmedMatching_deltaR"};
+   TTreeReaderArray<Float_t> Muon_dsaToSlimmedMatching_deltaPtRel = {fReader, "Muon_dsaToSlimmedMatching_deltaPtRel"};
+   TTreeReaderArray<Float_t> Muon_dsaToSlimmedMatching_deltadxyRel = {fReader, "Muon_dsaToSlimmedMatching_deltadxyRel"};
+   TTreeReaderArray<Float_t> Muon_dsaToSlimmedMatching_deltadzRel = {fReader, "Muon_dsaToSlimmedMatching_deltadzRel"};
    TTreeReaderArray<Float_t> Muon_caloCompatibility = {fReader, "Muon_caloCompatibility"};
    TTreeReaderArray<Float_t> Muon_dxy = {fReader, "Muon_dxy"};
    TTreeReaderArray<Float_t> Muon_dxyS = {fReader, "Muon_dxyS"};
@@ -465,6 +472,13 @@ public :
    Float_t the_sig_mu_dxysig = -99.;
    Float_t the_sig_mu_dz = -99.;
    Float_t the_sig_mu_dzsig = -99.;
+   Int_t the_sig_mu_ismatchedtoslimmedmuon = -99;
+   Int_t the_sig_mu_indexmatchedslimmedmuon = -99;
+   Float_t the_sig_mu_dsatoslimmedmatching_deltar = -99;
+   Float_t the_sig_mu_dsatoslimmedmatching_deltaptrel = -99;
+   Float_t the_sig_mu_dsatoslimmedmatching_deltadxyrel = -99;
+   Float_t the_sig_mu_dsatoslimmedmatching_deltadzrel = -99;
+   Int_t the_sig_mu_passdsaid = -99;
    //Float_t the_sig_mu_ip3d = -99.;
    //Float_t the_sig_mu_ip3dsig = -99.;
    Float_t the_sig_mu_pfiso03 = -99.;
