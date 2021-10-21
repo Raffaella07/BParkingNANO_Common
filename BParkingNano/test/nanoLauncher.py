@@ -29,6 +29,7 @@ def getOptions():
   parser.add_argument('--dohnl'             , dest='dohnl'       , help='run the HNLToMuMuPi process'                                    , action='store_true', default=False)
   parser.add_argument('--dotageprobe'       , dest='dotageprobe' , help='run the JpsiToMuMu process (tag and probe study)'               , action='store_true', default=False)
   parser.add_argument('--doquick'           , dest='doquick'     , help='[optional] run the jobs on the quick partition (t/job<1h)'      , action='store_true', default=False)
+  parser.add_argument('--dolong'            , dest='dolong'      , help='[optional] run the jobs on the long  partition (t/job<7days)'   , action='store_true', default=False)
   parser.add_argument('--dosplitflat'       , dest='dosplitflat' , help='[optional] run the dumper with one job per nano file'           , action='store_true', default=False)
   parser.add_argument('--docompile'         , dest='docompile'   , help='[optional] compile the full BParkingNano tool'                  , action='store_true', default=False)
   return parser.parse_args()
@@ -81,6 +82,7 @@ class NanoLauncher(NanoTools):
     self.dohnl       = vars(opt)["dohnl"]
     self.dotageprobe = vars(opt)["dotageprobe"]
     self.doquick     = vars(opt)["doquick"]
+    self.dolong      = vars(opt)["dolong"]
     self.dosplitflat = vars(opt)["dosplitflat"]
     self.docompile   = vars(opt)["docompile"]
 
@@ -201,7 +203,7 @@ class NanoLauncher(NanoTools):
           '#include "TProof.h"\n',
           'void starter(){',
           '  TString outFileName = "flat_bparknano.root";',
-          '  {addMC}'.format(addMC = '' if (self.data or self.dotageprobe) else 'outFileName += "_isMC";'),
+          '  {addMC}'.format(addMC = '' if self.data else 'outFileName += "_isMC";'),
           '  {addevt}'.format(addevt = event_chain),
           '  {addrun}'.format(addrun = '' if (self.data or self.dotageprobe) else run_chain),
           '}',
@@ -294,11 +296,11 @@ class NanoLauncher(NanoTools):
     tag = NanoTools.getTag(self, self.tagnano, self.tagflat)
 
     slurm_options = '-p {part} --account=t3 -o {ld}/{ln} -e {ld}/{ln} --job-name=dumperstep_{pl} --time={hh}:00:00 {dp}'.format(
-      part    = 'standard' if not self.doquick else 'short', 
+      part    = 'standard' if not self.doquick and not self.dolong else ('short' if self.doquick else 'long'), 
       ln      = 'dumperstep.log' if not self.dosplitflat else 'dumperstep_nj%a.log',
       ld      = logdir,
       pl      = label if not self.dosplitflat else label+'%a',
-      hh      = 10 if not self.doquick else 1,
+      hh      = 10 if not self.doquick and not self.dolong else (1 if self.doquick else '7-00'),
       dp      = ('--dependency=afterany:{}'.format(jobId) if jobId != -99 else '') if not self.dosplitflat else '--array 1-{}'.format(nfiles),
       )
 
