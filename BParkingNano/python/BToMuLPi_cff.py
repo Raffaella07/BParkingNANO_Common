@@ -3,7 +3,7 @@ from PhysicsTools.BParkingNano.common_cff import uint, ufloat, Var, CandVars
 
 BToMuMuPi = cms.EDProducer(
     'BToMuMuPiBuilder',
-    trgMuons                = cms.InputTag('muonTrgSelector', 'trgMuons'),
+    trgMuons                = cms.InputTag('muonTrgSelector','SelectedMuons'),
     leptons                = cms.InputTag('muonTrgSelector', 'SelectedMuons'), 
     leptonsTransientTracks = cms.InputTag('muonTrgSelector', 'SelectedTransientMuons'), 
     pions                   = cms.InputTag('tracksBPark', 'SelectedTracks'),
@@ -14,6 +14,7 @@ BToMuMuPi = cms.EDProducer(
     beamSpot                = cms.InputTag('offlineBeamSpot'), 
 
     isMC = cms.bool(False),
+    label = cms.string("muon"),
 
     # pre-fitter preselection
     pionSelection           = cms.string('pt > 0.55 && abs(eta)<2'), # pion preselection to be modified here 
@@ -80,11 +81,11 @@ BToMuMuPiTable = cms.EDProducer(
         trg_mu_eta      = ufloat('trg_muon_eta'  ), 
         trg_mu_phi      = ufloat('trg_muon_phi'  ), 
         ## vertex difference between the two muons
-        #dimu_vxdiff     = ufloat('dimuon_vxdiff' ),
-        #dimu_vydiff     = ufloat('dimuon_vydiff' ),
-        #dimu_vzdiff     = ufloat('dimuon_vzdiff' ),
-        #dimu_Lxy        = ufloat('dimuon_Lxy'    ),
-        #dimu_Lxyz       = ufloat('dimuon_Lxyz'   ),
+        dimu_vxdiff     = ufloat('dilepton_vxdiff' ),
+        dimu_vydiff     = ufloat('dilepton_vydiff' ),
+        dimu_vzdiff     = ufloat('dilepton_vzdiff' ),
+        dimu_Lxy        = ufloat('dilepton_Lxy'    ),
+        dimu_Lxyz       = ufloat('dilepton_Lxyz'   ),
         ## vertex difference between the trigger muon and pion
     #    pi_mu_vzdiff    = ufloat('pion_muon_vzdiff'  ),
         # post-fit quantities
@@ -108,6 +109,7 @@ BToMuMuPiTable = cms.EDProducer(
         hnl_phi         = ufloat('hnl_fitted_phi'    ),
         hnl_charge      = Var('daughter("hnl").charge()', int),
         hnl_cos2D       = ufloat('hnl_fitted_cos_theta_2D'   ),
+        hnl_cos2D_star  = ufloat('hnl_fitted_cos_theta_2D_star'   ),
         ## daughter muon
         fit_mu_pt       = ufloat('hnl_fitted_lep_pt'  ), 
         fit_mu_eta      = ufloat('hnl_fitted_lep_eta' ),
@@ -132,8 +134,8 @@ BToMuMuPiTable = cms.EDProducer(
     #    trg_mu_sip3d    = ufloat('trg_muon_sip3d' ), 
         trg_mu_dxy      = ufloat('trg_muon_dxy'   ), 
         trg_mu_dz       = ufloat('trg_muon_dz'    ), 
-        sel_mu_ip3d     = ufloat('sel_lep_ip3d'  ), 
-        sel_mu_sip3d    = ufloat('sel_lep_sip3d' ), 
+  #      sel_mu_ip3d     = ufloat('sel_lep_ip3d'  ), 
+   #     sel_mu_sip3d    = ufloat('sel_lep_sip3d' ), 
         sel_mu_dxy      = ufloat('sel_lep_dxy'   ), 
         sel_mu_dz       = ufloat('sel_lep_dz'    ), 
         pi_dz           = ufloat('pion_dz'        ), 
@@ -182,7 +184,7 @@ BToMuMuPiTable = cms.EDProducer(
 #count Mu
 BToMuEPi = cms.EDProducer(
     'BToMuEPiBuilder',
-    trgMuons                = cms.InputTag('muonTrgSelector', 'trgMuons'),
+    trgMuons                = cms.InputTag('muonTrgSelector', 'SelectedMuons'),
     leptons                 = cms.InputTag('electronsForAnalysis', 'SelectedElectrons'), 
     leptonsTransientTracks  = cms.InputTag('electronsForAnalysis','SelectedTransientElectrons'), 
     pions                   = cms.InputTag('tracksBPark', 'SelectedTracks'),
@@ -193,6 +195,7 @@ BToMuEPi = cms.EDProducer(
     beamSpot                = cms.InputTag('offlineBeamSpot'), 
 
     isMC = cms.bool(False),
+    label = cms.string("ele"),
 
     # pre-fitter preselection
     pionSelection           = cms.string('pt > 0.7 && abs(eta)<2'), # pion preselection to be modified here 
@@ -260,12 +263,12 @@ BToMuEPiTable = cms.EDProducer(
         trg_mu_eta      = ufloat('trg_muon_eta'  ), 
         trg_mu_phi      = ufloat('trg_muon_phi'  ), 
         ## vertex difference between the two muons
-       #dimu_vxdiff     = ufloat('dimuon_vxdiff' ),
-       #dimu_vydiff     = ufloat('dimuon_vydiff' ),
-       #dimu_vzdiff     = ufloat('dimuon_vzdiff' ),
-       #dimu_Lxy        = ufloat('dimuon_Lxy'    ),
-       #dimu_Lxyz       = ufloat('dimuon_Lxyz'   ),
-        ## vertex difference between the trigger muon and pion
+        dilep_vxdiff     = ufloat('dilepton_vxdiff' ),
+        dilep_vydiff     = ufloat('dilepton_vydiff' ),
+        dilep_vzdiff     = ufloat('dilepton_vzdiff' ),
+        dilep_Lxy        = ufloat('dilepton_Lxy'    ),
+        dilep_Lxyz       = ufloat('dilepton_Lxyz'   ),
+       ### vertex difference between the trigger muon and pion
         #pi_mu_vzdiff    = ufloat('pion_muon_vzdiff'  ),
         # post-fit quantities
         ## vertex information 
@@ -288,6 +291,7 @@ BToMuEPiTable = cms.EDProducer(
         hnl_phi         = ufloat('hnl_fitted_phi'    ),
         hnl_charge      = Var('daughter("hnl").charge()', int),
         hnl_cos2D       = ufloat('hnl_fitted_cos_theta_2D'   ),
+        hnl_cos2D_star  = ufloat('hnl_fitted_cos_theta_2D_star'),
         ## daughter muon
         fit_e_pt       = ufloat('hnl_fitted_lep_pt'  ), 
         fit_e_eta      = ufloat('hnl_fitted_lep_eta' ),
@@ -304,12 +308,12 @@ BToMuEPiTable = cms.EDProducer(
         # Other quantities
         ## ID WP of the selected ele 
         ## impact paramaters
-        #trg_mu_ip3d     = ufloat('trg_muon_ip3d'  ), 
-        #trg_mu_sip3d    = ufloat('trg_muon_sip3d' ), 
+      #  trg_mu_ip3d     = ufloat('trg_muon_ip3d'  ), 
+       # trg_mu_sip3d    = ufloat('trg_muon_sip3d' ), 
         trg_mu_dxy      = ufloat('trg_muon_dxy'   ), 
         trg_mu_dz       = ufloat('trg_muon_dz'    ), 
-        sel_ele_ip3d     = ufloat('sel_lep_ip3d'  ), 
-        sel_ele_sip3d    = ufloat('sel_lep_sip3d' ), 
+       # sel_ele_ip3d     = ufloat('sel_lep_ip3d'  ), 
+      #  sel_ele_sip3d    = ufloat('sel_lep_sip3d' ), 
         sel_ele_dxy      = ufloat('sel_lep_dxy'   ), 
         sel_ele_dz       = ufloat('sel_lep_dz'    ), 
         pi_dz           = ufloat('pion_dz'        ), 
