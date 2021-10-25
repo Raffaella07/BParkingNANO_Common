@@ -49,6 +49,11 @@ PerigeeKinematicState TransientTrackKinematicStateBuilder::operator()(const Kine
                                                                   const GlobalPoint& point)const
 {
  KinematicState nState = propagator.propagateToTheTransversePCA(state, point);
+ bool valid = nState.isValid();
+ if (!valid){
+   std::cout <<"Propagated state not valid. Will use the initial state\n";
+   return PerigeeKinematicState(state, point);
+ }
  return PerigeeKinematicState(nState, point);
 }	
 

@@ -11,33 +11,35 @@
 
 namespace reco {
   template<typename T1, typename T2>
-  class MCMatchSelector {
-  public:
-    MCMatchSelector(const edm::ParameterSet& cfg) : 
-      checkCharge_(cfg.getParameter<bool>("checkCharge")) { 
-      std::vector<int> ids = 
-	cfg.getParameter< std::vector<int> >("mcPdgId");
-      for ( std::vector<int>::const_iterator i=ids.begin();
-	    i!=ids.end(); ++i )  ids_.insert(*i);
-      std::vector<int> status = 
-	cfg.getParameter< std::vector<int> >("mcStatus");
-      for ( std::vector<int>::const_iterator i=status.begin();
-	    i!=status.end(); ++i )  status_.insert(*i);
-    }
-    /// true if match is possible
-    bool operator()( const T1 & c, const T2 & mc ) const {
-      if ( checkCharge_ && c.charge() != mc.charge() ) return false;
-      if ( !ids_.empty() ) {
-	if ( ids_.find(abs(mc.pdgId()))==ids_.end() )  return false;
-      }
-      if ( status_.empty() )  return true;
-      return status_.find(mc.status())!=status_.end();
-    }
-  private:
-    bool checkCharge_;
-    std::set<int> ids_;
-    std::set<int> status_;
-  };
+    class MCMatchSelector {
+      public:
+        MCMatchSelector(const edm::ParameterSet& cfg) : 
+          checkCharge_(cfg.getParameter<bool>("checkCharge")) { 
+            std::vector<int> ids = cfg.getParameter< std::vector<int> >("mcPdgId");
+            for ( std::vector<int>::const_iterator i=ids.begin(); i!=ids.end(); ++i ) ids_.insert(*i);
+            std::vector<int> status = cfg.getParameter< std::vector<int> >("mcStatus");
+            for ( std::vector<int>::const_iterator i=status.begin(); i!=status.end(); ++i ) status_.insert(*i);
+            std::vector<int> mother_ids = cfg.getParameter< std::vector<int> >("motherPdgId");
+            for ( std::vector<int>::const_iterator i=mother_ids.begin(); i!=mother_ids.end(); ++i ) mother_ids_.insert(*i);
+          }
+        /// true if match is possible
+        bool operator()( const T1 & c, const T2 & mc ) const {
+          if ( checkCharge_ && c.charge() != mc.charge() ) return false;
+          if ( !ids_.empty() ) {
+            if ( ids_.find(abs(mc.pdgId()))==ids_.end() )  return false;
+          }
+          if ( !mother_ids_.empty() ) {
+            if ( mother_ids_.find(abs(mc.mother()->pdgId()))==mother_ids_.end() )  return false;
+          }
+          if ( status_.empty() )  return true;
+          return status_.find(mc.status())!=status_.end();
+        }
+      private:
+        bool checkCharge_;
+        std::set<int> ids_;
+        std::set<int> mother_ids_;
+        std::set<int> status_;
+    };
 }
 
 #endif

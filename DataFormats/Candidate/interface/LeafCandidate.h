@@ -88,7 +88,7 @@ namespace reco {
     }
 
     /// electric charge
-    int charge() const final { return m_state.charge(); }
+    int charge() const override { return m_state.charge(); }
     /// set electric charge                                                               
     void setCharge( Charge q ) final { m_state.setCharge(q); }
     /// electric charge                                                                   
@@ -96,9 +96,9 @@ namespace reco {
     /// set electric charge                                                               
     void setThreeCharge( Charge qx3 ) final {m_state.setThreeCharge(qx3); }
     /// four-momentum Lorentz vector                                                      
-    const LorentzVector & p4() const final { return m_state.p4(); }
+    const LorentzVector & p4() const override { return m_state.p4(); }
     /// four-momentum Lorentz vector                                                      
-    const PolarLorentzVector & polarP4() const final { return m_state.polarP4(); }
+    const PolarLorentzVector & polarP4() const override { return m_state.polarP4(); }
     /// spatial momentum vector                                                           
     Vector momentum() const final { return m_state.momentum(); }
     /// boost vector to boost a Lorentz vector                                            
@@ -113,7 +113,7 @@ namespace reco {
     /// transverse energy squared (use this for cut!)                                                                 
     double et2() const final { return m_state.et2(); }
     /// mass                                                                              
-    double mass() const final { return m_state.mass(); }
+    double mass() const override { return m_state.mass(); }
     /// mass squared                                                                      
     double massSqr() const final { return mass() * mass(); }
 
@@ -128,13 +128,14 @@ namespace reco {
     /// z coordinate of momentum vector                                                   
     double pz() const final  {  return m_state.pz(); }
     /// transverse momentum                                                               
-    double pt() const final  { return m_state.pt();}
+    //double pt() const final  { return m_state.pt();}
+    double pt() const override { return m_state.pt();}
     /// momentum azimuthal angle                                                          
-    double phi() const final  { return m_state.phi(); }
+    double phi() const override  { return m_state.phi(); }
     /// momentum polar angle                                                              
     double theta() const final  {  return m_state.theta(); }
     /// momentum pseudorapidity                                                           
-     double eta() const final  { return m_state.eta(); }
+     double eta() const override  { return m_state.eta(); }
     /// rapidity                                                                          
     double rapidity() const final  {  return m_state.rapidity(); }
     /// rapidity                                                                          

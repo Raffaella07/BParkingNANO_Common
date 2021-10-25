@@ -20,7 +20,9 @@
 #include "DataFormats/Common/interface/Association.h"
 #include "CommonTools/UtilAlgos/interface/MatchByDR.h"
 
-// #include <iostream>
+#include <iostream>
+
+//using namespace std;
 
 namespace reco {
 
@@ -79,12 +81,13 @@ namespace reco {
     bool resolveByMatchQuality_;         // resolve by (global) quality
                                          //   of match (otherwise: by order
                                          //   of test candidates)
+    //double minPt_, maxEta_;
     bool select(const T1 & c1, const T2 & c2) const {
       return select_(c1, c2);
     }
     S select_;
     D distance_;
-//     DeltaR<typename C1::value_type, typename C2::value_type> testDR_;
+    DeltaR<typename C1::value_type, typename C2::value_type> testDR_;
   };
 
   template<typename C1, typename C2, typename S, typename D, typename Q>
@@ -94,6 +97,8 @@ namespace reco {
     matchedToken_(consumes<C2>(cfg.template getParameter<edm::InputTag>("matched"))),
     resolveAmbiguities_(cfg.template getParameter<bool>("resolveAmbiguities")),
     resolveByMatchQuality_(cfg.template getParameter<bool>("resolveByMatchQuality")),
+    //minPt_(cfg.template getParameter<double>("minPt")),
+    //maxEta_(cfg.template getParameter<double>("maxEta")),
     select_(reco::modules::make<S>(cfg)),
     distance_(reco::modules::make<D>(cfg)) {
     // definition of the product
@@ -132,19 +137,25 @@ namespace reco {
       // loop over candidates
       for(size_t c = 0; c != size; ++ c) {
 	const T1 & cand = (*cands)[c];
+  //if(cand.pt() < minPt_) continue;
+  //if(abs(cand.eta()) > maxEta_) continue;
 	// no global comparison of match quality -> reset the container for each candidate
 	if ( !resolveByMatchQuality_ )  matchPairs.clear();
 	// loop over target collection
 	for(size_t m = 0; m != matched->size(); ++m) {
 	  const T2 & match = (* matched)[m];
 	  // check lock and preselection
+    //if(minPt_== 0.1) std::cout << minPt_ << " (" << c << ", " << m << ") pt " << cand.pt() << " eta " << cand.eta() << " gen pt " << match.pt() << " gen eta " << match.eta() << " dist " << testDR_(cand,match) << std::endl;
 	  if ( !mLock[m] && select(cand, match)) {
 //  	    double dist = testDR_(cand,match);
 //   	    cout << "dist between c = " << c << " and m = "
 //   		 << m << " is " << dist << " at pts of "
 //  		 << cand.pt() << " " << match.pt() << endl;
 	    // matching requirement fulfilled -> store pair of indices
-	    if ( distance_(cand,match) )  matchPairs.push_back(make_pair(c,m));
+	    if ( distance_(cand,match) ){
+        //std::cout << minPt_ << " (" << c << ", " << m << ") pt " << cand.pt() << " eta " << cand.eta() << std::endl;
+        matchPairs.push_back(make_pair(c,m));
+      }
 	  }
 	}
 	// if match(es) found and no global ambiguity resolution requested
@@ -154,6 +165,7 @@ namespace reco {
 	  assert(idx < indices.size());
 	  size_t index = min_element(matchPairs.begin(), matchPairs.end(), comparator)->second;
 	  indices[idx] = index;
+    //std::cout << "c idx " << idx << " gen idx " << index << std::endl;
 	  // if ambiguity resolution by order of (reco) candidates:
 	  //   lock element in target collection
 	  if ( resolveAmbiguities_ )  mLock[index] = true;
@@ -175,6 +187,11 @@ namespace reco {
 	      i!=matchPairs.end(); ++i ) {
 	  size_t c = (*i).first;
 	  size_t m = (*i).second;
+	  const T1 & cand = (*cands)[c];
+	  const T2 & match = (* matched)[m];
+    //if(cand.pt() < minPt_) continue;
+    //if(abs(cand.eta()) > maxEta_) continue;
+    //std::cout << "idx " << m << std::endl;
 // 	  cout << "rel dp = " << ((*cands)[c].pt()-(*matched)[m].pt())/(*matched)[m].pt() << endl;
 	  // accept only pairs without any lock
 	  if ( mLock[m] || cLock[c] )  continue;
@@ -182,6 +199,8 @@ namespace reco {
 	  size_t idx = master.index(c);
 	  assert(idx < indices.size());
 	  indices[idx] = m;
+    //std::cout << minPt_ << " " << maxEta_ << std::endl;
+    //std::cout << "gen idx " << m << " cand pt " << cand.pt() << " cand eta " << cand.eta() << " gen pt " << match.pt() << " gen eta " << match.eta() << std::endl;
 	  mLock[m] = true;
 	  cLock[c] = true;
 	}
