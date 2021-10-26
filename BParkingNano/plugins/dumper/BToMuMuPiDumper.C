@@ -468,362 +468,312 @@ Bool_t BToMuMuPiDumper::Process(Long64_t entry)
     // - and select the candidate
     UInt_t selectedCandIdx_sig = pair_candIdx_desc_cos2d_sign_matched_sig[0].first;
 
-    // make sure that a BParking line is fired
-    if(Muon_fired_HLT_Mu7_IP4[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]] == 1 ||
-        Muon_fired_HLT_Mu8_IP3[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]] == 1 ||
-        Muon_fired_HLT_Mu8_IP5[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]] == 1 ||
-        Muon_fired_HLT_Mu8_IP6[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]] == 1 ||
-        Muon_fired_HLT_Mu8p5_IP3p5[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]] == 1 ||
-        Muon_fired_HLT_Mu9_IP4[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]] == 1 ||
-        Muon_fired_HLT_Mu9_IP5[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]] == 1 ||
-        Muon_fired_HLT_Mu9_IP6[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]] == 1 ||
-        Muon_fired_HLT_Mu10p5_IP3p5[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]] == 1 ||
-        Muon_fired_HLT_Mu12_IP6[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]] == 1)
-    {
-      // fill the signal_tree
-      //std::cout << "check " << BToMuMuPi_trg_mu_pt[selectedCandIdx_sig]-Muon_pt[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]] << std::endl;
-      if(BToMuMuPi_trg_mu_pt[selectedCandIdx_sig] == Muon_pt[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]]){ // temporary condition, skip events with faulty indexing
+    // fill the signal_tree
+    if(BToMuMuPi_trg_mu_pt[selectedCandIdx_sig] == Muon_pt[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]]){ // temporary condition, skip events with faulty indexing
+      the_sig_b_pt = BToMuMuPi_pt[selectedCandIdx_sig];
+      the_sig_b_eta = BToMuMuPi_eta[selectedCandIdx_sig];
+      the_sig_b_phi = BToMuMuPi_phi[selectedCandIdx_sig];
+      the_sig_b_mass = BToMuMuPi_mass[selectedCandIdx_sig];
+      the_sig_b_charge = BToMuMuPi_charge[selectedCandIdx_sig];
+      the_sig_b_pdgid = BToMuMuPi_pdgId[selectedCandIdx_sig];
 
-        //if(Muon_isDSAMuon[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]]==1) return false;
+      the_sig_hnl_pt = BToMuMuPi_hnl_pt[selectedCandIdx_sig];
+      the_sig_hnl_eta = BToMuMuPi_hnl_eta[selectedCandIdx_sig];
+      the_sig_hnl_phi = BToMuMuPi_hnl_phi[selectedCandIdx_sig];
+      the_sig_hnl_mass = BToMuMuPi_hnl_mass[selectedCandIdx_sig];
+      the_sig_hnl_charge = BToMuMuPi_hnl_charge[selectedCandIdx_sig];
+      the_sig_hnl_ct = BToMuMuPi_hnl_ct[selectedCandIdx_sig];
+      the_sig_hnl_cos2d = BToMuMuPi_hnl_cos2D[selectedCandIdx_sig];
+      the_sig_hnl_iso03 = BToMuMuPi_hnl_iso03[selectedCandIdx_sig];
+      the_sig_hnl_iso03_close = BToMuMuPi_hnl_iso03_close[selectedCandIdx_sig];
+      the_sig_hnl_iso03_rel_close = BToMuMuPi_hnl_iso03_rel_close[selectedCandIdx_sig];
+      the_sig_hnl_iso04 = BToMuMuPi_hnl_iso04[selectedCandIdx_sig];
+      the_sig_hnl_iso04_close = BToMuMuPi_hnl_iso04_close[selectedCandIdx_sig];
+      the_sig_hnl_iso04_rel_close = BToMuMuPi_hnl_iso04_rel_close[selectedCandIdx_sig];
 
-        the_sig_b_pt = BToMuMuPi_pt[selectedCandIdx_sig];
-        the_sig_b_eta = BToMuMuPi_eta[selectedCandIdx_sig];
-        the_sig_b_phi = BToMuMuPi_phi[selectedCandIdx_sig];
-        the_sig_b_mass = BToMuMuPi_mass[selectedCandIdx_sig];
-        the_sig_b_charge = BToMuMuPi_charge[selectedCandIdx_sig];
-        the_sig_b_pdgid = BToMuMuPi_pdgId[selectedCandIdx_sig];
+      the_sig_trgmu_pt = BToMuMuPi_trg_mu_pt[selectedCandIdx_sig];
+      //the_sig_trgmu_pt = Muon_pt[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
+      the_sig_trgmu_eta = BToMuMuPi_trg_mu_eta[selectedCandIdx_sig];
+      //the_sig_trgmu_eta = Muon_eta[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
+      the_sig_trgmu_phi = BToMuMuPi_trg_mu_phi[selectedCandIdx_sig];
+      //the_sig_trgmu_phi = Muon_phi[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
+      the_sig_trgmu_charge = Muon_charge[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
+      the_sig_trgmu_dxy = Muon_dxy[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
+      the_sig_trgmu_dxysig = Muon_dxyS[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
+      the_sig_trgmu_dz = Muon_dz[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
+      the_sig_trgmu_dzsig = Muon_dzS[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
+      //the_sig_trgmu_ip3d = Muon_ip3d[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
+      //the_sig_trgmu_ip3dsig = Muon_sip3d[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
+      the_sig_trgmu_pfiso03 = Muon_pfiso03_all[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
+      the_sig_trgmu_pfiso03_rel = Muon_pfiso03Rel_all[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
+      the_sig_trgmu_iso03 = BToMuMuPi_trg_mu_iso03[selectedCandIdx_sig];
+      the_sig_trgmu_iso03_close = BToMuMuPi_trg_mu_iso03_close[selectedCandIdx_sig];
+      the_sig_trgmu_iso03_rel_close = BToMuMuPi_trg_mu_iso03_rel_close[selectedCandIdx_sig];
+      the_sig_trgmu_pfiso04 = Muon_pfiso04_all[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
+      the_sig_trgmu_pfiso04_rel = Muon_pfiso04Rel_all[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
+      the_sig_trgmu_iso04 = BToMuMuPi_trg_mu_iso04[selectedCandIdx_sig];
+      the_sig_trgmu_iso04_close = BToMuMuPi_trg_mu_iso04_close[selectedCandIdx_sig];
+      the_sig_trgmu_iso04_rel_close = BToMuMuPi_trg_mu_iso04_rel_close[selectedCandIdx_sig];
+      the_sig_trgmu_looseid = Muon_looseId[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
+      the_sig_trgmu_mediumid = Muon_mediumId[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
+      the_sig_trgmu_tightid = Muon_tightId[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
+      the_sig_trgmu_softid = Muon_softId[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
+      the_sig_trgmu_pfisoid = Muon_pfIsoId[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
+      the_sig_trgmu_trkisoid = Muon_tkIsoId[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
+      the_sig_trgmu_triggerlooseid = Muon_triggerIdLoose[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
+      the_sig_trgmu_istriggering = Muon_isTriggeringBPark[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
+      the_sig_trgmu_isPF = Muon_isPF[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
+      the_sig_trgmu_isglobalmuon = Muon_isGlobalMuon[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
+      the_sig_trgmu_istrackermuon = Muon_isTrackerMuon[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
+      the_sig_trgmu_isglobalortrackermuon = Muon_isGlobalOrTrackerMuon[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
+      the_sig_trgmu_isglobalnottrackermuon = Muon_isGlobalNotTrackerMuon[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
+      the_sig_trgmu_istrackernotglobalmuon = Muon_isTrackerNotGlobalMuon[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
+      the_sig_trgmu_intimemuon = Muon_inTimeMuon[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
+      the_sig_trgmu_segmentcompatibility = Muon_segmentCompatibility[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
+      the_sig_trgmu_calocompatibility = Muon_caloCompatibility[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
+      the_sig_trgmu_validhitfraction = Muon_validHitFraction[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
+      the_sig_trgmu_kinkfinderchi2 = Muon_kinkFinderChi2[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
+      the_sig_trgmu_globalnormalisedchi2 = Muon_globalNormalisedChi2[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
+      the_sig_trgmu_localpositionchi2 = Muon_localPositionChi2[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
+      the_sig_trgmu_trackerhighpurityflag = Muon_trackerHighPurityFlag[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
+      the_sig_trgmu_numberofvalidmuonhits = Muon_numberOfValidMuonHits[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
+      the_sig_trgmu_numberofvalidpixelhits = Muon_numberOfValidPixelHits[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
+      the_sig_trgmu_numberoftrackerlayers = Muon_numberOfTrackerLayers[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
+      the_sig_trgmu_numberofpixellayers = Muon_numberOfPixelLayers[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
+      the_sig_trgmu_numberofstations = Muon_numberOfStations[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
+      the_sig_trgmu_fired_hlt_mu7_ip4 = Muon_fired_HLT_Mu7_IP4[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
+      the_sig_trgmu_fired_hlt_mu8_ip3 = Muon_fired_HLT_Mu8_IP3[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
+      the_sig_trgmu_fired_hlt_mu8_ip5 = Muon_fired_HLT_Mu8_IP5[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
+      the_sig_trgmu_fired_hlt_mu8_ip6 = Muon_fired_HLT_Mu8_IP6[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
+      the_sig_trgmu_fired_hlt_mu8p5_ip3p5 = Muon_fired_HLT_Mu8p5_IP3p5[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
+      the_sig_trgmu_fired_hlt_mu9_ip4 = Muon_fired_HLT_Mu9_IP4[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
+      the_sig_trgmu_fired_hlt_mu9_ip5 = Muon_fired_HLT_Mu9_IP5[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
+      the_sig_trgmu_fired_hlt_mu9_ip6 = Muon_fired_HLT_Mu9_IP6[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
+      the_sig_trgmu_fired_hlt_mu10p5_ip3p5 = Muon_fired_HLT_Mu10p5_IP3p5[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
+      the_sig_trgmu_fired_hlt_mu12_ip6 = Muon_fired_HLT_Mu12_IP6[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
 
-        the_sig_hnl_pt = BToMuMuPi_hnl_pt[selectedCandIdx_sig];
-        the_sig_hnl_eta = BToMuMuPi_hnl_eta[selectedCandIdx_sig];
-        the_sig_hnl_phi = BToMuMuPi_hnl_phi[selectedCandIdx_sig];
-        the_sig_hnl_mass = BToMuMuPi_hnl_mass[selectedCandIdx_sig];
-        the_sig_hnl_charge = BToMuMuPi_hnl_charge[selectedCandIdx_sig];
-        the_sig_hnl_ct = BToMuMuPi_hnl_ct[selectedCandIdx_sig];
-        the_sig_hnl_cos2d = BToMuMuPi_hnl_cos2D[selectedCandIdx_sig];
-        the_sig_hnl_iso03 = BToMuMuPi_hnl_iso03[selectedCandIdx_sig];
-        the_sig_hnl_iso03_close = BToMuMuPi_hnl_iso03_close[selectedCandIdx_sig];
-        the_sig_hnl_iso03_rel_close = BToMuMuPi_hnl_iso03_rel_close[selectedCandIdx_sig];
-        the_sig_hnl_iso04 = BToMuMuPi_hnl_iso04[selectedCandIdx_sig];
-        the_sig_hnl_iso04_close = BToMuMuPi_hnl_iso04_close[selectedCandIdx_sig];
-        the_sig_hnl_iso04_rel_close = BToMuMuPi_hnl_iso04_rel_close[selectedCandIdx_sig];
+      the_sig_mu_pt = BToMuMuPi_fit_mu_pt[selectedCandIdx_sig];
+      the_sig_mu_eta = BToMuMuPi_fit_mu_eta[selectedCandIdx_sig];
+      the_sig_mu_phi = BToMuMuPi_fit_mu_phi[selectedCandIdx_sig]; 
+      the_sig_mu_charge = Muon_charge[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
+      the_sig_mu_dxy = Muon_dxy[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
+      the_sig_mu_dxysig = Muon_dxyS[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
+      the_sig_mu_dz = Muon_dz[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
+      the_sig_mu_dzsig = Muon_dzS[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
+      //the_sig_mu_ip3d = Muon_ip3d[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
+      //the_sig_mu_ip3dsig = Muon_sip3d[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
+      the_sig_mu_pfiso03 = Muon_pfiso03_all[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
+      the_sig_mu_pfiso03_rel = Muon_pfiso03Rel_all[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
+      the_sig_mu_iso03 = BToMuMuPi_sel_mu_iso03[selectedCandIdx_sig];
+      the_sig_mu_iso03_close = BToMuMuPi_sel_mu_iso03_close[selectedCandIdx_sig];
+      the_sig_mu_iso03_rel_close = BToMuMuPi_sel_mu_iso03_rel_close[selectedCandIdx_sig];
+      the_sig_mu_pfiso04 = Muon_pfiso04_all[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
+      the_sig_mu_pfiso04_rel = Muon_pfiso04Rel_all[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
+      the_sig_mu_iso04 = BToMuMuPi_sel_mu_iso04[selectedCandIdx_sig];
+      the_sig_mu_iso04_close = BToMuMuPi_sel_mu_iso04_close[selectedCandIdx_sig];
+      the_sig_mu_iso04_rel_close = BToMuMuPi_sel_mu_iso04_rel_close[selectedCandIdx_sig];
+      //the_sig_mu_isloose = BToMuMuPi_sel_mu_isLoose[selectedCandIdx_sig];
+      //the_sig_mu_ismedium = BToMuMuPi_sel_mu_isMedium[selectedCandIdx_sig];
+      //the_sig_mu_istight = BToMuMuPi_sel_mu_isTight[selectedCandIdx_sig];
+      //the_sig_mu_issoft = BToMuMuPi_sel_mu_isSoft[selectedCandIdx_sig];
+      the_sig_mu_looseid = Muon_looseId[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
+      the_sig_mu_mediumid = Muon_mediumId[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
+      the_sig_mu_tightid = Muon_tightId[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
+      the_sig_mu_softid = Muon_softId[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
+      the_sig_mu_pfisoid = Muon_pfIsoId[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
+      the_sig_mu_trkisoid = Muon_tkIsoId[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
+      the_sig_mu_triggerlooseid = Muon_triggerIdLoose[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
+      the_sig_mu_istriggering = Muon_isTriggeringBPark[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
+      the_sig_mu_isslimmed = Muon_isSlimmedMuon[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
+      the_sig_mu_isdsa = Muon_isDSAMuon[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
+      the_sig_mu_isPF = Muon_isPF[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
+      the_sig_mu_isglobalmuon = Muon_isGlobalMuon[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
+      the_sig_mu_istrackermuon = Muon_isTrackerMuon[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
+      the_sig_mu_isglobalortrackermuon = Muon_isGlobalOrTrackerMuon[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
+      the_sig_mu_isglobalnottrackermuon = Muon_isGlobalNotTrackerMuon[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
+      the_sig_mu_istrackernotglobalmuon = Muon_isTrackerNotGlobalMuon[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
+      the_sig_mu_intimemuon = Muon_inTimeMuon[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
+      the_sig_mu_segmentcompatibility = Muon_segmentCompatibility[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
+      the_sig_mu_calocompatibility = Muon_caloCompatibility[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
+      the_sig_mu_validhitfraction = Muon_validHitFraction[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
+      the_sig_mu_kinkfinderchi2 = Muon_kinkFinderChi2[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
+      the_sig_mu_globalnormalisedchi2 = Muon_globalNormalisedChi2[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
+      the_sig_mu_localpositionchi2 = Muon_localPositionChi2[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
+      the_sig_mu_trackerhighpurityflag = Muon_trackerHighPurityFlag[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
+      the_sig_mu_numberofvalidmuonhits = Muon_numberOfValidMuonHits[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
+      the_sig_mu_numberofvalidpixelhits = Muon_numberOfValidPixelHits[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
+      the_sig_mu_numberoftrackerlayers = Muon_numberOfTrackerLayers[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
+      the_sig_mu_numberofpixellayers = Muon_numberOfPixelLayers[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
+      the_sig_mu_numberofstations = Muon_numberOfStations[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
 
-        the_sig_trgmu_pt = BToMuMuPi_trg_mu_pt[selectedCandIdx_sig];
-        //the_sig_trgmu_pt = Muon_pt[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
-        the_sig_trgmu_eta = BToMuMuPi_trg_mu_eta[selectedCandIdx_sig];
-        //the_sig_trgmu_eta = Muon_eta[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
-        the_sig_trgmu_phi = BToMuMuPi_trg_mu_phi[selectedCandIdx_sig];
-        //the_sig_trgmu_phi = Muon_phi[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
-        the_sig_trgmu_charge = Muon_charge[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
-        the_sig_trgmu_dxy = Muon_dxy[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
-        the_sig_trgmu_dxysig = Muon_dxyS[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
-        the_sig_trgmu_dz = Muon_dz[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
-        the_sig_trgmu_dzsig = Muon_dzS[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
-        //the_sig_trgmu_ip3d = Muon_ip3d[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
-        //the_sig_trgmu_ip3dsig = Muon_sip3d[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
-        the_sig_trgmu_pfiso03 = Muon_pfiso03_all[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
-        the_sig_trgmu_pfiso03_rel = Muon_pfiso03Rel_all[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
-        the_sig_trgmu_iso03 = BToMuMuPi_trg_mu_iso03[selectedCandIdx_sig];
-        the_sig_trgmu_iso03_close = BToMuMuPi_trg_mu_iso03_close[selectedCandIdx_sig];
-        the_sig_trgmu_iso03_rel_close = BToMuMuPi_trg_mu_iso03_rel_close[selectedCandIdx_sig];
-        the_sig_trgmu_pfiso04 = Muon_pfiso04_all[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
-        the_sig_trgmu_pfiso04_rel = Muon_pfiso04Rel_all[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
-        the_sig_trgmu_iso04 = BToMuMuPi_trg_mu_iso04[selectedCandIdx_sig];
-        the_sig_trgmu_iso04_close = BToMuMuPi_trg_mu_iso04_close[selectedCandIdx_sig];
-        the_sig_trgmu_iso04_rel_close = BToMuMuPi_trg_mu_iso04_rel_close[selectedCandIdx_sig];
-        the_sig_trgmu_looseid = Muon_looseId[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
-        the_sig_trgmu_mediumid = Muon_mediumId[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
-        the_sig_trgmu_tightid = Muon_tightId[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
-        the_sig_trgmu_softid = Muon_softId[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
-        the_sig_trgmu_pfisoid = Muon_pfIsoId[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
-        the_sig_trgmu_trkisoid = Muon_tkIsoId[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
-        the_sig_trgmu_triggerlooseid = Muon_triggerIdLoose[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
-        the_sig_trgmu_istriggering = Muon_isTriggering[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
-        the_sig_trgmu_isPF = Muon_isPF[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
-        the_sig_trgmu_isglobalmuon = Muon_isGlobalMuon[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
-        the_sig_trgmu_istrackermuon = Muon_isTrackerMuon[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
-        the_sig_trgmu_isglobalortrackermuon = Muon_isGlobalOrTrackerMuon[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
-        the_sig_trgmu_isglobalnottrackermuon = Muon_isGlobalNotTrackerMuon[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
-        the_sig_trgmu_istrackernotglobalmuon = Muon_isTrackerNotGlobalMuon[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
-        the_sig_trgmu_intimemuon = Muon_inTimeMuon[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
-        the_sig_trgmu_segmentcompatibility = Muon_segmentCompatibility[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
-        the_sig_trgmu_calocompatibility = Muon_caloCompatibility[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
-        the_sig_trgmu_validhitfraction = Muon_validHitFraction[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
-        the_sig_trgmu_kinkfinderchi2 = Muon_kinkFinderChi2[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
-        the_sig_trgmu_globalnormalisedchi2 = Muon_globalNormalisedChi2[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
-        the_sig_trgmu_localpositionchi2 = Muon_localPositionChi2[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
-        the_sig_trgmu_trackerhighpurityflag = Muon_trackerHighPurityFlag[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
-        the_sig_trgmu_numberofvalidmuonhits = Muon_numberOfValidMuonHits[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
-        the_sig_trgmu_numberofvalidpixelhits = Muon_numberOfValidPixelHits[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
-        the_sig_trgmu_numberoftrackerlayers = Muon_numberOfTrackerLayers[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
-        the_sig_trgmu_numberofpixellayers = Muon_numberOfPixelLayers[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
-        the_sig_trgmu_numberofstations = Muon_numberOfStations[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
-        the_sig_trgmu_fired_hlt_mu7_ip4 = Muon_fired_HLT_Mu7_IP4[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
-        the_sig_trgmu_fired_hlt_mu8_ip3 = Muon_fired_HLT_Mu8_IP3[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
-        the_sig_trgmu_fired_hlt_mu8_ip5 = Muon_fired_HLT_Mu8_IP5[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
-        the_sig_trgmu_fired_hlt_mu8_ip6 = Muon_fired_HLT_Mu8_IP6[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
-        the_sig_trgmu_fired_hlt_mu8p5_ip3p5 = Muon_fired_HLT_Mu8p5_IP3p5[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
-        the_sig_trgmu_fired_hlt_mu9_ip4 = Muon_fired_HLT_Mu9_IP4[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
-        the_sig_trgmu_fired_hlt_mu9_ip5 = Muon_fired_HLT_Mu9_IP5[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
-        the_sig_trgmu_fired_hlt_mu9_ip6 = Muon_fired_HLT_Mu9_IP6[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
-        the_sig_trgmu_fired_hlt_mu10p5_ip3p5 = Muon_fired_HLT_Mu10p5_IP3p5[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
-        the_sig_trgmu_fired_hlt_mu12_ip6 = Muon_fired_HLT_Mu12_IP6[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
+      the_sig_pi_pt = BToMuMuPi_fit_pi_pt[selectedCandIdx_sig];
+      the_sig_pi_eta = BToMuMuPi_fit_pi_eta[selectedCandIdx_sig];
+      the_sig_pi_phi = BToMuMuPi_fit_pi_phi[selectedCandIdx_sig]; 
+      the_sig_pi_charge = ProbeTracks_charge[BToMuMuPi_pi_idx[selectedCandIdx_sig]];
+      the_sig_pi_dcasig = BToMuMuPi_pi_DCASig[selectedCandIdx_sig];
+      the_sig_pi_dxy = BToMuMuPi_pi_dxy[selectedCandIdx_sig];
+      the_sig_pi_dz = BToMuMuPi_pi_dz[selectedCandIdx_sig];
+      the_sig_pi_dxysig = BToMuMuPi_pi_dxyS[selectedCandIdx_sig];
+      the_sig_pi_dzsig = BToMuMuPi_pi_dzS[selectedCandIdx_sig];
+      the_sig_pi_iso03 = BToMuMuPi_pi_iso03[selectedCandIdx_sig];
+      the_sig_pi_iso03_close = BToMuMuPi_pi_iso03_close[selectedCandIdx_sig];
+      the_sig_pi_iso03_rel_close = BToMuMuPi_pi_iso03_rel_close[selectedCandIdx_sig];
+      the_sig_pi_iso04 = BToMuMuPi_pi_iso04[selectedCandIdx_sig];
+      the_sig_pi_iso04_close = BToMuMuPi_pi_iso04_close[selectedCandIdx_sig];
+      the_sig_pi_iso04_rel_close = BToMuMuPi_pi_iso04_rel_close[selectedCandIdx_sig];
+      the_sig_pi_ispacked = ProbeTracks_isPacked[BToMuMuPi_pi_idx[selectedCandIdx_sig]];
+      the_sig_pi_islost = ProbeTracks_isLostTrk[BToMuMuPi_pi_idx[selectedCandIdx_sig]];
+      the_sig_pi_trgmu_dr = ProbeTracks_drTrg[BToMuMuPi_pi_idx[selectedCandIdx_sig]];
+      the_sig_pi_ismatchedtomuon = ProbeTracks_isMatchedToMuon[BToMuMuPi_pi_idx[selectedCandIdx_sig]];
 
-        the_sig_mu_pt = BToMuMuPi_fit_mu_pt[selectedCandIdx_sig];
-        the_sig_mu_eta = BToMuMuPi_fit_mu_eta[selectedCandIdx_sig];
-        the_sig_mu_phi = BToMuMuPi_fit_mu_phi[selectedCandIdx_sig]; 
-        the_sig_mu_charge = Muon_charge[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
-        the_sig_mu_dxy = Muon_dxy[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
-        the_sig_mu_dxysig = Muon_dxyS[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
-        the_sig_mu_dz = Muon_dz[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
-        the_sig_mu_dzsig = Muon_dzS[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
-        the_sig_mu_ismatchedtoslimmedmuon = Muon_isMatchedToSlimmedMuon[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
-        the_sig_mu_indexmatchedslimmedmuon = Muon_indexMatchedSlimmedMuon[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
-        the_sig_mu_dsatoslimmedmatching_deltar = Muon_dsaToSlimmedMatching_deltaR[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
-        the_sig_mu_dsatoslimmedmatching_deltaptrel = Muon_dsaToSlimmedMatching_deltaPtRel[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
-        the_sig_mu_dsatoslimmedmatching_deltadxyrel = Muon_dsaToSlimmedMatching_deltadxyRel[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
-        the_sig_mu_dsatoslimmedmatching_deltadzrel = Muon_dsaToSlimmedMatching_deltadzRel[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
-        the_sig_mu_passdsaid = Muon_passDSAMuonID[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
-        //the_sig_mu_ip3d = Muon_ip3d[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
-        //the_sig_mu_ip3dsig = Muon_sip3d[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
-        the_sig_mu_pfiso03 = Muon_pfiso03_all[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
-        the_sig_mu_pfiso03_rel = Muon_pfiso03Rel_all[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
-        the_sig_mu_iso03 = BToMuMuPi_sel_mu_iso03[selectedCandIdx_sig];
-        the_sig_mu_iso03_close = BToMuMuPi_sel_mu_iso03_close[selectedCandIdx_sig];
-        the_sig_mu_iso03_rel_close = BToMuMuPi_sel_mu_iso03_rel_close[selectedCandIdx_sig];
-        the_sig_mu_pfiso04 = Muon_pfiso04_all[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
-        the_sig_mu_pfiso04_rel = Muon_pfiso04Rel_all[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
-        the_sig_mu_iso04 = BToMuMuPi_sel_mu_iso04[selectedCandIdx_sig];
-        the_sig_mu_iso04_close = BToMuMuPi_sel_mu_iso04_close[selectedCandIdx_sig];
-        the_sig_mu_iso04_rel_close = BToMuMuPi_sel_mu_iso04_rel_close[selectedCandIdx_sig];
-        //the_sig_mu_isloose = BToMuMuPi_sel_mu_isLoose[selectedCandIdx_sig];
-        //the_sig_mu_ismedium = BToMuMuPi_sel_mu_isMedium[selectedCandIdx_sig];
-        //the_sig_mu_istight = BToMuMuPi_sel_mu_isTight[selectedCandIdx_sig];
-        //the_sig_mu_issoft = BToMuMuPi_sel_mu_isSoft[selectedCandIdx_sig];
-        the_sig_mu_looseid = Muon_looseId[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
-        the_sig_mu_mediumid = Muon_mediumId[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
-        the_sig_mu_tightid = Muon_tightId[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
-        the_sig_mu_softid = Muon_softId[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
-        the_sig_mu_pfisoid = Muon_pfIsoId[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
-        the_sig_mu_trkisoid = Muon_tkIsoId[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
-        the_sig_mu_triggerlooseid = Muon_triggerIdLoose[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
-        the_sig_mu_istriggering = Muon_isTriggering[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
-        the_sig_mu_isslimmed = Muon_isSlimmedMuon[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
-        the_sig_mu_isdsa = Muon_isDSAMuon[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
-        the_sig_mu_isPF = Muon_isPF[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
-        the_sig_mu_isglobalmuon = Muon_isGlobalMuon[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
-        the_sig_mu_istrackermuon = Muon_isTrackerMuon[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
-        the_sig_mu_isglobalortrackermuon = Muon_isGlobalOrTrackerMuon[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
-        the_sig_mu_isglobalnottrackermuon = Muon_isGlobalNotTrackerMuon[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
-        the_sig_mu_istrackernotglobalmuon = Muon_isTrackerNotGlobalMuon[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
-        the_sig_mu_intimemuon = Muon_inTimeMuon[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
-        the_sig_mu_segmentcompatibility = Muon_segmentCompatibility[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
-        the_sig_mu_calocompatibility = Muon_caloCompatibility[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
-        the_sig_mu_validhitfraction = Muon_validHitFraction[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
-        the_sig_mu_kinkfinderchi2 = Muon_kinkFinderChi2[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
-        the_sig_mu_globalnormalisedchi2 = Muon_globalNormalisedChi2[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
-        the_sig_mu_localpositionchi2 = Muon_localPositionChi2[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
-        the_sig_mu_trackerhighpurityflag = Muon_trackerHighPurityFlag[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
-        the_sig_mu_numberofvalidmuonhits = Muon_numberOfValidMuonHits[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
-        the_sig_mu_numberofvalidpixelhits = Muon_numberOfValidPixelHits[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
-        the_sig_mu_numberoftrackerlayers = Muon_numberOfTrackerLayers[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
-        the_sig_mu_numberofpixellayers = Muon_numberOfPixelLayers[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
-        the_sig_mu_numberofstations = Muon_numberOfStations[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
+      the_sig_trgmu_mu_mass = BToMuMuPi_trgmu_mu_mass[selectedCandIdx_sig];
+      the_sig_trgmu_mu_pt = BToMuMuPi_trgmu_mu_pt[selectedCandIdx_sig];
+      the_sig_trgmu_pi_mass = BToMuMuPi_trgmu_pi_mass[selectedCandIdx_sig];
+      the_sig_trgmu_pi_pt = BToMuMuPi_trgmu_pi_pt[selectedCandIdx_sig];
 
-        the_sig_pi_pt = BToMuMuPi_fit_pi_pt[selectedCandIdx_sig];
-        the_sig_pi_eta = BToMuMuPi_fit_pi_eta[selectedCandIdx_sig];
-        the_sig_pi_phi = BToMuMuPi_fit_pi_phi[selectedCandIdx_sig]; 
-        the_sig_pi_charge = ProbeTracks_charge[BToMuMuPi_pi_idx[selectedCandIdx_sig]];
-        the_sig_pi_dcasig = BToMuMuPi_pi_DCASig[selectedCandIdx_sig];
-        the_sig_pi_dxy = BToMuMuPi_pi_dxy[selectedCandIdx_sig];
-        the_sig_pi_dz = BToMuMuPi_pi_dz[selectedCandIdx_sig];
-        the_sig_pi_dxysig = BToMuMuPi_pi_dxyS[selectedCandIdx_sig];
-        the_sig_pi_dzsig = BToMuMuPi_pi_dzS[selectedCandIdx_sig];
-        the_sig_pi_iso03 = BToMuMuPi_pi_iso03[selectedCandIdx_sig];
-        the_sig_pi_iso03_close = BToMuMuPi_pi_iso03_close[selectedCandIdx_sig];
-        the_sig_pi_iso03_rel_close = BToMuMuPi_pi_iso03_rel_close[selectedCandIdx_sig];
-        the_sig_pi_iso04 = BToMuMuPi_pi_iso04[selectedCandIdx_sig];
-        the_sig_pi_iso04_close = BToMuMuPi_pi_iso04_close[selectedCandIdx_sig];
-        the_sig_pi_iso04_rel_close = BToMuMuPi_pi_iso04_rel_close[selectedCandIdx_sig];
-        the_sig_pi_ispacked = ProbeTracks_isPacked[BToMuMuPi_pi_idx[selectedCandIdx_sig]];
-        the_sig_pi_islost = ProbeTracks_isLostTrk[BToMuMuPi_pi_idx[selectedCandIdx_sig]];
-        the_sig_pi_trgmu_dr = ProbeTracks_drTrg[BToMuMuPi_pi_idx[selectedCandIdx_sig]];
-        the_sig_pi_ismatchedtomuon = ProbeTracks_isMatchedToMuon[BToMuMuPi_pi_idx[selectedCandIdx_sig]];
+      the_sig_dimu_lxy = BToMuMuPi_dimu_Lxy[selectedCandIdx_sig];
+      the_sig_dimu_lxyz = BToMuMuPi_dimu_Lxyz[selectedCandIdx_sig];
+      the_sig_dimu_vxdiff = BToMuMuPi_dimu_vxdiff[selectedCandIdx_sig];
+      the_sig_dimu_vydiff = BToMuMuPi_dimu_vydiff[selectedCandIdx_sig];
+      the_sig_dimu_vzdiff = BToMuMuPi_dimu_vzdiff[selectedCandIdx_sig];
 
-        the_sig_trgmu_mu_mass = BToMuMuPi_trgmu_mu_mass[selectedCandIdx_sig];
-        the_sig_trgmu_mu_pt = BToMuMuPi_trgmu_mu_pt[selectedCandIdx_sig];
-        the_sig_trgmu_pi_mass = BToMuMuPi_trgmu_pi_mass[selectedCandIdx_sig];
-        the_sig_trgmu_pi_pt = BToMuMuPi_trgmu_pi_pt[selectedCandIdx_sig];
+      the_sig_deltar_mu_pi = BToMuMuPi_dr_mu_pi[selectedCandIdx_sig];
+      the_sig_deltar_trgmu_hnl = BToMuMuPi_dr_trgmu_hnl[selectedCandIdx_sig];
+      the_sig_deltar_trgmu_mu = BToMuMuPi_dr_trgmu_mu[selectedCandIdx_sig]; 
+      the_sig_deltar_trgmu_pi = BToMuMuPi_dr_trgmu_pi[selectedCandIdx_sig]; 
+      the_sig_deltaeta_mu_pi = BToMuMuPi_deta_mu_pi[selectedCandIdx_sig];
+      the_sig_deltaeta_trgmu_hnl = BToMuMuPi_deta_trgmu_hnl[selectedCandIdx_sig];
+      the_sig_deltaeta_trgmu_mu = BToMuMuPi_deta_trgmu_mu[selectedCandIdx_sig];
+      the_sig_deltaeta_trgmu_pi = BToMuMuPi_deta_trgmu_pi[selectedCandIdx_sig];
+      the_sig_deltaphi_mu_pi = BToMuMuPi_dphi_mu_pi[selectedCandIdx_sig];
+      the_sig_deltaphi_trgmu_hnl = BToMuMuPi_dphi_trgmu_hnl[selectedCandIdx_sig];
+      the_sig_deltaphi_trgmu_mu = BToMuMuPi_dphi_trgmu_mu[selectedCandIdx_sig];
+      the_sig_deltaphi_trgmu_pi = BToMuMuPi_dphi_trgmu_pi[selectedCandIdx_sig];
+      the_sig_deltapt_pi_fit_pi = BToMuMuPi_dpt_pi_fit_pi[selectedCandIdx_sig];
+      the_sig_deltapt_mu_fit_mu = BToMuMuPi_dpt_mu_fit_mu[selectedCandIdx_sig];
+      the_sig_deltaeta_pi_fit_pi = BToMuMuPi_deta_pi_fit_pi[selectedCandIdx_sig];
+      the_sig_deltaeta_mu_fit_mu = BToMuMuPi_deta_mu_fit_mu[selectedCandIdx_sig];
+      the_sig_deltaphi_pi_fit_pi = BToMuMuPi_dphi_pi_fit_pi[selectedCandIdx_sig];
+      the_sig_deltaphi_mu_fit_mu = BToMuMuPi_dphi_mu_fit_mu[selectedCandIdx_sig];
+      //float deltaphi_mu_pi = fabs(BToMuMuPi_fit_mu_phi[selectedCandIdx_sig] - BToMuMuPi_fit_pi_phi[selectedCandIdx_sig]);
+      //the_sig_deltaphi_mu_pi = deltaphi_mu_pi > M_PI ? deltaphi_mu_pi : deltaphi_mu_pi - 2 * M_PI;
 
-        the_sig_dimu_lxy = BToMuMuPi_dimu_Lxy[selectedCandIdx_sig];
-        the_sig_dimu_lxyz = BToMuMuPi_dimu_Lxyz[selectedCandIdx_sig];
-        the_sig_dimu_vxdiff = BToMuMuPi_dimu_vxdiff[selectedCandIdx_sig];
-        the_sig_dimu_vydiff = BToMuMuPi_dimu_vydiff[selectedCandIdx_sig];
-        the_sig_dimu_vzdiff = BToMuMuPi_dimu_vzdiff[selectedCandIdx_sig];
+      the_sig_sv_chi2 = BToMuMuPi_sv_chi2[selectedCandIdx_sig];
+      the_sig_sv_lxy = BToMuMuPi_sv_lxy[selectedCandIdx_sig];
+      the_sig_sv_lxysig = BToMuMuPi_sv_lxy_sig[selectedCandIdx_sig];
+      the_sig_sv_lxyz = BToMuMuPi_sv_lxyz[selectedCandIdx_sig];
+      the_sig_sv_prob = BToMuMuPi_sv_prob[selectedCandIdx_sig];
+      the_sig_sv_x = BToMuMuPi_sv_x[selectedCandIdx_sig];
+      the_sig_sv_y = BToMuMuPi_sv_y[selectedCandIdx_sig];
+      the_sig_sv_z = BToMuMuPi_sv_z[selectedCandIdx_sig];
 
-        the_sig_deltar_mu_pi = BToMuMuPi_dr_mu_pi[selectedCandIdx_sig];
-        the_sig_deltar_trgmu_hnl = BToMuMuPi_dr_trgmu_hnl[selectedCandIdx_sig];
-        the_sig_deltar_trgmu_mu = BToMuMuPi_dr_trgmu_mu[selectedCandIdx_sig]; 
-        the_sig_deltar_trgmu_pi = BToMuMuPi_dr_trgmu_pi[selectedCandIdx_sig]; 
-        the_sig_deltaeta_mu_pi = BToMuMuPi_deta_mu_pi[selectedCandIdx_sig];
-        the_sig_deltaeta_trgmu_hnl = BToMuMuPi_deta_trgmu_hnl[selectedCandIdx_sig];
-        the_sig_deltaeta_trgmu_mu = BToMuMuPi_deta_trgmu_mu[selectedCandIdx_sig];
-        the_sig_deltaeta_trgmu_pi = BToMuMuPi_deta_trgmu_pi[selectedCandIdx_sig];
-        the_sig_deltaphi_mu_pi = BToMuMuPi_dphi_mu_pi[selectedCandIdx_sig];
-        the_sig_deltaphi_trgmu_hnl = BToMuMuPi_dphi_trgmu_hnl[selectedCandIdx_sig];
-        the_sig_deltaphi_trgmu_mu = BToMuMuPi_dphi_trgmu_mu[selectedCandIdx_sig];
-        the_sig_deltaphi_trgmu_pi = BToMuMuPi_dphi_trgmu_pi[selectedCandIdx_sig];
-        the_sig_deltapt_pi_fit_pi = BToMuMuPi_dpt_pi_fit_pi[selectedCandIdx_sig];
-        the_sig_deltapt_mu_fit_mu = BToMuMuPi_dpt_mu_fit_mu[selectedCandIdx_sig];
-        the_sig_deltaeta_pi_fit_pi = BToMuMuPi_deta_pi_fit_pi[selectedCandIdx_sig];
-        the_sig_deltaeta_mu_fit_mu = BToMuMuPi_deta_mu_fit_mu[selectedCandIdx_sig];
-        the_sig_deltaphi_pi_fit_pi = BToMuMuPi_dphi_pi_fit_pi[selectedCandIdx_sig];
-        the_sig_deltaphi_mu_fit_mu = BToMuMuPi_dphi_mu_fit_mu[selectedCandIdx_sig];
-        //float deltaphi_mu_pi = fabs(BToMuMuPi_fit_mu_phi[selectedCandIdx_sig] - BToMuMuPi_fit_pi_phi[selectedCandIdx_sig]);
-        //the_sig_deltaphi_mu_pi = deltaphi_mu_pi > M_PI ? deltaphi_mu_pi : deltaphi_mu_pi - 2 * M_PI;
+      the_sig_ismatched = BToMuMuPi_isMatched[selectedCandIdx_sig];
+      the_sig_trgmu_ismatched = BToMuMuPi_trg_mu_isMatched[selectedCandIdx_sig];
+      the_sig_mu_ismatched = BToMuMuPi_sel_mu_isMatched[selectedCandIdx_sig];
+      the_sig_pi_ismatched = BToMuMuPi_pi_isMatched[selectedCandIdx_sig];
+      the_sig_mupi_mass_reco_gen_reldiff = BToMuMuPi_mupi_mass_reco_gen_reldiff[selectedCandIdx_sig];
+      the_sig_lxy_reco_gen_reldiff = BToMuMuPi_lxy_reco_gen_reldiff[selectedCandIdx_sig];
 
-        the_sig_sv_chi2 = BToMuMuPi_sv_chi2[selectedCandIdx_sig];
-        the_sig_sv_lxy = BToMuMuPi_sv_lxy[selectedCandIdx_sig];
-        the_sig_sv_lxysig = BToMuMuPi_sv_lxy_sig[selectedCandIdx_sig];
-        the_sig_sv_lxyz = BToMuMuPi_sv_lxyz[selectedCandIdx_sig];
-        the_sig_sv_prob = BToMuMuPi_sv_prob[selectedCandIdx_sig];
-        the_sig_sv_x = BToMuMuPi_sv_x[selectedCandIdx_sig];
-        the_sig_sv_y = BToMuMuPi_sv_y[selectedCandIdx_sig];
-        the_sig_sv_z = BToMuMuPi_sv_z[selectedCandIdx_sig];
+      // additionnal displacement quantities
+      float dist_sv_pv_xy = sqrt((BToMuMuPi_sv_x[selectedCandIdx_sig] - *PV_x) * (BToMuMuPi_sv_x[selectedCandIdx_sig] - *PV_x) + (BToMuMuPi_sv_y[selectedCandIdx_sig] - *PV_y) * (BToMuMuPi_sv_y[selectedCandIdx_sig] - *PV_y));
+      float dist_sv_pv_xyz = sqrt((BToMuMuPi_sv_x[selectedCandIdx_sig] - *PV_x) * (BToMuMuPi_sv_x[selectedCandIdx_sig] - *PV_x) + (BToMuMuPi_sv_y[selectedCandIdx_sig] - *PV_y) * (BToMuMuPi_sv_y[selectedCandIdx_sig] - *PV_y) + (BToMuMuPi_sv_z[selectedCandIdx_sig] - *PV_z) * (BToMuMuPi_sv_z[selectedCandIdx_sig] - *PV_z));
+      the_sig_sv_pv_lxy = dist_sv_pv_xy;
+      the_sig_sv_pv_lxyz = dist_sv_pv_xyz;
 
-        the_sig_ismatched = BToMuMuPi_isMatched[selectedCandIdx_sig];
-        the_sig_trgmu_ismatched = BToMuMuPi_trg_mu_isMatched[selectedCandIdx_sig];
-        the_sig_mu_ismatched = BToMuMuPi_sel_mu_isMatched[selectedCandIdx_sig];
-        the_sig_pi_ismatched = BToMuMuPi_pi_isMatched[selectedCandIdx_sig];
-        the_sig_mupi_mass_reco_gen_reldiff = BToMuMuPi_mupi_mass_reco_gen_reldiff[selectedCandIdx_sig];
-        the_sig_lxy_reco_gen_reldiff = BToMuMuPi_lxy_reco_gen_reldiff[selectedCandIdx_sig];
-
-        // additionnal displacement quantities
-        float dist_sv_pv_xy = sqrt((BToMuMuPi_sv_x[selectedCandIdx_sig] - *PV_x) * (BToMuMuPi_sv_x[selectedCandIdx_sig] - *PV_x) + (BToMuMuPi_sv_y[selectedCandIdx_sig] - *PV_y) * (BToMuMuPi_sv_y[selectedCandIdx_sig] - *PV_y));
-        float dist_sv_pv_xyz = sqrt((BToMuMuPi_sv_x[selectedCandIdx_sig] - *PV_x) * (BToMuMuPi_sv_x[selectedCandIdx_sig] - *PV_x) + (BToMuMuPi_sv_y[selectedCandIdx_sig] - *PV_y) * (BToMuMuPi_sv_y[selectedCandIdx_sig] - *PV_y) + (BToMuMuPi_sv_z[selectedCandIdx_sig] - *PV_z) * (BToMuMuPi_sv_z[selectedCandIdx_sig] - *PV_z));
-        the_sig_sv_pv_lxy = dist_sv_pv_xy;
-        the_sig_sv_pv_lxyz = dist_sv_pv_xyz;
-
-        the_sig_pi_mu_vzdiff = BToMuMuPi_pi_mu_vzdiff[selectedCandIdx_sig];
+      the_sig_pi_mu_vzdiff = BToMuMuPi_pi_mu_vzdiff[selectedCandIdx_sig];
 
 
-        // getting the displacement at gen level
-        /*
-        if(isMC){
-          UInt_t nGen = *nGenPart;
+      // getting the displacement at gen level
+      if(isMC){
+        UInt_t nGen = *nGenPart;
 
-          float hnl_vx(0.), hnl_vy(0.), hnl_vz(0.);
-          float mother_vx(0.), mother_vy(0.), mother_vz(0.);
-          float trgmu_vx(0.), trgmu_vy(0.), trgmu_vz(0.);
-          float mu_vx(0.), mu_vy(0.), mu_vz(0.);
-          int mother_idx(-99), trgmu_idx(-99), mu_idx(-99);
+        float hnl_vx(0.), hnl_vy(0.), hnl_vz(0.);
+        float mother_vx(0.), mother_vy(0.), mother_vz(0.);
+        float trgmu_vx(0.), trgmu_vy(0.), trgmu_vz(0.);
+        float mu_vx(0.), mu_vy(0.), mu_vz(0.);
+        int mother_idx(-99), trgmu_idx(-99), mu_idx(-99);
 
-          if(BToMuMuPi_isMatched[selectedCandIdx_sig]==1){
-            trgmu_vx = GenPart_vx[Muon_genPartIdx[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]]];
-            trgmu_vy = GenPart_vy[Muon_genPartIdx[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]]];
-            trgmu_vz = GenPart_vz[Muon_genPartIdx[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]]];
-            mu_vx = GenPart_vx[Muon_genPartIdx[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]]];
-            mu_vy = GenPart_vy[Muon_genPartIdx[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]]];
-            mu_vz = GenPart_vz[Muon_genPartIdx[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]]];
+        if(BToMuMuPi_isMatched[selectedCandIdx_sig]==1){
+          trgmu_vx = GenPart_vx[Muon_genPartIdx[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]]];
+          trgmu_vy = GenPart_vy[Muon_genPartIdx[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]]];
+          trgmu_vz = GenPart_vz[Muon_genPartIdx[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]]];
+          mu_vx = GenPart_vx[Muon_genPartIdx[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]]];
+          mu_vy = GenPart_vy[Muon_genPartIdx[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]]];
+          mu_vz = GenPart_vz[Muon_genPartIdx[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]]];
 
-            the_gen_trgmu_mu_lxy = sqrt((trgmu_vx - mu_vx) * (trgmu_vx - mu_vx) + (trgmu_vy - mu_vy) * (trgmu_vy - mu_vy));
-            the_gen_trgmu_mu_lxyz = sqrt((trgmu_vx - mu_vx) * (trgmu_vx - mu_vx) + (trgmu_vy - mu_vy) * (trgmu_vy - mu_vy) + (trgmu_vz - mu_vz) * (trgmu_vz - mu_vz));
-          }
-          else{
-            the_gen_trgmu_mu_lxy = -99.;
-            the_gen_trgmu_mu_lxyz = -99;
-          }
+          the_gen_trgmu_mu_lxy = sqrt((trgmu_vx - mu_vx) * (trgmu_vx - mu_vx) + (trgmu_vy - mu_vy) * (trgmu_vy - mu_vy));
+          the_gen_trgmu_mu_lxyz = sqrt((trgmu_vx - mu_vx) * (trgmu_vx - mu_vx) + (trgmu_vy - mu_vy) * (trgmu_vy - mu_vy) + (trgmu_vz - mu_vz) * (trgmu_vz - mu_vz));
+        }
+        else{
+          the_gen_trgmu_mu_lxy = -99.;
+          the_gen_trgmu_mu_lxyz = -99;
+        }
 
-          // gen information (no matching)
+        // gen information (no matching)
 
-          // find idx of gen particles of interest
-          int gen_hnl_idx(-99), gen_b_idx(-99), gen_trgmu_idx(-99), gen_mu_idx(-99), gen_pi_idx(-99);
+        // find idx of gen particles of interest
+        int gen_hnl_idx(-99), gen_b_idx(-99), gen_trgmu_idx(-99), gen_mu_idx(-99), gen_pi_idx(-99);
 
-          for(unsigned int iGen(0); iGen < nGen; ++iGen){
-            if(abs(GenPart_pdgId[iGen])==9900015){
-              gen_hnl_idx = iGen;
-              gen_b_idx = GenPart_genPartIdxMother[iGen]; 
-              break;
-            }
-          }
-          for(unsigned int iGen(0); iGen < nGen; ++iGen){
-            if(abs(GenPart_pdgId[iGen])==13 && GenPart_genPartIdxMother[iGen]==gen_b_idx)
-              gen_trgmu_idx = iGen;
-            if((abs(GenPart_pdgId[iGen])==13) && GenPart_genPartIdxMother[iGen]==gen_hnl_idx)
-              gen_mu_idx = iGen;
-            if(abs(GenPart_pdgId[iGen])==211 && GenPart_genPartIdxMother[iGen]==gen_hnl_idx)
-              gen_pi_idx = iGen;
-          }
-
-          // get quantities that need more than one object
-          if(gen_hnl_idx!=-99 && gen_mu_idx!=-99){
-
-            ROOT::Math::PtEtaPhiMVector hnl_p4(GenPart_pt[gen_hnl_idx], GenPart_eta[gen_hnl_idx], GenPart_phi[gen_hnl_idx], GenPart_mass[gen_hnl_idx]);
-            Float_t hnl_betagamma = hnl_p4.Beta() * hnl_p4.Gamma();
-
-            the_gen_hnl_lxyz = get3Ddisp(GenPart_vx[gen_hnl_idx], GenPart_vx[gen_mu_idx],
-                GenPart_vy[gen_hnl_idx], GenPart_vy[gen_mu_idx],
-                GenPart_vz[gen_hnl_idx], GenPart_vz[gen_mu_idx]);
-
-            the_gen_hnl_lxy  = get2Ddisp(GenPart_vx[gen_hnl_idx], GenPart_vx[gen_mu_idx],
-                GenPart_vy[gen_hnl_idx], GenPart_vy[gen_mu_idx]);
-
-            the_gen_hnl_ct = the_gen_hnl_lxyz / hnl_betagamma;
-            //std::cout << "HNL pt,eta,phi,m"<< GenPart_pt[gen_hnl_idx] << " " << GenPart_eta[gen_hnl_idx] << " " << GenPart_phi[gen_hnl_idx] << " " << GenPart_mass[gen_hnl_idx] << std::endl;
-            //std::cout << "HNL beta,gamma=" <<  hnl_p4.Beta() << " " << hnl_p4.Gamma() << std::endl;
-            //std::cout << "HNL Lxy,Lxyz  =" <<  the_gen_hnl_lxy << " " << the_gen_hnl_lxyz << std::endl;
-          }
-
-          // set quantities for each object
-          if(gen_b_idx!=-99){
-            the_gen_b_pt = GenPart_pt[gen_b_idx];
-            the_gen_b_eta = GenPart_eta[gen_b_idx];
-            the_gen_b_phi = GenPart_phi[gen_b_idx];
-            the_gen_b_mass = GenPart_mass[gen_b_idx];
-            the_gen_b_pdgid = GenPart_pdgId[gen_b_idx];
-          }
-          if(gen_hnl_idx!=-99){
-            the_gen_hnl_pt = GenPart_pt[gen_hnl_idx];
-            the_gen_hnl_eta = GenPart_eta[gen_hnl_idx];
-            the_gen_hnl_phi = GenPart_phi[gen_hnl_idx];
-            the_gen_hnl_mass = GenPart_mass[gen_hnl_idx];
-            the_gen_hnl_vx = GenPart_vx[gen_hnl_idx];
-            the_gen_hnl_vy = GenPart_vy[gen_hnl_idx];
-            the_gen_hnl_vz = GenPart_vz[gen_hnl_idx];
-          }
-          if(gen_trgmu_idx!=-99){
-            the_gen_trgmu_pt = GenPart_pt[gen_trgmu_idx];
-            the_gen_trgmu_eta = GenPart_eta[gen_trgmu_idx];
-            the_gen_trgmu_phi = GenPart_phi[gen_trgmu_idx];
-            the_gen_trgmu_vx = GenPart_vx[gen_trgmu_idx];
-            the_gen_trgmu_vy = GenPart_vy[gen_trgmu_idx];
-            the_gen_trgmu_vz = GenPart_vz[gen_trgmu_idx];
-          }
-          if(gen_mu_idx!=-99){
-            the_gen_mu_pt = GenPart_pt[gen_mu_idx];
-            the_gen_mu_eta = GenPart_eta[gen_mu_idx];
-            the_gen_mu_phi = GenPart_phi[gen_mu_idx];
-            the_gen_mu_vx = GenPart_vx[gen_mu_idx];
-            the_gen_mu_vy = GenPart_vy[gen_mu_idx];
-            the_gen_mu_vz = GenPart_vz[gen_mu_idx];
-          }
-          if(gen_pi_idx!=-99){
-            the_gen_pi_pt = GenPart_pt[gen_pi_idx];
-            the_gen_pi_eta = GenPart_eta[gen_pi_idx];
-            the_gen_pi_phi = GenPart_phi[gen_pi_idx];
-            the_gen_pi_vx = GenPart_vx[gen_pi_idx];
-            the_gen_pi_vy = GenPart_vy[gen_pi_idx];
-            the_gen_pi_vz = GenPart_vz[gen_pi_idx];
+        for(unsigned int iGen(0); iGen < nGen; ++iGen){
+          if(abs(GenPart_pdgId[iGen])==9900015){
+            gen_hnl_idx = iGen;
+            gen_b_idx = GenPart_genPartIdxMother[iGen]; 
+            break;
           }
         }
-        */
+        for(unsigned int iGen(0); iGen < nGen; ++iGen){
+          if(abs(GenPart_pdgId[iGen])==13 && GenPart_genPartIdxMother[iGen]==gen_b_idx)
+            gen_trgmu_idx = iGen;
+          if((abs(GenPart_pdgId[iGen])==13) && GenPart_genPartIdxMother[iGen]==gen_hnl_idx)
+            gen_mu_idx = iGen;
+          if(abs(GenPart_pdgId[iGen])==211 && GenPart_genPartIdxMother[iGen]==gen_hnl_idx)
+            gen_pi_idx = iGen;
+        }
+
+        // get quantities that need more than one object
+        if(gen_hnl_idx!=-99 && gen_mu_idx!=-99){
+
+          ROOT::Math::PtEtaPhiMVector hnl_p4(GenPart_pt[gen_hnl_idx], GenPart_eta[gen_hnl_idx], GenPart_phi[gen_hnl_idx], GenPart_mass[gen_hnl_idx]);
+          Float_t hnl_betagamma = hnl_p4.Beta() * hnl_p4.Gamma();
+
+          the_gen_hnl_lxyz = get3Ddisp(GenPart_vx[gen_hnl_idx], GenPart_vx[gen_mu_idx],
+              GenPart_vy[gen_hnl_idx], GenPart_vy[gen_mu_idx],
+              GenPart_vz[gen_hnl_idx], GenPart_vz[gen_mu_idx]);
+
+          the_gen_hnl_lxy  = get2Ddisp(GenPart_vx[gen_hnl_idx], GenPart_vx[gen_mu_idx],
+              GenPart_vy[gen_hnl_idx], GenPart_vy[gen_mu_idx]);
+
+          the_gen_hnl_ct = the_gen_hnl_lxyz / hnl_betagamma;
+          //std::cout << "HNL pt,eta,phi,m"<< GenPart_pt[gen_hnl_idx] << " " << GenPart_eta[gen_hnl_idx] << " " << GenPart_phi[gen_hnl_idx] << " " << GenPart_mass[gen_hnl_idx] << std::endl;
+          //std::cout << "HNL beta,gamma=" <<  hnl_p4.Beta() << " " << hnl_p4.Gamma() << std::endl;
+          //std::cout << "HNL Lxy,Lxyz  =" <<  the_gen_hnl_lxy << " " << the_gen_hnl_lxyz << std::endl;
+        }
+
+        // set quantities for each object
+        if(gen_b_idx!=-99){
+          the_gen_b_pt = GenPart_pt[gen_b_idx];
+          the_gen_b_eta = GenPart_eta[gen_b_idx];
+          the_gen_b_phi = GenPart_phi[gen_b_idx];
+          the_gen_b_mass = GenPart_mass[gen_b_idx];
+          the_gen_b_pdgid = GenPart_pdgId[gen_b_idx];
+        }
+        if(gen_hnl_idx!=-99){
+          the_gen_hnl_pt = GenPart_pt[gen_hnl_idx];
+          the_gen_hnl_eta = GenPart_eta[gen_hnl_idx];
+          the_gen_hnl_phi = GenPart_phi[gen_hnl_idx];
+          the_gen_hnl_mass = GenPart_mass[gen_hnl_idx];
+          the_gen_hnl_vx = GenPart_vx[gen_hnl_idx];
+          the_gen_hnl_vy = GenPart_vy[gen_hnl_idx];
+          the_gen_hnl_vz = GenPart_vz[gen_hnl_idx];
+        }
+<<<<<<< HEAD
 
         // trigger scale factor
         //the_sig_weight_hlt = isMC ? getTriggerScaleFactor(the_sig_trgmu_pt, fabs(the_sig_trgmu_dxysig), fabs(the_sig_trgmu_eta)) : 1.;
         the_sig_weight_hlt = isMC ? getTriggerScaleFactor(the_sig_trgmu_pt, fabs(the_sig_trgmu_eta)) : 1.;
         //the_sig_weight_hlt = isMC ? getTriggerScaleFactor(the_sig_trgmu_pt, fabs(the_sig_trgmu_dxysig)) : 1.;
 
-        signal_tree->Fill();
-      } // end bpark line fired
+      signal_tree->Fill();
     } // end sound index
   }// end at least one candidate in the event
 

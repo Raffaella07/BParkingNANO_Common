@@ -251,88 +251,75 @@ Bool_t BToKMuMuDumper::Process(Long64_t entry)
     UInt_t selectedCandIdx_ctrl = pair_candIdx_desc_bpt_matched_ctrl[0].first;
 
     // temporary - we manually ask l1 to be the triggering muon
-    if(Muon_isTriggering[BToKMuMu_l1Idx[selectedCandIdx_ctrl]] == 1){
-      // make sure that a BParking line is fired
-      if(Muon_fired_HLT_Mu7_IP4[BToKMuMu_l1Idx[selectedCandIdx_ctrl]] == 1 ||
-          Muon_fired_HLT_Mu8_IP3[BToKMuMu_l1Idx[selectedCandIdx_ctrl]] == 1 ||
-          Muon_fired_HLT_Mu8_IP5[BToKMuMu_l1Idx[selectedCandIdx_ctrl]] == 1 ||
-          Muon_fired_HLT_Mu8_IP6[BToKMuMu_l1Idx[selectedCandIdx_ctrl]] == 1 ||
-          Muon_fired_HLT_Mu8p5_IP3p5[BToKMuMu_l1Idx[selectedCandIdx_ctrl]] == 1 ||
-          Muon_fired_HLT_Mu9_IP4[BToKMuMu_l1Idx[selectedCandIdx_ctrl]] == 1 ||
-          Muon_fired_HLT_Mu9_IP5[BToKMuMu_l1Idx[selectedCandIdx_ctrl]] == 1 ||
-          Muon_fired_HLT_Mu9_IP6[BToKMuMu_l1Idx[selectedCandIdx_ctrl]] == 1 ||
-          Muon_fired_HLT_Mu10p5_IP3p5[BToKMuMu_l1Idx[selectedCandIdx_ctrl]] == 1 ||
-          Muon_fired_HLT_Mu12_IP6[BToKMuMu_l1Idx[selectedCandIdx_ctrl]] == 1)
-      {
-        ncand_istriggering = 1; 
+    if(Muon_isTriggeringBPark[BToKMuMu_l1Idx[selectedCandIdx_ctrl]] == 1){
+      ncand_istriggering = 1; 
 
-        // fill the control_tree
-        the_ctrl_b_pt = BToKMuMu_fit_pt[selectedCandIdx_ctrl];
-        the_ctrl_b_eta = BToKMuMu_fit_eta[selectedCandIdx_ctrl];
-        the_ctrl_b_phi = BToKMuMu_fit_phi[selectedCandIdx_ctrl];
-        the_ctrl_b_mass = BToKMuMu_fit_mass[selectedCandIdx_ctrl];
-        the_ctrl_b_charge = BToKMuMu_charge[selectedCandIdx_ctrl];
-        the_ctrl_b_pdgid = BToKMuMu_pdgId[selectedCandIdx_ctrl];
-        the_ctrl_b_cos2d = BToKMuMu_fit_cos2D[selectedCandIdx_ctrl];
-        the_ctrl_b_iso03 = BToKMuMu_b_iso03[selectedCandIdx_ctrl];
-        the_ctrl_b_iso03_close = BToKMuMu_b_iso03_close[selectedCandIdx_ctrl];
-        the_ctrl_b_iso04 = BToKMuMu_b_iso04[selectedCandIdx_ctrl];
-        the_ctrl_b_iso04_close = BToKMuMu_b_iso04_close[selectedCandIdx_ctrl];
+      // fill the control_tree
+      the_ctrl_b_pt = BToKMuMu_fit_pt[selectedCandIdx_ctrl];
+      the_ctrl_b_eta = BToKMuMu_fit_eta[selectedCandIdx_ctrl];
+      the_ctrl_b_phi = BToKMuMu_fit_phi[selectedCandIdx_ctrl];
+      the_ctrl_b_mass = BToKMuMu_fit_mass[selectedCandIdx_ctrl];
+      the_ctrl_b_charge = BToKMuMu_charge[selectedCandIdx_ctrl];
+      the_ctrl_b_pdgid = BToKMuMu_pdgId[selectedCandIdx_ctrl];
+      the_ctrl_b_cos2d = BToKMuMu_fit_cos2D[selectedCandIdx_ctrl];
+      the_ctrl_b_iso03 = BToKMuMu_b_iso03[selectedCandIdx_ctrl];
+      the_ctrl_b_iso03_close = BToKMuMu_b_iso03_close[selectedCandIdx_ctrl];
+      the_ctrl_b_iso04 = BToKMuMu_b_iso04[selectedCandIdx_ctrl];
+      the_ctrl_b_iso04_close = BToKMuMu_b_iso04_close[selectedCandIdx_ctrl];
 
-        the_ctrl_k_pt = BToKMuMu_fit_k_pt[selectedCandIdx_ctrl];
-        the_ctrl_k_eta = BToKMuMu_fit_k_eta[selectedCandIdx_ctrl];
-        the_ctrl_k_phi = BToKMuMu_fit_k_phi[selectedCandIdx_ctrl];
-        the_ctrl_k_charge = ProbeTracks_charge[BToKMuMu_kIdx[selectedCandIdx_ctrl]];
-        the_ctrl_k_iso03 = BToKMuMu_k_iso03[selectedCandIdx_ctrl];
-        the_ctrl_k_iso03_close = BToKMuMu_k_iso03_close[selectedCandIdx_ctrl];
-        the_ctrl_k_iso04 = BToKMuMu_k_iso04[selectedCandIdx_ctrl];
-        the_ctrl_k_iso04_close = BToKMuMu_k_iso04_close[selectedCandIdx_ctrl];
+      the_ctrl_k_pt = BToKMuMu_fit_k_pt[selectedCandIdx_ctrl];
+      the_ctrl_k_eta = BToKMuMu_fit_k_eta[selectedCandIdx_ctrl];
+      the_ctrl_k_phi = BToKMuMu_fit_k_phi[selectedCandIdx_ctrl];
+      the_ctrl_k_charge = ProbeTracks_charge[BToKMuMu_kIdx[selectedCandIdx_ctrl]];
+      the_ctrl_k_iso03 = BToKMuMu_k_iso03[selectedCandIdx_ctrl];
+      the_ctrl_k_iso03_close = BToKMuMu_k_iso03_close[selectedCandIdx_ctrl];
+      the_ctrl_k_iso04 = BToKMuMu_k_iso04[selectedCandIdx_ctrl];
+      the_ctrl_k_iso04_close = BToKMuMu_k_iso04_close[selectedCandIdx_ctrl];
 
-        the_ctrl_l1_pt = BToKMuMu_fit_l1_pt[selectedCandIdx_ctrl];
-        the_ctrl_l1_eta = BToKMuMu_fit_l1_eta[selectedCandIdx_ctrl];
-        the_ctrl_l1_phi = BToKMuMu_fit_l1_phi[selectedCandIdx_ctrl];
-        the_ctrl_l1_charge = Muon_charge[BToKMuMu_l1Idx[selectedCandIdx_ctrl]];
-        the_ctrl_l1_iso03 = BToKMuMu_l1_iso03[selectedCandIdx_ctrl];
-        the_ctrl_l1_iso03_close = BToKMuMu_l1_iso03_close[selectedCandIdx_ctrl];
-        the_ctrl_l1_iso04 = BToKMuMu_l1_iso04[selectedCandIdx_ctrl];
-        the_ctrl_l1_iso04_close = BToKMuMu_l1_iso04_close[selectedCandIdx_ctrl];
-        the_ctrl_l1_istriggering = Muon_isTriggering[BToKMuMu_l1Idx[selectedCandIdx_ctrl]];
-        the_ctrl_l1_fired_hlt_mu7_ip4 = Muon_fired_HLT_Mu7_IP4[BToKMuMu_l1Idx[selectedCandIdx_ctrl]];
-        the_ctrl_l1_fired_hlt_mu8_ip3 = Muon_fired_HLT_Mu8_IP3[BToKMuMu_l1Idx[selectedCandIdx_ctrl]];
-        the_ctrl_l1_fired_hlt_mu8_ip5 = Muon_fired_HLT_Mu8_IP5[BToKMuMu_l1Idx[selectedCandIdx_ctrl]];
-        the_ctrl_l1_fired_hlt_mu8_ip6 = Muon_fired_HLT_Mu8_IP6[BToKMuMu_l1Idx[selectedCandIdx_ctrl]];
-        the_ctrl_l1_fired_hlt_mu8p5_ip3p5 = Muon_fired_HLT_Mu8p5_IP3p5[BToKMuMu_l1Idx[selectedCandIdx_ctrl]];
-        the_ctrl_l1_fired_hlt_mu9_ip4 = Muon_fired_HLT_Mu9_IP4[BToKMuMu_l1Idx[selectedCandIdx_ctrl]];
-        the_ctrl_l1_fired_hlt_mu9_ip5 = Muon_fired_HLT_Mu9_IP5[BToKMuMu_l1Idx[selectedCandIdx_ctrl]];
-        the_ctrl_l1_fired_hlt_mu9_ip6 = Muon_fired_HLT_Mu9_IP6[BToKMuMu_l1Idx[selectedCandIdx_ctrl]];
-        the_ctrl_l1_fired_hlt_mu10p5_ip3p5 = Muon_fired_HLT_Mu10p5_IP3p5[BToKMuMu_l1Idx[selectedCandIdx_ctrl]];
-        the_ctrl_l1_fired_hlt_mu12_ip6 = Muon_fired_HLT_Mu12_IP6[BToKMuMu_l1Idx[selectedCandIdx_ctrl]];
+      the_ctrl_l1_pt = BToKMuMu_fit_l1_pt[selectedCandIdx_ctrl];
+      the_ctrl_l1_eta = BToKMuMu_fit_l1_eta[selectedCandIdx_ctrl];
+      the_ctrl_l1_phi = BToKMuMu_fit_l1_phi[selectedCandIdx_ctrl];
+      the_ctrl_l1_charge = Muon_charge[BToKMuMu_l1Idx[selectedCandIdx_ctrl]];
+      the_ctrl_l1_iso03 = BToKMuMu_l1_iso03[selectedCandIdx_ctrl];
+      the_ctrl_l1_iso03_close = BToKMuMu_l1_iso03_close[selectedCandIdx_ctrl];
+      the_ctrl_l1_iso04 = BToKMuMu_l1_iso04[selectedCandIdx_ctrl];
+      the_ctrl_l1_iso04_close = BToKMuMu_l1_iso04_close[selectedCandIdx_ctrl];
+      the_ctrl_l1_istriggering = Muon_isTriggeringBpark[BToKMuMu_l1Idx[selectedCandIdx_ctrl]];
+      the_ctrl_l1_fired_hlt_mu7_ip4 = Muon_fired_HLT_Mu7_IP4[BToKMuMu_l1Idx[selectedCandIdx_ctrl]];
+      the_ctrl_l1_fired_hlt_mu8_ip3 = Muon_fired_HLT_Mu8_IP3[BToKMuMu_l1Idx[selectedCandIdx_ctrl]];
+      the_ctrl_l1_fired_hlt_mu8_ip5 = Muon_fired_HLT_Mu8_IP5[BToKMuMu_l1Idx[selectedCandIdx_ctrl]];
+      the_ctrl_l1_fired_hlt_mu8_ip6 = Muon_fired_HLT_Mu8_IP6[BToKMuMu_l1Idx[selectedCandIdx_ctrl]];
+      the_ctrl_l1_fired_hlt_mu8p5_ip3p5 = Muon_fired_HLT_Mu8p5_IP3p5[BToKMuMu_l1Idx[selectedCandIdx_ctrl]];
+      the_ctrl_l1_fired_hlt_mu9_ip4 = Muon_fired_HLT_Mu9_IP4[BToKMuMu_l1Idx[selectedCandIdx_ctrl]];
+      the_ctrl_l1_fired_hlt_mu9_ip5 = Muon_fired_HLT_Mu9_IP5[BToKMuMu_l1Idx[selectedCandIdx_ctrl]];
+      the_ctrl_l1_fired_hlt_mu9_ip6 = Muon_fired_HLT_Mu9_IP6[BToKMuMu_l1Idx[selectedCandIdx_ctrl]];
+      the_ctrl_l1_fired_hlt_mu10p5_ip3p5 = Muon_fired_HLT_Mu10p5_IP3p5[BToKMuMu_l1Idx[selectedCandIdx_ctrl]];
+      the_ctrl_l1_fired_hlt_mu12_ip6 = Muon_fired_HLT_Mu12_IP6[BToKMuMu_l1Idx[selectedCandIdx_ctrl]];
 
-        the_ctrl_l2_pt = BToKMuMu_fit_l2_pt[selectedCandIdx_ctrl];
-        the_ctrl_l2_eta = BToKMuMu_fit_l2_eta[selectedCandIdx_ctrl];
-        the_ctrl_l2_phi = BToKMuMu_fit_l2_phi[selectedCandIdx_ctrl];
-        the_ctrl_l2_charge = Muon_charge[BToKMuMu_l2Idx[selectedCandIdx_ctrl]];
-        the_ctrl_l2_iso03 = BToKMuMu_l2_iso03[selectedCandIdx_ctrl];
-        the_ctrl_l2_iso03_close = BToKMuMu_l2_iso03_close[selectedCandIdx_ctrl];
-        the_ctrl_l2_iso04 = BToKMuMu_l2_iso04[selectedCandIdx_ctrl];
-        the_ctrl_l2_iso04_close = BToKMuMu_l2_iso04_close[selectedCandIdx_ctrl];
-        the_ctrl_l2_istriggering = Muon_isTriggering[BToKMuMu_l2Idx[selectedCandIdx_ctrl]];
+      the_ctrl_l2_pt = BToKMuMu_fit_l2_pt[selectedCandIdx_ctrl];
+      the_ctrl_l2_eta = BToKMuMu_fit_l2_eta[selectedCandIdx_ctrl];
+      the_ctrl_l2_phi = BToKMuMu_fit_l2_phi[selectedCandIdx_ctrl];
+      the_ctrl_l2_charge = Muon_charge[BToKMuMu_l2Idx[selectedCandIdx_ctrl]];
+      the_ctrl_l2_iso03 = BToKMuMu_l2_iso03[selectedCandIdx_ctrl];
+      the_ctrl_l2_iso03_close = BToKMuMu_l2_iso03_close[selectedCandIdx_ctrl];
+      the_ctrl_l2_iso04 = BToKMuMu_l2_iso04[selectedCandIdx_ctrl];
+      the_ctrl_l2_iso04_close = BToKMuMu_l2_iso04_close[selectedCandIdx_ctrl];
+      the_ctrl_l2_istriggering = Muon_isTriggeringBPark[BToKMuMu_l2Idx[selectedCandIdx_ctrl]];
 
-        the_ctrl_dimu_mass = BToKMuMu_mll_fullfit[selectedCandIdx_ctrl];
-        the_ctrl_sv_x = BToKMuMu_vtx_x[selectedCandIdx_ctrl];
-        the_ctrl_sv_y = BToKMuMu_vtx_x[selectedCandIdx_ctrl];
-        the_ctrl_sv_z = BToKMuMu_vtx_x[selectedCandIdx_ctrl];
-        the_ctrl_sv_lxy = BToKMuMu_l_xy[selectedCandIdx_ctrl];
-        the_ctrl_sv_lxysig = BToKMuMu_l_xy[selectedCandIdx_ctrl]/BToKMuMu_l_xy_unc[selectedCandIdx_ctrl];
-        the_ctrl_sv_prob = BToKMuMu_svprob[selectedCandIdx_ctrl];
+      the_ctrl_dimu_mass = BToKMuMu_mll_fullfit[selectedCandIdx_ctrl];
+      the_ctrl_sv_x = BToKMuMu_vtx_x[selectedCandIdx_ctrl];
+      the_ctrl_sv_y = BToKMuMu_vtx_x[selectedCandIdx_ctrl];
+      the_ctrl_sv_z = BToKMuMu_vtx_x[selectedCandIdx_ctrl];
+      the_ctrl_sv_lxy = BToKMuMu_l_xy[selectedCandIdx_ctrl];
+      the_ctrl_sv_lxysig = BToKMuMu_l_xy[selectedCandIdx_ctrl]/BToKMuMu_l_xy_unc[selectedCandIdx_ctrl];
+      the_ctrl_sv_prob = BToKMuMu_svprob[selectedCandIdx_ctrl];
 
-        the_ctrl_ismatched = BToKMuMu_isMatched[selectedCandIdx_ctrl];
+      the_ctrl_ismatched = BToKMuMu_isMatched[selectedCandIdx_ctrl];
 
-        // trigger scale factor
-        the_ctrl_weight_hlt = isMC ? getTriggerScaleFactor(the_ctrl_l2_pt, fabs(the_ctrl_l2_eta)) : 1.;
+      // trigger scale factor
+      the_ctrl_weight_hlt = isMC ? getTriggerScaleFactor(the_ctrl_l2_pt, fabs(the_ctrl_l2_eta)) : 1.;
 
-        control_tree->Fill();
-      } // bparking line is fired
+      control_tree->Fill();
     } // l1 is triggering
   }// end at least one candidate in the event
 
@@ -380,7 +367,7 @@ Bool_t BToKMuMuDumper::Process(Long64_t entry)
       UInt_t selEff_kpt_ctrl = BToKMuMu_isMatched[pair_candIdx_desc_kpt_ctrl[0].first];
       //cout << selEff << endl;
 
-      if(nMatchedCand_ctrl != 0 && Muon_isTriggering[BToKMuMu_l1Idx[pair_candIdx_desc_bpT_ctrl[0].first]]==1){
+      if(nMatchedCand_ctrl != 0 && Muon_isTriggeringBPark[BToKMuMu_l1Idx[pair_candIdx_desc_bpT_ctrl[0].first]]==1){
         ctrlhist_selection_efficiency_bpt_allevents->Fill(selEff_bpt_ctrl);
         ctrlhist_selection_efficiency_svprob_allevents->Fill(selEff_svprob_ctrl);
         ctrlhist_selection_efficiency_cos2d_allevents->Fill(selEff_cos2d_ctrl);

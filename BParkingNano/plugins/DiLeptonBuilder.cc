@@ -74,8 +74,7 @@ void DiLeptonBuilder<Lepton>::produce(edm::StreamID, edm::Event &evt, edm::Event
     if(!l1_selection_(*l1_ptr)) continue; 
     if(lepton_type_=="muon" && l1_ptr->userInt("isDSAMuon") == 1) continue;
     // ask the first lepton to be triggering
-    if(lepton_type_=="muon" && l1_ptr->userInt("isTriggering") != 1) continue;
-    if(lepton_type_=="muon" && l1_ptr->userInt("HLT_Mu7_IP4") != 1 && l1_ptr->userInt("HLT_Mu8_IP3") != 1 && l1_ptr->userInt("HLT_Mu8_IP5") != 1 && l1_ptr->userInt("HLT_Mu8_IP6") != 1 && l1_ptr->userInt("HLT_Mu8p5_IP3p5") != 1 && l1_ptr->userInt("HLT_Mu9_IP4") != 1 && l1_ptr->userInt("HLT_Mu9_IP5") != 1 && l1_ptr->userInt("HLT_Mu9_IP6") != 1 && l1_ptr->userInt("HLT_Mu10p5_IP3p5") != 1 && l1_ptr->userInt("HLT_Mu12_IP6") != 1) continue;
+    if(lepton_type_=="muon" && l1_ptr->userInt("isTriggeringBPark") != 1) continue;
 
     math::PtEtaPhiMLorentzVector l1_p4(
       l1_ptr->pt(), 
