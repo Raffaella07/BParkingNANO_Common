@@ -34,20 +34,20 @@ BToMuMuPi = cms.EDProducer(
     ),
     pionSelection_dsa = cms.string(' && '.join([
         #'pt > 0.',
-        'pt > 0.6',
+        'pt > 0.7',
         'abs(eta)<2.',
         'abs(userFloat("dz")) > 0.005',
         'abs(userFloat("dxy")) > 0.001',
         'abs(userFloat("dzS")) > 1.5',  
         'abs(userFloat("dxyS")) > 0.5',
-        'abs(userFloat("DCASig")) > 0.5',
+        'abs(userFloat("DCASig")) > 1',
       ])
     ),
     #isoTracksSelection = cms.string('pt > 0.7 && abs(eta)<2.'),
     isoTracksSelection = cms.string('pt > 0. && abs(eta)<5'),
 
     trgMuonSelection       = cms.string('pt > 7 && abs(eta) < 1.5'),
-    trgMuonSelection_dsa   = cms.string('pt > 7 && abs(eta) < 1.55'),
+    trgMuonSelection_dsa   = cms.string('pt > 7 && abs(eta) < 1.5'),
     trgMuonSelection_loose = cms.string('pt > 0 && abs(eta) < 5'),
 
     leptonSelection_loose = cms.string(' && '.join([
@@ -96,7 +96,7 @@ BToMuMuPi = cms.EDProducer(
         'userFloat("hnl_fitted_cos_theta_2D") > 0.99',
         'userFloat("hnl_ls_xy") > 20',
         'mass < 8',
-        'userFloat("hnl_fitted_mass")<6.3',
+        'userFloat("hnl_fitted_mass") < 6.3',
         ])
     ), 
     postVtxSelection_dsa = cms.string(' & '.join([
@@ -108,7 +108,10 @@ BToMuMuPi = cms.EDProducer(
         'userFloat("hnl_vtx_prob") > 0.001',
         'userFloat("hnl_fitted_cos_theta_2D") > 0.95',
         'mass < 8',
-        'userFloat("hnl_fitted_mass")<6.3',
+        'userFloat("hnl_fitted_mass") < 6.3',
+        'abs(userFloat("deta_lep_pi")) < 1',
+        'abs(userFloat("deta_trgmu_pi")) < 0.8',
+        'abs(userFloat("dphi_lep_pi")) < 1',
         ])
     ), 
 )
