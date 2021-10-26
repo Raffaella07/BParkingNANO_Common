@@ -293,7 +293,7 @@ class NanoProdManager(NanoTools):
           if self.dosignal: branchname = 'nBToMuMuPi'
           elif self.docontrol: branchname = 'nBToKMuMu'
           elif self.dohnl: branchname = 'nHNLToMuPi'
-          elif self.dotageprobe: branchname = 'nJpsiToMuMu'
+          elif self.dotageprobe: branchname = 'nJPsiToMuMu'
           extra_cond = NanoTools.checkLocalFile(self, file_, cond=True, branch_check=True, branchname=branchname) if self.docheckfile else 'True'
           #if NanoTools.checkFileExists(self, file_) and NanoTools.checkLocalFile(self, file_, cond=True): # successfull job
           if NanoTools.checkFileExists(self, file_) and extra_cond: # successfull job
