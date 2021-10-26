@@ -57,6 +57,17 @@ trackBParkTable = cms.EDProducer(
         nValidHits = Var("userInt('nValidHits')", int,doc="Number of valid hits on track", precision=10),
         #dEdXStrip=Var("userFloat('dEdXStrip')", float,doc="dE/dX from strips of associated isolated track"),
         #dEdXPixel=Var("userFloat('dEdXPixel')", float,doc="dE/dX from pixels of associated isolated track"),
+        chi2 = Var("userFloat('chi2')", float, doc="chi2 of the track fit", precision=10),
+        ndof = Var("userInt('ndof')", int, doc="ndof of the track fit", precision=10),
+        normalisedChi2 = Var("userFloat('normalisedChi2')", float, doc="chi2/ndof of the track fit", precision=10),
+        numberOfValidHits = Var("userInt('numberOfValidHits')", int, doc="number of valid hits of the track", precision=10),
+        numberOfLostHits = Var("userInt('numberOfLostHits')", int, doc="number of lost hits of the track", precision=10),
+        numberOfValidPixelHits = Var("userInt('numberOfValidPixelHits')", int, doc="number of valid pixel hits", precision=10),
+        numberOfTrackerLayers = Var("userInt('numberOfTrackerLayers')", int, doc="number of tracker layers", precision=10),
+        numberOfPixelLayers = Var("userInt('numberOfPixelLayers')", int, doc="number of pixel layers", precision=10),
+        qualityIndex = Var("userInt('qualityIndex')", int, doc="quality index", precision=10),
+        highPurityFlag = Var("userInt('highPurityFlag')", int, doc="high purity flag", precision=10),
+        validFraction = Var("userFloat('validFraction')", float, doc="valid fraction", precision=10),
         ),
 )
 
