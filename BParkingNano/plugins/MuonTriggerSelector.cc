@@ -401,6 +401,7 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
       ETHmuons_out->back().addUserInt("isMatchedToSlimmedMuon", -99);
       ETHmuons_out->back().addUserInt("indexMatchedSlimmedMuon", -99);
       ETHmuons_out->back().addUserFloat("dsaToSlimmedMatching_deltaPtRel", -99.);
+      ETHmuons_out->back().addUserFloat("dsaToSlimmedMatching_deltaR", -99.);
       ETHmuons_out->back().addUserFloat("dsaToSlimmedMatching_deltadxyRel", -99.);
       ETHmuons_out->back().addUserFloat("dsaToSlimmedMatching_deltadzRel", -99.);
       ETHmuons_out->back().addUserInt("passDSAMuonID", -99);
@@ -439,10 +440,11 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
 
       // perform dR matching between DSA and slimmed muons
       // (without ambiguity resolving, i.e that a given slimmed muon can be matched to more than one DSA muon)
-      std::vector<pair<int, float>> pairs_slimmedIdx_deltaPtRel;
+      std::vector<pair<int, std::array<float, 4>>> pairs_slimmedIdx_deltaPtRel;
 
       bool isMatchedToSlimmedMuon = 0;
       int indexMatchedSlimmedMuon = -1;
+      float dsaToSlimmedMatching_deltaR = -1;
       float dsaToSlimmedMatching_deltaPtRel = -1.;
       float dsaToSlimmedMatching_deltadxyRel = -1.;
       float dsaToSlimmedMatching_deltadzRel = -1.;
@@ -458,31 +460,37 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
 
         float deltaR_dsa_slimmed = reco::deltaR(dsa_muon.eta(), dsa_muon.phi(), slimmed_muon.eta(), slimmed_muon.phi());
         if(deltaR_dsa_slimmed < max_deltaR_dsaToSlimmed_matching_){
-          pair<int, float> pairs_slimmedIdx_deltaPtRel_tmp;
+          pair<int, std::array<float, 4>> pairs_slimmedIdx_deltaPtRel_tmp;
           pairs_slimmedIdx_deltaPtRel_tmp.first = iSlimmedMuon; //indexMatchedSlimmedMuon;
-          pairs_slimmedIdx_deltaPtRel_tmp.second = fabs(dsa_muon.pt() - slimmed_muon.pt()) / slimmed_muon.pt();
+          pairs_slimmedIdx_deltaPtRel_tmp.second[0] = fabs(dsa_muon.pt() - slimmed_muon.pt()) / slimmed_muon.pt();
+          pairs_slimmedIdx_deltaPtRel_tmp.second[1] = deltaR_dsa_slimmed;
+          pairs_slimmedIdx_deltaPtRel_tmp.second[2] = fabs(dsa_muon.dxy(PV.position()) - slimmed_muon.dB(slimmed_muon.PV2D)) / fabs(slimmed_muon.dB(slimmed_muon.PV2D));
+          pairs_slimmedIdx_deltaPtRel_tmp.second[3] = fabs(dsa_muon.dz(PV.position()) - slimmed_muon.dB(slimmed_muon.PVDZ)) / fabs(slimmed_muon.dB(slimmed_muon.PVDZ));
           pairs_slimmedIdx_deltaPtRel.push_back(pairs_slimmedIdx_deltaPtRel_tmp);
-          dsaToSlimmedMatching_deltadxyRel = fabs(dsa_muon.dxy(PV.position()) - slimmed_muon.dB(slimmed_muon.PV2D)) / fabs(slimmed_muon.dB(slimmed_muon.PV2D));
-          dsaToSlimmedMatching_deltadzRel = fabs(dsa_muon.dz(PV.position()) - slimmed_muon.dB(slimmed_muon.PVDZ)) / fabs(slimmed_muon.dB(slimmed_muon.PVDZ));
-          //std::cout << "DSA muon " << iDSAMuon << " matched to slimmed muon " << pairs_slimmedIdx_deltaPtRel_tmp.first << " with deltaPtRel " << pairs_slimmedIdx_deltaPtRel_tmp.second << " and deltaR " << deltaR_dsa_slimmed << std::endl;
+          //std::cout << "DSA muon " << iDSAMuon << " matched to slimmed muon " << pairs_slimmedIdx_deltaPtRel_tmp.first << " with deltaPtRel " << fabs(dsa_muon.pt() - slimmed_muon.pt()) / slimmed_muon.pt() << " and deltaR " << deltaR_dsa_slimmed << std::endl;
         }
       }
       // sort the pairs in deltaPtRel
-      sort(pairs_slimmedIdx_deltaPtRel.begin(), pairs_slimmedIdx_deltaPtRel.end(), [](const pair<int, float> &pair_i, const pair<int, float> &pair_j){
-        return pair_i.second < pair_j.second;
+      sort(pairs_slimmedIdx_deltaPtRel.begin(), pairs_slimmedIdx_deltaPtRel.end(), [](const pair<int, std::array<float, 4>> &pair_i, const pair<int, std::array<float, 4>> &pair_j){
+        return pair_i.second[0] < pair_j.second[0];
       });
 
       // fetch the matching index
-      if(pairs_slimmedIdx_deltaPtRel.size() > 0 && pairs_slimmedIdx_deltaPtRel[0].second < max_deltaPtRel_dsaToSlimmed_matching_){
+      if(pairs_slimmedIdx_deltaPtRel.size() > 0 && pairs_slimmedIdx_deltaPtRel[0].second[0] < max_deltaPtRel_dsaToSlimmed_matching_){
         isMatchedToSlimmedMuon = 1;
         indexMatchedSlimmedMuon = pairs_slimmedIdx_deltaPtRel[0].first;
-        dsaToSlimmedMatching_deltaPtRel = pairs_slimmedIdx_deltaPtRel[0].second;
-        //std::cout << "DSA muon is matched " << isMatchedToSlimmedMuon << " to slimmed muon " << indexMatchedSlimmedMuon << std::endl;
+        dsaToSlimmedMatching_deltaPtRel = pairs_slimmedIdx_deltaPtRel[0].second[0];
+        dsaToSlimmedMatching_deltaR = pairs_slimmedIdx_deltaPtRel[0].second[1];
+        dsaToSlimmedMatching_deltadxyRel = pairs_slimmedIdx_deltaPtRel[0].second[2];
+        dsaToSlimmedMatching_deltadzRel = pairs_slimmedIdx_deltaPtRel[0].second[3];
+        //std::cout << "DSA muon is matched " << isMatchedToSlimmedMuon << " to slimmed muon " << indexMatchedSlimmedMuon << " with deltaR " << dsaToSlimmedMatching_deltaR << " deltaPtRel " << dsaToSlimmedMatching_deltaPtRel << std::endl;
       }
+
       //std::cout << std::endl;
       ETHmuons_out->back().addUserInt("isMatchedToSlimmedMuon", isMatchedToSlimmedMuon);
       ETHmuons_out->back().addUserInt("indexMatchedSlimmedMuon", indexMatchedSlimmedMuon);
       ETHmuons_out->back().addUserFloat("dsaToSlimmedMatching_deltaPtRel", dsaToSlimmedMatching_deltaPtRel);
+      ETHmuons_out->back().addUserFloat("dsaToSlimmedMatching_deltaR", dsaToSlimmedMatching_deltaR);
       ETHmuons_out->back().addUserFloat("dsaToSlimmedMatching_deltadxyRel", dsaToSlimmedMatching_deltadxyRel);
       ETHmuons_out->back().addUserFloat("dsaToSlimmedMatching_deltadzRel", dsaToSlimmedMatching_deltadzRel);
 
