@@ -196,6 +196,9 @@ class NanoMerger(NanoTools):
 
       if self.dosplitflat:
         self.doMerging(nanoName_flat_step, mergedName_flat, location, outputdir, False)
+        if self.dobatch:
+          command_sleep = 'sleep 30s'
+          os.system(command_sleep)
 
       self.doChunkMerging(nanoName_flat, mergedName_flat, location, False)
 
