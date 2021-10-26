@@ -96,8 +96,10 @@ Options:
 * --user `<user>`: with --mcprivate only; username where the miniAOD samples are stored
 * --tagnano `<tagnano>`: optional, tag to be appended to the nano rootfile name 
 * --tagflat `<tagflat>`: optional, tag to be appended to the flat rootfile name 
+* --dosplitflat: optional, instead of running the ntupliser per chunk, runs it per file (same splitting as for nano jobs)
 * --maxfiles `<maxfiles>`: optional, maximum number of files to process
-* --doquick: optional run on slurm quick partition (time/job < 1h)
+* --doquick: optional run on slurm short partition (time/job < 1h)
+* --dolong: optional run on slurm long partition (time/job < 7d)
 * --docompile: optional, compiles the BParkingNano tool before launching
 
 Examples of usage:
