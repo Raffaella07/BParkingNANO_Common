@@ -20,7 +20,7 @@ muonTrgSelector = cms.EDProducer("MuonTriggerSelector",
                                  max_deltaPtRel_trigger_matching = cms.double(0.1),
 
                                  # DSA to slimmed muon matching conditions
-                                 max_deltaR_dsaToSlimmed_matching = cms.double(0.2),
+                                 max_deltaR_dsaToSlimmed_matching = cms.double(0.1),
                                  max_deltaPtRel_dsaToSlimmed_matching = cms.double(0.2),
                                  
                                  # selection for the selected muon
@@ -51,6 +51,7 @@ muonBParkTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
         isDSAMuon = Var("isDSAMuon()", int, doc="muon is displacedStandaloneMuon"), 
         isMatchedToSlimmedMuon = Var("userInt('isMatchedToSlimmedMuon')", int, doc="DSA muon is matched to slimmed muon"), 
         indexMatchedSlimmedMuon = Var("userInt('indexMatchedSlimmedMuon')", int, doc="index of the slimmed muon to which the dsa muon is matched"), 
+        dsaToSlimmedMatching_deltaR = Var("userFloat('dsaToSlimmedMatching_deltaR')", float, doc="deltaR between the dsa and slimmed muon"), 
         dsaToSlimmedMatching_deltaPtRel = Var("userFloat('dsaToSlimmedMatching_deltaPtRel')", float, doc="relative difference in pt between the dsa and matched slimmed muons"), 
         dsaToSlimmedMatching_deltadxyRel = Var("userFloat('dsaToSlimmedMatching_deltadxyRel')", float, doc="relative difference in dxy between the dsa and matched slimmed muons"), 
         dsaToSlimmedMatching_deltadzRel = Var("userFloat('dsaToSlimmedMatching_deltadzRel')", float, doc="relative difference in dz between the dsa and matched slimmed muons"), 
