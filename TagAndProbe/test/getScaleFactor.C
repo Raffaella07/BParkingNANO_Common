@@ -13,9 +13,9 @@
 // ------- Global Variables ------- //
 
 //TString dataFileName = "results_tag_and_probe_v2_tag_fired_DST_DoubleMu1_data_A1_extraptbin.root";
-TString dataFileName = "results_tag_and_probe_v2_tag_fired_DST_DoubleMu1_mc_test3dbinning.root";
-TString mcFileName = "results_tag_and_probe_v2_tag_fired_DST_DoubleMu1_mc_test3dbinning.root";
-string dirLabel = "tag_and_probe_v2_tag_fired_DST_DoubleMu1_mc_test3dbinning";
+TString dataFileName = "results_tag_and_probe_v2_BToJPsiKstar_V0_tag_fired_DST_DoubleMu1_dataA1_6_B1_v1.root";
+TString mcFileName = "results_tag_and_probe_v2_BToJPsiKstar_V0_tag_fired_DST_DoubleMu1_mc_v1.root";
+string dirLabel = "tag_and_probe_v2_BToJPsiKstar_V0_tag_fired_DST_DoubleMu1_A1_6_B1_v1";
 
 
 // -------------------------------- //
@@ -27,7 +27,7 @@ void  write2DScaleFactor(TH2F* h, string name){
   TString name_forhist = name.c_str();
   TFile* root_file = TFile::Open(name_forhist + ".root", "RECREATE");
   TH2D* hist_scale_factor = (TH2D*)h->Clone("hist_scale_factor");
-  TCanvas* c = new TCanvas("c", "c", 800, 700);
+  TCanvas* c = new TCanvas("c", "c", 1200, 1000);
 
   int nX = h->GetNbinsX();
   int nY = h->GetNbinsY();
@@ -54,6 +54,7 @@ void  write2DScaleFactor(TH2F* h, string name){
   hist_scale_factor->SetOption("colztexte");
   hist_scale_factor->Write();
   hist_scale_factor->Draw();
+  gStyle->SetPaintTextFormat(".1f");
   c->SaveAs(name_forhist + ".pdf");
   root_file->Close();
 }
@@ -140,16 +141,20 @@ void  getScaleFactor(string dir="results"){
   TFile* fData = new TFile(dataFileName);
   TFile* fMC = new TFile(mcFileName);
 
-  //process(dir, "cat_pt_eta", outdir, "fit", fData, fMC, "probe_pt_probe_eta_PLOT", "", "2D"); 
-  //process(dir, "cat_pt_eta", outdir, "cnt", fData, fMC, "probe_pt_probe_eta_PLOT", "", "2D"); 
+  process(dir, "cat_pt_eta", outdir, "fit", fData, fMC, "probe_pt_probe_eta_PLOT", "", "2D"); 
+  process(dir, "cat_pt_eta", outdir, "cnt", fData, fMC, "probe_pt_probe_eta_PLOT", "", "2D"); 
 
   // make sure that the eta categories are correct
-  process(dir, "cat_pt_dxysig_eta", outdir, "fit", fData, fMC, "probe_pt_probe_dxy_sig_PLOT_probe_eta_bin0", "eta_0p00_0p50", "3D"); 
-  process(dir, "cat_pt_dxysig_eta", outdir, "cnt", fData, fMC, "probe_pt_probe_dxy_sig_PLOT_probe_eta_bin0", "eta_0p00_0p50", "3D"); 
-  process(dir, "cat_pt_dxysig_eta", outdir, "fit", fData, fMC, "probe_pt_probe_dxy_sig_PLOT_probe_eta_bin1", "eta_0p50_1p00", "3D"); 
-  process(dir, "cat_pt_dxysig_eta", outdir, "cnt", fData, fMC, "probe_pt_probe_dxy_sig_PLOT_probe_eta_bin1", "eta_0p50_1p00", "3D"); 
-  process(dir, "cat_pt_dxysig_eta", outdir, "fit", fData, fMC, "probe_pt_probe_dxy_sig_PLOT_probe_eta_bin2", "eta_1p00_2p00", "3D"); 
-  process(dir, "cat_pt_dxysig_eta", outdir, "cnt", fData, fMC, "probe_pt_probe_dxy_sig_PLOT_probe_eta_bin2", "eta_1p00_2p00", "3D"); 
+  /*
+  process(dir, "cat_pt_eta_dxysig", outdir, "fit", fData, fMC, "probe_pt_probe_dxy_sig_PLOT_probe_eta_bin0", "eta_0p00_0p40", "3D"); 
+  process(dir, "cat_pt_eta_dxysig", outdir, "cnt", fData, fMC, "probe_pt_probe_dxy_sig_PLOT_probe_eta_bin0", "eta_0p00_0p40", "3D"); 
+  process(dir, "cat_pt_eta_dxysig", outdir, "fit", fData, fMC, "probe_pt_probe_dxy_sig_PLOT_probe_eta_bin1", "eta_0p40_0p80", "3D"); 
+  process(dir, "cat_pt_eta_dxysig", outdir, "cnt", fData, fMC, "probe_pt_probe_dxy_sig_PLOT_probe_eta_bin1", "eta_0p40_0p80", "3D"); 
+  process(dir, "cat_pt_eta_dxysig", outdir, "fit", fData, fMC, "probe_pt_probe_dxy_sig_PLOT_probe_eta_bin2", "eta_0p80_1p50", "3D"); 
+  process(dir, "cat_pt_eta_dxysig", outdir, "cnt", fData, fMC, "probe_pt_probe_dxy_sig_PLOT_probe_eta_bin2", "eta_0p80_1p50", "3D"); 
+  process(dir, "cat_pt_eta_dxysig", outdir, "fit", fData, fMC, "probe_pt_probe_dxy_sig_PLOT_probe_eta_bin2", "eta_1p50_2p00", "3D"); 
+  process(dir, "cat_pt_eta_dxysig", outdir, "cnt", fData, fMC, "probe_pt_probe_dxy_sig_PLOT_probe_eta_bin2", "eta_1p50_2p00", "3D"); 
+  */
 
   //process(dir, "cat_pt_eta_2", outdir, "fit", fData, fMC, "probe_pt_probe_eta_PLOT", "", "2D"); 
   //process(dir, "cat_pt_eta_2", outdir, "cnt", fData, fMC, "probe_pt_probe_eta_PLOT", "", "2D"); 
