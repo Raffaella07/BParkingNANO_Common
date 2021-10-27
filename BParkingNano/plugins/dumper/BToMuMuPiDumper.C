@@ -766,7 +766,6 @@ Bool_t BToMuMuPiDumper::Process(Long64_t entry)
           the_gen_hnl_vy = GenPart_vy[gen_hnl_idx];
           the_gen_hnl_vz = GenPart_vz[gen_hnl_idx];
         }
-<<<<<<< HEAD
 
         // trigger scale factor
         //the_sig_weight_hlt = isMC ? getTriggerScaleFactor(the_sig_trgmu_pt, fabs(the_sig_trgmu_dxysig), fabs(the_sig_trgmu_eta)) : 1.;
