@@ -67,6 +67,12 @@ class MuonTriggerSelector : public edm::EDProducer {
     // trigger muon matching
     const double max_deltaR_trigger_matching_;
     const double max_deltaPtRel_trigger_matching_;
+    
+    // add displaced standalone muons
+    const bool add_dsa_;
+
+    // dsa to slimmed muon matching
+    const bool do_dsa_matching_;
     const double max_deltaR_dsaToSlimmed_matching_;
     const double max_deltaPtRel_dsaToSlimmed_matching_;
 
@@ -89,6 +95,8 @@ MuonTriggerSelector::MuonTriggerSelector(const edm::ParameterSet &iConfig):
   //
   max_deltaR_trigger_matching_(iConfig.getParameter<double>("max_deltaR_trigger_matching")),
   max_deltaPtRel_trigger_matching_(iConfig.getParameter<double>("max_deltaPtRel_trigger_matching")),
+  add_dsa_(iConfig.getParameter<bool>("add_dsa")),
+  do_dsa_matching_(iConfig.getParameter<bool>("do_dsa_matching")),
   max_deltaR_dsaToSlimmed_matching_(iConfig.getParameter<double>("max_deltaR_dsaToSlimmed_matching")),
   max_deltaPtRel_dsaToSlimmed_matching_(iConfig.getParameter<double>("max_deltaPtRel_dsaToSlimmed_matching")),
   selmu_ptMin_(iConfig.getParameter<double>("selmu_ptMin")),
@@ -412,107 +420,111 @@ void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSe
     }
 
     // add the displaced standalone muons to the collection
-    for(const reco::Track & dsa_muon : *displaced_standalone_muons){
-      //unsigned int iDSAMuon(&dsa_muon - &(displaced_standalone_muons->at(0)));
-      if(dsa_muon.pt()<selmu_ptMin_) continue;
-      if(fabs(dsa_muon.eta())>selmu_absEtaMax_) continue;
+    if(add_dsa_){
+      for(const reco::Track & dsa_muon : *displaced_standalone_muons){
+        //unsigned int iDSAMuon(&dsa_muon - &(displaced_standalone_muons->at(0)));
+        if(dsa_muon.pt()<selmu_ptMin_) continue;
+        if(fabs(dsa_muon.eta())>selmu_absEtaMax_) continue;
 
-      // add the muon to the transient track collection
-      // one has to make sure that the indices in the muon and transient track collections match
-      const reco::TransientTrack muonTT((*(&dsa_muon)),&(*bFieldHandle)); 
-      if(!muonTT.isValid()) continue; 
-      trans_muons_out->emplace_back(muonTT);
+        // add the muon to the transient track collection
+        // one has to make sure that the indices in the muon and transient track collections match
+        const reco::TransientTrack muonTT((*(&dsa_muon)),&(*bFieldHandle)); 
+        if(!muonTT.isValid()) continue; 
+        trans_muons_out->emplace_back(muonTT);
 
-      pat::ETHMuon the_muon(dsa_muon);
-      ETHmuons_out->emplace_back(the_muon);
+        pat::ETHMuon the_muon(dsa_muon);
+        ETHmuons_out->emplace_back(the_muon);
 
-      for(unsigned int i=0; i<HLTPaths_.size(); i++){
-        ETHmuons_out->back().addUserInt(HLTPaths_[i], -1);
-        ETHmuons_out->back().addUserInt(HLTPaths_[i] + "_prescale", -1);
-      }
-      ETHmuons_out->back().addUserInt("isTriggering", -1);
-      ETHmuons_out->back().addUserInt("isTriggeringBPark", -1);
-      ETHmuons_out->back().addUserFloat("DR", -1.);
-      ETHmuons_out->back().addUserFloat("DPT", -1.);
-      ETHmuons_out->back().addUserInt("isDSAMuon", 1);
-      ETHmuons_out->back().addUserInt("isSlimmedMuon", 0);
-      ETHmuons_out->back().addUserFloat("dz", dsa_muon.dz(PV.position()));
-      ETHmuons_out->back().addUserFloat("dzS", dsa_muon.dz(PV.position())/dsa_muon.dzError());
-      ETHmuons_out->back().addUserFloat("dxy", dsa_muon.dxy(PV.position()));
-      ETHmuons_out->back().addUserFloat("dxyS", dsa_muon.dxy(PV.position())/dsa_muon.dxyError());
-
-      //std::cout << "DSA muon " << iDSAMuon << " pt " << dsa_muon.pt()  << " eta " << dsa_muon.eta() << std::endl;
-
-      // perform dR matching between DSA and slimmed muons
-      // (without ambiguity resolving, i.e that a given slimmed muon can be matched to more than one DSA muon)
-      std::vector<pair<int, std::array<float, 4>>> pairs_slimmedIdx_deltaPtRel;
-
-      bool isMatchedToSlimmedMuon = 0;
-      int indexMatchedSlimmedMuon = -1;
-      float dsaToSlimmedMatching_deltaR = -1;
-      float dsaToSlimmedMatching_deltaPtRel = -1.;
-      float dsaToSlimmedMatching_deltadxyRel = -1.;
-      float dsaToSlimmedMatching_deltadzRel = -1.;
-      // for each DSA muon, get the slimmed muons that are within the deltaR_max cone
-      for(const pat::Muon & slimmed_muon : *slimmed_muons){
-        // for each slimmed  muon, apply same selection as above, to make sure that the indices are consistent
-        if(slimmed_muon.pt()<selmu_ptMin_) continue;
-        if(fabs(slimmed_muon.eta())>selmu_absEtaMax_) continue;
-        const reco::TransientTrack muonTT((*(slimmed_muon.bestTrack())),&(*bFieldHandle));
-        if(!muonTT.isValid()) continue;
-
-        unsigned int iSlimmedMuon(&slimmed_muon - &(slimmed_muons->at(0)));
-
-        float deltaR_dsa_slimmed = reco::deltaR(dsa_muon.eta(), dsa_muon.phi(), slimmed_muon.eta(), slimmed_muon.phi());
-        if(deltaR_dsa_slimmed < max_deltaR_dsaToSlimmed_matching_){
-          pair<int, std::array<float, 4>> pairs_slimmedIdx_deltaPtRel_tmp;
-          pairs_slimmedIdx_deltaPtRel_tmp.first = iSlimmedMuon; //indexMatchedSlimmedMuon;
-          pairs_slimmedIdx_deltaPtRel_tmp.second[0] = fabs(dsa_muon.pt() - slimmed_muon.pt()) / slimmed_muon.pt();
-          pairs_slimmedIdx_deltaPtRel_tmp.second[1] = deltaR_dsa_slimmed;
-          pairs_slimmedIdx_deltaPtRel_tmp.second[2] = fabs(dsa_muon.dxy(PV.position()) - slimmed_muon.dB(slimmed_muon.PV2D)) / fabs(slimmed_muon.dB(slimmed_muon.PV2D));
-          pairs_slimmedIdx_deltaPtRel_tmp.second[3] = fabs(dsa_muon.dz(PV.position()) - slimmed_muon.dB(slimmed_muon.PVDZ)) / fabs(slimmed_muon.dB(slimmed_muon.PVDZ));
-          pairs_slimmedIdx_deltaPtRel.push_back(pairs_slimmedIdx_deltaPtRel_tmp);
-          //std::cout << "DSA muon " << iDSAMuon << " matched to slimmed muon " << pairs_slimmedIdx_deltaPtRel_tmp.first << " with deltaPtRel " << fabs(dsa_muon.pt() - slimmed_muon.pt()) / slimmed_muon.pt() << " and deltaR " << deltaR_dsa_slimmed << std::endl;
+        for(unsigned int i=0; i<HLTPaths_.size(); i++){
+          ETHmuons_out->back().addUserInt(HLTPaths_[i], -1);
+          ETHmuons_out->back().addUserInt(HLTPaths_[i] + "_prescale", -1);
         }
-      }
-      // sort the pairs in deltaPtRel
-      sort(pairs_slimmedIdx_deltaPtRel.begin(), pairs_slimmedIdx_deltaPtRel.end(), [](const pair<int, std::array<float, 4>> &pair_i, const pair<int, std::array<float, 4>> &pair_j){
-        return pair_i.second[0] < pair_j.second[0];
-      });
+        ETHmuons_out->back().addUserInt("isTriggering", -1);
+        ETHmuons_out->back().addUserInt("isTriggeringBPark", -1);
+        ETHmuons_out->back().addUserFloat("DR", -1.);
+        ETHmuons_out->back().addUserFloat("DPT", -1.);
+        ETHmuons_out->back().addUserInt("isDSAMuon", 1);
+        ETHmuons_out->back().addUserInt("isSlimmedMuon", 0);
+        ETHmuons_out->back().addUserFloat("dz", dsa_muon.dz(PV.position()));
+        ETHmuons_out->back().addUserFloat("dzS", dsa_muon.dz(PV.position())/dsa_muon.dzError());
+        ETHmuons_out->back().addUserFloat("dxy", dsa_muon.dxy(PV.position()));
+        ETHmuons_out->back().addUserFloat("dxyS", dsa_muon.dxy(PV.position())/dsa_muon.dxyError());
 
-      // fetch the matching index
-      if(pairs_slimmedIdx_deltaPtRel.size() > 0 && pairs_slimmedIdx_deltaPtRel[0].second[0] < max_deltaPtRel_dsaToSlimmed_matching_){
-        isMatchedToSlimmedMuon = 1;
-        indexMatchedSlimmedMuon = pairs_slimmedIdx_deltaPtRel[0].first;
-        dsaToSlimmedMatching_deltaPtRel = pairs_slimmedIdx_deltaPtRel[0].second[0];
-        dsaToSlimmedMatching_deltaR = pairs_slimmedIdx_deltaPtRel[0].second[1];
-        dsaToSlimmedMatching_deltadxyRel = pairs_slimmedIdx_deltaPtRel[0].second[2];
-        dsaToSlimmedMatching_deltadzRel = pairs_slimmedIdx_deltaPtRel[0].second[3];
-        //std::cout << "DSA muon is matched " << isMatchedToSlimmedMuon << " to slimmed muon " << indexMatchedSlimmedMuon << " with deltaR " << dsaToSlimmedMatching_deltaR << " deltaPtRel " << dsaToSlimmedMatching_deltaPtRel << std::endl;
-      }
+        //std::cout << "DSA muon " << iDSAMuon << " pt " << dsa_muon.pt()  << " eta " << dsa_muon.eta() << std::endl;
 
-      //std::cout << std::endl;
-      ETHmuons_out->back().addUserInt("isMatchedToSlimmedMuon", isMatchedToSlimmedMuon);
-      ETHmuons_out->back().addUserInt("indexMatchedSlimmedMuon", indexMatchedSlimmedMuon);
-      ETHmuons_out->back().addUserFloat("dsaToSlimmedMatching_deltaPtRel", dsaToSlimmedMatching_deltaPtRel);
-      ETHmuons_out->back().addUserFloat("dsaToSlimmedMatching_deltaR", dsaToSlimmedMatching_deltaR);
-      ETHmuons_out->back().addUserFloat("dsaToSlimmedMatching_deltadxyRel", dsaToSlimmedMatching_deltadxyRel);
-      ETHmuons_out->back().addUserFloat("dsaToSlimmedMatching_deltadzRel", dsaToSlimmedMatching_deltadzRel);
+        // perform dR matching between DSA and slimmed muons
+        // (without ambiguity resolving, i.e that a given slimmed muon can be matched to more than one DSA muon)
+        bool isMatchedToSlimmedMuon = 0;
+        int indexMatchedSlimmedMuon = -1;
+        float dsaToSlimmedMatching_deltaR = -1;
+        float dsaToSlimmedMatching_deltaPtRel = -1.;
+        float dsaToSlimmedMatching_deltadxyRel = -1.;
+        float dsaToSlimmedMatching_deltadzRel = -1.;
 
-      // building DSA muon ID
-      bool passDSAMuonID = false;
-      if(
-        (
-         (dsa_muon.hitPattern().numberOfValidMuonDTHits() > 18 && dsa_muon.hitPattern().numberOfValidMuonCSCHits() == 0) ||
-         (dsa_muon.hitPattern().numberOfValidMuonHits() > 12 && dsa_muon.hitPattern().numberOfValidMuonCSCHits() > 0)
-        ) &&
-        dsa_muon.normalizedChi2() < 2.5 &&
-        dsa_muon.ptError() / dsa_muon.pt() < 1 && 
-        dsa_muon.hitPattern().muonStationsWithValidHits() > 1
-        ){
-        passDSAMuonID = true;
+        if(do_dsa_matching_){
+          std::vector<pair<int, std::array<float, 4>>> pairs_slimmedIdx_deltaPtRel;
+
+          // for each DSA muon, get the slimmed muons that are within the deltaR_max cone
+          for(const pat::Muon & slimmed_muon : *slimmed_muons){
+            // for each slimmed  muon, apply same selection as above, to make sure that the indices are consistent
+            if(slimmed_muon.pt()<selmu_ptMin_) continue;
+            if(fabs(slimmed_muon.eta())>selmu_absEtaMax_) continue;
+            const reco::TransientTrack muonTT((*(slimmed_muon.bestTrack())),&(*bFieldHandle));
+            if(!muonTT.isValid()) continue;
+
+            unsigned int iSlimmedMuon(&slimmed_muon - &(slimmed_muons->at(0)));
+
+            float deltaR_dsa_slimmed = reco::deltaR(dsa_muon.eta(), dsa_muon.phi(), slimmed_muon.eta(), slimmed_muon.phi());
+            if(deltaR_dsa_slimmed < max_deltaR_dsaToSlimmed_matching_){
+              pair<int, std::array<float, 4>> pairs_slimmedIdx_deltaPtRel_tmp;
+              pairs_slimmedIdx_deltaPtRel_tmp.first = iSlimmedMuon; //indexMatchedSlimmedMuon;
+              pairs_slimmedIdx_deltaPtRel_tmp.second[0] = fabs(dsa_muon.pt() - slimmed_muon.pt()) / slimmed_muon.pt();
+              pairs_slimmedIdx_deltaPtRel_tmp.second[1] = deltaR_dsa_slimmed;
+              pairs_slimmedIdx_deltaPtRel_tmp.second[2] = fabs(dsa_muon.dxy(PV.position()) - slimmed_muon.dB(slimmed_muon.PV2D)) / fabs(slimmed_muon.dB(slimmed_muon.PV2D));
+              pairs_slimmedIdx_deltaPtRel_tmp.second[3] = fabs(dsa_muon.dz(PV.position()) - slimmed_muon.dB(slimmed_muon.PVDZ)) / fabs(slimmed_muon.dB(slimmed_muon.PVDZ));
+              pairs_slimmedIdx_deltaPtRel.push_back(pairs_slimmedIdx_deltaPtRel_tmp);
+              //std::cout << "DSA muon " << iDSAMuon << " matched to slimmed muon " << pairs_slimmedIdx_deltaPtRel_tmp.first << " with deltaPtRel " << fabs(dsa_muon.pt() - slimmed_muon.pt()) / slimmed_muon.pt() << " and deltaR " << deltaR_dsa_slimmed << std::endl;
+            }
+          }
+          // sort the pairs in deltaPtRel
+          sort(pairs_slimmedIdx_deltaPtRel.begin(), pairs_slimmedIdx_deltaPtRel.end(), [](const pair<int, std::array<float, 4>> &pair_i, const pair<int, std::array<float, 4>> &pair_j){
+            return pair_i.second[0] < pair_j.second[0];
+          });
+
+          // fetch the matching index
+          if(pairs_slimmedIdx_deltaPtRel.size() > 0 && pairs_slimmedIdx_deltaPtRel[0].second[0] < max_deltaPtRel_dsaToSlimmed_matching_){
+            isMatchedToSlimmedMuon = 1;
+            indexMatchedSlimmedMuon = pairs_slimmedIdx_deltaPtRel[0].first;
+            dsaToSlimmedMatching_deltaPtRel = pairs_slimmedIdx_deltaPtRel[0].second[0];
+            dsaToSlimmedMatching_deltaR = pairs_slimmedIdx_deltaPtRel[0].second[1];
+            dsaToSlimmedMatching_deltadxyRel = pairs_slimmedIdx_deltaPtRel[0].second[2];
+            dsaToSlimmedMatching_deltadzRel = pairs_slimmedIdx_deltaPtRel[0].second[3];
+            //std::cout << "DSA muon is matched " << isMatchedToSlimmedMuon << " to slimmed muon " << indexMatchedSlimmedMuon << " with deltaR " << dsaToSlimmedMatching_deltaR << " deltaPtRel " << dsaToSlimmedMatching_deltaPtRel << std::endl;
+          }
+        }
+
+        ETHmuons_out->back().addUserInt("isMatchedToSlimmedMuon", isMatchedToSlimmedMuon);
+        ETHmuons_out->back().addUserInt("indexMatchedSlimmedMuon", indexMatchedSlimmedMuon);
+        ETHmuons_out->back().addUserFloat("dsaToSlimmedMatching_deltaPtRel", dsaToSlimmedMatching_deltaPtRel);
+        ETHmuons_out->back().addUserFloat("dsaToSlimmedMatching_deltaR", dsaToSlimmedMatching_deltaR);
+        ETHmuons_out->back().addUserFloat("dsaToSlimmedMatching_deltadxyRel", dsaToSlimmedMatching_deltadxyRel);
+        ETHmuons_out->back().addUserFloat("dsaToSlimmedMatching_deltadzRel", dsaToSlimmedMatching_deltadzRel);
+
+        // building DSA muon ID
+        bool passDSAMuonID = false;
+        if(
+          (
+           (dsa_muon.hitPattern().numberOfValidMuonDTHits() > 18 && dsa_muon.hitPattern().numberOfValidMuonCSCHits() == 0) ||
+           (dsa_muon.hitPattern().numberOfValidMuonHits() > 12 && dsa_muon.hitPattern().numberOfValidMuonCSCHits() > 0)
+          ) &&
+          dsa_muon.normalizedChi2() < 2.5 &&
+          dsa_muon.ptError() / dsa_muon.pt() < 1 && 
+          dsa_muon.hitPattern().muonStationsWithValidHits() > 1
+          ){
+          passDSAMuonID = true;
+        }
+        ETHmuons_out->back().addUserInt("passDSAMuonID", passDSAMuonID);
       }
-      ETHmuons_out->back().addUserInt("passDSAMuonID", passDSAMuonID);
     }
 
     //std::cout << std::endl;

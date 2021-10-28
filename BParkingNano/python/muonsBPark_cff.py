@@ -19,7 +19,11 @@ muonTrgSelector = cms.EDProducer("MuonTriggerSelector",
                                  max_deltaR_trigger_matching = cms.double(0.05),
                                  max_deltaPtRel_trigger_matching = cms.double(0.1),
 
+                                 # add displaced standalone muons
+                                 add_dsa = cms.bool(False),
+
                                  # DSA to slimmed muon matching conditions
+                                 do_dsa_matching = cms.bool(False),
                                  max_deltaR_dsaToSlimmed_matching = cms.double(0.1),
                                  max_deltaPtRel_dsaToSlimmed_matching = cms.double(0.2),
                                  
