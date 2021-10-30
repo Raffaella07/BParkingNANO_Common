@@ -4,7 +4,11 @@ import os.path
 from os import path
 import glob
 import ROOT
+
 from nanoTools import NanoTools
+sys.path.append('../data/samples')
+from bparkingdata_samples import bpark_samples
+from qcdmuenriched_samples import qcd_samples
 
 
 def getOptions():
@@ -44,7 +48,7 @@ def checkParser(opt):
 class NanoMerger(NanoTools):
   def __init__(self, opt):
     self.prodlabel   = vars(opt)['pl']
-    self.dataset     = vars(opt)['ds']
+    self.ds          = vars(opt)['ds']
     self.tagnano     = vars(opt)['tagnano']
     self.tagflat     = vars(opt)['tagflat']
     self.mcprivate   = vars(opt)['mcprivate']
@@ -54,6 +58,15 @@ class NanoMerger(NanoTools):
     self.doflat      = vars(opt)["doflat"]
     self.dosplitflat = vars(opt)["dosplitflat"]
     self.dobatch     = vars(opt)["dobatch"]
+
+    if self.data:
+      if self.ds not in bpark_samples.keys():
+        raise RuntimeError('Please indicate on which period of the BParking dataset you want to run. Label "{}" not recognised. Choose among {}'.format(self.ds, bpark_samples.keys()))
+      self.dataset = bpark_samples[self.ds]
+    elif self.mccentral:
+      if self.ds not in qcd_samples.keys():
+        raise RuntimeError('Please indicate on which QCD dataset you want to run. Label "{}" not recognised. Choose among {}'.format(self.ds, qcd_samples.keys()))
+      self.dataset = qcd_samples[self.ds]
 
 
   def doMerging(self, nanoName, mergedName, locationSE, outputdir, cond):

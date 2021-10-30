@@ -83,7 +83,7 @@ Options:
 * --pl `<prodLabel>` 
   * with --mcprivate:  must correspond to the production label of the miniAOD sample (e.g V15_full) 
   * with --mccentral/data: any production label of your choice
-* --ds `<dataset>`:  to be used with --data or --mccentral only. Datasets listed in data/samples 
+* --ds `<dataset_key>`:  to be used with --data or --mccentral only. Datasets and corresponding keys are listed in data/samples 
 * Indicate which process(es) to run
   * --dosignal: B->mumupi
   * --docontrol: B->Kmumu
@@ -107,10 +107,10 @@ Examples of usage:
 python nanoLauncher.py --pl V15_full --user mratti --dosignal --donano --doflat --mcprivate
 ```
 ```
-python nanoLauncher.py --pl V01 --ds /ParkingBPH1/Run2018A-05May2019-v1/MINIAOD --dosignal --donano --doflat --data
+python nanoLauncher.py --pl V01 --ds A1 --dosignal --donano --doflat --data
 ```
 ```
-python nanoLauncher.py --pl V01 --ds /QCD_Pt-15to20_MuEnrichedPt5_TuneCP5_13TeV_pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v3/MINIAODSIM --dosignal --donano --doflat --mccentral
+python nanoLauncher.py --pl V01 --ds pt15to20 --dosignal --donano --doflat --mccentral
 ```
 
 If not done at launching, you can merge a posteriori the different nano steps by doing
@@ -126,10 +126,10 @@ Examples of usage:
 python nanoMerger.py --pl V15_full --donano --mcprivate
 ```
 ```
-python nanoMerger.py --pl V01 --ds /ParkingBPH1/Run2018A-05May2019-v1/MINIAOD --donano --data
+python nanoMerger.py --pl V01 --ds A1 --donano --data
 ```
 ```
-python nanoMerger.py --pl V01 --ds /QCD_Pt-15to20_MuEnrichedPt5_TuneCP5_13TeV_pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v3/MINIAODSIM --donano --mccentral
+python nanoMerger.py --pl V01 --ds pt15to20 --donano --mccentral
 ```
 
 The nanoProdManager reports on the status of an on-going BParking data production, and serves as a resubmission tool

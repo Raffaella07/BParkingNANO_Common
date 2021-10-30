@@ -7,6 +7,9 @@ import subprocess
 import ROOT
 
 from nanoTools import NanoTools
+sys.path.append('../data/samples')
+from bparkingdata_samples import bpark_samples
+from qcdmuenriched_samples import qcd_samples
 
 
 def getOptions():
@@ -66,7 +69,7 @@ def checkParser(opt):
 class NanoLauncher(NanoTools):
   def __init__(self, opt):
     self.prodlabel   = vars(opt)['pl']
-    self.dataset     = vars(opt)['ds']
+    self.ds          = vars(opt)['ds']
     self.tagnano     = vars(opt)['tagnano']
     self.tagflat     = vars(opt)['tagflat']
     self.maxfiles    = vars(opt)['maxfiles']
@@ -85,6 +88,15 @@ class NanoLauncher(NanoTools):
     self.dolong      = vars(opt)["dolong"]
     self.dosplitflat = vars(opt)["dosplitflat"]
     self.docompile   = vars(opt)["docompile"]
+
+    if self.data:
+      if self.ds not in bpark_samples.keys():
+        raise RuntimeError('Please indicate on which period of the BParking dataset you want to run. Label "{}" not recognised. Choose among {}'.format(self.ds, bpark_samples.keys()))
+      self.dataset = bpark_samples[self.ds]
+    elif self.mccentral:
+      if self.ds not in qcd_samples.keys():
+        raise RuntimeError('Please indicate on which QCD dataset you want to run. Label "{}" not recognised. Choose among {}'.format(self.ds, qcd_samples.keys()))
+      self.dataset = qcd_samples[self.ds]
 
 
   def compile(self):
@@ -228,8 +240,8 @@ class NanoLauncher(NanoTools):
     else: command += ' --doflat'
     
     if self.mcprivate: command += ' --mcprivate'
-    if self.mccentral: command += ' --ds {} --mccentral'.format(self.dataset)
-    if self.data: command += ' --ds {} --data'.format(self.dataset)
+    if self.mccentral: command += ' --ds {} --mccentral'.format(self.ds)
+    if self.data: command += ' --ds {} --data'.format(self.ds)
 
     if filetype == 'flat' and self.dosplitflat: command += ' --dosplitflat'
 
@@ -245,6 +257,7 @@ class NanoLauncher(NanoTools):
       'cp nanoTools.py $workdir',
       'cp nanoMerger.py $workdir',
       'cp haddnano.py $workdir',
+      'cp -r ../data/samples/*py $workdir',
       'cd $workdir',
       '{cm}',
       'cd -',
