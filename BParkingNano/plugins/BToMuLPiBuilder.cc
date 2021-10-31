@@ -303,17 +303,21 @@ void BToMuLPiBuilder<Lepton>::produce(edm::StreamID, edm::Event &evt, edm::Event
         b_cand.addUserFloat("hnl_fitted_pi_eta"      , fitter.daughter_p4(1).eta()                                             );
         b_cand.addUserFloat("hnl_fitted_pi_phi"      , fitter.daughter_p4(1).phi()                                             );
         b_cand.addUserFloat("hnl_fitted_pi_mass"     , fitter.daughter_p4(1).mass()                                            );
+
+        // energy-momentum conservation 
+        b_cand.addUserFloat("energy_diff_hnl_daughters", hnl_cand.p4().energy() - (fitter.daughter_p4(0).energy()+fitter.daughter_p4(1).energy())); 
+        b_cand.addUserFloat("px_diff_hnl_daughters", hnl_cand.p4().px() - (fitter.daughter_p4(0).px()+fitter.daughter_p4(1).px())); 
+        b_cand.addUserFloat("py_diff_hnl_daughters", hnl_cand.p4().py() - (fitter.daughter_p4(0).py()+fitter.daughter_p4(1).py())); 
+        b_cand.addUserFloat("pz_diff_hnl_daughters", hnl_cand.p4().pz() - (fitter.daughter_p4(0).pz()+fitter.daughter_p4(1).pz())); 
           
         float hnl_lxyz = sqrt(pow(trg_mu_ptr->vx() - hnl_cand.vx(), 2) + pow(trg_mu_ptr->vy() - hnl_cand.vy(), 2) + pow(trg_mu_ptr->vz() - hnl_cand.vz(), 2));
         b_cand.addUserFloat("hnl_l_xyz"              , hnl_lxyz                                                                );
         b_cand.addUserFloat("hnl_ct"                 , hnl_lxyz / (hnl_cand.p4().Beta() * hnl_cand.p4().Gamma())               );
-
       
         // adding trigger muon information to the b candidate
         b_cand.addUserFloat("trg_muon_pt"              , trg_mu_ptr->pt()                                                      );
         b_cand.addUserFloat("trg_muon_eta"             , trg_mu_ptr->eta()                                                     );
         b_cand.addUserFloat("trg_muon_phi"             , trg_mu_ptr->phi()                                                     );
-
 
         // difference between the z vertex position of the selected muon and tigger muon
         // computed at the prefit stage 
@@ -325,7 +329,6 @@ void BToMuLPiBuilder<Lepton>::produce(edm::StreamID, edm::Event &evt, edm::Event
         
         // difference between the z vertex position of the pion and tigger muon
         b_cand.addUserFloat("pion_trgmuon_vzdiff"                , fabs(trg_mu_ptr->vz()-pi_ptr->vz())                            );
-      
 
         // fetch the id of the sel muon at the secondary vertex (use instead info saved in the muonsBPark collection?)
         //if(lepton_type_ == "muon"){
@@ -340,7 +343,6 @@ void BToMuLPiBuilder<Lepton>::produce(edm::StreamID, edm::Event &evt, edm::Event
         //  b_cand.addUserFloat("sel_muon_isLoose"      , sel_muon_isLoose     );
         //}
 
-        
         // adding dR quantities (with fitted quantities)
         float dR_lep_pi    = reco::deltaR(fitter.daughter_p4(0), fitter.daughter_p4(1)); 
         float dR_trgmu_hnl = reco::deltaR((*trg_mu_ptr), hnl_cand                     ); 
@@ -384,7 +386,6 @@ void BToMuLPiBuilder<Lepton>::produce(edm::StreamID, edm::Event &evt, edm::Event
         float dPhi_lep_fit_lep = reco::deltaPhi(lep_ptr->phi(), fitter.daughter_p4(0).phi()); 
         b_cand.addUserFloat("dphi_pi_fit_pi"   , dPhi_pi_fit_pi    );
         b_cand.addUserFloat("dphi_lep_fit_lep" , dPhi_lep_fit_lep  );
-
 
         // impact parameter variables (with pre-fit quantities)
         //b_cand.addUserFloat("trg_muon_ip3d"   , fabs(trg_mu_ptr->dB(pat::Muon::PV3D))                                    );
@@ -540,13 +541,11 @@ void BToMuLPiBuilder<Lepton>::produce(edm::StreamID, edm::Event &evt, edm::Event
         b_cand.addUserFloat("pi_iso04_rel_close", pi_iso04_rel_close);
         b_cand.addUserFloat("hnl_iso03_rel_close", hnl_iso03_rel_close);
         b_cand.addUserFloat("hnl_iso04_rel_close", hnl_iso04_rel_close);
-        
 
         // position of the muons / tracks in their own collections
         b_cand.addUserInt("trg_mu_idx", trg_mu_idx);
         b_cand.addUserInt("lep_idx", lep_idx);
         b_cand.addUserInt("pi_idx", pi_idx);
-
 
         // invariant masses
         float dilepton_mass = (fitter.daughter_p4(0) + trg_mu_p4).mass();
@@ -559,10 +558,8 @@ void BToMuLPiBuilder<Lepton>::produce(edm::StreamID, edm::Event &evt, edm::Event
         b_cand.addUserFloat("dilepton_pt", dilepton_pt);
         b_cand.addUserFloat("trgmu_pi_pt", trgmu_pi_pt);
 
-
         // post fit selection
         //if( !post_vtx_selection_(b_cand) ) continue;        
-
 
         // gen-matching
         int isMatched = 0;
@@ -642,7 +639,7 @@ void BToMuLPiBuilder<Lepton>::produce(edm::StreamID, edm::Event &evt, edm::Event
 
             // matching of the displaced lepton
             if(fabs(sel_mu_genPdgId) == 13 && fabs(genMuonMother_genPdgId) == 9900015){
-                sel_mu_isMatched = 1;
+              sel_mu_isMatched = 1;
             }
           }
 
@@ -692,7 +689,6 @@ void BToMuLPiBuilder<Lepton>::produce(edm::StreamID, edm::Event &evt, edm::Event
         b_cand.addUserFloat("mupi_mass_reco_gen_reldiff", mupi_mass_reldiff);
         b_cand.addUserFloat("lxy_reco_gen_reldiff", lxy_reldiff);
         b_cand.addUserFloat("gen_lxy", gen_lxy);
-        
 
         ret_val->push_back(b_cand);
               

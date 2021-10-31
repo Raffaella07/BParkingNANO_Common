@@ -249,6 +249,11 @@ BToMuMuPiTable = cms.EDProducer(
         trgmu_pi_mass   = ufloat('trgmu_pi_mass'  ),
         trgmu_mu_pt     = ufloat('dilepton_pt'    ),
         trgmu_pi_pt     = ufloat('trgmu_pi_pt'    ),
+        ## energy-momentum conservation
+        energy_diff_hnl_daughters = ufloat('energy_diff_hnl_daughters'),
+        px_diff_hnl_daughters     = ufloat('px_diff_hnl_daughters'),
+        py_diff_hnl_daughters     = ufloat('py_diff_hnl_daughters'),
+        pz_diff_hnl_daughters     = ufloat('pz_diff_hnl_daughters'),
         ## gen-matching
         isMatched                   = Var("userInt('isMatched')"                  , int, mcOnly=True),
         trg_mu_isMatched            = Var("userInt('trg_mu_isMatched')"           , int, mcOnly=True),
