@@ -165,7 +165,7 @@ void BToMuLPiBuilder<Lepton>::produce(edm::StreamID, edm::Event &evt, edm::Event
     if(trg_mu_ptr->userInt("isTriggeringBPark") != 1) continue;
 
     // selection on the trigger muon
-    //if( !trgmu_selection_(*trg_mu_ptr) ) continue;
+    if( !trgmu_selection_(*trg_mu_ptr) ) continue;
 
     math::PtEtaPhiMLorentzVector trg_mu_p4(
       trg_mu_ptr->pt(), 
@@ -178,7 +178,7 @@ void BToMuLPiBuilder<Lepton>::produce(edm::StreamID, edm::Event &evt, edm::Event
       edm::Ptr<pat::CompositeCandidate> pi_ptr(pions, pi_idx);
 
       // selection on the pion
-      //if( !pi_selection_(*pi_ptr) ) continue;
+      if( !pi_selection_(*pi_ptr) ) continue;
       
       math::PtEtaPhiMLorentzVector pi_p4(
         pi_ptr->pt(), 
@@ -210,16 +210,16 @@ void BToMuLPiBuilder<Lepton>::produce(edm::StreamID, edm::Event &evt, edm::Event
         }
 
         // selection on the lepton
-        //if( !lep_selection_(*lep_ptr) ) continue;
+        if( !lep_selection_(*lep_ptr) ) continue;
 
-        if( lep_ptr->userInt("isDSAMuon")!=1 && !trgmu_selection_(*trg_mu_ptr) ) continue;
-        if( lep_ptr->userInt("isDSAMuon")==1 && !trgmu_selection_dsa_(*trg_mu_ptr) ) continue;
+        //if( lep_ptr->userInt("isDSAMuon")!=1 && !trgmu_selection_(*trg_mu_ptr) ) continue;
+        //if( lep_ptr->userInt("isDSAMuon")==1 && !trgmu_selection_dsa_(*trg_mu_ptr) ) continue;
 
-        if( lep_ptr->userInt("isDSAMuon")!=1 && !pi_selection_(*pi_ptr) ) continue;
-        if( lep_ptr->userInt("isDSAMuon")==1 && !pi_selection_dsa_(*pi_ptr) ) continue;
+        //if( lep_ptr->userInt("isDSAMuon")!=1 && !pi_selection_(*pi_ptr) ) continue;
+        //if( lep_ptr->userInt("isDSAMuon")==1 && !pi_selection_dsa_(*pi_ptr) ) continue;
 
-        if( lep_ptr->userInt("isDSAMuon")!=1 && !lep_selection_(*lep_ptr) ) continue;
-        if( lep_ptr->userInt("isDSAMuon")==1 && !lep_selection_dsa_(*lep_ptr) ) continue;
+        //if( lep_ptr->userInt("isDSAMuon")!=1 && !lep_selection_(*lep_ptr) ) continue;
+        //if( lep_ptr->userInt("isDSAMuon")==1 && !lep_selection_dsa_(*lep_ptr) ) continue;
 
         math::PtEtaPhiMLorentzVector lep_p4(
           lep_ptr->pt(), 
@@ -473,10 +473,10 @@ void BToMuLPiBuilder<Lepton>::produce(edm::StreamID, edm::Event &evt, edm::Event
         b_cand.addUserFloat("pion_DCASig"     , pi_ptr->userFloat("DCASig") );
 
         // post fit selection
-        //if( !post_vtx_selection_(b_cand) ) continue;        
+        if( !post_vtx_selection_(b_cand) ) continue;        
 
-        if( lep_ptr->userInt("isDSAMuon")!=1 && !post_vtx_selection_(b_cand) ) continue;
-        if( lep_ptr->userInt("isDSAMuon")==1 && !post_vtx_selection_dsa_(b_cand) ) continue;
+        //if( lep_ptr->userInt("isDSAMuon")!=1 && !post_vtx_selection_(b_cand) ) continue;
+        //if( lep_ptr->userInt("isDSAMuon")==1 && !post_vtx_selection_dsa_(b_cand) ) continue;
 
         // isolation
         float trg_mu_iso03 = 0; 
