@@ -17,6 +17,7 @@ def getOptions():
   parser.add_argument('--dotageprobe'         , dest='dotageprobe' , help='run the JpsiToMuMu process (tag and probe study)', action='store_true', default=False)
   parser.add_argument('--mcprivate'           , dest='mcprivate'   , help='run the resubmitter on a private MC sample'      , action='store_true', default=False)
   parser.add_argument('--mccentral'           , dest='mccentral'   , help='run the resubmitter on a central MC sample'      , action='store_true', default=False)
+  parser.add_argument('--sigcentral'          , dest='sigcentral'  , help='run the resubmitter on a central signal sample'  , action='store_true', default=False)
   parser.add_argument('--data'                , dest='data'        , help='run the resubmitter on a data sample'            , action='store_true', default=False)
   parser.add_argument('--dofullreport'        , dest='dofullreport', help='add to report chunks and failure reason'         , action='store_true', default=False)
   parser.add_argument('--dofetchtime'         , dest='dofetchtime' , help='add to report time fetch'                        , action='store_true', default=False)
@@ -30,11 +31,11 @@ def checkParser(opt):
   if opt.pl==None:
     raise RuntimeError('Please indicate the production label of the sample')
 
-  if opt.mcprivate==False and opt.mccentral==False and opt.data==False:
-    raise RuntimeError('Please indicate if you want to run on data or MC by adding either --data or--mcprivate or --mccentral to the command line')
+  if opt.mcprivate==False and opt.mccentral==False and opt.sigcentral==False and opt.data==False:
+    raise RuntimeError('Please indicate if you want to run on data or MC by adding either --data or--mcprivate or --mccentral or --sigcentral to the command line')
 
-  if opt.mcprivate + opt.mccentral + opt.data > 1:
-    raise RuntimeError('Please indicate if you want to run on data or MC by adding only --data or --mcprivate or --mccentral to the command line')
+  if opt.mcprivate + opt.mccentral +opt.sigcentral + opt.data > 1:
+    raise RuntimeError('Please indicate if you want to run on data or MC by adding only --data or --mcprivate or --mccentral or --sigcentral to the command line')
 
   if opt.docheckfile and not (opt.dosignal or opt.docontrol or opt.dohnl or opt.dotageprobe):
     raise RuntimeError('Please indicate with branch you would like to check on (--dosignal or --docontrol or --dohnl or --dotageprobe)')
@@ -52,6 +53,7 @@ class NanoProdManager(NanoTools):
     self.dotageprobe  = vars(opt)["dotageprobe"]
     self.mcprivate    = vars(opt)['mcprivate']
     self.mccentral    = vars(opt)['mccentral']
+    self.sigcentral   = vars(opt)['sigcentral']
     self.data         = vars(opt)['data']
     self.dofullreport = vars(opt)['dofullreport'] 
     self.dofetchtime  = vars(opt)['dofetchtime'] 
@@ -122,6 +124,8 @@ class NanoProdManager(NanoTools):
       filename = './files/resubmit_mcprivate_{}'.format(label)
     elif self.mccentral:
       filename = './files/resubmit_mccentral_{}'.format(label)
+    elif self.sigcentral:
+      filename = './files/resubmit_sigcentral_{}'.format(label)
 
     for file_ in failed_files:
       # get the file to reprocess
@@ -167,7 +171,7 @@ class NanoProdManager(NanoTools):
       outdir  = outputdir,
       usr     = os.environ["USER"], 
       tag     = 0 if self.tag == None else self.tag,
-      isMC    = 1 if self.mcprivate or self.mccentral else 0,
+      isMC    = 0 if self.data else 1,
       rmt     = 0 if self.mcprivate else 1,
       lst     =  filelist,
       dosig     = 1 if self.dosignal else 0, 
@@ -190,6 +194,7 @@ class NanoProdManager(NanoTools):
     # pnfs directory where nano samples are located
     if self.data: dirtag = 'data'
     elif self.mccentral: dirtag = 'mccentral'
+    elif self.sigcentral: dirtag = 'sigcentral'
     else:  dirtag = ''
     location = NanoTools.getFilesLocation(self, dirtag)
 

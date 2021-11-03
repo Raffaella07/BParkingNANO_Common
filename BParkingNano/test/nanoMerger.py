@@ -9,6 +9,7 @@ from nanoTools import NanoTools
 sys.path.append('../data/samples')
 from bparkingdata_samples import bpark_samples
 from qcdmuenriched_samples import qcd_samples
+from signal_samples_Aug21 import signal_samples
 
 
 def getOptions():
@@ -18,9 +19,10 @@ def getOptions():
   parser.add_argument('--ds'     , type=str, dest='ds'         , help='[data-mccentral] name of the dataset'                                   , default=None)
   parser.add_argument('--tagnano', type=str, dest='tagnano'    , help='[optional] tag to be added on the outputfile name of the nano sample'   , default=None)
   parser.add_argument('--tagflat', type=str, dest='tagflat'    , help='[optional] tag to be added on the outputfile name of the flat sample'   , default=None)
-  parser.add_argument('--mcprivate'        , dest='mcprivate'  , help='run the BParking nano tool on a private MC sample' , action='store_true', default=False)
-  parser.add_argument('--mccentral'        , dest='mccentral'  , help='run the BParking nano tool on a central MC sample' , action='store_true', default=False)
-  parser.add_argument('--data'             , dest='data'       , help='run the BParking nano tool on a data sample'       , action='store_true', default=False)
+  parser.add_argument('--mcprivate'        , dest='mcprivate'  , help='run the merger tool on a private MC sample'        , action='store_true', default=False)
+  parser.add_argument('--mccentral'        , dest='mccentral'  , help='run the merger tool on a central MC sample'        , action='store_true', default=False)
+  parser.add_argument('--sigcentral'       , dest='sigcentral' , help='run the merger tool on a central signal sample'    , action='store_true', default=False)
+  parser.add_argument('--data'             , dest='data'       , help='run the merger tool on a data sample'              , action='store_true', default=False)
   parser.add_argument('--donano'           , dest='donano'     , help='merge nano files'                                  , action='store_true', default=False)
   parser.add_argument('--doflat'           , dest='doflat'     , help='merge flat files'                                  , action='store_true', default=False)
   parser.add_argument('--dosplitflat'      , dest='dosplitflat', help='[optional] flat files processed in multi steps'    , action='store_true', default=False)
@@ -35,11 +37,11 @@ def checkParser(opt):
   if opt.donano==False and opt.doflat==False:
     raise RuntimeError('Please indicate if you want to run the nano tool (--donano) and/or the ntupliser (--doflat)')
 
-  if opt.mcprivate==False and opt.mccentral==False and opt.data==False:
-    raise RuntimeError('Please indicate if you want to run on data or MC by adding either --data or--mcprivate or --mccentral to the command line')
+  if opt.mcprivate==False and opt.mccentral==False and opt.sigcentral==False and opt.data==False:
+    raise RuntimeError('Please indicate if you want to run on data or MC by adding either --data or--mcprivate or --mccentral or --sigcentral to the command line')
 
-  if opt.mcprivate + opt.mccentral + opt.data > 1:
-    raise RuntimeError('Please indicate if you want to run on data or MC by adding only --data or --mcprivate or --mccentral to the command line')
+  if opt.mcprivate + opt.mccentral +opt.sigcentral + opt.data > 1:
+    raise RuntimeError('Please indicate if you want to run on data or MC by adding only --data or --mcprivate or --mccentral or --sigcentral to the command line')
 
   if opt.data and opt.ds==None:
     raise RuntimeError('Please indicate the dataset you want to run the tool on using --ds <dataset>')
@@ -53,6 +55,7 @@ class NanoMerger(NanoTools):
     self.tagflat     = vars(opt)['tagflat']
     self.mcprivate   = vars(opt)['mcprivate']
     self.mccentral   = vars(opt)['mccentral']
+    self.sigcentral  = vars(opt)['sigcentral']
     self.data        = vars(opt)['data']
     self.donano      = vars(opt)["donano"]
     self.doflat      = vars(opt)["doflat"]
@@ -67,6 +70,10 @@ class NanoMerger(NanoTools):
       if self.ds not in qcd_samples.keys():
         raise RuntimeError('Please indicate on which QCD dataset you want to run. Label "{}" not recognised. Choose among {}'.format(self.ds, qcd_samples.keys()))
       self.dataset = qcd_samples[self.ds]
+    elif self.sigcentral:
+      if self.ds not in signal_samples.keys():
+        raise RuntimeError('Please indicate on which signal dataset you want to run. Label "{}" not recognised. Choose among {}'.format(self.ds, signal_samples.keys()))
+      self.dataset = signal_samples[self.ds]
 
 
   def doMerging(self, nanoName, mergedName, locationSE, outputdir, cond):
@@ -239,9 +246,9 @@ class NanoMerger(NanoTools):
 
         self.runMergingModule(pointdir+'/nanoFiles/')
 
-    elif self.data or self.mccentral:
+    elif self.data or self.mccentral or self.sigcentral:
       dataset_label = NanoTools.getDataLabel(self, self.dataset) if self.data else NanoTools.getMCLabel(self, self.dataset)
-      locationSE = '/pnfs/psi.ch/cms/trivcat/store/user/{}/BHNLsGen/{}/{}/{}'.format(user, 'data' if self.data else 'mc_central', self.prodlabel, dataset_label)
+      locationSE = '/pnfs/psi.ch/cms/trivcat/store/user/{}/BHNLsGen/{}/{}/{}'.format(user, 'data' if self.data else ('mc_central' if self.mccentral else 'signal_central'), self.prodlabel, dataset_label)
 
       self.runMergingModule(locationSE)
   

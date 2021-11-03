@@ -10,6 +10,7 @@ from nanoTools import NanoTools
 sys.path.append('../data/samples')
 from bparkingdata_samples import bpark_samples
 from qcdmuenriched_samples import qcd_samples
+from signal_samples_Aug21 import signal_samples
 
 
 def getOptions():
@@ -23,6 +24,7 @@ def getOptions():
   parser.add_argument('--user'    , type=str, dest='user'        , help='[optional-mcprivate] specify username where the miniAOD files are stored'            , default=os.environ["USER"])
   parser.add_argument('--mcprivate'         , dest='mcprivate'   , help='run the BParking nano tool on a private MC sample'              , action='store_true', default=False)
   parser.add_argument('--mccentral'         , dest='mccentral'   , help='run the BParking nano tool on a central MC sample'              , action='store_true', default=False)
+  parser.add_argument('--sigcentral'        , dest='sigcentral'  , help='run the BParking nano tool on a central signal sample'          , action='store_true', default=False)
   parser.add_argument('--data'              , dest='data'        , help='run the BParking nano tool on a data sample'                    , action='store_true', default=False)
   parser.add_argument('--donano'            , dest='donano'      , help='launch the nano tool on top of the minifile'                    , action='store_true', default=False)
   parser.add_argument('--doflat'            , dest='doflat'      , help='launch the ntupliser on top of the nanofile'                    , action='store_true', default=False)
@@ -48,7 +50,8 @@ def checkParser(opt):
   if opt.domergenano==True and opt.donano==False:
     command = 'python nanoMerger.py --donano --pl {}'.format(opt.pl)
     if opt.data==True: command += ' --ds {} --data'.format(opt.ds)
-    elif opt.mccentral==True: command += ' --ds {} --mccentral'.format(opt.mccentral)
+    elif opt.mccentral==True: command += ' --ds {} --mccentral'.format(opt.ds)
+    elif opt.sigcentral==True: command += ' --ds {} --sigcentral'.format(opt.ds)
     elif opt.mcprivate==True: command += ' --mcprivate'
     if opt.tagnano != None: command += ' --tagnano {}'.format(opt.tagnano)
     raise RuntimeError('This tool is not well suited for processing the merging of the nano step only. Use instead: \n {}'.format(command))
@@ -59,11 +62,11 @@ def checkParser(opt):
   if opt.dosignal==False and opt.docontrol==False and opt.dohnl==False and opt.dotageprobe==False:
     raise RuntimeError('Please indicate the process you want to run (--dosignal and/or --docontrol and/or --dohnl and/or --dotageprobe)')
 
-  if opt.mcprivate==False and opt.mccentral==False and opt.data==False:
-    raise RuntimeError('Please indicate if you want to run on data or MC by adding either --data or--mcprivate or --mccentral to the command line')
+  if opt.mcprivate==False and opt.mccentral==False and opt.sigcentral==False and opt.data==False:
+    raise RuntimeError('Please indicate if you want to run on data or MC by adding either --data or--mcprivate or --mccentral or --sigcentral to the command line')
 
-  if opt.mcprivate + opt.mccentral + opt.data > 1:
-    raise RuntimeError('Please indicate if you want to run on data or MC by adding only --data or --mcprivate or --mccentral to the command line')
+  if opt.mcprivate + opt.mccentral +opt.sigcentral + opt.data > 1:
+    raise RuntimeError('Please indicate if you want to run on data or MC by adding only --data or --mcprivate or --mccentral or --sigcentral to the command line')
 
 
 class NanoLauncher(NanoTools):
@@ -75,6 +78,7 @@ class NanoLauncher(NanoTools):
     self.maxfiles    = vars(opt)['maxfiles']
     self.mcprivate   = vars(opt)['mcprivate']
     self.mccentral   = vars(opt)['mccentral']
+    self.sigcentral  = vars(opt)['sigcentral']
     self.data        = vars(opt)['data']
     self.user        = vars(opt)["user"]
     self.donano      = vars(opt)["donano"]
@@ -97,6 +101,10 @@ class NanoLauncher(NanoTools):
       if self.ds not in qcd_samples.keys():
         raise RuntimeError('Please indicate on which QCD dataset you want to run. Label "{}" not recognised. Choose among {}'.format(self.ds, qcd_samples.keys()))
       self.dataset = qcd_samples[self.ds]
+    elif self.sigcentral:
+      if self.ds not in signal_samples.keys():
+        raise RuntimeError('Please indicate on which signal dataset you want to run. Label "{}" not recognised. Choose among {}'.format(self.ds, signal_samples.keys()))
+      self.dataset = signal_samples[self.ds]
 
 
   def compile(self):
@@ -241,6 +249,7 @@ class NanoLauncher(NanoTools):
     
     if self.mcprivate: command += ' --mcprivate'
     if self.mccentral: command += ' --ds {} --mccentral'.format(self.ds)
+    if self.sigcentral: command += ' --ds {} --sigcentral'.format(self.ds)
     if self.data: command += ' --ds {} --data'.format(self.ds)
 
     if filetype == 'flat' and self.dosplitflat: command += ' --dosplitflat'
@@ -289,7 +298,7 @@ class NanoLauncher(NanoTools):
       outdir    = outputdir,
       usr       = os.environ["USER"], 
       tag       = 0 if self.tagnano == None else self.tagnano,
-      isMC      = 1 if self.mcprivate or self.mccentral else 0,
+      isMC      = 0 if self.data else 1,
       rmt       = 0 if self.mcprivate else 1,
       lst       = filelist,
       dosig     = 1 if self.dosignal else 0, 
@@ -323,7 +332,7 @@ class NanoLauncher(NanoTools):
       outdir  = outputdir,
       usr     = os.environ["USER"], 
       tag     = tag,
-      isMC    = 1 if self.mcprivate or self.mccentral else 0,
+      isMC    = 0 if self.data else 1,
       dosig   = 1 if self.dosignal else 0,
       doctrl  = 1 if self.docontrol else 0,
       dohnl   = 1 if self.dohnl else 0,
@@ -407,7 +416,7 @@ class NanoLauncher(NanoTools):
       if self.mcprivate:
         outputdir += '{}/{}/nanoFiles/Chunk{}_n{}'.format(self.prodlabel, point, iFile, nfiles)
       else:
-        dirname = 'data' if self.data else 'mc_central'
+        dirname = 'data' if self.data else ('mc_central' if self.mccentral else 'signal_central')
         outputdir += '{}/{}/{}/Chunk{}_n{}/'.format(dirname, self.prodlabel, ds_label, iFile, nfiles)
       if not path.exists(outputdir):
         os.system('mkdir -p {}'.format(outputdir))
@@ -476,7 +485,7 @@ class NanoLauncher(NanoTools):
         self.launchingModule(point=point)
 
     
-    elif self.data or self.mccentral:
+    elif self.data or self.mccentral or self.sigcentral:
       dataset_label = NanoTools.getDataLabel(self, self.dataset) if self.data else NanoTools.getMCLabel(self, self.dataset)
 
       self.launchingModule(ds_label=dataset_label)
