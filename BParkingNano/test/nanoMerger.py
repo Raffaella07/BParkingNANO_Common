@@ -15,18 +15,19 @@ from signal_samples_Aug21 import signal_samples
 def getOptions():
   from argparse import ArgumentParser
   parser = ArgumentParser(description='Script to merge the nanoAOD files resulting from a multijob production', add_help=True)
-  parser.add_argument('--pl'     , type=str, dest='pl'         , help='label of the nano sample production'                                    , default='V01_n9000000_njt300')
-  parser.add_argument('--ds'     , type=str, dest='ds'         , help='[data-mccentral] name of the dataset'                                   , default=None)
-  parser.add_argument('--tagnano', type=str, dest='tagnano'    , help='[optional] tag to be added on the outputfile name of the nano sample'   , default=None)
-  parser.add_argument('--tagflat', type=str, dest='tagflat'    , help='[optional] tag to be added on the outputfile name of the flat sample'   , default=None)
-  parser.add_argument('--mcprivate'        , dest='mcprivate'  , help='run the merger tool on a private MC sample'        , action='store_true', default=False)
-  parser.add_argument('--mccentral'        , dest='mccentral'  , help='run the merger tool on a central MC sample'        , action='store_true', default=False)
-  parser.add_argument('--sigcentral'       , dest='sigcentral' , help='run the merger tool on a central signal sample'    , action='store_true', default=False)
-  parser.add_argument('--data'             , dest='data'       , help='run the merger tool on a data sample'              , action='store_true', default=False)
-  parser.add_argument('--donano'           , dest='donano'     , help='merge nano files'                                  , action='store_true', default=False)
-  parser.add_argument('--doflat'           , dest='doflat'     , help='merge flat files'                                  , action='store_true', default=False)
-  parser.add_argument('--dosplitflat'      , dest='dosplitflat', help='[optional] flat files processed in multi steps'    , action='store_true', default=False)
-  parser.add_argument('--dobatch'          , dest='dobatch'    , help='to be turned on if running the script on the batch', action='store_true', default=False)
+  parser.add_argument('--pl'      , type=str, dest='pl'         , help='label of the nano sample production'                                    , default='V01_n9000000_njt300')
+  parser.add_argument('--ds'      , type=str, dest='ds'         , help='[data-mccentral] name of the dataset'                                   , default=None)
+  parser.add_argument('--tagnano' , type=str, dest='tagnano'    , help='[optional] tag to be added on the outputfile name of the nano sample'   , default=None)
+  parser.add_argument('--tagflat' , type=str, dest='tagflat'    , help='[optional] tag to be added on the outputfile name of the flat sample'   , default=None)
+  parser.add_argument('--maxfiles', type=str, dest='maxfiles'   , help='[optional] only merge n=maxfiles first files'                           , default=None)
+  parser.add_argument('--mcprivate'         , dest='mcprivate'  , help='run the merger tool on a private MC sample'        , action='store_true', default=False)
+  parser.add_argument('--mccentral'         , dest='mccentral'  , help='run the merger tool on a central MC sample'        , action='store_true', default=False)
+  parser.add_argument('--sigcentral'        , dest='sigcentral' , help='run the merger tool on a central signal sample'    , action='store_true', default=False)
+  parser.add_argument('--data'              , dest='data'       , help='run the merger tool on a data sample'              , action='store_true', default=False)
+  parser.add_argument('--donano'            , dest='donano'     , help='merge nano files'                                  , action='store_true', default=False)
+  parser.add_argument('--doflat'            , dest='doflat'     , help='merge flat files'                                  , action='store_true', default=False)
+  parser.add_argument('--dosplitflat'       , dest='dosplitflat', help='[optional] flat files processed in multi steps'    , action='store_true', default=False)
+  parser.add_argument('--dobatch'           , dest='dobatch'    , help='to be turned on if running the script on the batch', action='store_true', default=False)
   return parser.parse_args()
 
 
@@ -53,6 +54,7 @@ class NanoMerger(NanoTools):
     self.ds          = vars(opt)['ds']
     self.tagnano     = vars(opt)['tagnano']
     self.tagflat     = vars(opt)['tagflat']
+    self.maxfiles    = vars(opt)['maxfiles']
     self.mcprivate   = vars(opt)['mcprivate']
     self.mccentral   = vars(opt)['mccentral']
     self.sigcentral  = vars(opt)['sigcentral']
@@ -80,9 +82,10 @@ class NanoMerger(NanoTools):
     print '\n-> Getting the different subdirectories (chunk/signal points)'
     subdirs = [f for f in glob.glob(locationSE+'/*')]
 
-    for subdir in subdirs:
+    for idir, subdir in enumerate(subdirs):
       if 'merged' in subdir: continue
       if '.root' in subdir: continue
+      if self.maxfiles != None and int(self.maxfiles) < 500 and idir > 0: continue
 
       print '\n-> Processing: {}'.format(subdir[subdir.rfind('/')+1:len(subdir)])
 
@@ -104,6 +107,7 @@ class NanoMerger(NanoTools):
       else:
         print "\n-> Checking the files"
         for iFile, fileName in enumerate(nanoFiles):
+          if self.maxfiles != None and iFile >= int(self.maxfiles): continue
           if iFile%100 == 0:              print '     --> checked {}% of the files'.format(round(float(iFile)/len(nanoFiles)*100, 1))
           elif iFile == len(nanoFiles)-1: print '     --> checked 100% of the files'
 
@@ -194,11 +198,12 @@ class NanoMerger(NanoTools):
   def runMergingModule(self, location):
     if self.donano:
       nanoName   = '/bparknano_nj*.root' if self.tagnano == None else '/bparknano_{}_nj*.root'.format(self.tagnano)
-      mergedName = 'bparknano.root' if self.tagnano == None else 'bparknano_{}.root'.format(self.tagnano)
+      outName    = 'bparknano' if self.tagnano == None else 'bparknano_{}'.format(self.tagnano)
+      mergedName = '{}.root'.format(outName) if self.maxfiles == None else '{}_{}files.root'.format(outName, self.maxfiles)
       outputdir  = '/merged'
           
-      nanoName_tot   = 'merged/bparknano.root' if self.tagnano == None else 'merged/bparknano_{}.root'.format(self.tagnano)
-      mergedName_tot = 'bparknano.root' if self.tagnano == None else 'bparknano_{}.root'.format(self.tagnano)
+      nanoName_tot   = 'merged/{}.root'.format(outName) if self.maxfiles == None else 'merged/{}_{}files.root'.format(outName, self.maxfiles)
+      mergedName_tot = '{}.root'.format(outName) if self.maxfiles == None else '{}_{}files.root'.format(outName, self.maxfiles)
 
       # per chunk
       self.doMerging(nanoName, mergedName, location, outputdir, True)
