@@ -97,6 +97,7 @@ BToMuMuPi = cms.EDProducer(
         'userFloat("hnl_ls_xy") > 20',
         'mass < 8',
         'userFloat("hnl_fitted_mass") < 6.3',
+        'abs(userFloat("cos_theta_star_pion")) < 0.9',
         ])
     ), 
     postVtxSelection_dsa = cms.string(' & '.join([
@@ -246,9 +247,9 @@ BToMuMuPiTable = cms.EDProducer(
         trgmu_pi_pt     = ufloat('trgmu_pi_pt'    ),
         ## cos(theta*)
         cos_theta_star_pion   = ufloat('cos_theta_star_pion'),
-        cos_theta_star_lepton = ufloat('cos_theta_star_lepton'),
+        cos_theta_star_muon = ufloat('cos_theta_star_lepton'),
         ## conservation laws
-        energy_diff_hnl_daughters_lab       = ufloat('energy_diff_hnl_daughters_lab'),
+        #energy_diff_hnl_daughters_lab       = ufloat('energy_diff_hnl_daughters_lab'),
         px_diff_hnl_daughters_lab           = ufloat('px_diff_hnl_daughters_lab'),
         py_diff_hnl_daughters_lab           = ufloat('py_diff_hnl_daughters_lab'),
         pz_diff_hnl_daughters_lab           = ufloat('pz_diff_hnl_daughters_lab'),
@@ -256,8 +257,8 @@ BToMuMuPiTable = cms.EDProducer(
         px_diff_prefithnl_daughters_lab     = ufloat('px_diff_prefithnl_daughters_lab'),
         py_diff_prefithnl_daughters_lab     = ufloat('py_diff_prefithnl_daughters_lab'),
         pz_diff_prefithnl_daughters_lab     = ufloat('pz_diff_prefithnl_daughters_lab'),
-        energy_diff_hnl_daughters_cm        = ufloat('energy_diff_hnl_daughters_cm'),
-        p_daughters_cm                      = ufloat('p_daughters_cm'),
+        #energy_diff_hnl_daughters_cm        = ufloat('energy_diff_hnl_daughters_cm'),
+        #p_daughters_cm                      = ufloat('p_daughters_cm'),
         ## difference between fitted and unfitted quantities
         de_pi_fit_pi     = ufloat('de_pi_fit_pi'),
         dpt_pi_fit_pi    = ufloat('dpt_pi_fit_pi'),
