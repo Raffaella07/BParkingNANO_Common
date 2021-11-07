@@ -372,7 +372,8 @@ public :
    TTreeReaderArray<Int_t> GenPart_status = {fReader, "BToMuMuPi_charge"};
    TTreeReaderArray<Int_t> GenPart_statusFlags = {fReader, "BToMuMuPi_charge"};
    TTreeReaderArray<Int_t> Muon_genPartIdx = {fReader, "BToMuMuPi_charge"};
-   TTreeReaderValue<Int_t> Pileup_nPU = {fReader, "nBToMuMuPi"};
+   // the correct value will be filled for MC only
+   TTreeReaderValue<Int_t> Pileup_nPU = {fReader, "PV_npvs"};
 
 
    BToMuMuPiDumper(TTree * /*tree*/ =0) { }
