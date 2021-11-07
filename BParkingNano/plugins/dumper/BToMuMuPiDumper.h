@@ -45,6 +45,9 @@ public :
    TTreeReaderArray<Float_t> BToMuMuPi_dr_trgmu_hnl = {fReader, "BToMuMuPi_dr_trgmu_hnl"};
    TTreeReaderArray<Float_t> BToMuMuPi_dr_trgmu_mu = {fReader, "BToMuMuPi_dr_trgmu_mu"};
    TTreeReaderArray<Float_t> BToMuMuPi_dr_trgmu_pi = {fReader, "BToMuMuPi_dr_trgmu_pi"};
+   TTreeReaderArray<Float_t> BToMuMuPi_de_pi_fit_pi = {fReader, "BToMuMuPi_de_pi_fit_pi"};
+   TTreeReaderArray<Float_t> BToMuMuPi_de_mu_fit_mu = {fReader, "BToMuMuPi_de_mu_fit_mu"};
+   TTreeReaderArray<Float_t> BToMuMuPi_de_hnl_fit_hnl = {fReader, "BToMuMuPi_de_hnl_fit_hnl"};
    TTreeReaderArray<Float_t> BToMuMuPi_deta_mu_pi = {fReader, "BToMuMuPi_deta_mu_pi"};
    TTreeReaderArray<Float_t> BToMuMuPi_deta_trgmu_hnl = {fReader, "BToMuMuPi_deta_trgmu_hnl"};
    TTreeReaderArray<Float_t> BToMuMuPi_deta_trgmu_mu = {fReader, "BToMuMuPi_deta_trgmu_mu"};
@@ -55,10 +58,22 @@ public :
    TTreeReaderArray<Float_t> BToMuMuPi_dphi_trgmu_pi = {fReader, "BToMuMuPi_dphi_trgmu_pi"};
    TTreeReaderArray<Float_t> BToMuMuPi_dpt_pi_fit_pi = {fReader, "BToMuMuPi_dpt_pi_fit_pi"};
    TTreeReaderArray<Float_t> BToMuMuPi_dpt_mu_fit_mu = {fReader, "BToMuMuPi_dpt_mu_fit_mu"};
+   TTreeReaderArray<Float_t> BToMuMuPi_dpt_hnl_fit_hnl = {fReader, "BToMuMuPi_dpt_hnl_fit_hnl"};
+   TTreeReaderArray<Float_t> BToMuMuPi_dpx_pi_fit_pi = {fReader, "BToMuMuPi_dpx_pi_fit_pi"};
+   TTreeReaderArray<Float_t> BToMuMuPi_dpx_mu_fit_mu = {fReader, "BToMuMuPi_dpx_mu_fit_mu"};
+   TTreeReaderArray<Float_t> BToMuMuPi_dpx_hnl_fit_hnl = {fReader, "BToMuMuPi_dpx_hnl_fit_hnl"};
+   TTreeReaderArray<Float_t> BToMuMuPi_dpy_pi_fit_pi = {fReader, "BToMuMuPi_dpy_pi_fit_pi"};
+   TTreeReaderArray<Float_t> BToMuMuPi_dpy_mu_fit_mu = {fReader, "BToMuMuPi_dpy_mu_fit_mu"};
+   TTreeReaderArray<Float_t> BToMuMuPi_dpy_hnl_fit_hnl = {fReader, "BToMuMuPi_dpy_hnl_fit_hnl"};
+   TTreeReaderArray<Float_t> BToMuMuPi_dpz_pi_fit_pi = {fReader, "BToMuMuPi_dpz_pi_fit_pi"};
+   TTreeReaderArray<Float_t> BToMuMuPi_dpz_mu_fit_mu = {fReader, "BToMuMuPi_dpz_mu_fit_mu"};
+   TTreeReaderArray<Float_t> BToMuMuPi_dpz_hnl_fit_hnl = {fReader, "BToMuMuPi_dpz_hnl_fit_hnl"};
    TTreeReaderArray<Float_t> BToMuMuPi_deta_pi_fit_pi = {fReader, "BToMuMuPi_deta_pi_fit_pi"};
    TTreeReaderArray<Float_t> BToMuMuPi_deta_mu_fit_mu = {fReader, "BToMuMuPi_deta_mu_fit_mu"};
+   TTreeReaderArray<Float_t> BToMuMuPi_deta_hnl_fit_hnl = {fReader, "BToMuMuPi_deta_hnl_fit_hnl"};
    TTreeReaderArray<Float_t> BToMuMuPi_dphi_pi_fit_pi = {fReader, "BToMuMuPi_dphi_pi_fit_pi"};
    TTreeReaderArray<Float_t> BToMuMuPi_dphi_mu_fit_mu = {fReader, "BToMuMuPi_dphi_mu_fit_mu"};
+   TTreeReaderArray<Float_t> BToMuMuPi_dphi_hnl_fit_hnl = {fReader, "BToMuMuPi_dphi_hnl_fit_hnl"};
    TTreeReaderArray<Float_t> BToMuMuPi_eta = {fReader, "BToMuMuPi_eta"};
    TTreeReaderArray<Float_t> BToMuMuPi_fit_mu_eta = {fReader, "BToMuMuPi_fit_mu_eta"};
    TTreeReaderArray<Float_t> BToMuMuPi_fit_mu_mass = {fReader, "BToMuMuPi_fit_mu_mass"};
@@ -83,6 +98,15 @@ public :
    TTreeReaderArray<Float_t> BToMuMuPi_hnl_pt = {fReader, "BToMuMuPi_hnl_pt"};
    TTreeReaderArray<Float_t> BToMuMuPi_mass = {fReader, "BToMuMuPi_mass"};
    TTreeReaderArray<Float_t> BToMuMuPi_phi = {fReader, "BToMuMuPi_phi"};
+   TTreeReaderArray<Float_t> BToMuMuPi_cos_theta_star_pion = {fReader, "BToMuMuPi_cos_theta_star_pion"};
+   TTreeReaderArray<Float_t> BToMuMuPi_cos_theta_star_muon = {fReader, "BToMuMuPi_cos_theta_star_muon"};
+   TTreeReaderArray<Float_t> BToMuMuPi_px_diff_hnl_daughters_lab = {fReader, "BToMuMuPi_px_diff_hnl_daughters_lab"};
+   TTreeReaderArray<Float_t> BToMuMuPi_py_diff_hnl_daughters_lab = {fReader, "BToMuMuPi_py_diff_hnl_daughters_lab"};
+   TTreeReaderArray<Float_t> BToMuMuPi_pz_diff_hnl_daughters_lab = {fReader, "BToMuMuPi_pz_diff_hnl_daughters_lab"};
+   TTreeReaderArray<Float_t> BToMuMuPi_energy_diff_prefithnl_daughters_lab = {fReader, "BToMuMuPi_energy_diff_prefithnl_daughters_lab"};
+   TTreeReaderArray<Float_t> BToMuMuPi_px_diff_prefithnl_daughters_lab = {fReader, "BToMuMuPi_px_diff_prefithnl_daughters_lab"};
+   TTreeReaderArray<Float_t> BToMuMuPi_py_diff_prefithnl_daughters_lab = {fReader, "BToMuMuPi_py_diff_prefithnl_daughters_lab"};
+   TTreeReaderArray<Float_t> BToMuMuPi_pz_diff_prefithnl_daughters_lab = {fReader, "BToMuMuPi_pz_diff_prefithnl_daughters_lab"};
    TTreeReaderArray<Float_t> BToMuMuPi_pi_DCASig = {fReader, "BToMuMuPi_pi_DCASig"};
    TTreeReaderArray<Float_t> BToMuMuPi_pi_dxy = {fReader, "BToMuMuPi_pi_dxy"};
    TTreeReaderArray<Float_t> BToMuMuPi_pi_dxyS = {fReader, "BToMuMuPi_pi_dxyS"};
@@ -263,6 +287,17 @@ public :
    TTreeReaderArray<Float_t> ProbeTracks_vx = {fReader, "ProbeTracks_vx"};
    TTreeReaderArray<Float_t> ProbeTracks_vy = {fReader, "ProbeTracks_vy"};
    TTreeReaderArray<Float_t> ProbeTracks_vz = {fReader, "ProbeTracks_vz"};
+   TTreeReaderArray<Float_t> ProbeTracks_chi2 = {fReader, "ProbeTracks_chi2"};
+   TTreeReaderArray<Float_t> ProbeTracks_normalisedChi2 = {fReader, "ProbeTracks_normalisedChi2"};
+   TTreeReaderArray<Float_t> ProbeTracks_validFraction = {fReader, "ProbeTracks_validFraction"};
+   TTreeReaderArray<Int_t> ProbeTracks_ndof = {fReader, "ProbeTracks_ndof"};
+   TTreeReaderArray<Int_t> ProbeTracks_numberOfValidHits = {fReader, "ProbeTracks_numberOfValidHits"};
+   TTreeReaderArray<Int_t> ProbeTracks_numberOfLostHits = {fReader, "ProbeTracks_numberOfLostHits"};
+   TTreeReaderArray<Int_t> ProbeTracks_numberOfValidPixelHits = {fReader, "ProbeTracks_numberOfValidPixelHits"};
+   TTreeReaderArray<Int_t> ProbeTracks_numberOfTrackerLayers = {fReader, "ProbeTracks_numberOfTrackerLayers"};
+   TTreeReaderArray<Int_t> ProbeTracks_numberOfPixelLayers = {fReader, "ProbeTracks_numberOfPixelLayers"};
+   TTreeReaderArray<Int_t> ProbeTracks_qualityIndex = {fReader, "ProbeTracks_qualityIndex"};
+   TTreeReaderArray<Int_t> ProbeTracks_highPurityFlag = {fReader, "ProbeTracks_highPurityFlag"};
    TTreeReaderArray<Int_t> ProbeTracks_charge = {fReader, "ProbeTracks_charge"};
    TTreeReaderArray<Int_t> ProbeTracks_isLostTrk = {fReader, "ProbeTracks_isLostTrk"};
    TTreeReaderArray<Int_t> ProbeTracks_isPacked = {fReader, "ProbeTracks_isPacked"};
@@ -542,6 +577,17 @@ public :
    Int_t the_sig_pi_islost = -99.;
    Float_t the_sig_pi_trgmu_dr = -99.;
    Int_t the_sig_pi_ismatchedtomuon = -99.;
+   Float_t the_sig_pi_chi2 = -99.;
+   Float_t the_sig_pi_normalisedChi2 = -99.;
+   Float_t the_sig_pi_validFraction = -99.;
+   Int_t the_sig_pi_ndof = -99.;
+   Int_t the_sig_pi_numberOfValidHits = -99.;
+   Int_t the_sig_pi_numberOfLostHits = -99.;
+   Int_t the_sig_pi_numberOfValidPixelHits = -99.;
+   Int_t the_sig_pi_numberOfTrackerLayers = -99.;
+   Int_t the_sig_pi_numberOfPixelLayers = -99.;
+   Int_t the_sig_pi_qualityIndex = -99.;
+   Int_t the_sig_pi_highPurityFlag = -99.;
 
    Float_t the_sig_trgmu_mu_mass = -99.;
    Float_t the_sig_trgmu_mu_pt = -99.;
@@ -555,6 +601,18 @@ public :
    Float_t the_sig_dimu_vydiff = -99.;
    Float_t the_sig_dimu_vzdiff = -99.;
 
+   Float_t the_sig_cos_theta_star_pion = -99.;
+   Float_t the_sig_cos_theta_star_muon = -99.;
+   Float_t the_sig_cos_theta_star_sum = -99.;
+
+   Float_t the_sig_px_diff_hnl_daughters_lab = -99.;
+   Float_t the_sig_py_diff_hnl_daughters_lab = -99.;
+   Float_t the_sig_pz_diff_hnl_daughters_lab = -99.;
+   Float_t the_sig_energy_diff_prefithnl_daughters_lab = -99.;
+   Float_t the_sig_px_diff_prefithnl_daughters_lab = -99.;
+   Float_t the_sig_py_diff_prefithnl_daughters_lab = -99.;
+   Float_t the_sig_pz_diff_prefithnl_daughters_lab = -99.;
+
    Float_t the_sig_deltar_mu_pi = -99.;
    Float_t the_sig_deltar_trgmu_hnl = -99.;
    Float_t the_sig_deltar_trgmu_mu = -99.;
@@ -567,12 +625,28 @@ public :
    Float_t the_sig_deltaphi_trgmu_hnl = -99.;
    Float_t the_sig_deltaphi_trgmu_mu = -99.;
    Float_t the_sig_deltaphi_trgmu_pi = -99.;
+
+   Float_t the_sig_deltae_pi_fit_pi = -99.;
+   Float_t the_sig_deltae_mu_fit_mu = -99.;
+   Float_t the_sig_deltae_hnl_fit_hnl = -99.;
    Float_t the_sig_deltapt_pi_fit_pi = -99.;
    Float_t the_sig_deltapt_mu_fit_mu = -99.;
+   Float_t the_sig_deltapt_hnl_fit_hnl = -99.;
+   Float_t the_sig_deltapx_pi_fit_pi = -99.;
+   Float_t the_sig_deltapx_mu_fit_mu = -99.;
+   Float_t the_sig_deltapx_hnl_fit_hnl = -99.;
+   Float_t the_sig_deltapy_pi_fit_pi = -99.;
+   Float_t the_sig_deltapy_mu_fit_mu = -99.;
+   Float_t the_sig_deltapy_hnl_fit_hnl = -99.;
+   Float_t the_sig_deltapz_pi_fit_pi = -99.;
+   Float_t the_sig_deltapz_mu_fit_mu = -99.;
+   Float_t the_sig_deltapz_hnl_fit_hnl = -99.;
    Float_t the_sig_deltaeta_pi_fit_pi = -99.;
    Float_t the_sig_deltaeta_mu_fit_mu = -99.;
+   Float_t the_sig_deltaeta_hnl_fit_hnl = -99.;
    Float_t the_sig_deltaphi_pi_fit_pi = -99.;
    Float_t the_sig_deltaphi_mu_fit_mu = -99.;
+   Float_t the_sig_deltaphi_hnl_fit_hnl = -99.;
 
    Float_t the_sig_sv_chi2 = -99.;
    Float_t the_sig_sv_lxy = -99.;
