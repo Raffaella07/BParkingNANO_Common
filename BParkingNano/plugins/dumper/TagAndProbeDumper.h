@@ -234,6 +234,7 @@ public :
    TTreeReaderArray<Float_t> SV_x = {fReader, "SV_x"};
    TTreeReaderArray<Float_t> SV_y = {fReader, "SV_y"};
    TTreeReaderArray<Float_t> SV_z = {fReader, "SV_z"};
+   TTreeReaderValue<Int_t> Pileup_nPU = {fReader, "nJPsiToMuMu"};
 
 
    TagAndProbeDumper(TTree * /*tree*/ =0) { }
@@ -253,6 +254,8 @@ public :
    virtual void    Terminate();
 
    TFile* my_file;  
+
+   Bool_t isMC;
 
    TTree* tree;
 
@@ -360,7 +363,11 @@ public :
 
    Int_t the_probe_fired_BParkingHLT;
 
+   Int_t the_pv_npvs;
+
    Float_t the_weight_hlt;
+   Float_t the_weight_pu;
+   Float_t the_weight_pu_npu;
 
    ClassDef(TagAndProbeDumper,0);
 

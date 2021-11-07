@@ -337,6 +337,7 @@ public :
    TTreeReaderArray<Int_t> GenPart_status = {fReader, "BToMuMuPi_charge"};
    TTreeReaderArray<Int_t> GenPart_statusFlags = {fReader, "BToMuMuPi_charge"};
    TTreeReaderArray<Int_t> Muon_genPartIdx = {fReader, "BToMuMuPi_charge"};
+   TTreeReaderValue<Int_t> Pileup_nPU = {fReader, "nBToMuMuPi"};
 
 
    BToMuMuPiDumper(TTree * /*tree*/ =0) { }
@@ -595,6 +596,8 @@ public :
 
    // weights
    Float_t the_sig_weight_hlt = -99.;
+   Float_t the_sig_weight_pu_qcd = -99.;
+   Float_t the_sig_weight_pu_qcd_npu = -99.;
    
    // these two are from matching information
    Float_t the_gen_trgmu_mu_lxy = -99.;

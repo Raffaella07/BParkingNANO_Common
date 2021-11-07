@@ -92,6 +92,7 @@ void BToMuMuPiDumper::SlaveBegin(TTree * /*tree*/)
     GenPart_status = {fReader, "GenPart_status"};
     GenPart_statusFlags = {fReader, "GenPart_statusFlags"};
     Muon_genPartIdx = {fReader, "Muon_genPartIdx"};
+    Pileup_nPU = {fReader, "Pileup_nPU"};
   }
 
   // getting the signal tree ready
@@ -314,6 +315,8 @@ void BToMuMuPiDumper::SlaveBegin(TTree * /*tree*/)
   signal_tree->Branch("lxy_reco_gen_reldiff", &the_sig_lxy_reco_gen_reldiff);
 
   signal_tree->Branch("weight_hlt", &the_sig_weight_hlt);
+  signal_tree->Branch("weight_pu_qcd", &the_sig_weight_pu_qcd);
+  signal_tree->Branch("weight_pu_qcd_npu", &the_sig_weight_pu_qcd_npu);
 
   if(isMC){
     signal_tree->Branch("gen_trgmu_mu_lxy", &the_gen_trgmu_mu_lxy);
@@ -766,12 +769,15 @@ Bool_t BToMuMuPiDumper::Process(Long64_t entry)
           the_gen_hnl_vy = GenPart_vy[gen_hnl_idx];
           the_gen_hnl_vz = GenPart_vz[gen_hnl_idx];
         }
+      }
 
-        // trigger scale factor
-        //the_sig_weight_hlt = isMC ? getTriggerScaleFactor(the_sig_trgmu_pt, fabs(the_sig_trgmu_dxysig), fabs(the_sig_trgmu_eta)) : 1.;
-        the_sig_weight_hlt = isMC ? getTriggerScaleFactor(the_sig_trgmu_pt, fabs(the_sig_trgmu_eta)) : 1.;
-        //the_sig_weight_hlt = isMC ? getTriggerScaleFactor(the_sig_trgmu_pt, fabs(the_sig_trgmu_dxysig)) : 1.;
+      // trigger scale factor
+      the_sig_weight_hlt = isMC ? getTriggerScaleFactor(the_sig_trgmu_pt, fabs(the_sig_trgmu_eta)) : 1.;
 
+      // pile-up weight
+      the_sig_weight_pu_qcd = isMC ? getPUWeight(the_pv_npvs) : 1.;
+      the_sig_weight_pu_qcd_npu = isMC ? getPUWeight(*Pileup_nPU) : 1.;
+      
       signal_tree->Fill();
     } // end sound index
   }// end at least one candidate in the event
