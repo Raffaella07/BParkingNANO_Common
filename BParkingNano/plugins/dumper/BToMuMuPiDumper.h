@@ -669,7 +669,9 @@ public :
    Float_t the_sig_lxy_reco_gen_reldiff = -99.;
 
    // weights
-   Float_t the_sig_weight_hlt = -99.;
+   Float_t the_sig_weight_hlt_A1 = -99.;
+   Float_t the_sig_weight_hlt_A1_6 = -99.;
+   Float_t the_sig_weight_hlt_A1_6_B1 = -99.;
    Float_t the_sig_weight_pu_qcd = -99.;
    Float_t the_sig_weight_pu_qcd_npu = -99.;
    

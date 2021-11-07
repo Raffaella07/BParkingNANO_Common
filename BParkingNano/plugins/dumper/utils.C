@@ -147,12 +147,12 @@ float getPUWeight(int PV_npvs){
 }
 
 
-float getTriggerScaleFactor(float pt, float eta){
+float getTriggerScaleFactor(TString filename_sf, float pt, float eta){
   // get trigger scale factor file
   //TString filename_sf = "/t3home/anlyon/BHNL/BHNLNano/CMSSW_10_2_15/src/PhysicsTools/BParkingNano/data/trigger_scale_factors/scaleFactor_results_cat_pt_eta_fit_A1.root";
   //TString filename_sf = "/t3home/anlyon/BHNL/BHNLNano/CMSSW_10_2_15/src/PhysicsTools/TagAndProbe/test/results/tag_and_probe_v2_tag_fired_DST_DoubleMu1_A1_extraptbin/scaleFactor_results_cat_pt_eta_fit.root";
   //TString filename_sf = "/t3home/anlyon/BHNL/BHNLNano/CMSSW_10_2_15/src/PhysicsTools/TagAndProbe/test/results/tag_and_probe_v2_BToJPsiKstar_V0_tag_fired_DST_DoubleMu1_A1_6_v1/scaleFactor_results_cat_pt_eta_fit.root";
-  TString filename_sf = "/t3home/anlyon/BHNL/BHNLNano/CMSSW_10_2_15/src/PhysicsTools/TagAndProbe/test/results/tag_and_probe_v2_BToJPsiKstar_V0_tag_fired_DST_DoubleMu1_A1_6_B1_v1/scaleFactor_results_cat_pt_eta_fit.root";
+  //TString filename_sf = "/t3home/anlyon/BHNL/BHNLNano/CMSSW_10_2_15/src/PhysicsTools/TagAndProbe/test/results/tag_and_probe_v2_BToJPsiKstar_V0_tag_fired_DST_DoubleMu1_A1_6_B1_v1/scaleFactor_results_cat_pt_eta_fit.root";
   TFile* file_sf = TFile::Open(filename_sf);
   file_sf->cd();
 
