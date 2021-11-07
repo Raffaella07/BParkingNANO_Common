@@ -38,7 +38,10 @@ def checkParser(opt):
     raise RuntimeError('Please indicate if you want to run on data or MC by adding only --data or --mcprivate or --mccentral or --sigcentral to the command line')
 
   if opt.docheckfile and not (opt.dosignal or opt.docontrol or opt.dohnl or opt.dotageprobe):
-    raise RuntimeError('Please indicate with branch you would like to check on (--dosignal or --docontrol or --dohnl or --dotageprobe)')
+    raise RuntimeError('Please indicate which branch you would like to check on (--dosignal or --docontrol or --dohnl or --dotageprobe)')
+
+  if opt.doresubmit and not (opt.dosignal or opt.docontrol or opt.dohnl or opt.dotageprobe):
+    raise RuntimeError('Please indicate over which builder to resubmit (--dosignal or --docontrol or --dohnl or --dotageprobe)')
 
 
 
