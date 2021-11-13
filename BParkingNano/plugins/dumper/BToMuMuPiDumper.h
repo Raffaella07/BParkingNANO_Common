@@ -374,6 +374,7 @@ public :
    TTreeReaderArray<Int_t> Muon_genPartIdx = {fReader, "BToMuMuPi_charge"};
    // the correct value will be filled for MC only
    TTreeReaderValue<Int_t> Pileup_nPU = {fReader, "PV_npvs"};
+   TTreeReaderValue<Float_t> Pileup_nTrueInt = {fReader, "PV_ndof"};
 
 
    BToMuMuPiDumper(TTree * /*tree*/ =0) { }
@@ -673,8 +674,12 @@ public :
    Float_t the_sig_weight_hlt_A1 = -99.;
    Float_t the_sig_weight_hlt_A1_6 = -99.;
    Float_t the_sig_weight_hlt_A1_6_B1 = -99.;
-   Float_t the_sig_weight_pu_qcd = -99.;
-   Float_t the_sig_weight_pu_qcd_npu = -99.;
+   Float_t the_sig_weight_pu_qcd_A = -99.;
+   Float_t the_sig_weight_pu_qcd_B = -99.;
+   Float_t the_sig_weight_pu_qcd_C = -99.;
+   Float_t the_sig_weight_pu_qcd_D = -99.;
+   Float_t the_sig_weight_pu_qcd_tot = -99.;
+   Float_t the_sig_weight_pu_qcd_ntrueint_weighted = -99.;
    
    // these two are from matching information
    Float_t the_gen_trgmu_mu_lxy = -99.;

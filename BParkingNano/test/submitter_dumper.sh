@@ -33,7 +33,7 @@ fi
 echo "copying ntupliser to workdir"
 cp $starter.C $workdir/starter.C
 cp ../data/json/golden_2018.json $workdir
-cp ../data/pileup/pileup_weight_dataA_mcAutumn18.root $workdir
+cp -r ../data/pileup/pileup_weight_data*_mcAutumn18.root $workdir
 cp ../plugins/dumper/utils.C $workdir 
 if [ ${5} == 1 ] ; then
   cp ../plugins/dumper/NanoRunDumper.C $workdir 

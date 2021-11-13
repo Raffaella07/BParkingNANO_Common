@@ -127,19 +127,18 @@ bool lumiMask(int run, int lumi){
 }
 
 
-float getPUWeight(int PV_npvs){
+float getPUWeight(TString filename, int var){
   // get file
-  TString filename = "pileup_weight_dataA_mcAutumn18.root";
   TFile* file = TFile::Open(filename);
   file->cd();
 
   // get histogram
   TH1D* hist = (TH1D*) file->Get("hist_weight")->Clone("hist");
 
-  PV_npvs = std::max(0, std::min(200, int(PV_npvs)));
+  var = std::max(0, std::min(200, int(var)));
 
   // get weight
-  Float_t pu_weight = hist->GetBinContent(PV_npvs);
+  Float_t pu_weight = hist->GetBinContent(var);
   
   file->Close();
 
