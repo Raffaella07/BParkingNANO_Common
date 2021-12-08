@@ -13,9 +13,9 @@
 // ------- Global Variables ------- //
 
 //TString dataFileName = "results_tag_and_probe_v2_tag_fired_DST_DoubleMu1_data_A1_extraptbin.root";
-TString dataFileName = "results_tag_and_probe_v2_BToJPsiKstar_V0_tag_fired_DST_DoubleMu1_dataA1_6_B1_v1.root";
-TString mcFileName = "results_tag_and_probe_v2_BToJPsiKstar_V0_tag_fired_DST_DoubleMu1_mc_v1.root";
-string dirLabel = "tag_and_probe_v2_BToJPsiKstar_V0_tag_fired_DST_DoubleMu1_A1_6_B1_v1";
+TString dataFileName = "results_tag_and_probe_v2_BToJPsiKstar_V0_tag_fired_HLT_Mu9_IP6_A1_6.root";
+TString mcFileName = "results_tag_and_probe_v2_BToJPsiKstar_V0_tag_fired_HLT_Mu9_IP6_mc.root";
+string dirLabel = "tag_and_probe_v2_BToJPsiKstar_V0_tag_fired_HLT_Mu9_IP6_A1_6";
 
 
 // -------------------------------- //
@@ -92,6 +92,46 @@ void  write1DScaleFactor(TH1F* h, string name){
   root_file->Close();
 }
 
+void  produce2DPlot(TH2F* h, string name){
+  TString name_forhist = name.c_str();
+  TFile* root_file = TFile::Open(name_forhist + ".root", "RECREATE");
+  TH2D* hist_scale_factor = new TH2D("hist_scale_factor", "hist_scale_factor", h->GetNbinsX(), 0, h->GetNbinsX(), h->GetNbinsY(), 0, h->GetNbinsY()-1);
+  TCanvas* c = new TCanvas("c", "c", 1200, 1000);
+  c->SetRightMargin(0.15);
+
+  int nX = h->GetNbinsX();
+  int nY = h->GetNbinsY();
+
+  for(int i=1; i<=nX; ++i) {
+    Double_t pT0 = h->GetXaxis()->GetBinLowEdge(i);
+    Double_t pT1 = h->GetXaxis()->GetBinLowEdge(i+1);
+
+    for(int j=1; j<=nY; ++j) {
+      Double_t x = h->GetBinContent(i,j);
+      Double_t dx = h->GetBinError(i,j);
+      Double_t err = (dx/x)*100;
+      Double_t eta0 = h->GetYaxis()->GetBinLowEdge(j);
+      Double_t eta1 = h->GetYaxis()->GetBinLowEdge(j+1);
+
+      hist_scale_factor->SetBinContent(i, j, x);
+      hist_scale_factor->SetBinError(i, j, dx);
+    }
+  }
+
+  hist_scale_factor->GetZaxis()->SetTitle("Scale Factor");
+  hist_scale_factor->GetZaxis()->SetRangeUser(-1e-3, 1);
+  hist_scale_factor->SetOption("colztexte");
+  hist_scale_factor->SetTitle("");
+  hist_scale_factor->Write();
+  hist_scale_factor->Draw();
+  gStyle->SetTitleFillColor(0);
+  gStyle->SetOptStat(0);
+  gStyle->SetPaintTextFormat(".3f");
+  c->SaveAs(name_forhist + ".pdf");
+  c->SaveAs(name_forhist + ".png");
+  root_file->Close();
+}
+
 
 void process(string dir, string subdir, string outdir, string method, TFile* fData, TFile* fMC, TString canvasname, TString extraname, string dim){
   TCanvas* c;
@@ -120,6 +160,7 @@ void process(string dir, string subdir, string outdir, string method, TFile* fDa
   else if(dim == "1D") hData1D->Divide(hMC1D);
   if(dim == "2D" || dim == "3D"){
     write2DScaleFactor(hData2D, name);
+    produce2DPlot(hData2D, name);
   }
   else if(dim == "1D"){
     write1DScaleFactor(hData1D, name);
