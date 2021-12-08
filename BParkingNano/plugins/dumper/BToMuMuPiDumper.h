@@ -680,9 +680,6 @@ public :
    Float_t the_sig_weight_pu_qcd_C = -99.;
    Float_t the_sig_weight_pu_qcd_D = -99.;
    Float_t the_sig_weight_pu_qcd_tot = -99.;
-   Float_t the_sig_weight_pu_qcd_ntrueint_weighted = -99.;
-   Float_t the_sig_weight_pu_qcd_ntrueint_weighted0p9 = -99.;
-   Float_t the_sig_weight_pu_qcd_ntrueint_weighted1p1 = -99.;
    
    // these two are from matching information
    Float_t the_gen_trgmu_mu_lxy = -99.;
