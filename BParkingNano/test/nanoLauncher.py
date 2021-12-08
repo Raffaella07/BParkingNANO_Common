@@ -427,8 +427,8 @@ class NanoLauncher(NanoTools):
       tag = NanoTools.getTag(self, self.tagnano, self.tagflat)
       #logdir = './logs/{}/{}/Chunk{}_n{}'.format(label1, label2, iFile, nfiles) if tag == 0 \
       #         else './logs/{}/{}_{}/Chunk{}_n{}'.format(label1, label2, tag, iFile, nfiles)
-      logdir = '/work/anlyon/logs/{}/{}/Chunk{}_n{}'.format(label1, label2, iFile, nfiles) if tag == 0 \
-               else '/work/anlyon/logs/{}/{}_{}/Chunk{}_n{}'.format(label1, label2, tag, iFile, nfiles)
+      logdir = '/work/{}/logs/{}/{}/Chunk{}_n{}'.format(os.environ["USER"], label1, label2, iFile, nfiles) if tag == 0 \
+               else '/work/{}/logs/{}/{}_{}/Chunk{}_n{}'.format(os.environ["USER"], label1, label2, tag, iFile, nfiles)
       if not path.exists(logdir):
         os.system('mkdir -p {}'.format(logdir))
 
