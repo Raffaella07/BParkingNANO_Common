@@ -40,6 +40,8 @@ class NanoTools(object):
       location += '/data'
     elif dirtag == 'mccentral': 
       location += '/mc_central'
+    elif dirtag == 'sigcentral': 
+      location += '/signal_central'
     return location
   
 

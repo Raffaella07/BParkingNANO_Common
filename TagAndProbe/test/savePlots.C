@@ -9,9 +9,9 @@
 
 // ------- Global Variables ------- //
 
-//TString inputFileName = "testTagProbeFitTreeAnalyzer_JPsiMuMu.root";
-TString inputFileName = "results_tag_and_probe_v2_tag_fired_DST_DoubleMu1_data_A1_6_forplots.root";
-string dirLabel = "tag_and_probe_v2_tag_fired_DST_DoubleMu1_A1_6_forplots";
+//TString inputFileName = "results_tag_and_probe_v2_tag_fired_DST_DoubleMu1_data_A1_6_forplots.root";
+TString inputFileName = "results_tag_and_probe_v2_BToJPsiKstar_V0_tag_fired_DST_DoubleMu1_dataA1_B1_v1.root";
+string dirLabel = "tag_and_probe_v2_BToJPsiKstar_V0_tag_fired_DST_DoubleMu1_A1_B1_v1";
 Bool_t isMC = false;
 
 
@@ -22,6 +22,8 @@ void savePlots(
 			   string dir="results", 
 			   bool isCutAndCount=false, 
 			   bool isMCTruth = false ) {
+
+  gStyle->SetPaintTextFormat(".1f");
 
   string outdir = "./results/" + dirLabel;
   if(isMC){

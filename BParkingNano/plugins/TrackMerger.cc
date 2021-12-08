@@ -254,6 +254,17 @@ void TrackMerger::produce(edm::StreamID, edm::Event &evt, edm::EventSetup const 
     pcand.addUserFloat("DCASig", DCASig);
     pcand.addUserFloat("drTrg", drTrg);
     pcand.addUserFloat("dzTrg", dzTrg);
+    pcand.addUserFloat("chi2", trk.bestTrack()->chi2()); 
+    pcand.addUserInt("ndof", trk.bestTrack()->ndof()); 
+    pcand.addUserFloat("normalisedChi2", trk.bestTrack()->normalizedChi2()); 
+    pcand.addUserInt("numberOfValidHits", trk.bestTrack()->numberOfValidHits()); 
+    pcand.addUserInt("numberOfLostHits", trk.bestTrack()->numberOfLostHits()); 
+    pcand.addUserInt("numberOfValidPixelHits", trk.bestTrack()->hitPattern().numberOfValidPixelHits()); 
+    pcand.addUserInt("numberOfTrackerLayers", trk.bestTrack()->hitPattern().trackerLayersWithMeasurement()); 
+    pcand.addUserInt("numberOfPixelLayers", trk.bestTrack()->hitPattern().pixelLayersWithMeasurement()); 
+    pcand.addUserInt("qualityIndex", trk.bestTrack()->qualityMask()); 
+    pcand.addUserInt("highPurityFlag", trk.bestTrack()->quality(reco::TrackBase::highPurity)); 
+    pcand.addUserFloat("validFraction", trk.bestTrack()->validFraction()); 
     pcand.addUserInt("isMatchedToMuon", matchedToMuon);
     pcand.addUserInt("isMatchedToLooseMuon", matchedToLooseMuon);
     pcand.addUserInt("isMatchedToSoftMuon", matchedToSoftMuon);

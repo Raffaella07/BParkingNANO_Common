@@ -187,13 +187,13 @@ public :
    TTreeReaderValue<UChar_t> HLT_Mu9_IP4 = {fReader, "HLT_Mu9_IP4"};
    TTreeReaderValue<UChar_t> HLT_Mu10p5_IP3p5 = {fReader, "HLT_Mu10p5_IP3p5"};
    TTreeReaderValue<UChar_t> HLT_Mu12_IP6 = {fReader, "HLT_Mu12_IP6"};
-   TTreeReaderValue<UChar_t> HLT_Mu7p5_L2Mu2_Jpsi_v10 = {fReader, "HLT_Mu7p5_L2Mu2_Jpsi_v10"};
-   TTreeReaderValue<UChar_t> HLT_Mu7p5_Track2_Jpsi_v11 = {fReader, "HLT_Mu7p5_Track2_Jpsi_v11"};
-   TTreeReaderValue<UChar_t> HLT_Mu7p5_Track7_Jpsi_v11 = {fReader, "HLT_Mu7p5_Track7_Jpsi_v11"};
-   TTreeReaderValue<UChar_t> HLT_Mu8_TrkIsoVVL_v12 = {fReader, "HLT_Mu8_TrkIsoVVL_v12"};
-   TTreeReaderValue<UChar_t> HLT_Mu8_v12 = {fReader, "HLT_Mu8_v12"};
-   TTreeReaderValue<UChar_t> HLT_Mu17_v13 = {fReader, "HLT_Mu17_v13"};
-   TTreeReaderValue<UChar_t> HLT_Mu19_v4 = {fReader, "HLT_Mu19_v4"};
+   //TTreeReaderValue<UChar_t> HLT_Mu7p5_L2Mu2_Jpsi_v10 = {fReader, "HLT_Mu7p5_L2Mu2_Jpsi_v10"};
+   //TTreeReaderValue<UChar_t> HLT_Mu7p5_Track2_Jpsi_v11 = {fReader, "HLT_Mu7p5_Track2_Jpsi_v11"};
+   //TTreeReaderValue<UChar_t> HLT_Mu7p5_Track7_Jpsi_v11 = {fReader, "HLT_Mu7p5_Track7_Jpsi_v11"};
+   //TTreeReaderValue<UChar_t> HLT_Mu8_TrkIsoVVL_v12 = {fReader, "HLT_Mu8_TrkIsoVVL_v12"};
+   //TTreeReaderValue<UChar_t> HLT_Mu8_v12 = {fReader, "HLT_Mu8_v12"};
+   //TTreeReaderValue<UChar_t> HLT_Mu17_v13 = {fReader, "HLT_Mu17_v13"};
+   //TTreeReaderValue<UChar_t> HLT_Mu19_v4 = {fReader, "HLT_Mu19_v4"};
    TTreeReaderValue<UChar_t> L1_SingleMu7er1p5 = {fReader, "L1_SingleMu7er1p5"};
    TTreeReaderValue<UChar_t> L1_SingleMu8er1p5 = {fReader, "L1_SingleMu8er1p5"};
    TTreeReaderValue<UChar_t> L1_SingleMu9er1p5 = {fReader, "L1_SingleMu9er1p5"};
@@ -234,6 +234,7 @@ public :
    TTreeReaderArray<Float_t> SV_x = {fReader, "SV_x"};
    TTreeReaderArray<Float_t> SV_y = {fReader, "SV_y"};
    TTreeReaderArray<Float_t> SV_z = {fReader, "SV_z"};
+   //TTreeReaderValue<Int_t> Pileup_nPU = {fReader, "nJPsiToMuMu"};
 
 
    TagAndProbeDumper(TTree * /*tree*/ =0) { }
@@ -253,6 +254,8 @@ public :
    virtual void    Terminate();
 
    TFile* my_file;  
+
+   Bool_t isMC;
 
    TTree* tree;
 
@@ -360,7 +363,11 @@ public :
 
    Int_t the_probe_fired_BParkingHLT;
 
+   Int_t the_pv_npvs;
+
    Float_t the_weight_hlt;
+   Float_t the_weight_pu;
+   Float_t the_weight_pu_npu;
 
    ClassDef(TagAndProbeDumper,0);
 

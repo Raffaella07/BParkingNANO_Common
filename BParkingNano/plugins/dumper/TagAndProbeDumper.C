@@ -26,6 +26,7 @@
 
 
 #include "TagAndProbeDumper.h"
+#include <TMath.h>
 #include <TH2.h>
 #include <TStyle.h>
 #include <TSystem.h>
@@ -53,8 +54,10 @@ void TagAndProbeDumper::SlaveBegin(TTree * /*tree*/)
   TString outFileName = option;
 
   if(outFileName.Contains("isMC")){
+    isMC = true;
     outFileName.Resize(outFileName.Length()-5);
   }
+  else isMC = false;
 
   // check if outputfile exists
   if(gSystem->AccessPathName(outFileName)){
@@ -64,6 +67,10 @@ void TagAndProbeDumper::SlaveBegin(TTree * /*tree*/)
     my_file = new TFile(outFileName, "UPDATE");  
   }
   my_file->cd();
+
+  //if(isMC){
+  //  Pileup_nPU = {fReader, "Pileup_nPU"};
+  //}
 
   tree = new TTree("tree", "tree");
   tree->Branch("pt", &the_pt);
@@ -170,7 +177,11 @@ void TagAndProbeDumper::SlaveBegin(TTree * /*tree*/)
   tree->Branch("probe_prescale_HLT_BTagMu_AK4DiJet40_Mu5_v13", &the_probe_prescale_HLT_BTagMu_AK4DiJet40_Mu5_v13);
   tree->Branch("probe_fired_BParkingHLT", &the_probe_fired_BParkingHLT);
 
+  tree->Branch("pv_npvs", &the_pv_npvs);
+
   tree->Branch("weight_hlt", &the_weight_hlt);
+  tree->Branch("weight_pu", &the_weight_pu);
+  tree->Branch("weight_pu_npu", &the_weight_pu_npu);
 
 }
 
@@ -194,8 +205,13 @@ Bool_t TagAndProbeDumper::Process(Long64_t entry)
 
   fReader.SetLocalEntry(entry);
 
-  if(Muon_fired_DST_DoubleMu1_noVtx_CaloScouting_v2[JPsiToMuMu_lep1_idx[0]] != 1) return false;
-  if(Muon_prescale_DST_DoubleMu1_noVtx_CaloScouting_v2[JPsiToMuMu_lep1_idx[0]] != 1) return false;
+  // initial strategy
+  //if(Muon_fired_DST_DoubleMu1_noVtx_CaloScouting_v2[JPsiToMuMu_lep1_idx[0]] != 1) return false;
+  //if(Muon_prescale_DST_DoubleMu1_noVtx_CaloScouting_v2[JPsiToMuMu_lep1_idx[0]] != 1) return false;
+
+  //if(Muon_fired_DST_DoubleMu1_noVtx_CaloScouting_v2[JPsiToMuMu_lep1_idx[0]] != 1 && Muon_fired_DST_DoubleMu3_noVtx_CaloScouting_v6[JPsiToMuMu_lep1_idx[0]] != 1) return false;
+  if(Muon_fired_HLT_Mu9_IP6[JPsiToMuMu_lep1_idx[0]] != 1) return false;
+  if(Muon_prescale_DST_DoubleMu1_noVtx_CaloScouting_v2[JPsiToMuMu_lep1_idx[0]] == -1) return false;
 
   // by default, take the first candidate (possible since <permille events have more than one candidate per event)
   the_pt = JPsiToMuMu_pt[0];
@@ -307,7 +323,11 @@ Bool_t TagAndProbeDumper::Process(Long64_t entry)
     the_probe_fired_BParkingHLT = 0;
   }
 
-  the_weight_hlt = getTriggerScaleFactor(the_tag_pt, fabs(the_tag_eta));
+  the_pv_npvs = *PV_npvs;
+
+  //the_weight_hlt = isMC ? getTriggerScaleFactor(the_tag_pt, fabs(the_tag_eta)) : 1.;
+  //the_weight_pu = isMC ? getPUWeight(*PV_npvs) : 1.;
+  //the_weight_pu_npu = isMC ? getPUWeight(*Pileup_nPU) : 1.;
 
   tree->Fill();
 
