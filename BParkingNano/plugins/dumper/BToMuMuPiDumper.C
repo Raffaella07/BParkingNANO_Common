@@ -356,6 +356,7 @@ void BToMuMuPiDumper::SlaveBegin(TTree * /*tree*/)
 
   signal_tree->Branch("weight_hlt_A1", &the_sig_weight_hlt_A1);
   signal_tree->Branch("weight_hlt_A1_6", &the_sig_weight_hlt_A1_6);
+  signal_tree->Branch("weight_hlt_HLT_Mu9_IP6_A1_6", &the_sig_weight_hlt_HLT_Mu9_IP6_A1_6);
   signal_tree->Branch("weight_hlt_A1_6_B1", &the_sig_weight_hlt_A1_6_B1);
   signal_tree->Branch("weight_pu_qcd_A", &the_sig_weight_pu_qcd_A);
   signal_tree->Branch("weight_pu_qcd_B", &the_sig_weight_pu_qcd_B);
@@ -363,6 +364,8 @@ void BToMuMuPiDumper::SlaveBegin(TTree * /*tree*/)
   signal_tree->Branch("weight_pu_qcd_D", &the_sig_weight_pu_qcd_D);
   signal_tree->Branch("weight_pu_qcd_tot", &the_sig_weight_pu_qcd_tot);
   signal_tree->Branch("weight_pu_qcd_ntrueint_weighted", &the_sig_weight_pu_qcd_ntrueint_weighted);
+  signal_tree->Branch("weight_pu_qcd_ntrueint_weighted0p9", &the_sig_weight_pu_qcd_ntrueint_weighted0p9);
+  signal_tree->Branch("weight_pu_qcd_ntrueint_weighted1p1", &the_sig_weight_pu_qcd_ntrueint_weighted1p1);
 
   if(isMC){
     signal_tree->Branch("gen_trgmu_mu_lxy", &the_gen_trgmu_mu_lxy);
@@ -859,6 +862,7 @@ Bool_t BToMuMuPiDumper::Process(Long64_t entry)
       // trigger scale factor
       the_sig_weight_hlt_A1 = isMC ? getTriggerScaleFactor("/t3home/anlyon/BHNL/BHNLNano/CMSSW_10_2_15/src/PhysicsTools/TagAndProbe/test/results/tag_and_probe_v2_BToJPsiKstar_V0_tag_fired_DST_DoubleMu1_A1_v1/scaleFactor_results_cat_pt_eta_fit.root", the_sig_trgmu_pt, fabs(the_sig_trgmu_eta)) : 1.;
       the_sig_weight_hlt_A1_6 = isMC ? getTriggerScaleFactor("/t3home/anlyon/BHNL/BHNLNano/CMSSW_10_2_15/src/PhysicsTools/TagAndProbe/test/results/tag_and_probe_v2_BToJPsiKstar_V0_tag_fired_DST_DoubleMu1_A1_6_v1/scaleFactor_results_cat_pt_eta_fit.root", the_sig_trgmu_pt, fabs(the_sig_trgmu_eta)) : 1.;
+      the_sig_weight_hlt_HLT_Mu9_IP6_A1_6 = isMC ? getTriggerScaleFactor("/t3home/anlyon/BHNL/BHNLNano/CMSSW_10_2_15/src/PhysicsTools/TagAndProbe/test/results/tag_and_probe_v2_BToJPsiKstar_V0_tag_fired_HLT_Mu9_IP6_A1_6/scaleFactor_results_cat_pt_eta_fit.root", the_sig_trgmu_pt, fabs(the_sig_trgmu_eta)) : 1.;
       the_sig_weight_hlt_A1_6_B1 = isMC ? getTriggerScaleFactor("/t3home/anlyon/BHNL/BHNLNano/CMSSW_10_2_15/src/PhysicsTools/TagAndProbe/test/results/tag_and_probe_v2_BToJPsiKstar_V0_tag_fired_DST_DoubleMu1_A1_6_B1_v1/scaleFactor_results_cat_pt_eta_fit.root", the_sig_trgmu_pt, fabs(the_sig_trgmu_eta)) : 1.;
 
       // pile-up weight
@@ -868,6 +872,8 @@ Bool_t BToMuMuPiDumper::Process(Long64_t entry)
       the_sig_weight_pu_qcd_D = isMC ? getPUWeight("pileup_weight_dataD_mcAutumn18.root", *Pileup_nTrueInt) : 1.;
       the_sig_weight_pu_qcd_tot = isMC ? getPUWeight("pileup_weight_datatot_mcAutumn18.root", *Pileup_nTrueInt) : 1.;
       the_sig_weight_pu_qcd_ntrueint_weighted = isMC ? getPUWeight("pileup_weight_dataA_mcAutumn18_weighted.root", *Pileup_nTrueInt) : 1.;
+      the_sig_weight_pu_qcd_ntrueint_weighted0p9 = isMC ? getPUWeight("pileup_weight_dataA_mcAutumn18_weighted.root", *Pileup_nTrueInt)*0.9 : 1.;
+      the_sig_weight_pu_qcd_ntrueint_weighted1p1 = isMC ? getPUWeight("pileup_weight_dataA_mcAutumn18_weighted.root", *Pileup_nTrueInt)*1.1 : 1.;
       
       signal_tree->Fill();
     } // end sound index
