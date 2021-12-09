@@ -19,7 +19,7 @@
 
 #include <limits>
 #include <algorithm>
-#include "helper.h"
+#include "../interface/helper.h"
 
 template< typename PATOBJ >
 class MatchEmbedder : public edm::global::EDProducer<> {
@@ -81,7 +81,7 @@ void MatchEmbedder<PATOBJ>::produce(edm::StreamID, edm::Event &evt, edm::EventSe
   evt.put(std::move(out));
 }
 
-#include "ETHMuon.h"
+#include "../interface/ETHMuon.h"
 typedef MatchEmbedder<pat::ETHMuon> MuonMatchEmbedder;
 
 #include "DataFormats/PatCandidates/interface/Muon.h"

@@ -23,8 +23,8 @@
 #include "DataFormats/PatCandidates/interface/Electron.h"
 #include "DataFormats/Common/interface/AssociationVector.h"
 
-#include "ETHMuon.h"
-#include "helper.h"
+#include "../interface/ETHMuon.h"
+#include "../interface/helper.h"
 
 class TrackMerger : public edm::global::EDProducer<> {
 

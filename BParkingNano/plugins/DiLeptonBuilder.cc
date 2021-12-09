@@ -14,10 +14,10 @@
 #include "DataFormats/Math/interface/deltaR.h"
 #include "CommonTools/Statistics/interface/ChiSquaredProbability.h"
 #include "TrackingTools/TransientTrack/interface/TransientTrack.h"
-#include "helper.h"
+#include "../interface/helper.h"
 #include <limits>
 #include <algorithm>
-#include "KinVtxFitter.h"
+#include "../interface/KinVtxFitter.h"
 
 template<typename Lepton>
 class DiLeptonBuilder : public edm::global::EDProducer<> {
@@ -143,7 +143,7 @@ void DiLeptonBuilder<Lepton>::produce(edm::StreamID, edm::Event &evt, edm::Event
   evt.put(std::move(ret_value));
 }
 
-#include "ETHMuon.h"
+#include "../interface/ETHMuon.h"
 #include "DataFormats/PatCandidates/interface/Electron.h"
 typedef DiLeptonBuilder<pat::ETHMuon> DiMuonBuilder;
 typedef DiLeptonBuilder<pat::Electron> DiElectronBuilder;

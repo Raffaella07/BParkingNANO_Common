@@ -20,11 +20,11 @@
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
 #include "DataFormats/EgammaCandidates/interface/Conversion.h"
 #include "DataFormats/BeamSpot/interface/BeamSpot.h"
-#include "ConversionInfo.h"
+#include "../interface/ConversionInfo.h"
 
 #include <limits>
 #include <algorithm>
-#include "helper.h"
+#include "../interface/helper.h"
 
 class ElectronMerger : public edm::global::EDProducer<> {
 
