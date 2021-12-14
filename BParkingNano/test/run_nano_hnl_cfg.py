@@ -11,6 +11,7 @@ options.register('doControl'               , False           , VarParsing.multip
 options.register('doHNL'                   , False           , VarParsing.multiplicity.singleton, VarParsing.varType.bool  , "Run the HNLToMuPiBuilder"               )
 options.register('doTagAndProbe'           , False           , VarParsing.multiplicity.singleton, VarParsing.varType.bool  , "Run the TagAndProbeJpsiToMuMu"          )
 options.register('addTriggerMuonCollection', False           , VarParsing.multiplicity.singleton, VarParsing.varType.bool  , "Add the TriggerMuon_* branches"         )
+options.register('addProbeTracksCollection', False           , VarParsing.multiplicity.singleton, VarParsing.varType.bool  , "Add the ProbeTracks_* branches"         )
 options.register('skipDuplicated'          , True            , VarParsing.multiplicity.singleton, VarParsing.varType.bool  , "Skip duplicated events. True by default")
 options.register('globalTag'               ,'NOTSET'         , VarParsing.multiplicity.singleton, VarParsing.varType.string, "Set global tag"                         )
 options.register('wantSummary'             , True            , VarParsing.multiplicity.singleton, VarParsing.varType.bool  , "Run this on real data"                  )
@@ -122,7 +123,7 @@ process.GlobalTag = GlobalTag(process.GlobalTag, globaltag, '')
 
 from PhysicsTools.BParkingNano.nanoBPark_cff import *
 process = nanoAOD_customizeMuonTriggerBPark      (process, addTriggerMuonCollection=options.addTriggerMuonCollection)
-process = nanoAOD_customizeTrackFilteredBPark    (process)
+process = nanoAOD_customizeTrackFilteredBPark    (process, addProbeTracksCollection=options.addProbeTracksCollection)
 process = nanoAOD_customizeBToMuMuPi             (process, isMC=options.isMC)
 process = nanoAOD_customizeBToKMuMu              (process, isMC=options.isMC) 
 process = nanoAOD_customizeHNLToMuPi             (process, isMC=options.isMC)

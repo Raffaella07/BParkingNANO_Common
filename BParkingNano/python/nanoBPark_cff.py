@@ -47,8 +47,11 @@ def nanoAOD_customizeMuonTriggerBPark(process, addTriggerMuonCollection=False):
       process.nanoSequence = cms.Sequence( process.nanoSequence + muonBParkSequence + muonBParkTables)
     return process
 
-def nanoAOD_customizeTrackFilteredBPark(process):
-    process.nanoSequence = cms.Sequence( process.nanoSequence + tracksBParkSequence + tracksBParkTables)
+def nanoAOD_customizeTrackFilteredBPark(process, addProbeTracksCollection=False):
+    if addProbeTracksCollection:
+      process.nanoSequence = cms.Sequence( process.nanoSequence + tracksBParkSequence + tracksBParkTables)
+    else:
+      process.nanoSequence = cms.Sequence( process.nanoSequence + tracksBParkSequence)
     return process
 
 def nanoAOD_customizeElectronFilteredBPark(process):
