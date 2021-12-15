@@ -38,18 +38,19 @@ public:
   typedef std::vector<reco::TransientTrack> TransientTrackCollection;
 
   explicit BToMuLPiBuilder(const edm::ParameterSet &cfg):
-    pi_selection_      {cfg.getParameter<std::string>("pionSelection"     )},
-    pi_selection_dsa_  {cfg.getParameter<std::string>("pionSelection_dsa" )},
-    isotrk_selection_  {cfg.getParameter<std::string>("isoTracksSelection")},
-    trgmu_selection_   {cfg.getParameter<std::string>("trgMuonSelection"  )},
-    trgmu_selection_dsa_   {cfg.getParameter<std::string>("trgMuonSelection_dsa"  )},
-    lep_selection_     {cfg.getParameter<std::string>("leptonSelection"  )},
-    lep_selection_dsa_     {cfg.getParameter<std::string>("leptonSelection_dsa"  )},
-    pre_vtx_selection_ {cfg.getParameter<std::string>("preVtxSelection"   )},
-    post_vtx_selection_{cfg.getParameter<std::string>("postVtxSelection"  )},
-    post_vtx_selection_dsa_{cfg.getParameter<std::string>("postVtxSelection_dsa"  )},
-    lepton_type_       {cfg.getParameter<std::string>("label")},
-    isMC_              {cfg.getParameter<bool>("isMC")},
+    pi_selection_          {cfg.getParameter<std::string>("pionSelection")},
+    isotrk_selection_      {cfg.getParameter<std::string>("isoTracksSelection")},
+    trgmu_selection_       {cfg.getParameter<std::string>("trgMuonSelection")},
+    lep_selection_         {cfg.getParameter<std::string>("leptonSelection")},
+    pre_vtx_selection_     {cfg.getParameter<std::string>("preVtxSelection")},
+    post_vtx_selection_    {cfg.getParameter<std::string>("postVtxSelection")},
+    extra_selection_       {cfg.getParameter<std::string>("extraSelection")},
+    pi_selection_dsa_      {cfg.getParameter<std::string>("pionSelection_dsa")},
+    trgmu_selection_dsa_   {cfg.getParameter<std::string>("trgMuonSelection_dsa")},
+    lep_selection_dsa_     {cfg.getParameter<std::string>("leptonSelection_dsa")},
+    post_vtx_selection_dsa_{cfg.getParameter<std::string>("postVtxSelection_dsa")},
+    lepton_type_           {cfg.getParameter<std::string>("label")},
+    isMC_                  {cfg.getParameter<bool>("isMC")},
 
     // these two collections are ideally created beforehand by MuonTriggerSelector.cc
     //    * the former are muons that pass the preselection defined there AND match one of the 
@@ -82,15 +83,18 @@ public:
 private:
   // pre-fitter preselection 
   const StringCutObjectSelector<pat::CompositeCandidate> pi_selection_; 
-  const StringCutObjectSelector<pat::CompositeCandidate> pi_selection_dsa_; 
   const StringCutObjectSelector<pat::PackedCandidate> isotrk_selection_;
   const StringCutObjectSelector<pat::ETHMuon> trgmu_selection_; 
-  const StringCutObjectSelector<pat::ETHMuon> trgmu_selection_dsa_; 
   const StringCutObjectSelector<Lepton> lep_selection_; 
-  const StringCutObjectSelector<Lepton> lep_selection_dsa_; 
   const StringCutObjectSelector<pat::CompositeCandidate> pre_vtx_selection_; 
   // post-fitter preselection 
   const StringCutObjectSelector<pat::CompositeCandidate> post_vtx_selection_; 
+  // extra preselection
+  const StringCutObjectSelector<pat::CompositeCandidate> extra_selection_; 
+  // preselection on dsa candidates
+  const StringCutObjectSelector<pat::CompositeCandidate> pi_selection_dsa_; 
+  const StringCutObjectSelector<pat::ETHMuon> trgmu_selection_dsa_; 
+  const StringCutObjectSelector<Lepton> lep_selection_dsa_; 
   const StringCutObjectSelector<pat::CompositeCandidate> post_vtx_selection_dsa_; 
 
   const std::string lepton_type_;
@@ -304,6 +308,9 @@ void BToMuLPiBuilder<Lepton>::produce(edm::StreamID, edm::Event &evt, edm::Event
         b_cand.addUserFloat("hnl_fitted_pi_phi"      , fitter.daughter_p4(1).phi()                                             );
         b_cand.addUserFloat("hnl_fitted_pi_mass"     , fitter.daughter_p4(1).mass()                                            );
 
+        // post fit selection
+        if( !post_vtx_selection_(b_cand) ) continue;        
+
         // computation of cos(theta*), 
         // (angle between the hnl's momentum direction in the lab frame and the daughter's momentum direction in the center of mass frame)
         float mass_hnl_fitted = fitter.fitted_candidate().mass();
@@ -473,7 +480,7 @@ void BToMuLPiBuilder<Lepton>::produce(edm::StreamID, edm::Event &evt, edm::Event
         b_cand.addUserFloat("pion_DCASig"     , pi_ptr->userFloat("DCASig") );
 
         // post fit selection
-        if( !post_vtx_selection_(b_cand) ) continue;        
+        //if( !post_vtx_selection_(b_cand) ) continue;        
 
         //if( lep_ptr->userInt("isDSAMuon")!=1 && !post_vtx_selection_(b_cand) ) continue;
         //if( lep_ptr->userInt("isDSAMuon")==1 && !post_vtx_selection_dsa_(b_cand) ) continue;
@@ -624,8 +631,8 @@ void BToMuLPiBuilder<Lepton>::produce(edm::StreamID, edm::Event &evt, edm::Event
         b_cand.addUserFloat("dilepton_pt", dilepton_pt);
         b_cand.addUserFloat("trgmu_pi_pt", trgmu_pi_pt);
 
-        // post fit selection
-        //if( !post_vtx_selection_(b_cand) ) continue;        
+        // extra selection
+        if( !extra_selection_(b_cand) ) continue;        
 
         // gen-matching
         int isMatched = 0;
