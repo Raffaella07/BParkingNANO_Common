@@ -115,6 +115,7 @@ tracksBParkMCTable = cms.EDProducer("CandMCMatchTableProducerBPark",
 
 tracksBParkSequence = cms.Sequence(tracksBPark)
 tracksBParkTables = cms.Sequence(trackBParkTable)
-tracksBParkMC = cms.Sequence(tracksBParkSequence + tracksBParkMCMatchForTable + tracksBParkMCMatchEmbedded + tracksBParkMCTable)
+tracksBParkMC = cms.Sequence(tracksBParkSequence + tracksBParkMCMatchForTable + tracksBParkMCMatchEmbedded)
+tracksBParkMCWithTable = cms.Sequence(tracksBParkMC + tracksBParkMCTable)
 
 
