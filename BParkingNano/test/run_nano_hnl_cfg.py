@@ -139,7 +139,7 @@ process.nanoAOD_JPsiToMuMu_step  = cms.Path(process.nanoSequence + process.nanoJ
 # customisation of the process.
 if options.isMC:
     from PhysicsTools.BParkingNano.nanoBPark_cff import nanoAOD_customizeMC
-    nanoAOD_customizeMC(process, ancestor_particles=[511, 521, 531, 541, 9900015]) 
+    nanoAOD_customizeMC(process, ancestor_particles=[511, 521, 531, 541, 9900015], addTriggerMuonCollection=options.addTriggerMuonCollection) 
 
 process.endjob_step = cms.EndPath(process.endOfProcess)
 process.FEVTDEBUGHLToutput_step = cms.EndPath(process.FEVTDEBUGHLToutput)
