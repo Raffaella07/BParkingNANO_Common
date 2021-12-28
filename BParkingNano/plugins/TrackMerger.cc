@@ -50,6 +50,7 @@ public:
     do_trgmu_cleaning_(cfg.getParameter<bool>("do_trgmu_cleaning")),
     do_mu_cleaning_(cfg.getParameter<bool>("do_mu_cleaning")),
     do_el_cleaning_(cfg.getParameter<bool>("do_el_cleaning")),
+    do_trk_highpurity_(cfg.getParameter<bool>("do_trk_highpurity")),
     dcaSig_(cfg.getParameter<double>("dcaSig")),
     trkNormChiMin_(cfg.getParameter<int>("trkNormChiMin")),
     trkNormChiMax_(cfg.getParameter<int>("trkNormChiMax")) 
@@ -85,6 +86,7 @@ private:
   const bool do_trgmu_cleaning_;
   const bool do_mu_cleaning_;
   const bool do_el_cleaning_;
+  const bool do_trk_highpurity_;
   const double dcaSig_;
   const int trkNormChiMin_;
   const int trkNormChiMax_;
@@ -180,8 +182,8 @@ void TrackMerger::produce(edm::StreamID, edm::Event &evt, edm::EventSetup const 
       if (skipTrack) continue;
     }
 
-    // high purity requirment applied only in packedCands
-    if( iTrk < nTracks && !trk.trackHighPurity()) continue;
+    // high purity requirement applied only in packedCands
+    if( do_trk_highpurity_ && iTrk < nTracks && !trk.trackHighPurity()) continue;
     const reco::TransientTrack trackTT( (*trk.bestTrack()) , &(*bFieldHandle));
     //distance closest approach in x,y wrt beam spot
     std::pair<double,double> DCA = computeDCA(trackTT, beamSpot);

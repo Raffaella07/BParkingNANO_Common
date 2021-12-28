@@ -28,6 +28,8 @@ tracksBPark = cms.EDProducer('TrackMerger',
                              do_mu_cleaning = cms.bool(False),
                              # clean tracks wrt electrons (checked that not relevant for our study)
                              do_el_cleaning = cms.bool(False),
+                             # request PackedCandidate to have high purity
+                             do_trk_highpurity = cms.bool(True),
 
                              dcaSig = cms.double(-100000),
                              trkNormChiMin = cms.int32(-1),
