@@ -460,24 +460,35 @@ void BToMuLPiBuilder<Lepton>::produce(edm::StreamID, edm::Event &evt, edm::Event
         b_cand.addUserFloat("dphi_hnl_fit_hnl", dPhi_hnl_fit_hnl);
         b_cand.addUserFloat("deta_hnl_fit_hnl", dEta_hnl_fit_hnl);
 
-        // impact parameter variables (with pre-fit quantities)
-        //b_cand.addUserFloat("trg_muon_ip3d"   , fabs(trg_mu_ptr->dB(pat::Muon::PV3D))                                    );
-        //b_cand.addUserFloat("trg_muon_sip3d"  , fabs(trg_mu_ptr->dB(pat::Muon::PV3D) / trg_mu_ptr->edB(pat::Muon::PV3D)) );
-        //b_cand.addUserFloat("trg_muon_dxy"    , trg_mu_ptr->dB(pat::Muon::PV2D)                                          );
-        //b_cand.addUserFloat("trg_muon_dz"     , trg_mu_ptr->dB(pat::Muon::PVDZ)                                          );
-        
-        //if(lepton_type_ == "muon"){
-        //  b_cand.addUserFloat("sel_muon_ip3d"   , fabs(lep_ptr->dB(pat::Muon::PV3D))                                 );
-        //  b_cand.addUserFloat("sel_muon_sip3d"  , fabs(lep_ptr->dB(pat::Muon::PV3D) / lep_ptr->edB(pat::Muon::PV3D)) );
-        //  b_cand.addUserFloat("sel_muon_dxy"    , lep_ptr->dB(pat::Muon::PV2D)                                       );
-        //  b_cand.addUserFloat("sel_muon_dz"     , lep_ptr->dB(pat::Muon::PVDZ)                                       );
-        //}
+        // save information on pions 
+        b_cand.addUserFloat("pion_pt"                  , pi_ptr->pt()                             );
+        b_cand.addUserFloat("pion_eta"                 , pi_ptr->eta()                            );
+        b_cand.addUserFloat("pion_phi"                 , pi_ptr->phi()                            );
+        b_cand.addUserFloat("pion_mass"                , pi_ptr->mass()                           );
+        b_cand.addUserInt("pion_charge"                , pi_ptr->charge()                         );
+        b_cand.addUserInt("pion_pdgId"                 , pi_ptr->pdgId()                          );
+        b_cand.addUserFloat("pion_vx"                  , pi_ptr->vx()                             );
+        b_cand.addUserFloat("pion_vy"                  , pi_ptr->vy()                             );
+        b_cand.addUserFloat("pion_vz"                  , pi_ptr->vz()                             );
+        b_cand.addUserFloat("pion_dz"                  , pi_ptr->userFloat("dz")                  );
+        b_cand.addUserFloat("pion_dxy"                 , pi_ptr->userFloat("dxy")                 );
+        b_cand.addUserFloat("pion_dzS"                 , pi_ptr->userFloat("dzS")                 );
+        b_cand.addUserFloat("pion_dxyS"                , pi_ptr->userFloat("dxyS")                );
+        b_cand.addUserFloat("pion_DCASig"              , pi_ptr->userFloat("DCASig")              );
+        b_cand.addUserInt("pion_ispacked"              , pi_ptr->userInt("isPacked")              );
+        b_cand.addUserInt("pion_islost"                , pi_ptr->userInt("isLostTrk")             );
+        b_cand.addUserFloat("pion_chi2"                , pi_ptr->userFloat("chi2")                );
+        b_cand.addUserFloat("pion_normalisedChi2"      , pi_ptr->userFloat("normalisedChi2")      );
+        b_cand.addUserFloat("pion_validFraction"       , pi_ptr->userFloat("validFraction")       );
+        b_cand.addUserInt("pion_ndof"                  , pi_ptr->userInt("ndof")                  );
+        b_cand.addUserInt("pion_numberOfValidHits"     , pi_ptr->userInt("nValidHits")            );
+        b_cand.addUserInt("pion_numberOfLostHits"      , pi_ptr->userInt("numberOfLostHits")      );
+        b_cand.addUserInt("pion_numberOfValidPixelHits", pi_ptr->userInt("numberOfValidPixelHits"));
+        b_cand.addUserInt("pion_numberOfTrackerLayers" , pi_ptr->userInt("numberOfTrackerLayers") );
+        b_cand.addUserInt("pion_numberOfPixelLayers"   , pi_ptr->userInt("numberOfPixelLayers")   );
+        b_cand.addUserInt("pion_qualityIndex"          , pi_ptr->userInt("qualityIndex")          );
+        b_cand.addUserInt("pion_highPurityFlag"        , pi_ptr->userInt("highPurityFlag")        );
 
-        b_cand.addUserFloat("pion_dz"         , pi_ptr->userFloat("dz")     );
-        b_cand.addUserFloat("pion_dxy"        , pi_ptr->userFloat("dxy")    );
-        b_cand.addUserFloat("pion_dzS"        , pi_ptr->userFloat("dzS")    );
-        b_cand.addUserFloat("pion_dxyS"       , pi_ptr->userFloat("dxyS")   );
-        b_cand.addUserFloat("pion_DCASig"     , pi_ptr->userFloat("DCASig") );
 
         // post fit selection
         //if( !post_vtx_selection_(b_cand) ) continue;        
