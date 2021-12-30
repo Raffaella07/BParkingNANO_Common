@@ -68,7 +68,7 @@ BToMuMuPi = cms.EDProducer(
     ), 
     # preselection applied at the end of the builder
     extraSelection = cms.string(' & '.join([
-        'abs(userFloat("cos_theta_star_pion")) < 0.9',
+        'pt > 0', # dummy placeholder,
         ])
     ), 
 
