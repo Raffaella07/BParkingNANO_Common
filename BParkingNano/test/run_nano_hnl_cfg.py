@@ -37,9 +37,9 @@ outputFileFEVT = cms.untracked.string('_'.join(['BParkFullEvt', extension[option
 if not options.inputFiles:
     #options.inputFiles = ['/store/mc/RunIIAutumn18MiniAOD/QCD_Pt-20to30_MuEnrichedPt5_TuneCP5_13TeV_pythia8/MINIAODSIM/102X_upgrade2018_realistic_v15-v4/110000/A1ADA5DA-4A57-7945-9B9D-6FAC167A1627.root'] if options.isMC else \
     #options.inputFiles = ['/store/data/Run2018B/ParkingBPH4/MINIAOD/05May2019-v2/230000/F7E7EF39-476F-1C48-95F7-74CB5C7A542C.root'] if not options.isMC else \
-    #options.inputFiles = ['/store/data/Run2018A/ParkingBPH1/MINIAOD/05May2019-v1/280001/F7C35481-2E63-F747-B3ED-79FDF14DF1F6.root'] if not options.isMC else \
-    options.inputFiles = ['/store/data/Run2018A/ParkingBPH1/MINIAOD/05May2019-v1/20000/72A32519-B235-654F-AB7A-3ABAFD0A0818.root'] if not options.isMC else \
-                         ['file:%s' %i for i in glob('/pnfs/psi.ch/cms/trivcat/store/user/mratti/BHNLsGen/V20_emu/mass3.0_ctau184.0/step4_nj15.root')]
+    #options.inputFiles = ['/store/data/Run2018A/ParkingBPH1/MINIAOD/05May2019-v1/20000/72A32519-B235-654F-AB7A-3ABAFD0A0818.root'] if not options.isMC else \
+    options.inputFiles = ['/store/data/Run2018A/ParkingBPH3/MINIAOD/05May2019-v1/100000/75A4F19E-33BA-334F-9975-B5C8D2EB2026.root'] if not options.isMC else \
+                         ['file:%s' %i for i in glob('/pnfs/psi.ch/cms/trivcat/store/user/mratti/BHNLsGen/V20_emu/mass3.0_ctau184.0/step4_nj5*.root')]
 
 annotation = '%s nevts:%d' % (outputFileNANO, options.maxEvents)
 
