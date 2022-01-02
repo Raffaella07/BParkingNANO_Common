@@ -307,7 +307,7 @@ Bool_t BToKMuMuDumper::Process(Long64_t entry)
       the_ctrl_k_pt = BToKMuMu_fit_k_pt[selectedCandIdx_ctrl];
       the_ctrl_k_eta = BToKMuMu_fit_k_eta[selectedCandIdx_ctrl];
       the_ctrl_k_phi = BToKMuMu_fit_k_phi[selectedCandIdx_ctrl];
-      the_ctrl_k_charge = ProbeTracks_charge[BToKMuMu_kIdx[selectedCandIdx_ctrl]];
+      the_ctrl_k_charge = BToKMuMu_k_charge[selectedCandIdx_ctrl];
       the_ctrl_k_iso03 = BToKMuMu_k_iso03[selectedCandIdx_ctrl];
       the_ctrl_k_iso03_close = BToKMuMu_k_iso03_close[selectedCandIdx_ctrl];
       the_ctrl_k_iso04 = BToKMuMu_k_iso04[selectedCandIdx_ctrl];
@@ -391,7 +391,7 @@ Bool_t BToKMuMuDumper::Process(Long64_t entry)
             : -99;
 
       // trigger scale factor
-      the_ctrl_weight_hlt = isMC ? getTriggerScaleFactor(the_ctrl_l1_pt, fabs(the_ctrl_l1_eta)) : 1.;
+      the_ctrl_weight_hlt = isMC ? getTriggerScaleFactor("/t3home/anlyon/BHNL/BHNLNano/CMSSW_10_2_15/src/PhysicsTools/TagAndProbe/test/results/tag_and_probe_v2_BToJPsiKstar_V0_tag_fired_DST_DoubleMu1_A1_6_v1/scaleFactor_results_cat_pt_eta_fit.root", the_ctrl_l1_pt, fabs(the_ctrl_l1_eta)) : 1.;
 
       control_tree->Fill();
     } // l1 is triggering
