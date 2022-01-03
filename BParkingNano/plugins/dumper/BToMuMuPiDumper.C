@@ -258,16 +258,17 @@ void BToMuMuPiDumper::SlaveBegin(TTree * /*tree*/)
   //signal_tree->Branch("pi_trgmu_dr", &the_sig_pi_trgmu_dr);
   //signal_tree->Branch("pi_ismatchedtomuon", &the_sig_pi_ismatchedtomuon);
   signal_tree->Branch("pi_chi2", &the_sig_pi_chi2);
-  signal_tree->Branch("pi_normalisedChi2", &the_sig_pi_normalisedChi2);
-  signal_tree->Branch("pi_validFraction", &the_sig_pi_validFraction);
+  signal_tree->Branch("pi_normalisedchi2", &the_sig_pi_normalisedChi2);
+  signal_tree->Branch("pi_validfraction", &the_sig_pi_validFraction);
   signal_tree->Branch("pi_ndof", &the_sig_pi_ndof);
-  signal_tree->Branch("pi_numberOfValidHits", &the_sig_pi_numberOfValidHits);
-  signal_tree->Branch("pi_numberOfLostHits", &the_sig_pi_numberOfLostHits);
-  signal_tree->Branch("pi_numberOfValidPixelHits", &the_sig_pi_numberOfValidPixelHits);
-  signal_tree->Branch("pi_numberOfTrackerLayers", &the_sig_pi_numberOfTrackerLayers);
-  signal_tree->Branch("pi_numberOfPixelLayers", &the_sig_pi_numberOfPixelLayers);
-  signal_tree->Branch("pi_qualityIndex", &the_sig_pi_qualityIndex);
-  signal_tree->Branch("pi_highPurityFlag", &the_sig_pi_highPurityFlag);
+  signal_tree->Branch("pi_numberofvalidhits", &the_sig_pi_numberOfValidHits);
+  signal_tree->Branch("pi_numberoflosthits", &the_sig_pi_numberOfLostHits);
+  signal_tree->Branch("pi_numberofvalidpixelhits", &the_sig_pi_numberOfValidPixelHits);
+  signal_tree->Branch("pi_numberoftrackerlayers", &the_sig_pi_numberOfTrackerLayers);
+  signal_tree->Branch("pi_numberofpixellayers", &the_sig_pi_numberOfPixelLayers);
+  signal_tree->Branch("pi_qualityindex", &the_sig_pi_qualityIndex);
+  signal_tree->Branch("pi_highpurityflag", &the_sig_pi_highPurityFlag);
+  signal_tree->Branch("pi_packedcandhashighpurity", &the_sig_pi_packedcandhashighpurity);
 
   //signal_tree->Branch("dimu_mass", &the_sig_dimu_mass);
   //signal_tree->Branch("dimu_pt", &the_sig_dimu_pt);
@@ -678,7 +679,13 @@ Bool_t BToMuMuPiDumper::Process(Long64_t entry)
       the_sig_pi_numberOfPixelLayers = BToMuMuPi_pi_numberOfPixelLayers[selectedCandIdx_sig];
       the_sig_pi_qualityIndex = BToMuMuPi_pi_qualityIndex[selectedCandIdx_sig];
       the_sig_pi_highPurityFlag = BToMuMuPi_pi_highPurityFlag[selectedCandIdx_sig];
-      // add high purity flag for PackedPFCandidates only
+      if(the_sig_pi_ispacked && the_sig_pi_highPurityFlag){
+        the_sig_pi_packedcandhashighpurity = 1;
+      }
+      else{
+        the_sig_pi_packedcandhashighpurity = 0;
+      }
+      std::cout << the_sig_pi_ispacked << " " << the_sig_pi_highPurityFlag << " " << the_sig_pi_packedcandhashighpurity << std::endl;
 
       the_sig_trgmu_mu_mass = BToMuMuPi_trgmu_mu_mass[selectedCandIdx_sig];
       the_sig_trgmu_mu_pt = BToMuMuPi_trgmu_mu_pt[selectedCandIdx_sig];
