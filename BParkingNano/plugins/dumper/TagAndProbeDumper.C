@@ -68,9 +68,9 @@ void TagAndProbeDumper::SlaveBegin(TTree * /*tree*/)
   }
   my_file->cd();
 
-  //if(isMC){
-  //  Pileup_nPU = {fReader, "Pileup_nPU"};
-  //}
+  if(isMC){
+    Pileup_nTrueInt = {fReader, "Pileup_nTrueInt"};
+  }
 
   tree = new TTree("tree", "tree");
   tree->Branch("pt", &the_pt);
@@ -179,9 +179,13 @@ void TagAndProbeDumper::SlaveBegin(TTree * /*tree*/)
 
   tree->Branch("pv_npvs", &the_pv_npvs);
 
-  tree->Branch("weight_hlt", &the_weight_hlt);
-  tree->Branch("weight_pu", &the_weight_pu);
-  tree->Branch("weight_pu_npu", &the_weight_pu_npu);
+  tree->Branch("weight_hlt_A1", &the_weight_hlt_A1);
+  tree->Branch("weight_hlt_A1_6", &the_weight_hlt_A1_6);
+  tree->Branch("weight_pu_A", &the_weight_pu_A);
+  tree->Branch("weight_pu_B", &the_weight_pu_B);
+  tree->Branch("weight_pu_C", &the_weight_pu_C);
+  tree->Branch("weight_pu_D", &the_weight_pu_D);
+  tree->Branch("weight_pu_tot", &the_weight_pu_tot);
 
 }
 
@@ -325,9 +329,14 @@ Bool_t TagAndProbeDumper::Process(Long64_t entry)
 
   the_pv_npvs = *PV_npvs;
 
-  //the_weight_hlt = isMC ? getTriggerScaleFactor(the_tag_pt, fabs(the_tag_eta)) : 1.;
-  //the_weight_pu = isMC ? getPUWeight(*PV_npvs) : 1.;
-  //the_weight_pu_npu = isMC ? getPUWeight(*Pileup_nPU) : 1.;
+  // weights
+  the_weight_hlt_A1 = isMC ? getTriggerScaleFactor("/t3home/anlyon/BHNL/BHNLNano/CMSSW_10_2_15/src/PhysicsTools/TagAndProbe/test/results/tag_and_probe_v2_BToJPsiKstar_V0_tag_fired_DST_DoubleMu1_A1_v1/scaleFactor_results_cat_pt_eta_fit.root", the_tag_pt, fabs(the_tag_eta)) : 1.;
+  the_weight_hlt_A1_6 = isMC ? getTriggerScaleFactor("/t3home/anlyon/BHNL/BHNLNano/CMSSW_10_2_15/src/PhysicsTools/TagAndProbe/test/results/tag_and_probe_v2_BToJPsiKstar_V0_tag_fired_DST_DoubleMu1_A1_6_v1/scaleFactor_results_cat_pt_eta_fit.root", the_tag_pt, fabs(the_tag_eta)) : 1.;
+  the_weight_pu_A = isMC ? getPUWeight("pileup_weight_dataA_mcAutumn18.root", *Pileup_nTrueInt) : 1.;
+  the_weight_pu_B = isMC ? getPUWeight("pileup_weight_dataB_mcAutumn18.root", *Pileup_nTrueInt) : 1.;
+  the_weight_pu_C = isMC ? getPUWeight("pileup_weight_dataC_mcAutumn18.root", *Pileup_nTrueInt) : 1.;
+  the_weight_pu_D = isMC ? getPUWeight("pileup_weight_dataD_mcAutumn18.root", *Pileup_nTrueInt) : 1.;
+  the_weight_pu_tot = isMC ? getPUWeight("pileup_weight_datatot_mcAutumn18.root", *Pileup_nTrueInt) : 1.;
 
   tree->Fill();
 
