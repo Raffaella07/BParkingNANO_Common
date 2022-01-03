@@ -77,6 +77,10 @@ void BToKMuMuDumper::SlaveBegin(TTree * /*tree*/)
   }
   my_file->cd();
 
+  if(isMC){
+    Pileup_nTrueInt = {fReader, "Pileup_nTrueInt"};
+  }
+
   // getting the control tree ready
   control_tree = new TTree("control_tree", "control_tree");
 
@@ -174,7 +178,14 @@ void BToKMuMuDumper::SlaveBegin(TTree * /*tree*/)
 
   control_tree->Branch("pv_npvs", &the_pv_npvs);
 
-  control_tree->Branch("weight_hlt", &the_ctrl_weight_hlt);
+  control_tree->Branch("weight_hlt_A1", &the_ctrl_weight_hlt_A1);
+  control_tree->Branch("weight_hlt_A1_6", &the_ctrl_weight_hlt_A1_6);
+
+  control_tree->Branch("weight_pu_sig_A", &the_ctrl_weight_pu_sig_A);
+  control_tree->Branch("weight_pu_sig_B", &the_ctrl_weight_pu_sig_B);
+  control_tree->Branch("weight_pu_sig_C", &the_ctrl_weight_pu_sig_C);
+  control_tree->Branch("weight_pu_sig_D", &the_ctrl_weight_pu_sig_D);
+  control_tree->Branch("weight_pu_sig_tot", &the_ctrl_weight_pu_sig_tot);
 
   control_tree->Branch("hlt_mu7_ip4", &the_hlt_mu7_ip4);
   control_tree->Branch("hlt_mu8_ip6", &the_hlt_mu8_ip6);
@@ -391,7 +402,15 @@ Bool_t BToKMuMuDumper::Process(Long64_t entry)
             : -99;
 
       // trigger scale factor
-      the_ctrl_weight_hlt = isMC ? getTriggerScaleFactor("/t3home/anlyon/BHNL/BHNLNano/CMSSW_10_2_15/src/PhysicsTools/TagAndProbe/test/results/tag_and_probe_v2_BToJPsiKstar_V0_tag_fired_DST_DoubleMu1_A1_6_v1/scaleFactor_results_cat_pt_eta_fit.root", the_ctrl_l1_pt, fabs(the_ctrl_l1_eta)) : 1.;
+      the_ctrl_weight_hlt_A1 = isMC ? getTriggerScaleFactor("/t3home/anlyon/BHNL/BHNLNano/CMSSW_10_2_15/src/PhysicsTools/TagAndProbe/test/results/tag_and_probe_v2_BToJPsiKstar_V0_tag_fired_DST_DoubleMu1_A1_v1/scaleFactor_results_cat_pt_eta_fit.root", the_ctrl_l1_pt, fabs(the_ctrl_l1_eta)) : 1.;
+      the_ctrl_weight_hlt_A1_6 = isMC ? getTriggerScaleFactor("/t3home/anlyon/BHNL/BHNLNano/CMSSW_10_2_15/src/PhysicsTools/TagAndProbe/test/results/tag_and_probe_v2_BToJPsiKstar_V0_tag_fired_DST_DoubleMu1_A1_6_v1/scaleFactor_results_cat_pt_eta_fit.root", the_ctrl_l1_pt, fabs(the_ctrl_l1_eta)) : 1.;
+
+      // pile-up weights
+      the_ctrl_weight_pu_sig_A = isMC ? getPUWeight("pileup_weight_dataA_sigAug21.root", *Pileup_nTrueInt) : 1.;
+      the_ctrl_weight_pu_sig_B = isMC ? getPUWeight("pileup_weight_dataB_sigAug21.root", *Pileup_nTrueInt) : 1.;
+      the_ctrl_weight_pu_sig_C = isMC ? getPUWeight("pileup_weight_dataC_sigAug21.root", *Pileup_nTrueInt) : 1.;
+      the_ctrl_weight_pu_sig_D = isMC ? getPUWeight("pileup_weight_dataD_sigAug21.root", *Pileup_nTrueInt) : 1.;
+      the_ctrl_weight_pu_sig_tot = isMC ? getPUWeight("pileup_weight_datatot_sigAug21.root", *Pileup_nTrueInt) : 1.;
 
       control_tree->Fill();
     } // l1 is triggering

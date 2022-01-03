@@ -290,7 +290,7 @@ public :
    TTreeReaderArray<Float_t> SV_x = {fReader, "SV_x"};
    TTreeReaderArray<Float_t> SV_y = {fReader, "SV_y"};
    TTreeReaderArray<Float_t> SV_z = {fReader, "SV_z"};
-
+   TTreeReaderValue<Float_t> Pileup_nTrueInt = {fReader, "PV_ndof"};
 
    BToKMuMuDumper(TTree * /*tree*/ =0) { }
    virtual ~BToKMuMuDumper() { }
@@ -428,7 +428,14 @@ public :
    Float_t the_ctrl_matched_b_eta = -99.;
    Float_t the_ctrl_matched_b_y = -99.;
 
-   Float_t the_ctrl_weight_hlt = -99.;
+   Float_t the_ctrl_weight_hlt_A1 = -99.;
+   Float_t the_ctrl_weight_hlt_A1_6 = -99.;
+
+   Float_t the_ctrl_weight_pu_sig_A = -99.;
+   Float_t the_ctrl_weight_pu_sig_B = -99.;
+   Float_t the_ctrl_weight_pu_sig_C = -99.;
+   Float_t the_ctrl_weight_pu_sig_D = -99.;
+   Float_t the_ctrl_weight_pu_sig_tot = -99.;
 
    // histograms
    TH1F* ctrlhist_ncand_perevent;

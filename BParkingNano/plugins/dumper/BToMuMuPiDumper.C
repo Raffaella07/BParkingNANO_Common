@@ -357,6 +357,11 @@ void BToMuMuPiDumper::SlaveBegin(TTree * /*tree*/)
   signal_tree->Branch("weight_pu_qcd_C", &the_sig_weight_pu_qcd_C);
   signal_tree->Branch("weight_pu_qcd_D", &the_sig_weight_pu_qcd_D);
   signal_tree->Branch("weight_pu_qcd_tot", &the_sig_weight_pu_qcd_tot);
+  signal_tree->Branch("weight_pu_sig_A", &the_sig_weight_pu_sig_A);
+  signal_tree->Branch("weight_pu_sig_B", &the_sig_weight_pu_sig_B);
+  signal_tree->Branch("weight_pu_sig_C", &the_sig_weight_pu_sig_C);
+  signal_tree->Branch("weight_pu_sig_D", &the_sig_weight_pu_sig_D);
+  signal_tree->Branch("weight_pu_sig_tot", &the_sig_weight_pu_sig_tot);
 
   if(isMC){
     signal_tree->Branch("gen_trgmu_mu_lxy", &the_gen_trgmu_mu_lxy);
@@ -857,6 +862,12 @@ Bool_t BToMuMuPiDumper::Process(Long64_t entry)
       the_sig_weight_pu_qcd_C = isMC ? getPUWeight("pileup_weight_dataC_mcAutumn18.root", *Pileup_nTrueInt) : 1.;
       the_sig_weight_pu_qcd_D = isMC ? getPUWeight("pileup_weight_dataD_mcAutumn18.root", *Pileup_nTrueInt) : 1.;
       the_sig_weight_pu_qcd_tot = isMC ? getPUWeight("pileup_weight_datatot_mcAutumn18.root", *Pileup_nTrueInt) : 1.;
+
+      the_sig_weight_pu_sig_A = isMC ? getPUWeight("pileup_weight_dataA_sigAug21.root", *Pileup_nTrueInt) : 1.;
+      the_sig_weight_pu_sig_B = isMC ? getPUWeight("pileup_weight_dataB_sigAug21.root", *Pileup_nTrueInt) : 1.;
+      the_sig_weight_pu_sig_C = isMC ? getPUWeight("pileup_weight_dataC_sigAug21.root", *Pileup_nTrueInt) : 1.;
+      the_sig_weight_pu_sig_D = isMC ? getPUWeight("pileup_weight_dataD_sigAug21.root", *Pileup_nTrueInt) : 1.;
+      the_sig_weight_pu_sig_tot = isMC ? getPUWeight("pileup_weight_datatot_sigAug21.root", *Pileup_nTrueInt) : 1.;
       
       signal_tree->Fill();
     } // end sound index
