@@ -297,13 +297,17 @@ class NanoProdManager(NanoTools):
             n_unprocessed_perchunk += 1
             continue
 
-          branchname = ''
-          if self.dosignal: branchname = 'nBToMuMuPi'
-          elif self.docontrol: branchname = 'nBToKMuMu'
-          elif self.dohnl: branchname = 'nHNLToMuPi'
-          elif self.dotageprobe: branchname = 'nJPsiToMuMu'
-          extra_cond = NanoTools.checkLocalFile(self, file_, cond=True, branch_check=True, branchname=branchname) if self.docheckfile else 'True'
-          #if NanoTools.checkFileExists(self, file_) and NanoTools.checkLocalFile(self, file_, cond=True): # successfull job
+          if self.docheckfile:
+            branchnames = []
+            if self.dosignal: branchnames.append('nBToMuMuPi')
+            if self.docontrol: branchnames.append('nBToKMuMu')
+            if self.dohnl: branchnames.append('nHNLToMuPi')
+            if self.dotageprobe: branchnames.append('nJPsiToMuMu')
+            for branchname in branchnames:
+              extra_cond = NanoTools.checkLocalFile(self, file_, cond=True, branch_check=True, branchname=branchname)
+              if not extra_cond: break
+          else: extra_cond = 'True'
+
           if NanoTools.checkFileExists(self, file_) and extra_cond: # successfull job
             n_good_perchunk += 1
 
