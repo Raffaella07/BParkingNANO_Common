@@ -268,6 +268,16 @@ public :
    TTreeReaderArray<Int_t> Muon_fired_HLT_Mu9_IP4 = {fReader, "Muon_fired_HLT_Mu9_IP4"};
    TTreeReaderArray<Int_t> Muon_fired_HLT_Mu9_IP5 = {fReader, "Muon_fired_HLT_Mu9_IP5"};
    TTreeReaderArray<Int_t> Muon_fired_HLT_Mu9_IP6 = {fReader, "Muon_fired_HLT_Mu9_IP6"};
+   TTreeReaderArray<Int_t> Muon_prescale_HLT_Mu10p5_IP3p5 = {fReader, "Muon_prescale_HLT_Mu10p5_IP3p5"};
+   TTreeReaderArray<Int_t> Muon_prescale_HLT_Mu12_IP6 = {fReader, "Muon_prescale_HLT_Mu12_IP6"};
+   TTreeReaderArray<Int_t> Muon_prescale_HLT_Mu7_IP4 = {fReader, "Muon_prescale_HLT_Mu7_IP4"};
+   TTreeReaderArray<Int_t> Muon_prescale_HLT_Mu8_IP3 = {fReader, "Muon_prescale_HLT_Mu8_IP3"};
+   TTreeReaderArray<Int_t> Muon_prescale_HLT_Mu8_IP5 = {fReader, "Muon_prescale_HLT_Mu8_IP5"};
+   TTreeReaderArray<Int_t> Muon_prescale_HLT_Mu8_IP6 = {fReader, "Muon_prescale_HLT_Mu8_IP6"};
+   TTreeReaderArray<Int_t> Muon_prescale_HLT_Mu8p5_IP3p5 = {fReader, "Muon_prescale_HLT_Mu8p5_IP3p5"};
+   TTreeReaderArray<Int_t> Muon_prescale_HLT_Mu9_IP4 = {fReader, "Muon_prescale_HLT_Mu9_IP4"};
+   TTreeReaderArray<Int_t> Muon_prescale_HLT_Mu9_IP5 = {fReader, "Muon_prescale_HLT_Mu9_IP5"};
+   TTreeReaderArray<Int_t> Muon_prescale_HLT_Mu9_IP6 = {fReader, "Muon_prescale_HLT_Mu9_IP6"};
    TTreeReaderArray<Int_t> Muon_isTriggering = {fReader, "Muon_isTriggering"};
    TTreeReaderArray<Int_t> Muon_isTriggeringBPark = {fReader, "Muon_isTriggeringBPark"};
    TTreeReaderArray<Int_t> Muon_looseId = {fReader, "Muon_looseId"};
@@ -526,6 +536,16 @@ public :
    Int_t the_sig_trgmu_fired_hlt_mu9_ip4 = -99;
    Int_t the_sig_trgmu_fired_hlt_mu10p5_ip3p5 = -99;
    Int_t the_sig_trgmu_fired_hlt_mu12_ip6 = -99;
+   Int_t the_sig_trgmu_prescale_hlt_mu7_ip4 = -99;
+   Int_t the_sig_trgmu_prescale_hlt_mu8_ip6 = -99;
+   Int_t the_sig_trgmu_prescale_hlt_mu8_ip5 = -99;
+   Int_t the_sig_trgmu_prescale_hlt_mu8_ip3 = -99;
+   Int_t the_sig_trgmu_prescale_hlt_mu8p5_ip3p5 = -99;
+   Int_t the_sig_trgmu_prescale_hlt_mu9_ip6 = -99;
+   Int_t the_sig_trgmu_prescale_hlt_mu9_ip5 = -99;
+   Int_t the_sig_trgmu_prescale_hlt_mu9_ip4 = -99;
+   Int_t the_sig_trgmu_prescale_hlt_mu10p5_ip3p5 = -99;
+   Int_t the_sig_trgmu_prescale_hlt_mu12_ip6 = -99;
 
    Float_t the_sig_mu_pt = -99.;
    Float_t the_sig_mu_eta = -99.;

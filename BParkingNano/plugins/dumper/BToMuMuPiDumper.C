@@ -181,6 +181,16 @@ void BToMuMuPiDumper::SlaveBegin(TTree * /*tree*/)
   signal_tree->Branch("trgmu_fired_hlt_mu9_ip6", &the_sig_trgmu_fired_hlt_mu9_ip6);
   signal_tree->Branch("trgmu_fired_hlt_mu10p5_ip3p5", &the_sig_trgmu_fired_hlt_mu10p5_ip3p5);
   signal_tree->Branch("trgmu_fired_hlt_mu12_ip6", &the_sig_trgmu_fired_hlt_mu12_ip6);
+  signal_tree->Branch("trgmu_prescale_hlt_mu7_ip4", &the_sig_trgmu_prescale_hlt_mu7_ip4);
+  signal_tree->Branch("trgmu_prescale_hlt_mu8_ip3", &the_sig_trgmu_prescale_hlt_mu8_ip3);
+  signal_tree->Branch("trgmu_prescale_hlt_mu8_ip5", &the_sig_trgmu_prescale_hlt_mu8_ip5);
+  signal_tree->Branch("trgmu_prescale_hlt_mu8_ip6", &the_sig_trgmu_prescale_hlt_mu8_ip6);
+  signal_tree->Branch("trgmu_prescale_hlt_mu8p5_ip3p5", &the_sig_trgmu_prescale_hlt_mu8p5_ip3p5);
+  signal_tree->Branch("trgmu_prescale_hlt_mu9_ip4", &the_sig_trgmu_prescale_hlt_mu9_ip4);
+  signal_tree->Branch("trgmu_prescale_hlt_mu9_ip5", &the_sig_trgmu_prescale_hlt_mu9_ip5);
+  signal_tree->Branch("trgmu_prescale_hlt_mu9_ip6", &the_sig_trgmu_prescale_hlt_mu9_ip6);
+  signal_tree->Branch("trgmu_prescale_hlt_mu10p5_ip3p5", &the_sig_trgmu_prescale_hlt_mu10p5_ip3p5);
+  signal_tree->Branch("trgmu_prescale_hlt_mu12_ip6", &the_sig_trgmu_prescale_hlt_mu12_ip6);
 
   signal_tree->Branch("mu_pt", &the_sig_mu_pt);
   signal_tree->Branch("mu_eta", &the_sig_mu_eta);
@@ -602,6 +612,16 @@ Bool_t BToMuMuPiDumper::Process(Long64_t entry)
       the_sig_trgmu_fired_hlt_mu9_ip6 = Muon_fired_HLT_Mu9_IP6[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
       the_sig_trgmu_fired_hlt_mu10p5_ip3p5 = Muon_fired_HLT_Mu10p5_IP3p5[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
       the_sig_trgmu_fired_hlt_mu12_ip6 = Muon_fired_HLT_Mu12_IP6[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
+      the_sig_trgmu_prescale_hlt_mu7_ip4 = Muon_prescale_HLT_Mu7_IP4[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
+      the_sig_trgmu_prescale_hlt_mu8_ip3 = Muon_prescale_HLT_Mu8_IP3[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
+      the_sig_trgmu_prescale_hlt_mu8_ip5 = Muon_prescale_HLT_Mu8_IP5[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
+      the_sig_trgmu_prescale_hlt_mu8_ip6 = Muon_prescale_HLT_Mu8_IP6[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
+      the_sig_trgmu_prescale_hlt_mu8p5_ip3p5 = Muon_prescale_HLT_Mu8p5_IP3p5[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
+      the_sig_trgmu_prescale_hlt_mu9_ip4 = Muon_prescale_HLT_Mu9_IP4[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
+      the_sig_trgmu_prescale_hlt_mu9_ip5 = Muon_prescale_HLT_Mu9_IP5[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
+      the_sig_trgmu_prescale_hlt_mu9_ip6 = Muon_prescale_HLT_Mu9_IP6[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
+      the_sig_trgmu_prescale_hlt_mu10p5_ip3p5 = Muon_prescale_HLT_Mu10p5_IP3p5[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
+      the_sig_trgmu_prescale_hlt_mu12_ip6 = Muon_prescale_HLT_Mu12_IP6[BToMuMuPi_trg_mu_idx[selectedCandIdx_sig]];
 
       the_sig_mu_pt = BToMuMuPi_fit_mu_pt[selectedCandIdx_sig];
       the_sig_mu_eta = BToMuMuPi_fit_mu_eta[selectedCandIdx_sig];
