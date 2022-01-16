@@ -561,6 +561,8 @@ public :
    Int_t the_sig_mu_pfisoid = -99;
    Int_t the_sig_mu_trkisoid = -99;
    Int_t the_sig_mu_triggerlooseid = -99;
+   Int_t the_sig_mu_whnlid = -99;
+   Int_t the_sig_mu_customisedid = -99;
    Int_t the_sig_mu_istriggering = -99;
    Int_t the_sig_mu_isslimmed = -99;
    Int_t the_sig_mu_isdsa = -99;

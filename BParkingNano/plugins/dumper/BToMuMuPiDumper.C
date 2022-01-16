@@ -221,6 +221,8 @@ void BToMuMuPiDumper::SlaveBegin(TTree * /*tree*/)
   signal_tree->Branch("mu_pfisoid", &the_sig_mu_pfisoid);
   signal_tree->Branch("mu_trkisoid", &the_sig_mu_trkisoid);
   signal_tree->Branch("mu_triggerlooseid", &the_sig_mu_triggerlooseid);
+  signal_tree->Branch("mu_whnlid", &the_sig_mu_whnlid);
+  signal_tree->Branch("mu_customisedid", &the_sig_mu_customisedid);
   signal_tree->Branch("mu_istriggering", &the_sig_mu_istriggering);
   signal_tree->Branch("mu_isslimmed", &the_sig_mu_isslimmed);
   signal_tree->Branch("mu_isdsa", &the_sig_mu_isdsa);
@@ -654,6 +656,23 @@ Bool_t BToMuMuPiDumper::Process(Long64_t entry)
       the_sig_mu_numberoftrackerlayers = Muon_numberOfTrackerLayers[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
       the_sig_mu_numberofpixellayers = Muon_numberOfPixelLayers[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
       the_sig_mu_numberofstations = Muon_numberOfStations[BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]];
+      // add customised muon ids
+      Bool_t isgoodGlobalMuon = 0;
+      if(the_sig_mu_isglobalmuon==1 && the_sig_mu_localpositionchi2<12 && the_sig_mu_kinkfinderchi2<20) isgoodGlobalMuon = 1;
+      if(the_sig_mu_looseid==1 && ((isgoodGlobalMuon==1 && the_sig_mu_segmentcompatibility>0.303) || (isgoodGlobalMuon==0 && the_sig_mu_segmentcompatibility>0.451))){
+        the_sig_mu_whnlid = 1;
+      }
+      else{
+        the_sig_mu_whnlid = 0;
+      }
+
+      if(the_sig_mu_looseid==1 && the_sig_mu_intimemuon==1 && the_sig_mu_trackerhighpurityflag==1 && ((the_sig_mu_isglobalmuon==1 && the_sig_mu_numberofstations>0 && the_sig_mu_numberoftrackerlayers<18) || (the_sig_mu_isglobalmuon!=1 && the_sig_mu_calocompatibility>0.05 && the_sig_mu_numberoftrackerlayers>6 && the_sig_mu_numberoftrackerlayers<16 && the_sig_mu_numberofvalidpixelhits<6))){
+        the_sig_mu_customisedid = 1;
+      }
+      else{
+        the_sig_mu_customisedid = 0;
+      }
+
 
       the_sig_pi_pt = BToMuMuPi_fit_pi_pt[selectedCandIdx_sig];
       the_sig_pi_eta = BToMuMuPi_fit_pi_eta[selectedCandIdx_sig];
@@ -685,7 +704,6 @@ Bool_t BToMuMuPiDumper::Process(Long64_t entry)
       else{
         the_sig_pi_packedcandhashighpurity = 0;
       }
-      std::cout << the_sig_pi_ispacked << " " << the_sig_pi_highPurityFlag << " " << the_sig_pi_packedcandhashighpurity << std::endl;
 
       the_sig_trgmu_mu_mass = BToMuMuPi_trgmu_mu_mass[selectedCandIdx_sig];
       the_sig_trgmu_mu_pt = BToMuMuPi_trgmu_mu_pt[selectedCandIdx_sig];
