@@ -631,6 +631,9 @@ public :
    Int_t the_sig_pi_qualityIndex = -99;
    Int_t the_sig_pi_highPurityFlag = -99;
    Int_t the_sig_pi_packedcandhashighpurity = -99;
+   Int_t the_sig_pi_matchedtomuon_loose = -99;
+   Int_t the_sig_pi_matchedtomuon_medium = -99;
+   Int_t the_sig_pi_matchedtomuon_tight = -99;
 
    Float_t the_sig_trgmu_mu_mass = -99.;
    Float_t the_sig_trgmu_mu_pt = -99.;

@@ -33,6 +33,7 @@
 #include <TSystem.h>
 #include "Math/Vector4D.h"
 #include "Math/Vector4Dfwd.h"
+#include "DataFormats/Math/interface/deltaR.h"
 #include "utils.C"
 
 
@@ -281,6 +282,9 @@ void BToMuMuPiDumper::SlaveBegin(TTree * /*tree*/)
   signal_tree->Branch("pi_qualityindex", &the_sig_pi_qualityIndex);
   signal_tree->Branch("pi_highpurityflag", &the_sig_pi_highPurityFlag);
   signal_tree->Branch("pi_packedcandhashighpurity", &the_sig_pi_packedcandhashighpurity);
+  signal_tree->Branch("pi_matchedtomuon_loose", &the_sig_pi_matchedtomuon_loose);
+  signal_tree->Branch("pi_matchedtomuon_medium", &the_sig_pi_matchedtomuon_medium);
+  signal_tree->Branch("pi_matchedtomuon_tight", &the_sig_pi_matchedtomuon_tight);
 
   //signal_tree->Branch("dimu_mass", &the_sig_dimu_mass);
   //signal_tree->Branch("dimu_pt", &the_sig_dimu_pt);
@@ -724,6 +728,33 @@ Bool_t BToMuMuPiDumper::Process(Long64_t entry)
       else{
         the_sig_pi_packedcandhashighpurity = 0;
       }
+
+      // track to muon matching
+      bool pi_matchedtomuon_loose = 0;
+      bool pi_matchedtomuon_medium = 0;
+      bool pi_matchedtomuon_tight = 0;
+      for(unsigned int iMuon(0); iMuon<*nMuon; ++iMuon){
+        // do not consider muons in the signal final state
+        if(iMuon == BToMuMuPi_trg_mu_idx[selectedCandIdx_sig] || iMuon == BToMuMuPi_sel_mu_idx[selectedCandIdx_sig]) continue;
+        // compute the deltaR and deltaPtRel between the given track and the muon (unfitted values)
+        float deltaR_track_muon = reco::deltaR(Muon_eta[iMuon], Muon_phi[iMuon], BToMuMuPi_pi_eta[selectedCandIdx_sig], BToMuMuPi_pi_phi[selectedCandIdx_sig]);
+        float deltaPtRel = fabs(Muon_pt[iMuon] - BToMuMuPi_pi_pt[selectedCandIdx_sig]) / BToMuMuPi_pi_pt[selectedCandIdx_sig];
+
+        // match if any muon fulfills requirements
+        if(deltaR_track_muon < 0.3 && deltaPtRel < 1.){
+          pi_matchedtomuon_loose = 1;
+        }
+        if(deltaR_track_muon < 0.3 && deltaPtRel < 0.3){
+          pi_matchedtomuon_medium = 1;
+        }
+        if(deltaR_track_muon < 0.1 && deltaPtRel < 0.3){
+          pi_matchedtomuon_tight = 1;
+        }
+      }
+      the_sig_pi_matchedtomuon_loose = pi_matchedtomuon_loose;
+      the_sig_pi_matchedtomuon_medium = pi_matchedtomuon_medium;
+      the_sig_pi_matchedtomuon_tight = pi_matchedtomuon_tight;
+
 
       the_sig_trgmu_mu_mass = BToMuMuPi_trgmu_mu_mass[selectedCandIdx_sig];
       the_sig_trgmu_mu_pt = BToMuMuPi_trgmu_mu_pt[selectedCandIdx_sig];
