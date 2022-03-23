@@ -64,7 +64,6 @@ class NanoProdManager(NanoTools):
     self.dofetchtime  = vars(opt)['dofetchtime'] 
     self.docheckfile  = vars(opt)['docheckfile'] 
     self.doresubmit   = vars(opt)['doresubmit'] 
-    self.copylocal = True #TODO
 
 
   def isJobFinished(self, logfile):
@@ -170,8 +169,7 @@ class NanoProdManager(NanoTools):
     outputdir = failed_files[0][0:failed_files[0].find('bparknano')]
     filelist  = self.writeFileList(chunk, failed_files, label) 
 
-    #command = 'sbatch -p standard --account=t3 -o {ld}/nanostep_nj%a.log -e {ld}/nanostep_nj%a.log --job-name=nanostep_nj%a_{pl} --array {ar} --time=03:00:00 submitter.sh {outdir} {usr} {pl} {tag} {isMC} {rmt} {lst} 1 {dosig} {doctrl} {dohnl} {dotep}'.format(
-    command = 'sbatch -p standard --account=t3 -o {ld}/nanostep_nj%a.log -e {ld}/nanostep_nj%a.log --job-name=nanostep_nj%a_{pl} --array {ar} --time=03:00:00 submitter.sh {outdir} {usr} {pl} {tag} {isMC} {rmt} {lst} 1 {dosig} {doctrl} {dohnl} {dotep} {copylcl}'.format(
+    command = 'sbatch -p standard --account=t3 -o {ld}/nanostep_nj%a.log -e {ld}/nanostep_nj%a.log --job-name=nanostep_nj%a_{pl} --array {ar} --time=03:00:00 submitter.sh {outdir} {usr} {pl} {tag} {isMC} {rmt} {lst} 1 {dosig} {doctrl} {dohnl} {dotep}'.format(
     #command = 'sbatch -p short --account=t3 -o {ld}/nanostep_nj%a.log -e {ld}/nanostep_nj%a.log --job-name=nanostep_nj%a_{pl} --array {ar} submitter.sh {outdir} {usr} {pl} {tag} {isMC} {rmt} {lst} 1 {dosig} {doctrl} {dohnl} {dotep}'.format(
       ld      = logdir,
       pl      = label,
@@ -186,10 +184,8 @@ class NanoProdManager(NanoTools):
       doctrl    = 1 if self.docontrol else 0, 
       dohnl     = 1 if self.dohnl else 0, 
       dotep     = 1 if self.dotageprobe else 0, 
-      copylcl   = 1 if self.copylocal else 0,
     )
 
-    print command
     os.system(command)
 
 
@@ -254,7 +250,6 @@ class NanoProdManager(NanoTools):
 
       for chunk_ in chunks:
         if self.dofullreport: print '\n -- {} --'.format(chunk_[chunk_.rfind('/')+1:len(chunk_)])
-        #if chunk_[chunk_.rfind('/')+1:len(chunk_)] != 'Chunk10_n500': continue
 
         failed_files = []
 
