@@ -14,6 +14,7 @@
 # ${10}: docontrol
 # ${11}: dohnl
 # ${12}: doTagAndProbe
+# ${13}: copylocal (only if resubmission)
 #--------------------
 
 
@@ -45,6 +46,16 @@ else # different treatment in case of resubmission
   inputFilename=$(sed '1!d' *nj$SLURM_ARRAY_TASK_ID.txt)
 fi
 echo "inputfilename: "$inputFilename
+
+# in case of resubmission, we might want to copy the file locally to avoid repetitive xrootd errors
+if [ ${13} == 1 ] ; then
+  echo "copying the file locally"
+  echo "xrdcp -r root://xrootd-cms.infn.it/$inputFilename miniaod.root"
+  xrdcp -r root://xrootd-cms.infn.it/$inputFilename miniaod.root
+  #xrdcp -r root://cms-xrd-global.cern.ch/$inputFilename miniaod.root
+  inputFilename="file:miniaod.root"
+  echo "inputfilename: "$inputFilename
+fi
 
 # index of the output file
 if [ ${5} == 1 ] ; then #isMC
