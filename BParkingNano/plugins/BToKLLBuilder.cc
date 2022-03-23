@@ -16,11 +16,11 @@
 #include "DataFormats/PatCandidates/interface/CompositeCandidate.h"
 #include "DataFormats/Math/interface/deltaR.h"
 #include "CommonTools/Statistics/interface/ChiSquaredProbability.h"
-#include "helper.h"
+#include "../interface/helper.h"
 #include <limits>
 #include <algorithm>
-#include "KinVtxFitter.h"
-#include "ETHMuon.h"
+#include "../interface/KinVtxFitter.h"
+#include "../interface/ETHMuon.h"
 
 class BToKLLBuilder : public edm::global::EDProducer<> {
 
@@ -208,6 +208,25 @@ void BToKLLBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
       cand.addUserFloat("ll_sv_prob", ll_ptr->userFloat("sv_prob"));
 
       if( !post_vtx_selection_(cand) ) continue;        
+
+      // add kaon information
+      cand.addUserFloat("kaon_pt"                  , k_ptr->pt()                             );
+      cand.addUserFloat("kaon_eta"                 , k_ptr->eta()                            );
+      cand.addUserFloat("kaon_phi"                 , k_ptr->phi()                            );
+      cand.addUserFloat("kaon_mass"                , k_ptr->mass()                           );
+      cand.addUserInt("kaon_charge"                , k_ptr->charge()                         );
+      cand.addUserInt("kaon_pdgId"                 , k_ptr->pdgId()                          );
+      cand.addUserFloat("kaon_vx"                  , k_ptr->vx()                             );
+      cand.addUserFloat("kaon_vy"                  , k_ptr->vy()                             );
+      cand.addUserFloat("kaon_vz"                  , k_ptr->vz()                             );
+      cand.addUserFloat("kaon_dz"                  , k_ptr->userFloat("dz")                  );
+      cand.addUserFloat("kaon_dxy"                 , k_ptr->userFloat("dxy")                 );
+      cand.addUserFloat("kaon_dzS"                 , k_ptr->userFloat("dzS")                 );
+      cand.addUserFloat("kaon_dxyS"                , k_ptr->userFloat("dxyS")                );
+      cand.addUserFloat("kaon_DCASig"              , k_ptr->userFloat("DCASig")              );
+      cand.addUserInt("kaon_ispacked"              , k_ptr->userInt("isPacked")              );
+      cand.addUserInt("kaon_islost"                , k_ptr->userInt("isLostTrk")             );
+      cand.addUserInt("kaon_highPurityFlag"        , k_ptr->userInt("highPurityFlag")        );
 
       //compute isolation
       float l1_iso03 = 0;

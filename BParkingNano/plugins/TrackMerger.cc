@@ -23,8 +23,8 @@
 #include "DataFormats/PatCandidates/interface/Electron.h"
 #include "DataFormats/Common/interface/AssociationVector.h"
 
-#include "ETHMuon.h"
-#include "helper.h"
+#include "../interface/ETHMuon.h"
+#include "../interface/helper.h"
 
 class TrackMerger : public edm::global::EDProducer<> {
 
@@ -36,7 +36,7 @@ public:
     beamSpotSrc_(consumes<reco::BeamSpot>(cfg.getParameter<edm::InputTag>("beamSpot"))),
     tracksToken_(consumes<pat::PackedCandidateCollection>(cfg.getParameter<edm::InputTag>("tracks"))),
     lostTracksToken_(consumes<pat::PackedCandidateCollection>(cfg.getParameter<edm::InputTag>("lostTracks"))),
-    trgMuonToken_(consumes<std::vector<pat::ETHMuon>>(cfg.getParameter<edm::InputTag>("trgMuon"))),
+    trgMuonToken_(consumes<std::vector<pat::Muon>>(cfg.getParameter<edm::InputTag>("trgMuon"))),
     muonToken_(consumes<std::vector<pat::ETHMuon>>(cfg.getParameter<edm::InputTag>("muons"))),
     eleToken_(consumes<pat::ElectronCollection>(cfg.getParameter<edm::InputTag>("pfElectrons"))),
     vertexToken_(consumes<reco::VertexCollection> (cfg.getParameter<edm::InputTag>( "vertices" ))), 
@@ -47,6 +47,10 @@ public:
     trkEtaCut_(cfg.getParameter<double>("trkEtaCut")),
     dzTrg_cleaning_(cfg.getParameter<double>("dzTrg_cleaning")),
     drTrg_cleaning_(cfg.getParameter<double>("drTrg_cleaning")),
+    do_trgmu_cleaning_(cfg.getParameter<bool>("do_trgmu_cleaning")),
+    do_mu_cleaning_(cfg.getParameter<bool>("do_mu_cleaning")),
+    do_el_cleaning_(cfg.getParameter<bool>("do_el_cleaning")),
+    do_trk_highpurity_(cfg.getParameter<bool>("do_trk_highpurity")),
     dcaSig_(cfg.getParameter<double>("dcaSig")),
     trkNormChiMin_(cfg.getParameter<int>("trkNormChiMin")),
     trkNormChiMax_(cfg.getParameter<int>("trkNormChiMax")) 
@@ -66,7 +70,7 @@ private:
   const edm::EDGetTokenT<reco::BeamSpot> beamSpotSrc_;
   const edm::EDGetTokenT<pat::PackedCandidateCollection> tracksToken_;
   const edm::EDGetTokenT<pat::PackedCandidateCollection> lostTracksToken_;
-  const edm::EDGetTokenT<std::vector<pat::ETHMuon>> trgMuonToken_;
+  const edm::EDGetTokenT<std::vector<pat::Muon>> trgMuonToken_;
   const edm::EDGetTokenT<std::vector<pat::ETHMuon>> muonToken_;
   const edm::EDGetTokenT<pat::ElectronCollection> eleToken_;
   const edm::EDGetTokenT<reco::VertexCollection> vertexToken_;
@@ -79,6 +83,10 @@ private:
   const double trkEtaCut_;
   const double dzTrg_cleaning_;
   const double drTrg_cleaning_;
+  const bool do_trgmu_cleaning_;
+  const bool do_mu_cleaning_;
+  const bool do_el_cleaning_;
+  const bool do_trk_highpurity_;
   const double dcaSig_;
   const int trkNormChiMin_;
   const int trkNormChiMax_;
@@ -105,7 +113,7 @@ void TrackMerger::produce(edm::StreamID, edm::Event &evt, edm::EventSetup const 
   evt.getByToken(tracksToken_, tracks);
   edm::Handle<pat::PackedCandidateCollection> lostTracks;
   evt.getByToken(lostTracksToken_, lostTracks);
-  edm::Handle<std::vector<pat::ETHMuon>> trgMuons;
+  edm::Handle<std::vector<pat::Muon>> trgMuons;
   evt.getByToken(trgMuonToken_, trgMuons);
 
   edm::Handle<std::vector<pat::ETHMuon>> muons;
@@ -114,7 +122,7 @@ void TrackMerger::produce(edm::StreamID, edm::Event &evt, edm::EventSetup const 
   evt.getByToken(eleToken_, pfele);
   edm::Handle<reco::VertexCollection> vertexHandle;
   evt.getByToken(vertexToken_, vertexHandle);
-  const reco::Vertex & PV = vertexHandle->front();
+  //const reco::Vertex & PV = vertexHandle->front();
 
   //edm::Handle<pat::ElectronCollection> lowptele;
   //evt.getByToken(lowptele_, lowptele);
@@ -157,25 +165,25 @@ void TrackMerger::produce(edm::StreamID, edm::Event &evt, edm::EventSetup const 
     bool skipTrack=true;
     float drTrg = 0.0;
     float dzTrg = 0.0;
-    //for (const pat::Muon & mu: *trgMuons){
-    for (const pat::ETHMuon & mu: *trgMuons){
-      // add is triggering condition
-      //remove tracks inside trg muons jet
-      if(reco::deltaR(trk, mu) < drTrg_cleaning_ && drTrg_cleaning_ >0) 
-        continue;
-      //if dz is negative it is deactivated
-      if((fabs(trk.vz() - mu.vz()) > dzTrg_cleaning_ && dzTrg_cleaning_ > 0))
-        continue;
-      skipTrack=false;
-      drTrg = reco::deltaR(trk, mu);
-      dzTrg = trk.vz() - mu.vz();
-      break; // at least for one trg muon to pass this cuts
+    if(do_trgmu_cleaning_){
+      for (const pat::Muon & mu: *trgMuons){
+        //remove tracks inside trg muons jet
+        if(reco::deltaR(trk, mu) < drTrg_cleaning_ && drTrg_cleaning_ >0) 
+          continue;
+        //if dz is negative it is deactivated
+        if((fabs(trk.vz() - mu.vz()) > dzTrg_cleaning_ && dzTrg_cleaning_ > 0))
+          continue;
+        skipTrack=false;
+        drTrg = reco::deltaR(trk, mu);
+        dzTrg = trk.vz() - mu.vz();
+        break; // at least for one trg muon to pass this cuts
+      }
+      // if track is closer to at least a triggering muon keep it
+      if (skipTrack) continue;
     }
-    // if track is closer to at least a triggering muon keep it
-    if (skipTrack) continue;
 
-    // high purity requirment applied only in packedCands
-    if( iTrk < nTracks && !trk.trackHighPurity()) continue;
+    // high purity requirement applied only in packedCands
+    if( do_trk_highpurity_ && iTrk < nTracks && !trk.trackHighPurity()) continue;
     const reco::TransientTrack trackTT( (*trk.bestTrack()) , &(*bFieldHandle));
     //distance closest approach in x,y wrt beam spot
     std::pair<double,double> DCA = computeDCA(trackTT, beamSpot);
@@ -189,39 +197,41 @@ void TrackMerger::produce(edm::StreamID, edm::Event &evt, edm::EventSetup const 
     int matchedToLooseMuon  = 0;
     int matchedToSoftMuon   = 0;
     int matchedToMediumMuon = 0;
-    for (const pat::ETHMuon &imutmp : *muons) {
-        for (unsigned int i = 0; i < imutmp.numberOfSourceCandidatePtrs(); ++i) {
-            if (! ((imutmp.sourceCandidatePtr(i)).isNonnull() && 
-                   (imutmp.sourceCandidatePtr(i)).isAvailable())
-               )   continue;
-            
-            const edm::Ptr<reco::Candidate> & source = imutmp.sourceCandidatePtr(i);
-            if (source.id() == tracks.id() && source.key() == iTrk){
-                matchedToMuon =1;
-                if (imutmp.looseId()) matchedToLooseMuon  = 1;
-                if (imutmp.softId())  matchedToSoftMuon   = 1;
-                if (imutmp.mediumId()) matchedToMediumMuon = 1;
-                // add is slimmed/ is dsa?
-                break;
-            }
-        }
+    if(do_mu_cleaning_){
+      for (const pat::ETHMuon &imutmp : *muons) {
+          for (unsigned int i = 0; i < imutmp.numberOfSourceCandidatePtrs(); ++i) {
+              if (! ((imutmp.sourceCandidatePtr(i)).isNonnull() && 
+                     (imutmp.sourceCandidatePtr(i)).isAvailable())
+                 )   continue;
+              
+              const edm::Ptr<reco::Candidate> & source = imutmp.sourceCandidatePtr(i);
+              if (source.id() == tracks.id() && source.key() == iTrk){
+                  matchedToMuon =1;
+                  if (imutmp.looseId()) matchedToLooseMuon  = 1;
+                  if (imutmp.softId())  matchedToSoftMuon   = 1;
+                  if (imutmp.mediumId()) matchedToMediumMuon = 1;
+                  // add is slimmed/ is dsa?
+                  break;
+              }
+          }
+      }
     }
 
     // clean tracks wrt to all pf electrons
-    int matchedToEle        = 0;
-    for (const pat::Electron &ietmp : *pfele) {
-        for (unsigned int i = 0; i < ietmp.numberOfSourceCandidatePtrs(); ++i) {
-            
-            if (! ((ietmp.sourceCandidatePtr(i)).isNonnull() && 
-                   (ietmp.sourceCandidatePtr(i)).isAvailable())
-               )   continue;
-            const edm::Ptr<reco::Candidate> & source = ietmp.sourceCandidatePtr(i);
-            if (source.id() == tracks.id() && source.key() == iTrk){
-                matchedToEle =1;
-                break;
-            }        
-        }
-
+    int matchedToEle = 0;
+    if(do_el_cleaning_){
+      for (const pat::Electron &ietmp : *pfele) {
+          for (unsigned int i = 0; i < ietmp.numberOfSourceCandidatePtrs(); ++i) {
+              if (! ((ietmp.sourceCandidatePtr(i)).isNonnull() && 
+                     (ietmp.sourceCandidatePtr(i)).isAvailable())
+                 )   continue;
+              const edm::Ptr<reco::Candidate> & source = ietmp.sourceCandidatePtr(i);
+              if (source.id() == tracks.id() && source.key() == iTrk){
+                  matchedToEle =1;
+                  break;
+              }        
+          }
+       }
     }
 
     // clean tracks wrt to all low pT electrons

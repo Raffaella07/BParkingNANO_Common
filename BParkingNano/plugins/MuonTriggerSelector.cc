@@ -33,10 +33,10 @@
 
 #include "DataFormats/Math/interface/deltaR.h"
 
-#include "ETHMuon.h"
+#include "../interface/ETHMuon.h"
 
 #include <TLorentzVector.h>
-#include "helper.h"
+#include "../interface/helper.h"
 
 using namespace std;
 

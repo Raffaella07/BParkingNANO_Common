@@ -27,6 +27,7 @@ def getOptions():
   parser.add_argument('--donano'            , dest='donano'     , help='merge nano files'                                  , action='store_true', default=False)
   parser.add_argument('--doflat'            , dest='doflat'     , help='merge flat files'                                  , action='store_true', default=False)
   parser.add_argument('--dosplitflat'       , dest='dosplitflat', help='[optional] flat files processed in multi steps'    , action='store_true', default=False)
+  parser.add_argument('--doskip'            , dest='doskip'     , help='[optional] skip if file already merged in chunk'   , action='store_true', default=False)
   parser.add_argument('--dobatch'           , dest='dobatch'    , help='to be turned on if running the script on the batch', action='store_true', default=False)
   return parser.parse_args()
 
@@ -62,6 +63,7 @@ class NanoMerger(NanoTools):
     self.donano      = vars(opt)["donano"]
     self.doflat      = vars(opt)["doflat"]
     self.dosplitflat = vars(opt)["dosplitflat"]
+    self.doskip      = vars(opt)["doskip"]
     self.dobatch     = vars(opt)["dobatch"]
 
     if self.data:
@@ -103,6 +105,11 @@ class NanoMerger(NanoTools):
 
       if len(nanoFiles) == 0: 
         print 'no files of interest in this chunk'
+
+      if self.doskip and NanoTools.checkFileExists(self, outputname):
+        print 'merged file already exists in this chunk'
+        print '--> skipping'
+        continue
 
       else:
         print "\n-> Checking the files"

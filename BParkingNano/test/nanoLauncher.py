@@ -358,7 +358,7 @@ class NanoLauncher(NanoTools):
       ld    = logdir,
       ft    = filetype,
       pl    = label,
-      hh    = 2 if not self.doquick else 1,
+      hh    = 10 if not self.doquick else 1,
       jobid = NanoTools.getJobIdsList(self, jobIds),
       )
 

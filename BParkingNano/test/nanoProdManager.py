@@ -11,6 +11,7 @@ def getOptions():
   parser.add_argument('--pl'        , type=str, dest='pl'          , help='label of the sample file'                                             , default=None)
   parser.add_argument('--ds'        , type=str, dest='ds'          , help='[optional] name of dataset'                                           , default=None)
   parser.add_argument('--tag'       , type=str, dest='tag'         , help='[optional] tag name'                                                  , default=None)
+  parser.add_argument('--doflat'              , dest='doflat'      , help='check the ntuples'                              , action='store_true', default=False)
   parser.add_argument('--dosignal'            , dest='dosignal'    , help='run the BToMuMuPi process'                       , action='store_true', default=False)
   parser.add_argument('--docontrol'           , dest='docontrol'   , help='run the BToKMuMu process'                        , action='store_true', default=False)
   parser.add_argument('--dohnl'               , dest='dohnl'       , help='run the HNLToMuMuPi process'                     , action='store_true', default=False)
@@ -50,6 +51,7 @@ class NanoProdManager(NanoTools):
     self.prodlabel    = vars(opt)['pl']
     self.dataset      = vars(opt)['ds']
     self.tag          = vars(opt)['tag']
+    self.doflat       = vars(opt)["doflat"]
     self.dosignal     = vars(opt)["dosignal"]
     self.docontrol    = vars(opt)["docontrol"]
     self.dohnl        = vars(opt)["dohnl"]
@@ -168,6 +170,7 @@ class NanoProdManager(NanoTools):
     filelist  = self.writeFileList(chunk, failed_files, label) 
 
     command = 'sbatch -p standard --account=t3 -o {ld}/nanostep_nj%a.log -e {ld}/nanostep_nj%a.log --job-name=nanostep_nj%a_{pl} --array {ar} --time=03:00:00 submitter.sh {outdir} {usr} {pl} {tag} {isMC} {rmt} {lst} 1 {dosig} {doctrl} {dohnl} {dotep}'.format(
+    #command = 'sbatch -p short --account=t3 -o {ld}/nanostep_nj%a.log -e {ld}/nanostep_nj%a.log --job-name=nanostep_nj%a_{pl} --array {ar} submitter.sh {outdir} {usr} {pl} {tag} {isMC} {rmt} {lst} 1 {dosig} {doctrl} {dohnl} {dotep}'.format(
       ld      = logdir,
       pl      = label,
       ar      = self.getArray(failed_files), 
@@ -263,8 +266,10 @@ class NanoProdManager(NanoTools):
         if not self.mcprivate:
           if self.tag == None:
             files = [chunk_+'/bparknano_nj'+str(nj)+'.root' for nj in range(1, n_exp+1)]
+            files_flat = [chunk_+'/flat/flat_bparknano_nj'+str(nj)+'.root' for nj in range(1, n_exp+1)]
           else:
             files = [chunk_+'/bparknano_{}_nj'.format(self.tag) +str(nj)+'.root' for nj in range(1, n_exp+1)]
+            files_flat = [chunk_+'/flat/flat_bparknano_{}_nj'.format(self.tag) +str(nj)+'.root' for nj in range(1, n_exp+1)]
 
           logdir = NanoTools.getLogDir(self, files[0], self.prodlabel, self.tag, self.data, 'mcprivate' if self.mcprivate else '')
           logfiles = [NanoTools.getLogFile(self, logdir, file_) for file_ in files]
@@ -283,10 +288,18 @@ class NanoProdManager(NanoTools):
           lines = f.readlines()
 
           files = [chunk_+'/bparknano_{}_nj'.format(self.tag) +str(NanoTools.getStep(self, lines[nj-1]))+'.root' for nj in range(1, n_exp+1)]
+          files_flat = [chunk_+'/flat/flat_bparknano_{}_nj'.format(self.tag) +str(NanoTools.getStep(self, lines[nj-1]))+'.root' for nj in range(1, n_exp+1)]
           files_nlog = [chunk_+'/bparknano_{}_nj'.format(self.tag) +str(nj)+'.root' for nj in range(1, n_exp+1)]
 
           logdir = NanoTools.getLogDir(self, files[0], self.prodlabel, self.tag, self.data, 'mcprivate' if self.mcprivate else '')
           logfiles = [NanoTools.getLogFile(self, logdir, file_) for file_ in files_nlog]
+
+        if self.doflat:
+          #files_flat = [chunk_+'/flat_bparknano_{}_nj'.format(self.tag) +str(NanoTools.getStep(self, lines[nj-1]))+'.root' for nj in range(1, n_exp+1)]
+          for ifile, file_ in enumerate(files_flat):
+            if not NanoTools.checkFileExists(self, file_): # successfull job
+              print 'file does not exist'
+              print file_
 
         for ifile, file_ in enumerate(files):
           # get the log file
@@ -297,13 +310,17 @@ class NanoProdManager(NanoTools):
             n_unprocessed_perchunk += 1
             continue
 
-          branchname = ''
-          if self.dosignal: branchname = 'nBToMuMuPi'
-          elif self.docontrol: branchname = 'nBToKMuMu'
-          elif self.dohnl: branchname = 'nHNLToMuPi'
-          elif self.dotageprobe: branchname = 'nJPsiToMuMu'
-          extra_cond = NanoTools.checkLocalFile(self, file_, cond=True, branch_check=True, branchname=branchname) if self.docheckfile else 'True'
-          #if NanoTools.checkFileExists(self, file_) and NanoTools.checkLocalFile(self, file_, cond=True): # successfull job
+          if self.docheckfile:
+            branchnames = []
+            if self.dosignal: branchnames.append('nBToMuMuPi')
+            if self.docontrol: branchnames.append('nBToKMuMu')
+            if self.dohnl: branchnames.append('nHNLToMuPi')
+            if self.dotageprobe: branchnames.append('nJPsiToMuMu')
+            for branchname in branchnames:
+              extra_cond = NanoTools.checkLocalFile(self, file_, cond=True, branch_check=True, branchname=branchname)
+              if not extra_cond: break
+          else: extra_cond = 'True'
+
           if NanoTools.checkFileExists(self, file_) and extra_cond: # successfull job
             n_good_perchunk += 1
 

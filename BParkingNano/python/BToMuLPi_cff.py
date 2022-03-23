@@ -17,10 +17,6 @@ BToMuMuPi = cms.EDProducer(
     isMC  = cms.bool(False),
 
     # pre-fitter preselection
-    pionSelection_loose = cms.string(' && '.join([
-        'pt > 0.',
-      ])
-    ),
     pionSelection = cms.string(' && '.join([
         #'pt > 0.',
         'pt > 0.7',
@@ -32,27 +28,11 @@ BToMuMuPi = cms.EDProducer(
         'abs(userFloat("DCASig")) > 5.',
       ])
     ),
-    pionSelection_dsa = cms.string(' && '.join([
-        #'pt > 0.',
-        'pt > 0.7',
-        'abs(eta)<2.',
-        'abs(userFloat("dz")) > 0.005',
-        'abs(userFloat("dxy")) > 0.001',
-        'abs(userFloat("dzS")) > 1.5',  
-        'abs(userFloat("dxyS")) > 0.5',
-        'abs(userFloat("DCASig")) > 1',
-      ])
-    ),
-    #isoTracksSelection = cms.string('pt > 0.7 && abs(eta)<2.'),
-    isoTracksSelection = cms.string('pt > 0. && abs(eta)<5'),
-
-    trgMuonSelection       = cms.string('pt > 7 && abs(eta) < 1.5'),
-    trgMuonSelection_dsa   = cms.string('pt > 7 && abs(eta) < 1.5'),
-    trgMuonSelection_loose = cms.string('pt > 0 && abs(eta) < 5'),
-
-    leptonSelection_loose = cms.string(' && '.join([
-        'pt > 0.',
-      ])
+    isoTracksSelection = cms.string('pt > 0.7 && abs(eta)<2.'),
+    trgMuonSelection = cms.string(' && '.join([
+        'pt > 7.0',
+        'abs(eta) < 1.5',
+      ])     
     ),
     leptonSelection = cms.string(' && '.join([
         #'pt > 0.',
@@ -64,14 +44,6 @@ BToMuMuPi = cms.EDProducer(
         'abs(userFloat("dxyS")) > 1.5',
       ])
     ),
-    leptonSelection_dsa = cms.string(' && '.join([
-        #'pt > 0.',
-        'pt > 2',
-        'abs(eta) < 2.',
-        'abs(userFloat("dz")) > 0.0015',
-        'abs(userFloat("dxy")) > 0.1',
-      ])
-    ),
     preVtxSelection = cms.string(' & '.join([
         'pt > 1',
         'mass > 0.2',        
@@ -80,12 +52,6 @@ BToMuMuPi = cms.EDProducer(
     ),  
 
     # post-fitter preselection
-    postVtxSelection_loose = cms.string(' & '.join([
-        'userInt("hnl_vtx_OK") == 1',
-        'userFloat("hnl_fitted_cos_theta_2D") > 0.9',
-        'mass < 10',
-        ])
-    ), 
     postVtxSelection = cms.string(' & '.join([
         #'userInt("hnl_vtx_OK") == 1',
         #'userFloat("hnl_fitted_cos_theta_2D") > 0.9',
@@ -97,9 +63,53 @@ BToMuMuPi = cms.EDProducer(
         'userFloat("hnl_ls_xy") > 20',
         'mass < 8',
         'userFloat("hnl_fitted_mass") < 6.3',
-        'abs(userFloat("cos_theta_star_pion")) < 0.9',
+        ##'abs(userFloat("cos_theta_star_pion")) < 0.9',
         ])
     ), 
+    # preselection applied at the end of the builder
+    extraSelection = cms.string(' & '.join([
+        'pt > 0', # dummy placeholder,
+        ])
+    ), 
+
+    # loose preselection
+    pionSelection_loose = cms.string(' && '.join([
+        'pt > 0.',
+      ])
+    ),
+    trgMuonSelection_loose = cms.string('pt > 0 && abs(eta) < 5'),
+    leptonSelection_loose = cms.string(' && '.join([
+        'pt > 0.',
+      ])
+    ),
+    postVtxSelection_loose = cms.string(' & '.join([
+        'userInt("hnl_vtx_OK") == 1',
+        'userFloat("hnl_fitted_cos_theta_2D") > 0.9',
+        'mass < 10',
+        ])
+    ), 
+
+    # preselection applied on dsa candidates (not used)
+    pionSelection_dsa = cms.string(' && '.join([
+        #'pt > 0.',
+        'pt > 0.7',
+        'abs(eta)<2.',
+        'abs(userFloat("dz")) > 0.005',
+        'abs(userFloat("dxy")) > 0.001',
+        'abs(userFloat("dzS")) > 1.5',  
+        'abs(userFloat("dxyS")) > 0.5',
+        'abs(userFloat("DCASig")) > 1',
+      ])
+    ),
+    trgMuonSelection_dsa   = cms.string('pt > 7 && abs(eta) < 1.5'),
+    leptonSelection_dsa = cms.string(' && '.join([
+        #'pt > 0.',
+        'pt > 2',
+        'abs(eta) < 2.',
+        'abs(userFloat("dz")) > 0.0015',
+        'abs(userFloat("dxy")) > 0.1',
+      ])
+    ),
     postVtxSelection_dsa = cms.string(' & '.join([
         #'userInt("hnl_vtx_OK") == 1',
         #'userFloat("hnl_fitted_cos_theta_2D") > 0.9',
@@ -141,11 +151,33 @@ BToMuMuPiTable = cms.EDProducer(
         trg_mu_eta      = ufloat('trg_muon_eta'  ), 
         trg_mu_phi      = ufloat('trg_muon_phi'  ), 
         ## pion
-        pi_dz           = ufloat('pion_dz'        ), 
-        pi_dxy          = ufloat('pion_dxy'       ), 
-        pi_dzS          = ufloat('pion_dzS'       ), 
-        pi_dxyS         = ufloat('pion_dxyS'      ), 
-        pi_DCASig       = ufloat('pion_DCASig'    ), 
+        pi_pt                     = ufloat('pion_pt'                  ), 
+        pi_eta                    = ufloat('pion_eta'                 ), 
+        pi_phi                    = ufloat('pion_phi'                 ), 
+        pi_mass                   = ufloat('pion_mass'                ), 
+        pi_charge                 = uint('pion_charge'                ), 
+        pi_pdgid                  = uint('pion_pdgId'                 ), 
+        pi_vx                     = ufloat('pion_vx'                  ), 
+        pi_vy                     = ufloat('pion_vy'                  ), 
+        pi_vz                     = ufloat('pion_vz'                  ), 
+        pi_dz                     = ufloat('pion_dz'                  ), 
+        pi_dxy                    = ufloat('pion_dxy'                 ), 
+        pi_dzS                    = ufloat('pion_dzS'                 ), 
+        pi_dxyS                   = ufloat('pion_dxyS'                ), 
+        pi_DCASig                 = ufloat('pion_DCASig'              ), 
+        pi_ispacked               = uint('pion_ispacked'              ), 
+        pi_islost                 = uint('pion_islost'                ), 
+        pi_chi2                   = ufloat('pion_chi2'                ), 
+        pi_normalisedChi2         = ufloat('pion_normalisedChi2'      ), 
+        pi_validFraction          = ufloat('pion_validFraction'       ), 
+        pi_ndof                   = uint('pion_ndof'                  ), 
+        pi_numberOfValidHits      = uint('pion_numberOfValidHits'     ), 
+        pi_numberOfLostHits       = uint('pion_numberOfLostHits'      ), 
+        pi_numberOfValidPixelHits = uint('pion_numberOfValidPixelHits'), 
+        pi_numberOfTrackerLayers  = uint('pion_numberOfTrackerLayers' ), 
+        pi_numberOfPixelLayers    = uint('pion_numberOfPixelLayers'   ), 
+        pi_qualityIndex           = uint('pion_qualityIndex'          ), 
+        pi_highPurityFlag         = uint('pion_highPurityFlag'        ), 
         ## vertex difference between the two muons
         dimu_vxdiff     = ufloat('dilepton_vxdiff' ),
         dimu_vydiff     = ufloat('dilepton_vydiff' ),

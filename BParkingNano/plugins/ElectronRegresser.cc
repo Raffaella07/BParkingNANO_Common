@@ -9,7 +9,7 @@
 #include "DataFormats/Common/interface/View.h"
 #include "DataFormats/PatCandidates/interface/Electron.h"
 #include "CommonTools/CandAlgos/interface/ModifyObjectValueBase.h"
-#include "helper.h"
+#include "../interface/helper.h"
 
 class ElectronRegresser : public edm::global::EDProducer<> {
 

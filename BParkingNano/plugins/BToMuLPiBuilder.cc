@@ -21,12 +21,12 @@
 #include "DataFormats/Math/interface/deltaR.h"
 #include "DataFormats/Math/interface/deltaPhi.h"
 #include "CommonTools/Statistics/interface/ChiSquaredProbability.h"
-#include "helper.h"
+#include "../interface/helper.h"
 #include <limits>
 #include <algorithm>
-#include "KinVtxFitter.h"
+#include "../interface/KinVtxFitter.h"
 
-#include "ETHMuon.h"
+#include "../interface/ETHMuon.h"
 
 template<typename Lepton>
 class BToMuLPiBuilder : public edm::global::EDProducer<> {
@@ -38,18 +38,19 @@ public:
   typedef std::vector<reco::TransientTrack> TransientTrackCollection;
 
   explicit BToMuLPiBuilder(const edm::ParameterSet &cfg):
-    pi_selection_      {cfg.getParameter<std::string>("pionSelection"     )},
-    pi_selection_dsa_  {cfg.getParameter<std::string>("pionSelection_dsa" )},
-    isotrk_selection_  {cfg.getParameter<std::string>("isoTracksSelection")},
-    trgmu_selection_   {cfg.getParameter<std::string>("trgMuonSelection"  )},
-    trgmu_selection_dsa_   {cfg.getParameter<std::string>("trgMuonSelection_dsa"  )},
-    lep_selection_     {cfg.getParameter<std::string>("leptonSelection"  )},
-    lep_selection_dsa_     {cfg.getParameter<std::string>("leptonSelection_dsa"  )},
-    pre_vtx_selection_ {cfg.getParameter<std::string>("preVtxSelection"   )},
-    post_vtx_selection_{cfg.getParameter<std::string>("postVtxSelection"  )},
-    post_vtx_selection_dsa_{cfg.getParameter<std::string>("postVtxSelection_dsa"  )},
-    lepton_type_       {cfg.getParameter<std::string>("label")},
-    isMC_              {cfg.getParameter<bool>("isMC")},
+    pi_selection_          {cfg.getParameter<std::string>("pionSelection")},
+    isotrk_selection_      {cfg.getParameter<std::string>("isoTracksSelection")},
+    trgmu_selection_       {cfg.getParameter<std::string>("trgMuonSelection")},
+    lep_selection_         {cfg.getParameter<std::string>("leptonSelection")},
+    pre_vtx_selection_     {cfg.getParameter<std::string>("preVtxSelection")},
+    post_vtx_selection_    {cfg.getParameter<std::string>("postVtxSelection")},
+    extra_selection_       {cfg.getParameter<std::string>("extraSelection")},
+    pi_selection_dsa_      {cfg.getParameter<std::string>("pionSelection_dsa")},
+    trgmu_selection_dsa_   {cfg.getParameter<std::string>("trgMuonSelection_dsa")},
+    lep_selection_dsa_     {cfg.getParameter<std::string>("leptonSelection_dsa")},
+    post_vtx_selection_dsa_{cfg.getParameter<std::string>("postVtxSelection_dsa")},
+    lepton_type_           {cfg.getParameter<std::string>("label")},
+    isMC_                  {cfg.getParameter<bool>("isMC")},
 
     // these two collections are ideally created beforehand by MuonTriggerSelector.cc
     //    * the former are muons that pass the preselection defined there AND match one of the 
@@ -82,15 +83,18 @@ public:
 private:
   // pre-fitter preselection 
   const StringCutObjectSelector<pat::CompositeCandidate> pi_selection_; 
-  const StringCutObjectSelector<pat::CompositeCandidate> pi_selection_dsa_; 
   const StringCutObjectSelector<pat::PackedCandidate> isotrk_selection_;
   const StringCutObjectSelector<pat::ETHMuon> trgmu_selection_; 
-  const StringCutObjectSelector<pat::ETHMuon> trgmu_selection_dsa_; 
   const StringCutObjectSelector<Lepton> lep_selection_; 
-  const StringCutObjectSelector<Lepton> lep_selection_dsa_; 
   const StringCutObjectSelector<pat::CompositeCandidate> pre_vtx_selection_; 
   // post-fitter preselection 
   const StringCutObjectSelector<pat::CompositeCandidate> post_vtx_selection_; 
+  // extra preselection
+  const StringCutObjectSelector<pat::CompositeCandidate> extra_selection_; 
+  // preselection on dsa candidates
+  const StringCutObjectSelector<pat::CompositeCandidate> pi_selection_dsa_; 
+  const StringCutObjectSelector<pat::ETHMuon> trgmu_selection_dsa_; 
+  const StringCutObjectSelector<Lepton> lep_selection_dsa_; 
   const StringCutObjectSelector<pat::CompositeCandidate> post_vtx_selection_dsa_; 
 
   const std::string lepton_type_;
@@ -304,6 +308,9 @@ void BToMuLPiBuilder<Lepton>::produce(edm::StreamID, edm::Event &evt, edm::Event
         b_cand.addUserFloat("hnl_fitted_pi_phi"      , fitter.daughter_p4(1).phi()                                             );
         b_cand.addUserFloat("hnl_fitted_pi_mass"     , fitter.daughter_p4(1).mass()                                            );
 
+        // post fit selection
+        if( !post_vtx_selection_(b_cand) ) continue;        
+
         // computation of cos(theta*), 
         // (angle between the hnl's momentum direction in the lab frame and the daughter's momentum direction in the center of mass frame)
         float mass_hnl_fitted = fitter.fitted_candidate().mass();
@@ -453,27 +460,38 @@ void BToMuLPiBuilder<Lepton>::produce(edm::StreamID, edm::Event &evt, edm::Event
         b_cand.addUserFloat("dphi_hnl_fit_hnl", dPhi_hnl_fit_hnl);
         b_cand.addUserFloat("deta_hnl_fit_hnl", dEta_hnl_fit_hnl);
 
-        // impact parameter variables (with pre-fit quantities)
-        //b_cand.addUserFloat("trg_muon_ip3d"   , fabs(trg_mu_ptr->dB(pat::Muon::PV3D))                                    );
-        //b_cand.addUserFloat("trg_muon_sip3d"  , fabs(trg_mu_ptr->dB(pat::Muon::PV3D) / trg_mu_ptr->edB(pat::Muon::PV3D)) );
-        //b_cand.addUserFloat("trg_muon_dxy"    , trg_mu_ptr->dB(pat::Muon::PV2D)                                          );
-        //b_cand.addUserFloat("trg_muon_dz"     , trg_mu_ptr->dB(pat::Muon::PVDZ)                                          );
-        
-        //if(lepton_type_ == "muon"){
-        //  b_cand.addUserFloat("sel_muon_ip3d"   , fabs(lep_ptr->dB(pat::Muon::PV3D))                                 );
-        //  b_cand.addUserFloat("sel_muon_sip3d"  , fabs(lep_ptr->dB(pat::Muon::PV3D) / lep_ptr->edB(pat::Muon::PV3D)) );
-        //  b_cand.addUserFloat("sel_muon_dxy"    , lep_ptr->dB(pat::Muon::PV2D)                                       );
-        //  b_cand.addUserFloat("sel_muon_dz"     , lep_ptr->dB(pat::Muon::PVDZ)                                       );
-        //}
+        // save information on pions 
+        b_cand.addUserFloat("pion_pt"                  , pi_ptr->pt()                             );
+        b_cand.addUserFloat("pion_eta"                 , pi_ptr->eta()                            );
+        b_cand.addUserFloat("pion_phi"                 , pi_ptr->phi()                            );
+        b_cand.addUserFloat("pion_mass"                , pi_ptr->mass()                           );
+        b_cand.addUserInt("pion_charge"                , pi_ptr->charge()                         );
+        b_cand.addUserInt("pion_pdgId"                 , pi_ptr->pdgId()                          );
+        b_cand.addUserFloat("pion_vx"                  , pi_ptr->vx()                             );
+        b_cand.addUserFloat("pion_vy"                  , pi_ptr->vy()                             );
+        b_cand.addUserFloat("pion_vz"                  , pi_ptr->vz()                             );
+        b_cand.addUserFloat("pion_dz"                  , pi_ptr->userFloat("dz")                  );
+        b_cand.addUserFloat("pion_dxy"                 , pi_ptr->userFloat("dxy")                 );
+        b_cand.addUserFloat("pion_dzS"                 , pi_ptr->userFloat("dzS")                 );
+        b_cand.addUserFloat("pion_dxyS"                , pi_ptr->userFloat("dxyS")                );
+        b_cand.addUserFloat("pion_DCASig"              , pi_ptr->userFloat("DCASig")              );
+        b_cand.addUserInt("pion_ispacked"              , pi_ptr->userInt("isPacked")              );
+        b_cand.addUserInt("pion_islost"                , pi_ptr->userInt("isLostTrk")             );
+        b_cand.addUserFloat("pion_chi2"                , pi_ptr->userFloat("chi2")                );
+        b_cand.addUserFloat("pion_normalisedChi2"      , pi_ptr->userFloat("normalisedChi2")      );
+        b_cand.addUserFloat("pion_validFraction"       , pi_ptr->userFloat("validFraction")       );
+        b_cand.addUserInt("pion_ndof"                  , pi_ptr->userInt("ndof")                  );
+        b_cand.addUserInt("pion_numberOfValidHits"     , pi_ptr->userInt("nValidHits")            );
+        b_cand.addUserInt("pion_numberOfLostHits"      , pi_ptr->userInt("numberOfLostHits")      );
+        b_cand.addUserInt("pion_numberOfValidPixelHits", pi_ptr->userInt("numberOfValidPixelHits"));
+        b_cand.addUserInt("pion_numberOfTrackerLayers" , pi_ptr->userInt("numberOfTrackerLayers") );
+        b_cand.addUserInt("pion_numberOfPixelLayers"   , pi_ptr->userInt("numberOfPixelLayers")   );
+        b_cand.addUserInt("pion_qualityIndex"          , pi_ptr->userInt("qualityIndex")          );
+        b_cand.addUserInt("pion_highPurityFlag"        , pi_ptr->userInt("highPurityFlag")        );
 
-        b_cand.addUserFloat("pion_dz"         , pi_ptr->userFloat("dz")     );
-        b_cand.addUserFloat("pion_dxy"        , pi_ptr->userFloat("dxy")    );
-        b_cand.addUserFloat("pion_dzS"        , pi_ptr->userFloat("dzS")    );
-        b_cand.addUserFloat("pion_dxyS"       , pi_ptr->userFloat("dxyS")   );
-        b_cand.addUserFloat("pion_DCASig"     , pi_ptr->userFloat("DCASig") );
 
         // post fit selection
-        if( !post_vtx_selection_(b_cand) ) continue;        
+        //if( !post_vtx_selection_(b_cand) ) continue;        
 
         //if( lep_ptr->userInt("isDSAMuon")!=1 && !post_vtx_selection_(b_cand) ) continue;
         //if( lep_ptr->userInt("isDSAMuon")==1 && !post_vtx_selection_dsa_(b_cand) ) continue;
@@ -624,8 +642,8 @@ void BToMuLPiBuilder<Lepton>::produce(edm::StreamID, edm::Event &evt, edm::Event
         b_cand.addUserFloat("dilepton_pt", dilepton_pt);
         b_cand.addUserFloat("trgmu_pi_pt", trgmu_pi_pt);
 
-        // post fit selection
-        //if( !post_vtx_selection_(b_cand) ) continue;        
+        // extra selection
+        if( !extra_selection_(b_cand) ) continue;        
 
         // gen-matching
         int isMatched = 0;

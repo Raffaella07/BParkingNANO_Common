@@ -14,11 +14,11 @@
 #include "DataFormats/Math/interface/deltaR.h"
 #include "CommonTools/Statistics/interface/ChiSquaredProbability.h"
 #include "TrackingTools/TransientTrack/interface/TransientTrack.h"
-#include "helper.h"
+#include "../interface/helper.h"
 #include <limits>
 #include <algorithm>
-#include "KinVtxFitter.h"
-#include "ETHMuon.h"
+#include "../interface/KinVtxFitter.h"
+#include "../interface/ETHMuon.h"
 
 //template<typename Lepton>
 class TagAndProbeJPsiToMuMuBuilder : public edm::global::EDProducer<> {
@@ -209,7 +209,7 @@ void TagAndProbeJPsiToMuMuBuilder::produce(edm::StreamID, edm::Event &evt, edm::
   evt.put(std::move(ret_value));
 }
 
-//#include "ETHMuon.h"
+//#include "../interface/ETHMuon.h"
 //typedef TagAndProbeJPsiToLLBuilder<pat::ETHMuon> TagAndProbeJPsiToMuMuBuilder;
 
 #include "FWCore/Framework/interface/MakerMacros.h"
