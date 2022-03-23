@@ -14,7 +14,7 @@ using namespace std;
 void PUReweighter(){
 
   // get the mc pileup profile
-  TFile* file_mc = TFile::Open("../../data/pileup/profiles/pileup_mc_2018_Autumn18.root");
+  TFile* file_mc = TFile::Open("../../data/pileup/profiles/pileup_mc_signal_Aug21.root");
   TH1D* hist_mc_fromfile = (TH1D*) file_mc->Get("pileup")->Clone("hist_mc_fromfile");
   hist_mc_fromfile->Scale(1./hist_mc_fromfile->Integral());
 
@@ -29,7 +29,7 @@ void PUReweighter(){
 
   // get the data pileup profile
   TFile* file_data = TFile::Open("../../data/pileup/profiles/pileup_data_2018.root");
-  TH1D* hist_data = (TH1D*) file_data->Get("pileup_2018A")->Clone("hist_data");
+  TH1D* hist_data = (TH1D*) file_data->Get("pileup_2018total")->Clone("hist_data");
   hist_data->Scale(1./hist_data->Integral());
 
   bool do_check = false;
@@ -50,7 +50,7 @@ void PUReweighter(){
   hist_weight->GetXaxis()->SetTitle("pileup data/MC");
 
   // store the weight in a root file
-  TFile* root_file = TFile::Open("pileup_weight_dataA_mcAutumn18.root", "RECREATE");
+  TFile* root_file = TFile::Open("pileup_weight_datatot_sigAug21.root", "RECREATE");
   hist_weight->Write();
   root_file->Close();
 
@@ -132,13 +132,13 @@ void PUReweighter(){
 
   TLegend* leg = new TLegend(0.6, 0.6, 0.85, 0.85);
   leg->AddEntry(hist_data_A, "Data - A");
-  leg->AddEntry(hist_data_B_5streams, "Data - B (5 streams)");
-  leg->AddEntry(hist_data_B_6streams, "Data - B (6 streams)");
-  leg->AddEntry(hist_data_C, "Data - C");
+  //leg->AddEntry(hist_data_B_5streams, "Data - B (5 streams)");
+  //leg->AddEntry(hist_data_B_6streams, "Data - B (6 streams)");
+  //leg->AddEntry(hist_data_C, "Data - C");
   leg->AddEntry(hist_data_D, "Data - D");
   leg->AddEntry(hist_data_tot, "Data - total");
-  leg->AddEntry(hist_mc, "MC (Autumn 18)");
-  leg->AddEntry(hist_mc_weighted, "MC reweighted");
+  leg->AddEntry(hist_mc, "MC (signal Aug21)");
+  //leg->AddEntry(hist_mc_weighted, "MC reweighted");
   leg->SetTextSize(0.04);
   leg->SetLineColor(0);
   leg->SetFillColorAlpha(0, 0);
@@ -146,15 +146,15 @@ void PUReweighter(){
 
   hist_data_tot->Draw("hist L");
   hist_data_A->Draw("same");
-  hist_data_B_5streams->Draw("same");
-  hist_data_B_6streams->Draw("same");
-  hist_data_C->Draw("same");
+  //hist_data_B_5streams->Draw("same");
+  //hist_data_B_6streams->Draw("same");
+  //hist_data_C->Draw("same");
   hist_data_D->Draw("same");
   hist_mc->Draw("hist L same");
-  hist_mc_weighted->Draw("same");
+  //hist_mc_weighted->Draw("same");
 
   leg->Draw();
 
-  c->SaveAs("pu_data_mc_reweighted.png");
+  c->SaveAs("pu_data_mc_signal.png");
 
 }
