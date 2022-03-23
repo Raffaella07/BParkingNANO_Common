@@ -214,8 +214,13 @@ Bool_t TagAndProbeDumper::Process(Long64_t entry)
   //if(Muon_prescale_DST_DoubleMu1_noVtx_CaloScouting_v2[JPsiToMuMu_lep1_idx[0]] != 1) return false;
 
   //if(Muon_fired_DST_DoubleMu1_noVtx_CaloScouting_v2[JPsiToMuMu_lep1_idx[0]] != 1 && Muon_fired_DST_DoubleMu3_noVtx_CaloScouting_v6[JPsiToMuMu_lep1_idx[0]] != 1) return false;
-  if(Muon_fired_HLT_Mu9_IP6[JPsiToMuMu_lep1_idx[0]] != 1) return false;
-  if(Muon_prescale_DST_DoubleMu1_noVtx_CaloScouting_v2[JPsiToMuMu_lep1_idx[0]] == -1) return false;
+  
+  // the following was used to compute SF on period A only
+  //if(Muon_fired_HLT_Mu9_IP6[JPsiToMuMu_lep1_idx[0]] != 1) return false;
+  //if(Muon_prescale_DST_DoubleMu1_noVtx_CaloScouting_v2[JPsiToMuMu_lep1_idx[0]] == -1) return false;
+  
+  // requirement of the tag muon to fire any BParking HLT line
+  if(Muon_isTriggeringBPark[JPsiToMuMu_lep1_idx[0]] != 1) return false;
 
   // by default, take the first candidate (possible since <permille events have more than one candidate per event)
   the_pt = JPsiToMuMu_pt[0];
