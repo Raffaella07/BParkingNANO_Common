@@ -1,6 +1,6 @@
 from CRABClient.UserUtilities import config, ClientException, getUsernameFromCRIC
-#from input_crab_data import dataset_files
-import yaml
+#from input_crab_data i  mport dataset_files
+import yaml              
 import datetime
 from fnmatch import fnmatch
 from argparse import ArgumentParser
@@ -11,7 +11,8 @@ config = config()
 config.section_('General')
 config.General.transferOutputs = True
 config.General.transferLogs = True
-config.General.workArea = 'BParkingNANO_%s' % production_tag
+config.General.workArea = 'BParkingNANO_fast_%s' % production_tag
+
 
 config.section_('Data')
 config.Data.publication = False
@@ -58,49 +59,51 @@ if __name__ == '__main__':
     
     # loop over samples
     for sample, info in doc['samples'].iteritems():
+        print(info)
       # Given we have repeated datasets check for different parts
-      parts = info['parts'] if 'parts' in info else [None]
-      for part in parts:
-        name = sample % part if part is not None else sample
-        
+        parts = info['parts'] if 'parts' in info else [None]
+    	for part in parts:
+          name = sample % part if part is not None else sample 
         # filter names according to what we need
-        if not fnmatch(name, args.filter): continue
-        print 'submitting', name
-
-        isMC = info['isMC']
-
-        config.Data.inputDataset = info['dataset'] % part \
-                                   if part is not None else \
-                                      info['dataset']
-
-        config.General.requestName = name
-        common_branch = 'mc' if isMC else 'data'
-        config.Data.splitting = 'FileBased' if isMC else 'LumiBased'
-        if not isMC:
-            config.Data.lumiMask = info.get(
-                'lumimask', 
-                common[common_branch].get('lumimask', None)
-            )
-        else:
-            config.Data.lumiMask = ''
-
-        config.Data.unitsPerJob = info.get(
-            'splitting',
-            common[common_branch].get('splitting', None)
-        )
-        globaltag = info.get(
-            'globaltag',
-            common[common_branch].get('globaltag', None)
-        )
-        
-        config.JobType.pyCfgParams = [
-            'isMC=%s' % isMC, 'reportEvery=1000',
-            'tag=%s' % production_tag,
-            'globalTag=%s' % globaltag,
-        ]
-        
-        config.JobType.outputFiles = ['_'.join(['BParkNANO', 'mc' if isMC else 'data', production_tag])+'.root']
-        
-        print config
-        submit(config)
-
+          if not fnmatch(name, args.filter):
+		 continue
+          print 'submitting', name
+  
+          isMC = info['isMC']
+  
+          config.Data.inputDataset = info['dataset'] % part \
+                                     if part is not None else \
+                                        info['dataset']
+  
+          config.General.requestName = name
+          common_branch = 'mc' if isMC else 'data'
+          config.Data.splitting = 'FileBased'# if isMC else 'Automatic'
+          if not isMC:
+              config.Data.lumiMask = info.get(
+                  'lumimask', 
+                  common[common_branch].get('lumimask', None)
+              )	
+  	 #   config.Data.runRange = '315257-319914'
+          else:
+              config.Data.lumiMask = ''
+  
+          config.Data.unitsPerJob = info.get(
+              'splitting',
+              common[common_branch].get('splitting', None)
+          )
+          globaltag = info.get(
+              'globaltag',
+              common[common_branch].get('globaltag', None)
+          )
+          
+          config.JobType.pyCfgParams = [
+              'isMC=%s' % isMC, 'reportEvery=1000',
+              'tag=%s' % production_tag,
+              'globalTag=%s' % globaltag,
+          ]
+          
+          config.JobType.outputFiles = ['_'.join(['BParkNANO', 'mc' if isMC else 'data', production_tag])+'.root']
+          
+          print config
+          submit(config)
+  
