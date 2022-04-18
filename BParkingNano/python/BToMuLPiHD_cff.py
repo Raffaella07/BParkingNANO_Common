@@ -1,10 +1,12 @@
 import FWCore.ParameterSet.Config as cms
 from PhysicsTools.BParkingNano.common_cff import uint, ufloat, Var, CandVars
 
+
 #comment out BToMuEPi and BToMuEPiMC and their tables when running on BToMuMuPiBuilder
 BToMuEPiHD = cms.EDProducer(
      'BToMuTrkPiBuilder',
      trgMuons                = cms.InputTag('muonTrgSelector', 'SelectedMuons'),
+
      leptons                 = cms.InputTag('tracksBPark', 'SelectedTracks'),
      leptonsTransientTracks  = cms.InputTag('tracksBPark', 'SelectedTransientTracks'),
      pions                   = cms.InputTag('tracksBPark', 'SelectedTracks'),
@@ -16,6 +18,7 @@ BToMuEPiHD = cms.EDProducer(
  
      label = cms.string('ele'),
      isMC  = cms.bool(False),
+
      # pre-fitter preselection
      #pionSelection           = cms.string('pt > 0.55 && abs(eta)<2'),  
      isoTracksSelection      = cms.string('pt > 0.55 && abs(eta)<2'),
@@ -45,18 +48,21 @@ BToMuEPiHD = cms.EDProducer(
         #'charge ==0',
          'mass > 0.5',        
          'mass < 7.0',        
+
          ])
      ), # applied on the HNL cand 
  
      # post-fitter preselection
      postVtxSelection = cms.string(' & '.join([
          'userInt("hnl_vtx_OK") == 1',
+
          'userFloat("hnl_vtx_prob") > 0.01',
         # 'userFloat("hnl_l_xy") > 10 ',
           'mass < 8',
         # 'pt > 11',
         # 'abs(eta) < 1.7',
           'userFloat("hnl_vtx_chi2") < 9', #<----------------ulterior selections have been commented out for a clean slate production 
+
       #   'userFloat("trg_muon_sip3d") > 0.8',
       #  'userFloat("sel_lep_ip3d") > 0.0015',
       #  'abs(userFloat("sel_lep_dxy")) > 0.0005',
@@ -69,12 +75,14 @@ BToMuEPiHD = cms.EDProducer(
          ##'userFloat("pion_muon_vzdiff") > 0.001',
          ##'userFloat("dr_mu_pi") < 1.8',
        # 'userFloat("dr_trgmu_hnl") < 0.8',
+
         'userFloat("hnl_fitted_mass") > 0.5',
         'userFloat("hnl_fitted_mass") < 7',
        # 'userFloat("hnl_fitted_pt") > 4',
        # 'abs(userFloat("hnl_fitted_eta")) < 1.8',
          'userFloat("hnl_ls_xy") > 20',
         'userFloat("hnl_fitted_cos_theta_2D") > 0.99',
+
          ])
      ), # applied on the B cand
 )
@@ -226,11 +234,13 @@ BToMuEPiHDTable = cms.EDProducer(
    #    trg_mu_eta      = ufloat('trg_muon_eta'  ), 
    #    trg_mu_phi      = ufloat('trg_muon_phi'  ), 
         ## vertex difference between the two muons
+
         dilep_vxdiff     = ufloat('dilepton_vxdiff' ),
         dilep_vydiff     = ufloat('dilepton_vydiff' ),
         dilep_vzdiff     = ufloat('dilepton_vzdiff' ),
         dilep_Lxy        = ufloat('dilepton_Lxy'    ),
         dilep_Lxyz       = ufloat('dilepton_Lxyz'   ),
+
         ## vertex difference between the trigger muon and pion
         pi_mu_vzdiff    = ufloat('pion_trgmuon_vzdiff'  ),
         # post-fit quantities
@@ -254,7 +264,9 @@ BToMuEPiHDTable = cms.EDProducer(
         hnl_phi         = ufloat('hnl_fitted_phi'    ),
         hnl_charge      = Var('daughter("hnl").charge()', int),
         hnl_cos2D       = ufloat('hnl_fitted_cos_theta_2D'   ),
+
         hnl_cos2D_star  = ufloat('hnl_fitted_cos_theta_2D_star'   ),
+
         ## daughter muon
         fit_l_pt       = ufloat('hnl_fitted_lep_pt'  ), 
         fit_l_eta      = ufloat('hnl_fitted_lep_eta' ),
@@ -309,7 +321,9 @@ BToMuEPiHDTable = cms.EDProducer(
         dilepton_mass   = ufloat('dilepton_mass'  ),
         dilepton_pt     = ufloat('dilepton_pt'    ),
         ## gen-matching
+
         isMatched                   = Var("userInt('isMatched')"                  , int, mcOnly=True),
+
   #     matching_sel_e_genIdx      = Var("userInt('matching_sel_lep_genIdx')"     , int, mcOnly=True),
   #     matching_trg_mu_genIdx      = Var("userInt('matching_trg_mu_genIdx')"     , int, mcOnly=True),
   #     matching_pi_genIdx          = Var("userInt('matching_pi_genIdx')"         , int, mcOnly=True),

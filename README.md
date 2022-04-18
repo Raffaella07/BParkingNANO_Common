@@ -36,6 +36,8 @@ cp $CMSSW_BASE/external/$SCRAM_ARCH/data/RecoEgamma/ElectronIdentification/data/
 Build everything
 
 ```
+git clone https://github.com/Raffaella07/BParkingNANO_Common.git ./PhysicsTools
+git cms-addpkg PhysicsTools/NanoAOD
 scram b -j 8
 ```
 

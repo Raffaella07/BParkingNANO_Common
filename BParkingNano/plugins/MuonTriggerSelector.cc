@@ -28,15 +28,22 @@
 #include "DataFormats/PatCandidates/interface/TriggerEvent.h"
 #include "DataFormats/PatCandidates/interface/TriggerAlgorithm.h"
 
+#include "TrackingTools/TransientTrack/interface/TransientTrack.h"
 #include "MagneticField/Engine/interface/MagneticField.h"
 #include "MagneticField/Records/interface/IdealMagneticFieldRecord.h"
 
 #include "DataFormats/Math/interface/deltaR.h"
 
+
 #include "PhysicsTools/BParkingNano/interface/ETHMuon.h"
 
 #include <TLorentzVector.h>
 #include "PhysicsTools/BParkingNano/interface/helper.h"
+
+#include "PhysicsTools/BParkingNano/interface/KinVtxFitter.h"
+
+
+
 
 using namespace std;
 
@@ -46,7 +53,9 @@ class MuonTriggerSelector : public edm::EDProducer {
 
 	public:
 
+
 		explicit MuonTriggerSelector(const edm::ParameterSet &iConfig);
+
 
 		~MuonTriggerSelector() override {};
 
@@ -103,6 +112,7 @@ MuonTriggerSelector::MuonTriggerSelector(const edm::ParameterSet &iConfig):
 
 
 void MuonTriggerSelector::produce(edm::Event& iEvent, const edm::EventSetup& iSetup) {
+
 	edm::ESHandle<MagneticField> bFieldHandle;
 	iSetup.get<IdealMagneticFieldRecord>().get(bFieldHandle);
 

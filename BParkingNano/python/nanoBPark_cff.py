@@ -69,8 +69,10 @@ def nanoAOD_customizeBToMuLPi(process, isMC=False):
      process.nanoBMuEPiHDSequence  = cms.Sequence( BToMuEPiHDSequence  + BToMuEPiHDTable  + CountBToMuEPiHD)
    else:
      process.nanoBMuMuPiSequence = cms.Sequence( BToMuMuPiSequenceMC + BToMuMuPiMCTable + CountBToMuMuPiMC)
+
      process.nanoBMuEPiSequence  = cms.Sequence( BToMuEPiSequenceMC  + BToMuEPiMCTable  + CountBToMuEPiMC )
      process.nanoBMuEPiHDSequence  = cms.Sequence( BToMuEPiHDSequenceMC  + BToMuEPiHDMCTable  + CountBToMuEPiHDMC)
+
    return process
 
 def nanoAOD_customizeHNLToMuPi(process, isMC=False):
@@ -131,8 +133,10 @@ def nanoAOD_customizeMC(process, ancestor_particles=[511, 521, 531, 541, 9900015
 
         # make the BToMuEPiTable/count talk to the correct producer
         massSearchReplaceAnyInputTag(path, 'BToMuEPi', 'BToMuEPiMC') #adding electron channel
+
         # make the BToMuEPiHDTable/count talk to the correct producer
         massSearchReplaceAnyInputTag(path, 'BToMuEPiHD', 'BToMuEPiHDMC') #adding electron channel
+
         # make the HNLToMuPiTable/count talk to the correct producer
         massSearchReplaceAnyInputTag(path, 'HNLToMuPi', 'HNLToMuPiMC')
 

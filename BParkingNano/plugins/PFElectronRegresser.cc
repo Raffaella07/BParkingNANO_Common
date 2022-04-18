@@ -9,7 +9,9 @@
 #include "DataFormats/Common/interface/View.h"
 #include "DataFormats/PatCandidates/interface/Electron.h"
 #include "CommonTools/CandAlgos/interface/ModifyObjectValueBase.h"
-#include "helper.h"
+
+#include "PhysicsTools/BParkingNano/interface/helper.h"
+
 
 class PFElectronRegresser : public edm::global::EDProducer<> {
 
@@ -68,7 +70,9 @@ void PFElectronRegresser::produce(edm::StreamID, edm::Event &evt, edm::EventSetu
   for(auto ele : *pf) {
    ipfele++;
    if(debug) {
-     std::cout << "ElectronRegresser, Event " << (evt.id()).event() 
+
+     std::cout << "PFElectronRegresser, Event " << (evt.id()).event() 
+
 	       << " => Pre regression, PF: ele.superCluster()->rawEnergy() = " << ele.superCluster()->rawEnergy()
 	       << ", ele.correctedEcalEnergy() = " << ele.correctedEcalEnergy()
 	       << ", ele gsf track chi2 = " << ele.core()->gsfTrack()->normalizedChi2()
@@ -78,7 +82,9 @@ void PFElectronRegresser::produce(edm::StreamID, edm::Event &evt, edm::EventSetu
    regressionGsf_->modifyObject(ele);
 
    if(debug) { 
-     std::cout << "ElectronRegresser, Event " << (evt.id()).event() 
+
+     std::cout << "PFElectronRegresser, Event " << (evt.id()).event() 
+
 	       << " => Post regression, PF: ele.superCluster()->rawEnergy() = " << ele.superCluster()->rawEnergy()
 	       << ", ele.correctedEcalEnergy() = " << ele.correctedEcalEnergy()
 	       << ", ele gsf track chi2 = " << ele.core()->gsfTrack()->normalizedChi2()
@@ -89,6 +95,7 @@ void PFElectronRegresser::produce(edm::StreamID, edm::Event &evt, edm::EventSetu
   }
 
   // put collections in the event
+
   evt.put(std::move(ele_out_pf),  "regressedElectrons");
 }
 
