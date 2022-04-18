@@ -1,4 +1,4 @@
-#include "ConversionInfo.h"
+#include "../interface/ConversionInfo.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 // Matched to any conversion (without selections)

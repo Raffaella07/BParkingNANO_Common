@@ -14,11 +14,11 @@
 #include "DataFormats/Math/interface/deltaR.h"
 #include "CommonTools/Statistics/interface/ChiSquaredProbability.h"
 #include "TrackingTools/TransientTrack/interface/TransientTrack.h"
-#include "helper.h"
+#include "../interface/helper.h"
 #include <limits>
 #include <algorithm>
-#include "KinVtxFitter.h"
-#include "ETHMuon.h"
+#include "../interface/KinVtxFitter.h"
+#include "../interface/ETHMuon.h"
 
 //template<typename Lepton>
 class TagAndProbeJPsiToMuMuBuilder : public edm::global::EDProducer<> {
@@ -82,6 +82,7 @@ void TagAndProbeJPsiToMuMuBuilder::produce(edm::StreamID, edm::Event &evt, edm::
   for(size_t l1_idx = 0; l1_idx < leptons->size(); ++l1_idx) {
     edm::Ptr<Lepton> l1_ptr(leptons, l1_idx);
     if(l1_ptr->isDSAMuon()==1) continue;
+    // the next two cuts are removed from the builder and applied in the ntupliser
     ////if(l1_ptr->userInt("HLT_Mu8_v1")!=1) continue;
     ////if(l1_ptr->userInt("HLT_Mu8_v1_prescale")<1) continue;
     if(l1_ptr->userInt("isTriggering")!=1) continue;
@@ -93,7 +94,7 @@ void TagAndProbeJPsiToMuMuBuilder::produce(edm::StreamID, edm::Event &evt, edm::
       edm::Ptr<Lepton> l2_ptr(leptons, l2_idx);
       if(l2_ptr->isDSAMuon()==1) continue;
       if(l2_ptr->charge() == l1_ptr->charge()) continue;
-      // request at least one BParking trigger to be fired
+      // request at least one BParking trigger to be fired (cut moved to the ntupliser)
       ////if(l2_ptr->userInt("HLT_Mu7_IP4")!=1 && l2_ptr->userInt("HLT_Mu8_IP3")!=1 && l2_ptr->userInt("HLT_Mu8_IP5")!=1 && l2_ptr->userInt("HLT_Mu8_IP6")!=1 && l2_ptr->userInt("HLT_Mu8p5_IP3p5")!=1 && l2_ptr->userInt("HLT_Mu9_IP4")!=1 && l2_ptr->userInt("HLT_Mu9_IP5")!=1 && l2_ptr->userInt("HLT_Mu9_IP6")!=1 && l2_ptr->userInt("HLT_Mu10p5_IP3p5")!=1 && l2_ptr->userInt("HLT_Mu12_IP6")!=1) continue;
       ////if(l2_ptr->userInt("isTriggering")!=1) continue;
       if(!l2_selection_(*l2_ptr)) continue;
@@ -208,7 +209,7 @@ void TagAndProbeJPsiToMuMuBuilder::produce(edm::StreamID, edm::Event &evt, edm::
   evt.put(std::move(ret_value));
 }
 
-//#include "ETHMuon.h"
+//#include "../interface/ETHMuon.h"
 //typedef TagAndProbeJPsiToLLBuilder<pat::ETHMuon> TagAndProbeJPsiToMuMuBuilder;
 
 #include "FWCore/Framework/interface/MakerMacros.h"

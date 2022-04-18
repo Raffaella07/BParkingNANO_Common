@@ -40,13 +40,18 @@ nanoSequenceMC = cms.Sequence(particleLevelBParkSequence + genParticleBParkSeque
 
 
 
-def nanoAOD_customizeMuonTriggerBPark(process):
-    #process.nanoSequence = cms.Sequence( process.nanoSequence + muonBParkSequence + muonBParkTables)#+ muonTriggerMatchedTables)   ###comment in this extra table in case you want to create the TriggerMuon collection again.
-    process.nanoSequence = cms.Sequence( process.nanoSequence + muonBParkSequence + muonTriggerMatchedTables + muonBParkTables)
+def nanoAOD_customizeMuonTriggerBPark(process, addTriggerMuonCollection=False):
+    if addTriggerMuonCollection:
+      process.nanoSequence = cms.Sequence( process.nanoSequence + muonBParkSequence + muonTriggerMatchedTables + muonBParkTables)
+    else:
+      process.nanoSequence = cms.Sequence( process.nanoSequence + muonBParkSequence + muonBParkTables)
     return process
 
-def nanoAOD_customizeTrackFilteredBPark(process):
-    process.nanoSequence = cms.Sequence( process.nanoSequence + tracksBParkSequence + tracksBParkTables)
+def nanoAOD_customizeTrackFilteredBPark(process, addProbeTracksCollection=False):
+    if addProbeTracksCollection:
+      process.nanoSequence = cms.Sequence( process.nanoSequence + tracksBParkSequence + tracksBParkTables)
+    else:
+      process.nanoSequence = cms.Sequence( process.nanoSequence + tracksBParkSequence)
     return process
 
 def nanoAOD_customizeElectronFilteredBPark(process):
@@ -105,8 +110,7 @@ def nanoAOD_customizeBToKstarMuMu(process):
     return process
 
 from FWCore.ParameterSet.MassReplace import massSearchReplaceAnyInputTag
-#def nanoAOD_customizeMC(process, ancestor_particles=[511, 521, 531, 541, 211, 9900015]):  
-def nanoAOD_customizeMC(process, ancestor_particles=[511, 521, 531, 541, 9900015]):  
+def nanoAOD_customizeMC(process, ancestor_particles=[511, 521, 531, 541, 9900015], addTriggerMuonCollection=False, addProbeTracksCollection=False):  
     for name, path in process.paths.iteritems():
         # replace all the non-match embedded inputs with the matched ones
         massSearchReplaceAnyInputTag(path, 'muonTrgSelector:SelectedMuons', 'selectedMuonsMCMatchEmbedded')
@@ -133,6 +137,12 @@ def nanoAOD_customizeMC(process, ancestor_particles=[511, 521, 531, 541, 9900015
 
         # modify the path to include mc-specific info
         path.insert(0, nanoSequenceMC)
-        path.replace(process.muonBParkSequence, process.muonBParkMC)
+        if addTriggerMuonCollection:
+          path.replace(process.muonBParkSequence, process.muonBParkMCWithTriggerMuon)
+        else:
+          path.replace(process.muonBParkSequence, process.muonBParkMC)
         path.replace(process.electronsBParkSequence, process.electronBParkMC)
-        path.replace(process.tracksBParkSequence, process.tracksBParkMC)
+        if addProbeTracksCollection:
+          path.replace(process.tracksBParkSequence, process.tracksBParkMCWithTable)
+        else:
+          path.replace(process.tracksBParkSequence, process.tracksBParkMC)

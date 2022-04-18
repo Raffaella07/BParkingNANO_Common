@@ -3,7 +3,7 @@ from PhysicsTools.NanoAOD.common_cff import *
 
 tracksBPark = cms.EDProducer('TrackMerger',
                              beamSpot   = cms.InputTag("offlineBeamSpot"),
-                             trgMuon    = cms.InputTag('muonTrgSelector', 'SelectedMuons'), # use SelectedMuons and ask them to be triggering
+                             trgMuon    = cms.InputTag('muonTrgSelector', 'trgMuons'),
                              tracks     = cms.InputTag("packedPFCandidates"),
                              lostTracks = cms.InputTag("lostTracks"),
                              muons      = cms.InputTag('muonTrgSelector', 'SelectedMuons'),
@@ -12,14 +12,25 @@ tracksBPark = cms.EDProducer('TrackMerger',
                              #lowPtElectrons=cms.InputTag("slimmedLowPtElectrons"),
                              #gsf2packed=cms.InputTag("lowPtGsfLinks:packedCandidates"),
                              #gsf2lost=cms.InputTag("lowPtGsfLinks:lostTracks"),
+
                              # keep the cuts as tight as possible without affecting any physics builder
                              trkPtCut = cms.double(0.6),
                              #trkPtCut = cms.double(0.3),
                              trkEtaCut = cms.double(2.1),
                              #trkEtaCut = cms.double(2.8),
+
+                             # clean tracks wrt trigger muons (checked that not relevant for our study)
+                             do_trgmu_cleaning = cms.bool(False),
                              dzTrg_cleaning = cms.double(-1), # initial value: 1.8
                              #drTrg_cleaning = cms.double(0.03), # deltaR requirement between track and trigger muon  
                              drTrg_cleaning = cms.double(-1), # keep track even in trgmu jet, deltaR requirement between track and trigger muon  
+                             # clean tracks wrt muons (checked that not relevant for our study)
+                             do_mu_cleaning = cms.bool(False),
+                             # clean tracks wrt electrons (checked that not relevant for our study)
+                             do_el_cleaning = cms.bool(False),
+                             # request PackedCandidate to have high purity
+                             do_trk_highpurity = cms.bool(False),
+
                              dcaSig = cms.double(-100000),
                              trkNormChiMin = cms.int32(-1),
                              trkNormChiMax = cms.int32(-1)
@@ -57,6 +68,17 @@ trackBParkTable = cms.EDProducer(
         nValidHits = Var("userInt('nValidHits')", int,doc="Number of valid hits on track", precision=10),
         #dEdXStrip=Var("userFloat('dEdXStrip')", float,doc="dE/dX from strips of associated isolated track"),
         #dEdXPixel=Var("userFloat('dEdXPixel')", float,doc="dE/dX from pixels of associated isolated track"),
+        chi2 = Var("userFloat('chi2')", float, doc="chi2 of the track fit", precision=10),
+        ndof = Var("userInt('ndof')", int, doc="ndof of the track fit", precision=10),
+        normalisedChi2 = Var("userFloat('normalisedChi2')", float, doc="chi2/ndof of the track fit", precision=10),
+        numberOfValidHits = Var("userInt('numberOfValidHits')", int, doc="number of valid hits of the track", precision=10),
+        numberOfLostHits = Var("userInt('numberOfLostHits')", int, doc="number of lost hits of the track", precision=10),
+        numberOfValidPixelHits = Var("userInt('numberOfValidPixelHits')", int, doc="number of valid pixel hits", precision=10),
+        numberOfTrackerLayers = Var("userInt('numberOfTrackerLayers')", int, doc="number of tracker layers", precision=10),
+        numberOfPixelLayers = Var("userInt('numberOfPixelLayers')", int, doc="number of pixel layers", precision=10),
+        qualityIndex = Var("userInt('qualityIndex')", int, doc="quality index", precision=10),
+        highPurityFlag = Var("userInt('highPurityFlag')", int, doc="high purity flag", precision=10),
+        validFraction = Var("userFloat('validFraction')", float, doc="valid fraction", precision=10),
         ),
 )
 
@@ -95,6 +117,7 @@ tracksBParkMCTable = cms.EDProducer("CandMCMatchTableProducerBPark",
 
 tracksBParkSequence = cms.Sequence(tracksBPark)
 tracksBParkTables = cms.Sequence(trackBParkTable)
-tracksBParkMC = cms.Sequence(tracksBParkSequence + tracksBParkMCMatchForTable + tracksBParkMCMatchEmbedded + tracksBParkMCTable)
+tracksBParkMC = cms.Sequence(tracksBParkSequence + tracksBParkMCMatchForTable + tracksBParkMCMatchEmbedded)
+tracksBParkMCWithTable = cms.Sequence(tracksBParkMC + tracksBParkMCTable)
 
 

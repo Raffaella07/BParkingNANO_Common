@@ -20,10 +20,10 @@
 #include "DataFormats/PatCandidates/interface/Muon.h"
 #include "DataFormats/Math/interface/deltaR.h"
 #include "CommonTools/Statistics/interface/ChiSquaredProbability.h"
-#include "helper.h"
+#include "../interface/helper.h"
 #include <limits>
 #include <algorithm>
-#include "KinVtxFitter.h"
+#include "../interface/KinVtxFitter.h"
 
 class my_BToMuMuPiBuilder : public edm::global::EDProducer<> {
 

@@ -16,8 +16,16 @@ muonTrgSelector = cms.EDProducer("MuonTriggerSelector",
                                  prescales = cms.InputTag("patTrigger"),
 
                                  # trigger muon matching conditions
-                                 max_deltaR = cms.double(0.05),
-                                 max_deltaPtRel = cms.double(0.1),
+                                 max_deltaR_trigger_matching = cms.double(0.05),
+                                 max_deltaPtRel_trigger_matching = cms.double(0.1),
+
+                                 # add displaced standalone muons
+                                 add_dsa = cms.bool(False),
+
+                                 # DSA to slimmed muon matching conditions
+                                 do_dsa_matching = cms.bool(False),
+                                 max_deltaR_dsaToSlimmed_matching = cms.double(0.1),
+                                 max_deltaPtRel_dsaToSlimmed_matching = cms.double(0.2),
                                  
                                  # selection for the selected muon
                                  selmu_ptMin = cms.double(1.),
@@ -45,6 +53,12 @@ muonBParkTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
     variables = cms.PSet(CandVars,
         isSlimmedMuon = Var("isSlimmedMuon()", int, doc="muon is slimmedMuon"), 
         isDSAMuon = Var("isDSAMuon()", int, doc="muon is displacedStandaloneMuon"), 
+        isMatchedToSlimmedMuon = Var("userInt('isMatchedToSlimmedMuon')", int, doc="DSA muon is matched to slimmed muon"), 
+        indexMatchedSlimmedMuon = Var("userInt('indexMatchedSlimmedMuon')", int, doc="index of the slimmed muon to which the dsa muon is matched"), 
+        dsaToSlimmedMatching_deltaR = Var("userFloat('dsaToSlimmedMatching_deltaR')", float, doc="deltaR between the dsa and slimmed muon"), 
+        dsaToSlimmedMatching_deltaPtRel = Var("userFloat('dsaToSlimmedMatching_deltaPtRel')", float, doc="relative difference in pt between the dsa and matched slimmed muons"), 
+        dsaToSlimmedMatching_deltadxyRel = Var("userFloat('dsaToSlimmedMatching_deltadxyRel')", float, doc="relative difference in dxy between the dsa and matched slimmed muons"), 
+        dsaToSlimmedMatching_deltadzRel = Var("userFloat('dsaToSlimmedMatching_deltadzRel')", float, doc="relative difference in dz between the dsa and matched slimmed muons"), 
         vx = Var("vx()", float, doc="x coordinate of vertex position, in cm", precision=6),
         vy = Var("vy()", float, doc="y coordinate of vertex position, in cm", precision=6),
         vz = Var("vz()", float, doc="z coordinate of vertex position, in cm", precision=6),
@@ -104,6 +118,7 @@ muonBParkTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
         pfIsoId = Var("pfIsoId()", "uint8", doc="PFIso ID from miniAOD selector (1=PFIsoVeryLoose, 2=PFIsoLoose, 3=PFIsoMedium, 4=PFIsoTight, 5=PFIsoVeryTight, 6=PFIsoVeryVeryTight)"),
         tkIsoId = Var("tkIsoId()", "uint8", doc="TkIso ID (1=TkIsoLoose, 2=TkIsoTight)"),  
         triggerIdLoose = Var("triggerIdLoose()", int, doc="TriggerIdLoose ID"),
+        passDSAMuonID = Var("userInt('passDSAMuonID')", int, doc="DSA muon passes customised DSA muon ID"), 
         ##highPtId = Var("?passed('CutBasedIdGlobalHighPt')?2:passed('CutBasedIdTrkHighPt')","uint8",doc="high-pT cut-based ID (1 = tracker high pT, 2 = global high pT, which includes tracker high pT)"),
         ##softMvaId = Var("passed('SoftMvaId')",bool,doc="soft MVA ID"),
         ##mvaId = Var("passed('MvaLoose')+passed('MvaMedium')+passed('MvaTight')","uint8",doc="Mva ID from miniAOD selector (1=MvaLoose, 2=MvaMedium, 3=MvaTight)"),
@@ -242,7 +257,8 @@ triggerMuonsMCMatchEmbedded = cms.EDProducer(
 
 #muonBParkSequence = cms.Sequence(muonTrgSelector * countTrgMuons)
 muonBParkSequence = cms.Sequence(muonTrgSelector)
-#muonBParkMC = cms.Sequence(muonTrgSelector + muonsBParkMCMatchForTable + selectedMuonsMCMatchEmbedded + muonBParkMCTable + muonsTriggerBParkMCMatchForTable + triggerMuonsMCMatchEmbedded + muonTriggerBParkMCTable* countTrgMuons)
-muonBParkMC = cms.Sequence(muonTrgSelector + muonsBParkMCMatchForTable + selectedMuonsMCMatchEmbedded + muonBParkMCTable + muonsTriggerBParkMCMatchForTable + triggerMuonsMCMatchEmbedded + muonTriggerBParkMCTable)
+
+muonBParkMC = cms.Sequence(muonTrgSelector + muonsBParkMCMatchForTable + selectedMuonsMCMatchEmbedded + muonBParkMCTable)
+muonBParkMCWithTriggerMuon = cms.Sequence(muonBParkMC + muonsTriggerBParkMCMatchForTable + triggerMuonsMCMatchEmbedded + muonTriggerBParkMCTable)
 muonBParkTables = cms.Sequence(muonBParkTable)
 muonTriggerMatchedTables = cms.Sequence(muonTriggerBParkTable)

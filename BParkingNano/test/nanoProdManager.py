@@ -11,12 +11,14 @@ def getOptions():
   parser.add_argument('--pl'        , type=str, dest='pl'          , help='label of the sample file'                                             , default=None)
   parser.add_argument('--ds'        , type=str, dest='ds'          , help='[optional] name of dataset'                                           , default=None)
   parser.add_argument('--tag'       , type=str, dest='tag'         , help='[optional] tag name'                                                  , default=None)
+  parser.add_argument('--doflat'              , dest='doflat'      , help='check the ntuples'                              , action='store_true', default=False)
   parser.add_argument('--dosignal'            , dest='dosignal'    , help='run the BToMuMuPi process'                       , action='store_true', default=False)
   parser.add_argument('--docontrol'           , dest='docontrol'   , help='run the BToKMuMu process'                        , action='store_true', default=False)
   parser.add_argument('--dohnl'               , dest='dohnl'       , help='run the HNLToMuMuPi process'                     , action='store_true', default=False)
   parser.add_argument('--dotageprobe'         , dest='dotageprobe' , help='run the JpsiToMuMu process (tag and probe study)', action='store_true', default=False)
   parser.add_argument('--mcprivate'           , dest='mcprivate'   , help='run the resubmitter on a private MC sample'      , action='store_true', default=False)
   parser.add_argument('--mccentral'           , dest='mccentral'   , help='run the resubmitter on a central MC sample'      , action='store_true', default=False)
+  parser.add_argument('--sigcentral'          , dest='sigcentral'  , help='run the resubmitter on a central signal sample'  , action='store_true', default=False)
   parser.add_argument('--data'                , dest='data'        , help='run the resubmitter on a data sample'            , action='store_true', default=False)
   parser.add_argument('--dofullreport'        , dest='dofullreport', help='add to report chunks and failure reason'         , action='store_true', default=False)
   parser.add_argument('--dofetchtime'         , dest='dofetchtime' , help='add to report time fetch'                        , action='store_true', default=False)
@@ -30,14 +32,17 @@ def checkParser(opt):
   if opt.pl==None:
     raise RuntimeError('Please indicate the production label of the sample')
 
-  if opt.mcprivate==False and opt.mccentral==False and opt.data==False:
-    raise RuntimeError('Please indicate if you want to run on data or MC by adding either --data or--mcprivate or --mccentral to the command line')
+  if opt.mcprivate==False and opt.mccentral==False and opt.sigcentral==False and opt.data==False:
+    raise RuntimeError('Please indicate if you want to run on data or MC by adding either --data or--mcprivate or --mccentral or --sigcentral to the command line')
 
-  if opt.mcprivate + opt.mccentral + opt.data > 1:
-    raise RuntimeError('Please indicate if you want to run on data or MC by adding only --data or --mcprivate or --mccentral to the command line')
+  if opt.mcprivate + opt.mccentral +opt.sigcentral + opt.data > 1:
+    raise RuntimeError('Please indicate if you want to run on data or MC by adding only --data or --mcprivate or --mccentral or --sigcentral to the command line')
 
   if opt.docheckfile and not (opt.dosignal or opt.docontrol or opt.dohnl or opt.dotageprobe):
-    raise RuntimeError('Please indicate with branch you would like to check on (--dosignal or --docontrol or --dohnl or --dotageprobe)')
+    raise RuntimeError('Please indicate which branch you would like to check on (--dosignal or --docontrol or --dohnl or --dotageprobe)')
+
+  if opt.doresubmit and not (opt.dosignal or opt.docontrol or opt.dohnl or opt.dotageprobe):
+    raise RuntimeError('Please indicate over which builder to resubmit (--dosignal or --docontrol or --dohnl or --dotageprobe)')
 
 
 
@@ -46,12 +51,14 @@ class NanoProdManager(NanoTools):
     self.prodlabel    = vars(opt)['pl']
     self.dataset      = vars(opt)['ds']
     self.tag          = vars(opt)['tag']
+    self.doflat       = vars(opt)["doflat"]
     self.dosignal     = vars(opt)["dosignal"]
     self.docontrol    = vars(opt)["docontrol"]
     self.dohnl        = vars(opt)["dohnl"]
     self.dotageprobe  = vars(opt)["dotageprobe"]
     self.mcprivate    = vars(opt)['mcprivate']
     self.mccentral    = vars(opt)['mccentral']
+    self.sigcentral   = vars(opt)['sigcentral']
     self.data         = vars(opt)['data']
     self.dofullreport = vars(opt)['dofullreport'] 
     self.dofetchtime  = vars(opt)['dofetchtime'] 
@@ -122,6 +129,8 @@ class NanoProdManager(NanoTools):
       filename = './files/resubmit_mcprivate_{}'.format(label)
     elif self.mccentral:
       filename = './files/resubmit_mccentral_{}'.format(label)
+    elif self.sigcentral:
+      filename = './files/resubmit_sigcentral_{}'.format(label)
 
     for file_ in failed_files:
       # get the file to reprocess
@@ -161,13 +170,14 @@ class NanoProdManager(NanoTools):
     filelist  = self.writeFileList(chunk, failed_files, label) 
 
     command = 'sbatch -p standard --account=t3 -o {ld}/nanostep_nj%a.log -e {ld}/nanostep_nj%a.log --job-name=nanostep_nj%a_{pl} --array {ar} --time=03:00:00 submitter.sh {outdir} {usr} {pl} {tag} {isMC} {rmt} {lst} 1 {dosig} {doctrl} {dohnl} {dotep}'.format(
+    #command = 'sbatch -p short --account=t3 -o {ld}/nanostep_nj%a.log -e {ld}/nanostep_nj%a.log --job-name=nanostep_nj%a_{pl} --array {ar} submitter.sh {outdir} {usr} {pl} {tag} {isMC} {rmt} {lst} 1 {dosig} {doctrl} {dohnl} {dotep}'.format(
       ld      = logdir,
       pl      = label,
       ar      = self.getArray(failed_files), 
       outdir  = outputdir,
       usr     = os.environ["USER"], 
       tag     = 0 if self.tag == None else self.tag,
-      isMC    = 1 if self.mcprivate or self.mccentral else 0,
+      isMC    = 0 if self.data else 1,
       rmt     = 0 if self.mcprivate else 1,
       lst     =  filelist,
       dosig     = 1 if self.dosignal else 0, 
@@ -190,6 +200,7 @@ class NanoProdManager(NanoTools):
     # pnfs directory where nano samples are located
     if self.data: dirtag = 'data'
     elif self.mccentral: dirtag = 'mccentral'
+    elif self.sigcentral: dirtag = 'sigcentral'
     else:  dirtag = ''
     location = NanoTools.getFilesLocation(self, dirtag)
 
@@ -255,8 +266,10 @@ class NanoProdManager(NanoTools):
         if not self.mcprivate:
           if self.tag == None:
             files = [chunk_+'/bparknano_nj'+str(nj)+'.root' for nj in range(1, n_exp+1)]
+            files_flat = [chunk_+'/flat/flat_bparknano_nj'+str(nj)+'.root' for nj in range(1, n_exp+1)]
           else:
             files = [chunk_+'/bparknano_{}_nj'.format(self.tag) +str(nj)+'.root' for nj in range(1, n_exp+1)]
+            files_flat = [chunk_+'/flat/flat_bparknano_{}_nj'.format(self.tag) +str(nj)+'.root' for nj in range(1, n_exp+1)]
 
           logdir = NanoTools.getLogDir(self, files[0], self.prodlabel, self.tag, self.data, 'mcprivate' if self.mcprivate else '')
           logfiles = [NanoTools.getLogFile(self, logdir, file_) for file_ in files]
@@ -275,10 +288,18 @@ class NanoProdManager(NanoTools):
           lines = f.readlines()
 
           files = [chunk_+'/bparknano_{}_nj'.format(self.tag) +str(NanoTools.getStep(self, lines[nj-1]))+'.root' for nj in range(1, n_exp+1)]
+          files_flat = [chunk_+'/flat/flat_bparknano_{}_nj'.format(self.tag) +str(NanoTools.getStep(self, lines[nj-1]))+'.root' for nj in range(1, n_exp+1)]
           files_nlog = [chunk_+'/bparknano_{}_nj'.format(self.tag) +str(nj)+'.root' for nj in range(1, n_exp+1)]
 
           logdir = NanoTools.getLogDir(self, files[0], self.prodlabel, self.tag, self.data, 'mcprivate' if self.mcprivate else '')
           logfiles = [NanoTools.getLogFile(self, logdir, file_) for file_ in files_nlog]
+
+        if self.doflat:
+          #files_flat = [chunk_+'/flat_bparknano_{}_nj'.format(self.tag) +str(NanoTools.getStep(self, lines[nj-1]))+'.root' for nj in range(1, n_exp+1)]
+          for ifile, file_ in enumerate(files_flat):
+            if not NanoTools.checkFileExists(self, file_): # successfull job
+              print 'file does not exist'
+              print file_
 
         for ifile, file_ in enumerate(files):
           # get the log file
@@ -289,13 +310,17 @@ class NanoProdManager(NanoTools):
             n_unprocessed_perchunk += 1
             continue
 
-          branchname = ''
-          if self.dosignal: branchname = 'nBToMuMuPi'
-          elif self.docontrol: branchname = 'nBToKMuMu'
-          elif self.dohnl: branchname = 'nHNLToMuPi'
-          elif self.dotageprobe: branchname = 'nJpsiToMuMu'
-          extra_cond = NanoTools.checkLocalFile(self, file_, cond=True, branch_check=True, branchname=branchname) if self.docheckfile else 'True'
-          #if NanoTools.checkFileExists(self, file_) and NanoTools.checkLocalFile(self, file_, cond=True): # successfull job
+          if self.docheckfile:
+            branchnames = []
+            if self.dosignal: branchnames.append('nBToMuMuPi')
+            if self.docontrol: branchnames.append('nBToKMuMu')
+            if self.dohnl: branchnames.append('nHNLToMuPi')
+            if self.dotageprobe: branchnames.append('nJPsiToMuMu')
+            for branchname in branchnames:
+              extra_cond = NanoTools.checkLocalFile(self, file_, cond=True, branch_check=True, branchname=branchname)
+              if not extra_cond: break
+          else: extra_cond = 'True'
+
           if NanoTools.checkFileExists(self, file_) and extra_cond: # successfull job
             n_good_perchunk += 1
 

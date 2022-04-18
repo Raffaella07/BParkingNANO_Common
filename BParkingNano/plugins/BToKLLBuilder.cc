@@ -16,11 +16,11 @@
 #include "DataFormats/PatCandidates/interface/CompositeCandidate.h"
 #include "DataFormats/Math/interface/deltaR.h"
 #include "CommonTools/Statistics/interface/ChiSquaredProbability.h"
-#include "helper.h"
+#include "../interface/helper.h"
 #include <limits>
 #include <algorithm>
-#include "KinVtxFitter.h"
-#include "ETHMuon.h"
+#include "../interface/KinVtxFitter.h"
+#include "../interface/ETHMuon.h"
 
 class BToKLLBuilder : public edm::global::EDProducer<> {
 
@@ -204,8 +204,29 @@ void BToKLLBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
       cand.addUserFloat("fitted_k_pt"  , fitter.daughter_p4(2).pt()); 
       cand.addUserFloat("fitted_k_eta" , fitter.daughter_p4(2).eta());
       cand.addUserFloat("fitted_k_phi" , fitter.daughter_p4(2).phi());
-    
+   
+      cand.addUserFloat("ll_sv_prob", ll_ptr->userFloat("sv_prob"));
+
       if( !post_vtx_selection_(cand) ) continue;        
+
+      // add kaon information
+      cand.addUserFloat("kaon_pt"                  , k_ptr->pt()                             );
+      cand.addUserFloat("kaon_eta"                 , k_ptr->eta()                            );
+      cand.addUserFloat("kaon_phi"                 , k_ptr->phi()                            );
+      cand.addUserFloat("kaon_mass"                , k_ptr->mass()                           );
+      cand.addUserInt("kaon_charge"                , k_ptr->charge()                         );
+      cand.addUserInt("kaon_pdgId"                 , k_ptr->pdgId()                          );
+      cand.addUserFloat("kaon_vx"                  , k_ptr->vx()                             );
+      cand.addUserFloat("kaon_vy"                  , k_ptr->vy()                             );
+      cand.addUserFloat("kaon_vz"                  , k_ptr->vz()                             );
+      cand.addUserFloat("kaon_dz"                  , k_ptr->userFloat("dz")                  );
+      cand.addUserFloat("kaon_dxy"                 , k_ptr->userFloat("dxy")                 );
+      cand.addUserFloat("kaon_dzS"                 , k_ptr->userFloat("dzS")                 );
+      cand.addUserFloat("kaon_dxyS"                , k_ptr->userFloat("dxyS")                );
+      cand.addUserFloat("kaon_DCASig"              , k_ptr->userFloat("DCASig")              );
+      cand.addUserInt("kaon_ispacked"              , k_ptr->userInt("isPacked")              );
+      cand.addUserInt("kaon_islost"                , k_ptr->userInt("isLostTrk")             );
+      cand.addUserInt("kaon_highPurityFlag"        , k_ptr->userInt("highPurityFlag")        );
 
       //compute isolation
       float l1_iso03 = 0;
@@ -307,10 +328,13 @@ void BToKLLBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
       cand.addUserFloat("b_iso04_close", b_iso04_close);
 
       // gen-matching
-      
       int isMatched = 0;
       int l1_genIdx(-1), l2_genIdx(-1), k_genIdx(-1);
       int genMuon1Mother_genPdgId(-1), genMuon2Mother_genPdgId(-1), genKaonMother_genPdgId(-1);
+      float matched_b_pt(-99.), matched_b_eta(-99.), matched_b_phi(-99.), matched_b_mass(-99.);
+      float matched_l1_pt(-99.), matched_l1_eta(-99.), matched_l1_phi(-99.), matched_l1_mass(-99.);
+      float matched_l2_pt(-99.), matched_l2_eta(-99.), matched_l2_phi(-99.), matched_l2_mass(-99.);
+      float matched_k_pt(-99.), matched_k_eta(-99.), matched_k_phi(-99.), matched_k_mass(-99.);
 
       // for MC only
       if(isMC_ == true){
@@ -350,12 +374,41 @@ void BToKLLBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
           genMuon2Mother_genPdgId = genMuon2Mother_ptr->pdgId();
           genKaonMother_genPdgId  = genKaonMother_ptr->pdgId();
 
+          // grand-mothers of the muons
+          int genMuon1GMother_genIdx = (genMuon1Mother_ptr->motherRef(0).key()) ? genMuon1Mother_ptr->motherRef(0).key() : -1;
+          int genMuon2GMother_genIdx = (genMuon2Mother_ptr->motherRef(0).key()) ? genMuon2Mother_ptr->motherRef(0).key() : -1;
+          edm::Ptr<reco::GenParticle> genMuon1GMother_ptr(genParticles, genMuon1GMother_genIdx);
+          edm::Ptr<reco::GenParticle> genMuon2GMother_ptr(genParticles, genMuon2GMother_genIdx);
+          int genMuon1GMother_genPdgId = genMuon1GMother_ptr->pdgId();
+          int genMuon2GMother_genPdgId = genMuon2GMother_ptr->pdgId();
+          
+          // matching: muons fully matched, kaon not necessarily
           if(
              fabs(l1_genPdgId) == 13 && fabs(genMuon1Mother_genPdgId) == 443 && 
              fabs(l2_genPdgId) == 13 && fabs(genMuon2Mother_genPdgId) == 443 && 
-             fabs(k_genPdgId) == 321 && fabs(genKaonMother_genPdgId) == 521
+               (  
+                  (fabs(k_genPdgId) == 321 && fabs(genKaonMother_genPdgId) == 521) || 
+                  (fabs(genMuon1GMother_genPdgId) == fabs(genMuon2GMother_genPdgId) && fabs(genMuon2GMother_genPdgId)==521) 
+               )
             ){
               isMatched = 1;
+              matched_b_pt = genKaonMother_ptr->pt();
+              matched_b_eta = genKaonMother_ptr->eta();
+              matched_b_phi = genKaonMother_ptr->phi();
+              matched_b_mass = genKaonMother_ptr->mass();
+              matched_l1_pt = genMuon1_ptr->pt();
+              matched_l1_eta = genMuon1_ptr->eta();
+              matched_l1_phi = genMuon1_ptr->phi();
+              matched_l1_mass = genMuon1_ptr->mass();
+              matched_l2_pt = genMuon2_ptr->pt();
+              matched_l2_eta = genMuon2_ptr->eta();
+              matched_l2_phi = genMuon2_ptr->phi();
+              matched_l2_mass = genMuon2_ptr->mass();
+              matched_k_pt = genKaon_ptr->pt();
+              matched_k_eta = genKaon_ptr->eta();
+              matched_k_phi = genKaon_ptr->phi();
+              matched_k_mass = genKaon_ptr->mass();
+               
           }
         }
       }
@@ -367,6 +420,22 @@ void BToKLLBuilder::produce(edm::StreamID, edm::Event &evt, edm::EventSetup cons
       cand.addUserInt("matching_l1_motherPdgId", genMuon1Mother_genPdgId);
       cand.addUserInt("matching_l2_motherPdgId", genMuon2Mother_genPdgId);
       cand.addUserInt("matching_k_motherPdgId", genKaonMother_genPdgId);
+      cand.addUserFloat("matched_b_pt", matched_b_pt);
+      cand.addUserFloat("matched_b_eta", matched_b_eta);
+      cand.addUserFloat("matched_b_phi", matched_b_phi);
+      cand.addUserFloat("matched_b_mass", matched_b_mass);
+      cand.addUserFloat("matched_l1_pt", matched_l1_pt);
+      cand.addUserFloat("matched_l1_eta", matched_l1_eta);
+      cand.addUserFloat("matched_l1_phi", matched_l1_phi);
+      cand.addUserFloat("matched_l1_mass", matched_l1_mass);
+      cand.addUserFloat("matched_l2_pt", matched_l2_pt);
+      cand.addUserFloat("matched_l2_eta", matched_l2_eta);
+      cand.addUserFloat("matched_l2_phi", matched_l2_phi);
+      cand.addUserFloat("matched_l2_mass", matched_l2_mass);
+      cand.addUserFloat("matched_k_pt", matched_k_pt);
+      cand.addUserFloat("matched_k_eta", matched_k_eta);
+      cand.addUserFloat("matched_k_phi", matched_k_phi);
+      cand.addUserFloat("matched_k_mass", matched_k_mass);
 
 
       ret_val->push_back(cand);

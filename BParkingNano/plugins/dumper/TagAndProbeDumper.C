@@ -26,6 +26,7 @@
 
 
 #include "TagAndProbeDumper.h"
+#include <TMath.h>
 #include <TH2.h>
 #include <TStyle.h>
 #include <TSystem.h>
@@ -53,8 +54,10 @@ void TagAndProbeDumper::SlaveBegin(TTree * /*tree*/)
   TString outFileName = option;
 
   if(outFileName.Contains("isMC")){
+    isMC = true;
     outFileName.Resize(outFileName.Length()-5);
   }
+  else isMC = false;
 
   // check if outputfile exists
   if(gSystem->AccessPathName(outFileName)){
@@ -64,6 +67,10 @@ void TagAndProbeDumper::SlaveBegin(TTree * /*tree*/)
     my_file = new TFile(outFileName, "UPDATE");  
   }
   my_file->cd();
+
+  if(isMC){
+    Pileup_nTrueInt = {fReader, "Pileup_nTrueInt"};
+  }
 
   tree = new TTree("tree", "tree");
   tree->Branch("pt", &the_pt);
@@ -170,7 +177,15 @@ void TagAndProbeDumper::SlaveBegin(TTree * /*tree*/)
   tree->Branch("probe_prescale_HLT_BTagMu_AK4DiJet40_Mu5_v13", &the_probe_prescale_HLT_BTagMu_AK4DiJet40_Mu5_v13);
   tree->Branch("probe_fired_BParkingHLT", &the_probe_fired_BParkingHLT);
 
-  tree->Branch("weight_hlt", &the_weight_hlt);
+  tree->Branch("pv_npvs", &the_pv_npvs);
+
+  tree->Branch("weight_hlt_A1", &the_weight_hlt_A1);
+  tree->Branch("weight_hlt_A1_6", &the_weight_hlt_A1_6);
+  tree->Branch("weight_pu_A", &the_weight_pu_A);
+  tree->Branch("weight_pu_B", &the_weight_pu_B);
+  tree->Branch("weight_pu_C", &the_weight_pu_C);
+  tree->Branch("weight_pu_D", &the_weight_pu_D);
+  tree->Branch("weight_pu_tot", &the_weight_pu_tot);
 
 }
 
@@ -194,8 +209,18 @@ Bool_t TagAndProbeDumper::Process(Long64_t entry)
 
   fReader.SetLocalEntry(entry);
 
-  if(Muon_fired_DST_DoubleMu1_noVtx_CaloScouting_v2[JPsiToMuMu_lep1_idx[0]] != 1) return false;
-  if(Muon_prescale_DST_DoubleMu1_noVtx_CaloScouting_v2[JPsiToMuMu_lep1_idx[0]] != 1) return false;
+  // initial strategy
+  //if(Muon_fired_DST_DoubleMu1_noVtx_CaloScouting_v2[JPsiToMuMu_lep1_idx[0]] != 1) return false;
+  //if(Muon_prescale_DST_DoubleMu1_noVtx_CaloScouting_v2[JPsiToMuMu_lep1_idx[0]] != 1) return false;
+
+  //if(Muon_fired_DST_DoubleMu1_noVtx_CaloScouting_v2[JPsiToMuMu_lep1_idx[0]] != 1 && Muon_fired_DST_DoubleMu3_noVtx_CaloScouting_v6[JPsiToMuMu_lep1_idx[0]] != 1) return false;
+  
+  // the following was used to compute SF on period A only
+  //if(Muon_fired_HLT_Mu9_IP6[JPsiToMuMu_lep1_idx[0]] != 1) return false;
+  //if(Muon_prescale_DST_DoubleMu1_noVtx_CaloScouting_v2[JPsiToMuMu_lep1_idx[0]] == -1) return false;
+  
+  // requirement of the tag muon to fire any BParking HLT line
+  if(Muon_isTriggeringBPark[JPsiToMuMu_lep1_idx[0]] != 1) return false;
 
   // by default, take the first candidate (possible since <permille events have more than one candidate per event)
   the_pt = JPsiToMuMu_pt[0];
@@ -307,7 +332,16 @@ Bool_t TagAndProbeDumper::Process(Long64_t entry)
     the_probe_fired_BParkingHLT = 0;
   }
 
-  the_weight_hlt = getTriggerScaleFactor(the_tag_pt, fabs(the_tag_eta));
+  the_pv_npvs = *PV_npvs;
+
+  // weights
+  the_weight_hlt_A1 = isMC ? getTriggerScaleFactor("/t3home/anlyon/BHNL/BHNLNano/CMSSW_10_2_15/src/PhysicsTools/TagAndProbe/test/results/tag_and_probe_v2_BToJPsiKstar_V0_tag_fired_DST_DoubleMu1_A1_v1/scaleFactor_results_cat_pt_eta_fit.root", the_tag_pt, fabs(the_tag_eta)) : 1.;
+  the_weight_hlt_A1_6 = isMC ? getTriggerScaleFactor("/t3home/anlyon/BHNL/BHNLNano/CMSSW_10_2_15/src/PhysicsTools/TagAndProbe/test/results/tag_and_probe_v2_BToJPsiKstar_V0_tag_fired_DST_DoubleMu1_A1_6_v1/scaleFactor_results_cat_pt_eta_fit.root", the_tag_pt, fabs(the_tag_eta)) : 1.;
+  the_weight_pu_A = isMC ? getPUWeight("pileup_weight_dataA_mcAutumn18.root", *Pileup_nTrueInt) : 1.;
+  the_weight_pu_B = isMC ? getPUWeight("pileup_weight_dataB_mcAutumn18.root", *Pileup_nTrueInt) : 1.;
+  the_weight_pu_C = isMC ? getPUWeight("pileup_weight_dataC_mcAutumn18.root", *Pileup_nTrueInt) : 1.;
+  the_weight_pu_D = isMC ? getPUWeight("pileup_weight_dataD_mcAutumn18.root", *Pileup_nTrueInt) : 1.;
+  the_weight_pu_tot = isMC ? getPUWeight("pileup_weight_datatot_mcAutumn18.root", *Pileup_nTrueInt) : 1.;
 
   tree->Fill();
 
