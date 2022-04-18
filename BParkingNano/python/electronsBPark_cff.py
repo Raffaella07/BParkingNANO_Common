@@ -1,10 +1,10 @@
 import FWCore.ParameterSet.Config as cms
 from PhysicsTools.NanoAOD.common_cff import *
-
-from RecoEgamma.EgammaElectronProducers.lowPtGsfElectronIDExtra_cff import lowPtGsfElectronIDExtra
-lowPtGsfElectronExtraID = lowPtGsfElectronIDExtra.clone()
-lowPtGsfElectronExtraID.electrons = 'regressionForEle:regressedLowPtElectrons'
-lowPtGsfElectronExtraID.rho = 'fixedGridRhoFastjetAll'
+#importing variables for lowPtMvaId
+#from RecoEgamma.EgammaElectronProducers.lowPtGsfElectronIDExtra_cff import lowPtGsfElectronIDExtra
+#lowPtGsfElectronExtraID = lowPtGsfElectronIDExtra.clone()
+#lowPtGsfElectronExtraID.electrons = 'regressionForEle:regressedLowPtElectrons'
+#lowPtGsfElectronExtraID.rho = 'fixedGridRhoFastjetAll'
 
 mvaConfigsForEleProducer = cms.VPSet( )
 # Import and add all desired MVAs
@@ -60,74 +60,74 @@ from RecoEgamma.EgammaTools.regressionModifierNew_cfi import regressionModifier1
 from RecoEgamma.EgammaTools.regressionModifierNew_cfi import regressionModifier106XULLP
 
 regressionForEle = cms.EDProducer(
-  'ElectronRegresser',
-  lowptSrc = cms.InputTag('slimmedLowPtElectrons'),
-  pfSrc    = cms.InputTag('slimmedElectrons'),
-    lowPtRegressionConfig = cms.PSet(
-      modifierName = cms.string('EGRegressionModifierLPV1'),
-      rhoTag = cms.string('fixedGridRhoFastjetAll'),
-      useClosestToCentreSeedCrysDef = cms.bool(False),
-      maxRawEnergyForLowPtEBSigma = cms.double(-1),
-      maxRawEnergyForLowPtEESigma = cms.double(1200.),
-      eleRegs = cms.PSet(
-        ecalOnlyMean = cms.PSet(
-            rangeMinLowEt = cms.double(0.2),
-            rangeMaxLowEt = cms.double(2.0),
-            rangeMinHighEt = cms.double(-1.),
-            rangeMaxHighEt = cms.double(3.0),
-            forceHighEnergyTrainingIfSaturated = cms.bool(True),
-            lowEtHighEtBoundary = cms.double(20.),
-            ebLowEtForestName = cms.string("lowPtElectron_eb_ecalOnly_05To20_mean"),
-            ebHighEtForestName = cms.string("lowPtElectron_eb_ecalOnly_20To50_mean"),
-            eeLowEtForestName = cms.string("lowPtElectron_ee_ecalOnly_05To20_mean"),
-            eeHighEtForestName = cms.string("lowPtElectron_ee_ecalOnly_20To50_mean"),
-            ),
-        ecalOnlySigma = cms.PSet(
-            rangeMinLowEt = cms.double(0.0002),
-            rangeMaxLowEt = cms.double(0.5),
-            rangeMinHighEt = cms.double(0.0002),
-            rangeMaxHighEt = cms.double(0.5),
-            forceHighEnergyTrainingIfSaturated = cms.bool(True),
-            lowEtHighEtBoundary = cms.double(20.),
-            ebLowEtForestName = cms.string("lowPtElectron_eb_ecalOnly_05To20_sigma"),
-            ebHighEtForestName = cms.string("lowPtElectron_eb_ecalOnly_20To50_sigma"),
-            eeLowEtForestName = cms.string("lowPtElectron_ee_ecalOnly_05To20_sigma"),
-            eeHighEtForestName = cms.string("lowPtElectron_ee_ecalOnly_20To50_sigma"),
-            ),
-        epComb = cms.PSet(
-            ecalTrkRegressionConfig = cms.PSet(
-                rangeMinLowEt = cms.double(0.2),
-                rangeMaxLowEt = cms.double(2.0),
-                rangeMinHighEt = cms.double(0.2),
-                rangeMaxHighEt = cms.double(2.0),
-                lowEtHighEtBoundary = cms.double(20.),
-                forceHighEnergyTrainingIfSaturated = cms.bool(False),
-                ebLowEtForestName = cms.string('lowPtElectron_eb_ecalTrk_05To20_mean'),
-                ebHighEtForestName = cms.string('lowPtElectron_eb_ecalTrk_20To50_mean'),
-                eeLowEtForestName = cms.string('lowPtElectron_ee_ecalTrk_05To20_mean'),
-                eeHighEtForestName = cms.string('lowPtElectron_ee_ecalTrk_20To50_mean'),
-                ),
-            ecalTrkRegressionUncertConfig = cms.PSet(
-                rangeMinLowEt = cms.double(0.0002),
-                rangeMaxLowEt = cms.double(0.5),
-                rangeMinHighEt = cms.double(0.0002),
-                rangeMaxHighEt = cms.double(0.5),
-                lowEtHighEtBoundary = cms.double(20.),
-                forceHighEnergyTrainingIfSaturated = cms.bool(False),
-                ebLowEtForestName = cms.string('lowPtElectron_eb_ecalTrk_05To20_sigma'),
-                ebHighEtForestName = cms.string('lowPtElectron_eb_ecalTrk_20To50_sigma'),
-                eeLowEtForestName = cms.string('lowPtElectron_ee_ecalTrk_05To20_sigma'),
-                eeHighEtForestName = cms.string('lowPtElectron_ee_ecalTrk_20To50_sigma'),
-                ),
-            maxEcalEnergyForComb=cms.double(200.),
-            minEOverPForComb=cms.double(0.025),
-            maxEPDiffInSigmaForComb=cms.double(15.),
-            maxRelTrkMomErrForComb=cms.double(10.),
-            )
-        ),
-      phoRegs = regressionModifier106XUL.phoRegs.clone()
-    ),
-    gsfRegressionConfig = cms.PSet(
+  'PFElectronRegresser',
+# lowptSrc = cms.InputTag('slimmedLowPtElectrons'),
+ pfSrc    = cms.InputTag('slimmedElectrons'),
+#lowPtRegressionConfig = cms.PSet(
+#  modifierName = cms.string('EGRegressionModifierLPV1'),
+#  rhoTag = cms.string('fixedGridRhoFastjetAll'),
+#  useClosestToCentreSeedCrysDef = cms.bool(False),
+#  maxRawEnergyForLowPtEBSigma = cms.double(-1),
+#  maxRawEnergyForLowPtEESigma = cms.double(1200.),
+#  eleRegs = cms.PSet(
+#    ecalOnlyMean = cms.PSet(
+#        rangeMinLowEt = cms.double(0.2),
+#        rangeMaxLowEt = cms.double(2.0),
+#        rangeMinHighEt = cms.double(-1.),
+#        rangeMaxHighEt = cms.double(3.0),
+#        forceHighEnergyTrainingIfSaturated = cms.bool(True),
+#        lowEtHighEtBoundary = cms.double(20.),
+#        ebLowEtForestName = cms.string("lowPtElectron_eb_ecalOnly_05To20_mean"),
+#        ebHighEtForestName = cms.string("lowPtElectron_eb_ecalOnly_20To50_mean"),
+#        eeLowEtForestName = cms.string("lowPtElectron_ee_ecalOnly_05To20_mean"),
+#        eeHighEtForestName = cms.string("lowPtElectron_ee_ecalOnly_20To50_mean"),
+#        ),
+#    ecalOnlySigma = cms.PSet(
+#        rangeMinLowEt = cms.double(0.0002),
+#        rangeMaxLowEt = cms.double(0.5),
+#        rangeMinHighEt = cms.double(0.0002),
+#        rangeMaxHighEt = cms.double(0.5),
+#        forceHighEnergyTrainingIfSaturated = cms.bool(True),
+#        lowEtHighEtBoundary = cms.double(20.),
+#        ebLowEtForestName = cms.string("lowPtElectron_eb_ecalOnly_05To20_sigma"),
+#        ebHighEtForestName = cms.string("lowPtElectron_eb_ecalOnly_20To50_sigma"),
+#        eeLowEtForestName = cms.string("lowPtElectron_ee_ecalOnly_05To20_sigma"),
+#        eeHighEtForestName = cms.string("lowPtElectron_ee_ecalOnly_20To50_sigma"),
+#        ),
+#    epComb = cms.PSet(
+#        ecalTrkRegressionConfig = cms.PSet(
+#            rangeMinLowEt = cms.double(0.2),
+#            rangeMaxLowEt = cms.double(2.0),
+#            rangeMinHighEt = cms.double(0.2),
+#            rangeMaxHighEt = cms.double(2.0),
+#            lowEtHighEtBoundary = cms.double(20.),
+#            forceHighEnergyTrainingIfSaturated = cms.bool(False),
+#            ebLowEtForestName = cms.string('lowPtElectron_eb_ecalTrk_05To20_mean'),
+#            ebHighEtForestName = cms.string('lowPtElectron_eb_ecalTrk_20To50_mean'),
+#            eeLowEtForestName = cms.string('lowPtElectron_ee_ecalTrk_05To20_mean'),
+#            eeHighEtForestName = cms.string('lowPtElectron_ee_ecalTrk_20To50_mean'),
+#            ),
+#        ecalTrkRegressionUncertConfig = cms.PSet(
+#            rangeMinLowEt = cms.double(0.0002),
+#            rangeMaxLowEt = cms.double(0.5),
+#            rangeMinHighEt = cms.double(0.0002),
+#            rangeMaxHighEt = cms.double(0.5),
+#            lowEtHighEtBoundary = cms.double(20.),
+#            forceHighEnergyTrainingIfSaturated = cms.bool(False),
+#            ebLowEtForestName = cms.string('lowPtElectron_eb_ecalTrk_05To20_sigma'),
+#            ebHighEtForestName = cms.string('lowPtElectron_eb_ecalTrk_20To50_sigma'),
+#            eeLowEtForestName = cms.string('lowPtElectron_ee_ecalTrk_05To20_sigma'),
+#            eeHighEtForestName = cms.string('lowPtElectron_ee_ecalTrk_20To50_sigma'),
+#            ),
+#        maxEcalEnergyForComb=cms.double(200.),
+#        minEOverPForComb=cms.double(0.025),
+#        maxEPDiffInSigmaForComb=cms.double(15.),
+#        maxRelTrkMomErrForComb=cms.double(10.),
+#        )
+#    ),
+#  phoRegs = regressionModifier106XUL.phoRegs.clone()
+#),
+   gsfRegressionConfig = cms.PSet(
       modifierName = cms.string('EGRegressionModifierV3'),
       rhoTag = cms.string('fixedGridRhoFastjetAll'),
       useClosestToCentreSeedCrysDef = cms.bool(False),
@@ -191,26 +191,26 @@ regressionForEle = cms.EDProducer(
         ),
       phoRegs = regressionModifier106XUL.phoRegs.clone()
     )
-
 )
+
 
 #Everything can be done here, in one loop and save time :)
 electronsForAnalysis = cms.EDProducer(
-  'ElectronMerger',
-  trgMuon = cms.InputTag('muonTrgSelector:trgMuons'),
-  lowptSrc = cms.InputTag('regressionForEle:regressedLowPtElectrons'),
+  'PFElectronMerger',
+  trgMuon = cms.InputTag('muonTrgSelector','SelectedMuons'), #use ETH selected muons, then ask in the producer for each used muon to be triggering
+ # lowptSrc = cms.InputTag('regressionForEle:regressedLowPtElectrons'),
   pfSrc    = cms.InputTag('regressionForEle:regressedElectrons'),
-  ptbiasedSeeding = cms.InputTag("lowPtGsfElectronSeedValueMaps","ptbiased","RECO"),
-  unbiasedSeeding = cms.InputTag("lowPtGsfElectronSeedValueMaps","unbiased","RECO"),
-  mvaId = cms.InputTag("lowPtGsfElectronExtraID"),
+#  ptbiasedSeeding = cms.InputTag("lowPtGsfElectronSeedValueMaps","ptbiased","RECO"),
+#  unbiasedSeeding = cms.InputTag("lowPtGsfElectronSeedValueMaps","unbiased","RECO"),
+#  mvaId = cms.InputTag("lowPtGsfElectronExtraID"),
   pfmvaId = cms.InputTag("electronMVAValueMapProducer:ElectronMVAEstimatorRun2BParkRetrainRawValues"),
   vertexCollection = cms.InputTag("offlineSlimmedPrimaryVertices"),
   ## cleaning wrt trigger muon [-1 == no cut]
-  drForCleaning_wrtTrgMuon = cms.double(0.03),
-  dzForCleaning_wrtTrgMuon = cms.double(1.),
+  drForCleaning_wrtTrgMuon = cms.double(-1),
+  dzForCleaning_wrtTrgMuon = cms.double(-1),
   ## cleaning between pfEle and lowPtGsf
   drForCleaning = cms.double(0.03),
-  dzForCleaning = cms.double(0.5), ##keep tighter dZ to check overlap of pfEle with lowPt (?)
+  dzForCleaning = cms.double(1), ##keep tighter dZ to check overlap of pfEle with lowPt (?)
   ## true = flag and clean; false = only flag
   flagAndclean = cms.bool(False),
   pf_ptMin = cms.double(1.),
@@ -247,13 +247,13 @@ electronBParkTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
         dzTrg = Var("userFloat('dzTrg')",float,doc="dz from the corresponding trigger muon, in cm",precision=10),
         ip3d = Var("abs(dB('PV3D'))",float,doc="3D impact parameter wrt first PV, in cm",precision=10),
         sip3d = Var("abs(dB('PV3D')/edB('PV3D'))",float,doc="3D impact parameter significance wrt first PV, in cm",precision=10),
-#        deltaEtaSC = Var("superCluster().eta()-eta()",float,doc="delta eta (SC,ele) with sign",precision=10),
-#        r9 = Var("full5x5_r9()",float,doc="R9 of the supercluster, calculated with full 5x5 region",precision=10),
-#        sieie = Var("full5x5_sigmaIetaIeta()",float,doc="sigma_IetaIeta of the supercluster, calculated with full 5x5 region",precision=10),
-#        hoe = Var("hadronicOverEm()",float,doc="H over E",precision=8),
-#        tightCharge = Var("isGsfCtfScPixChargeConsistent() + isGsfScPixChargeConsistent()",int,doc="Tight charge criteria (0:none, 1:isGsfScPixChargeConsistent, 2:isGsfCtfScPixChargeConsistent)"),
+        deltaEtaSC = Var("superCluster().eta()-eta()",float,doc="delta eta (SC,ele) with sign",precision=10),
+        r9 = Var("full5x5_r9()",float,doc="R9 of the supercluster, calculated with full 5x5 region",precision=10),
+        sieie = Var("full5x5_sigmaIetaIeta()",float,doc="sigma_IetaIeta of the supercluster, calculated with full 5x5 region",precision=10),
+        hoe = Var("hadronicOverEm()",float,doc="H over E",precision=8),
+        tightCharge = Var("isGsfCtfScPixChargeConsistent() + isGsfScPixChargeConsistent()",int,doc="Tight charge criteria (0:none, 1:isGsfScPixChargeConsistent, 2:isGsfCtfScPixChargeConsistent)"),
         convVeto = Var("passConversionVeto()",bool,doc="pass conversion veto"),
-#        lostHits = Var("gsfTrack.hitPattern.numberOfLostHits('MISSING_INNER_HITS')","uint8",doc="number of missing inner hits"),
+        lostHits = Var("gsfTrack.hitPattern.numberOfLostHits('MISSING_INNER_HITS')","uint8",doc="number of missing inner hits"),
         pfRelIso = Var("(pfIsolationVariables().sumChargedHadronPt+max(0.0,pfIsolationVariables().sumNeutralHadronEt+pfIsolationVariables().sumPhotonEt-0.5*pfIsolationVariables().sumPUPt))/pt",float,doc="PF relative isolation dR=0.3, total (deltaBeta corrections)"),
         trkRelIso = Var("trackIso/pt",float,doc="PF relative isolation dR=0.3, total (deltaBeta corrections)"),
         isPF = Var("userInt('isPF')",bool,doc="electron is PF candidate"),
@@ -304,11 +304,11 @@ electronsBParkMCMatchForTable = cms.EDProducer("MCMatcher",  # cut on deltaR, de
     mcPdgId     = cms.vint32(11,22),                 # one or more PDG ID (11 = el, 22 = pho); absolute values (see below)
     checkCharge = cms.bool(False),              # True = require RECO and MC objects to have the same charge  
     mcStatus    = cms.vint32(1),                # PYTHIA status code (1 = stable, 2 = shower, 3 = hard scattering)
-    maxDeltaR   = cms.double(0.03),             # Minimum deltaR for the match
-    maxDPtRel   = cms.double(0.5),              # Minimum deltaPt/Pt for the match
+    maxDeltaR   = cms.double(0.25),             # Minimum deltaR for the match
+    maxDPtRel   = cms.double(0.25),              # Minimum deltaPt/Pt for the match
     resolveAmbiguities    = cms.bool(False),    # Forbid two RECO objects to match to the same GEN object
     resolveByMatchQuality = cms.bool(True),    # False = just match input in order; True = pick lowest deltaR pair first
-    
+    motherPdgId = cms.vint32(9900015, 521),
 )
 
 selectedElectronsMCMatchEmbedded = cms.EDProducer(
@@ -316,7 +316,6 @@ selectedElectronsMCMatchEmbedded = cms.EDProducer(
     src = electronBParkTable.src,
     matching = cms.InputTag('electronsBParkMCMatchForTable')
 )
-
 electronBParkMCTable = cms.EDProducer("CandMCMatchTableProducerBPark",
     src     = electronBParkTable.src,
     mcMap   = cms.InputTag("electronsBParkMCMatchForTable"),
@@ -328,7 +327,7 @@ electronBParkMCTable = cms.EDProducer("CandMCMatchTableProducerBPark",
 
 electronsBParkSequence = cms.Sequence(
   regressionForEle
-  +lowPtGsfElectronExtraID
+#  +lowPtGsfElectronExtraID
   +egmGsfElectronIDSequence
   +electronsForAnalysis
 )

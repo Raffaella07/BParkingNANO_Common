@@ -19,8 +19,8 @@
 #include "helper.h"
 #include <limits>
 #include <algorithm>
-#include "KinVtxFitter.h"
-#include "ETHMuon.h"
+#include "PhysicsTools/BParkingNano/interface/KinVtxFitter.h"
+#include "PhysicsTools/BParkingNano/interface/ETHMuon.h"
 
 class BToKLLBuilder : public edm::global::EDProducer<> {
 

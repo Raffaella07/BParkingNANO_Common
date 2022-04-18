@@ -3,8 +3,8 @@
 
 #include "DataFormats/Common/interface/Wrapper.h"
 #include "TrackingTools/TransientTrack/interface/TransientTrack.h"
-#include "PhysicsTools/BParkingNano/plugins/KinVtxFitter.h"
-#include "PhysicsTools/BParkingNano/plugins/ETHMuon.h"
+#include "PhysicsTools/BParkingNano/interface/KinVtxFitter.h"
+#include "PhysicsTools/BParkingNano/interface/ETHMuon.h"
 #include <vector>
 
 

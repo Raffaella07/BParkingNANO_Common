@@ -9,17 +9,17 @@ tracksBPark = cms.EDProducer('TrackMerger',
                              muons      = cms.InputTag('muonTrgSelector', 'SelectedMuons'),
                              pfElectrons= cms.InputTag("slimmedElectrons"),
                              vertices   = cms.InputTag("offlineSlimmedPrimaryVertices"),
-                             #lowPtElectrons=cms.InputTag("slimmedLowPtElectrons"),
-                             #gsf2packed=cms.InputTag("lowPtGsfLinks:packedCandidates"),
-                             #gsf2lost=cms.InputTag("lowPtGsfLinks:lostTracks"),
+                             lowPtElectrons=cms.InputTag("slimmedLowPtElectrons"),
+                             gsf2packed=cms.InputTag("lowPtGsfLinks:packedCandidates"),
+                             gsf2lost=cms.InputTag("lowPtGsfLinks:lostTracks"),
                              # keep the cuts as tight as possible without affecting any physics builder
                              trkPtCut = cms.double(0.6),
                              #trkPtCut = cms.double(0.3),
                              trkEtaCut = cms.double(2.1),
                              #trkEtaCut = cms.double(2.8),
                              dzTrg_cleaning = cms.double(-1), # initial value: 1.8
-                             #drTrg_cleaning = cms.double(0.03), # deltaR requirement between track and trigger muon  
-                             drTrg_cleaning = cms.double(-1), # keep track even in trgmu jet, deltaR requirement between track and trigger muon  
+                             drTrg_cleaning = cms.double(0.03), # deltaR requirement between track and trigger muon  
+                            # drTrg_cleaning = cms.double(-1), # keep track even in trgmu jet, deltaR requirement between track and trigger muon  
                              dcaSig = cms.double(-100000),
                              trkNormChiMin = cms.int32(-1),
                              trkNormChiMax = cms.int32(-1)
@@ -55,10 +55,23 @@ trackBParkTable = cms.EDProducer(
         isMatchedToEle = Var("userInt('isMatchedToEle')",bool,doc="track was used to build a PF ele", precision=10),
         #isMatchedToLowPtEle = Var("userInt('isMatchedToLowPtEle')",bool,doc="track was used to build a low-pT ele", precision=10),
         nValidHits = Var("userInt('nValidHits')", int,doc="Number of valid hits on track", precision=10),
+        chi2 = Var("userFloat('chi2')", float, doc="chi2 of the track fit", precision=10),
+        ndof = Var("userInt('ndof')", int, doc="ndof of the track fit", precision=10),
+        normalisedChi2 = Var("userFloat('normalisedChi2')", float, doc="chi2/ndof of the track fit", precision=10),
+        numberOfValidHits = Var("userInt('numberOfValidHits')", int, doc="number of valid hits of the track", precision=10),
+        numberOfLostHits = Var("userInt('numberOfLostHits')", int, doc="number of lost hits of the track", precision=10),
+        numberOfValidPixelHits = Var("userInt('numberOfValidPixelHits')", int, doc="number of valid pixel hits", precision=10),
+        numberOfTrackerLayers = Var("userInt('numberOfTrackerLayers')", int, doc="number of tracker layers", precision=10),
+        numberOfPixelLayers = Var("userInt('numberOfPixelLayers')", int, doc="number of pixel layers", precision=10),
+        qualityIndex = Var("userInt('qualityIndex')", int, doc="quality index", precision=10),
+        highPurityFlag = Var("userInt('highPurityFlag')", int, doc="high purity flag", precision=10),
+        validFraction = Var("userFloat('validFraction')", float, doc="valid fraction", precision=10),
+        missingInnerHits = Var("userInt('missingInnerHits')", float, doc="missing hits expected from track extrapolation", precision=10),
+        ),
+)  
+
         #dEdXStrip=Var("userFloat('dEdXStrip')", float,doc="dE/dX from strips of associated isolated track"),
         #dEdXPixel=Var("userFloat('dEdXPixel')", float,doc="dE/dX from pixels of associated isolated track"),
-        ),
-)
 
 
 tracksBParkMCMatchForTable = cms.EDProducer("MCMatcher",   # cut on deltaR, deltaPt/Pt; pick best by deltaR
@@ -68,7 +81,7 @@ tracksBParkMCMatchForTable = cms.EDProducer("MCMatcher",   # cut on deltaR, delt
     mcPdgId     = cms.vint32(321,211),                     # one or more PDG ID (321 = charged kaon, 211 = charged pion); absolute values (see below)
     checkCharge = cms.bool(False),              # True = require RECO and MC objects to have the same charge
     mcStatus    = cms.vint32(1),                # PYTHIA status code (1 = stable, 2 = shower, 3 = hard scattering)
-    maxDeltaR   = cms.double(0.15), #0.03       # Minimum deltaR for the match
+    maxDeltaR   = cms.double(0.15),             # Minimum deltaR for the match
     maxDPtRel   = cms.double(0.5),              # Minimum deltaPt/Pt for the match
     resolveAmbiguities    = cms.bool(False),     # Forbid two RECO objects to match to the same GEN object
     resolveByMatchQuality = cms.bool(True),     # False = just match input in order; True = pick lowest deltaR pair first
