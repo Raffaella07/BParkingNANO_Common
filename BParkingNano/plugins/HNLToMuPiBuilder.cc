@@ -24,9 +24,8 @@
 #include "../interface/helper.h"
 #include <limits>
 #include <algorithm>
-#include "../interface/KinVtxFitter.h"
-
-#include "../interface/ETHMuon.h"
+#include "PhysicsTools/BParkingNano/interface/KinVtxFitter.h"
+#include "PhysicsTools/BParkingNano/interface/ETHMuon.h"
 
 class HNLToMuPiBuilder : public edm::global::EDProducer<> {
 

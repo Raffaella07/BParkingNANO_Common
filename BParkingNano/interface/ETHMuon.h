@@ -25,12 +25,12 @@ namespace pat {
         vx_ = muon.vx();
         vy_ = muon.vy();
         vz_ = muon.vz();
-        //dz_ = muon.dB(muon.PVDZ);
-        //dzS_ = muon.dB(muon.PVDZ)/muon.edB(muon.PVDZ);
-        //dxy_ = muon.dB(muon.PV2D);
-        //dxyS_= muon.dB(muon.PV2D)/muon.edB(muon.PV2D);
-        //ip3d_ = muon.dB(muon.PV3D);
-        //sip3d_ = muon.dB(muon.PV3D)/muon.edB(muon.PV3D); 
+        dz_ = muon.dB(muon.PVDZ);
+        dzS_ = muon.dB(muon.PVDZ)/muon.edB(muon.PVDZ);
+        dxy_ = muon.dB(muon.PV2D);
+        dxyS_= muon.dB(muon.PV2D)/muon.edB(muon.PV2D);
+        ip3d_ = muon.dB(muon.PV3D);
+        sip3d_ = muon.dB(muon.PV3D)/muon.edB(muon.PV3D); 
         pfiso03_all_ = muon.pfIsolationR03().sumChargedHadronPt + std::max(muon.pfIsolationR03().sumNeutralHadronEt + muon.pfIsolationR03().sumPhotonEt - muon.pfIsolationR03().sumPUPt/2,static_cast<float>(0.0));
         pfiso03Rel_all_ = (muon.pfIsolationR03().sumChargedHadronPt + std::max(muon.pfIsolationR03().sumNeutralHadronEt + muon.pfIsolationR03().sumPhotonEt - muon.pfIsolationR03().sumPUPt/2,static_cast<float>(0.0)))/muon.pt();
         pfiso04_all_ = muon.pfIsolationR04().sumChargedHadronPt + std::max(muon.pfIsolationR04().sumNeutralHadronEt + muon.pfIsolationR04().sumPhotonEt - muon.pfIsolationR04().sumPUPt/2,static_cast<float>(0.0));
@@ -76,12 +76,12 @@ namespace pat {
         vx_ = muon.vx();
         vy_ = muon.vy();
         vz_ = muon.vz();
-        //dz_ = muon.dz(); //0.001; //99.; // needs to be studied, see https://cmssdt.cern.ch/lxr/source/DataFormats/TrackReco/interface/TrackBase.h
-        //dzS_ = 1.; //99.; // needs to be studied, see https://cmssdt.cern.ch/lxr/source/DataFormats/TrackReco/interface/TrackBase.h
-        //dxy_ = 0.001; // needs to be studied, see https://cmssdt.cern.ch/lxr/source/DataFormats/TrackReco/interface/TrackBase.h
-        //dxyS_ = 1.; //99.; // needs to be studied, see https://cmssdt.cern.ch/lxr/source/DataFormats/TrackReco/interface/TrackBase.h
-        //ip3d_ = 99; // to modify
-        //sip3d_ = 99; // to modify
+        dz_ = muon.dz(); //0.001; //99.; // needs to be studied, see https://cmssdt.cern.ch/lxr/source/DataFormats/TrackReco/interface/TrackBase.h
+        dzS_ = 1.; //99.; // needs to be studied, see https://cmssdt.cern.ch/lxr/source/DataFormats/TrackReco/interface/TrackBase.h
+        dxy_ = 0.001; // needs to be studied, see https://cmssdt.cern.ch/lxr/source/DataFormats/TrackReco/interface/TrackBase.h
+        dxyS_ = 1.; //99.; // needs to be studied, see https://cmssdt.cern.ch/lxr/source/DataFormats/TrackReco/interface/TrackBase.h
+        ip3d_ = 99; // to modify
+        sip3d_ = 99; // to modify
         pfiso03_all_ = -99.; // to modify
         pfiso03Rel_all_ = -99.; // to modify
         pfiso04_all_ = -99.; // to modify
@@ -128,12 +128,12 @@ namespace pat {
       double vx() const override { return (*this).vx_; }
       double vy() const override { return (*this).vy_; }
       double vz() const override { return (*this).vz_; }
-      //double dz() const { return (*this).dz_; }
-      //double dzS() const { return (*this).dzS_; }
-      //double dxy() const { return (*this).dxy_; }
-      //double dxyS() const { return (*this).dxyS_; }
-      //double ip3d() const { return (*this).ip3d_; }
-      //double sip3d() const { return (*this).sip3d_; }
+      double dz() const { return (*this).dz_; }
+      double dzS() const { return (*this).dzS_; }
+      double dxy() const { return (*this).dxy_; }
+      double dxyS() const { return (*this).dxyS_; }
+      double ip3d() const { return (*this).ip3d_; }
+      double sip3d() const { return (*this).sip3d_; }
       double pfiso03_all() const { return (*this).pfiso03_all_; }
       double pfiso03Rel_all() const { return (*this).pfiso03Rel_all_; }
       double pfiso04_all() const { return (*this).pfiso04_all_; }

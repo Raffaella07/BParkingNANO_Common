@@ -16,11 +16,11 @@
 #include "DataFormats/PatCandidates/interface/CompositeCandidate.h"
 #include "DataFormats/Math/interface/deltaR.h"
 #include "CommonTools/Statistics/interface/ChiSquaredProbability.h"
-#include "../interface/helper.h"
+#include "PhysicsTools/BParkingNano/interface/helper.h"
 #include <limits>
 #include <algorithm>
-#include "../interface/KinVtxFitter.h"
-#include "../interface/ETHMuon.h"
+#include "PhysicsTools/BParkingNano/interface/KinVtxFitter.h"
+#include "PhysicsTools/BParkingNano/interface/ETHMuon.h"
 
 class BToKLLBuilder : public edm::global::EDProducer<> {
 

@@ -41,23 +41,17 @@ nanoSequenceMC = cms.Sequence(particleLevelBParkSequence + genParticleBParkSeque
 
 
 
-def nanoAOD_customizeMuonTriggerBPark(process, addTriggerMuonCollection=False):
-    if addTriggerMuonCollection:
-      process.nanoSequence = cms.Sequence( process.nanoSequence + muonBParkSequence + muonTriggerMatchedTables + muonBParkTables)
-    else:
-      process.nanoSequence = cms.Sequence( process.nanoSequence + muonBParkSequence + muonBParkTables)
+def nanoAOD_customizeMuonTriggerBPark(process):
+    #process.nanoSequence = cms.Sequence( process.nanoSequence + muonBParkSequence + muonBParkTables)#+ muonTriggerMatchedTables)   ###comment in this extra table in case you want to create the TriggerMuon collection again.
+    process.nanoSequence = cms.Sequence( process.nanoSequence + muonBParkSequence + muonTriggerMatchedTables + muonBParkTables)
     return process
 
-def nanoAOD_customizeTrackFilteredBPark(process, addProbeTracksCollection=False):
-    if addProbeTracksCollection:
-      process.nanoSequence = cms.Sequence( process.nanoSequence + tracksBParkSequence + tracksBParkTables)
-    else:
-      process.nanoSequence = cms.Sequence( process.nanoSequence + tracksBParkSequence)
+def nanoAOD_customizeTrackFilteredBPark(process):
+    process.nanoSequence = cms.Sequence( process.nanoSequence + tracksBParkSequence + tracksBParkTables)
     return process
 
 def nanoAOD_customizeElectronFilteredBPark(process):
     process.nanoBKeeSequence     = cms.Sequence( electronsBParkSequence + electronBParkTables)
-
     process.nanoeSequence     = cms.Sequence( electronsBParkSequence + electronBParkTables) #new sequence defined just for the sake of clarity, to be used in the python config
     process.nanoBKstarEESequence = cms.Sequence( electronsBParkSequence + electronBParkTables)
     return process
@@ -74,10 +68,8 @@ def nanoAOD_customizeBToMuLPi(process, isMC=False):
      process.nanoBMuEPiHDSequence  = cms.Sequence( BToMuEPiHDSequence  + BToMuEPiHDTable  + CountBToMuEPiHD)
    else:
      process.nanoBMuMuPiSequence = cms.Sequence( BToMuMuPiSequenceMC + BToMuMuPiMCTable + CountBToMuMuPiMC)
-
-     process.nanoBMuEPiSequence  = cms.Sequence( BToMuEPiSequenceMC  + BToMuEPiMCTable  + CountBToMuEPiMC )
-     process.nanoBMuEPiHDSequence  = cms.Sequence( BToMuEPiHDSequenceMC  + BToMuEPiHDMCTable  + CountBToMuEPiHDMC)
-
+     process.nanoBMuEPiSequence  = cms.Sequence( BToMuEPiSequenceMC  + BToMuEPiMCTable  + CountBToMuEPiMC)
+     process.nanoBMuEPiHDSequence  = cms.Sequence( BToMuEPiHDSequence  + BToMuEPiHDTable  + CountBToMuEPiHD)
    return process
 
 def nanoAOD_customizeHNLToMuPi(process, isMC=False):
@@ -121,7 +113,8 @@ def nanoAOD_customizeBToKstarMuMu(process):
     return process
 
 from FWCore.ParameterSet.MassReplace import massSearchReplaceAnyInputTag
-def nanoAOD_customizeMC(process, ancestor_particles=[511, 521, 531, 541, 9900015], addTriggerMuonCollection=False, addProbeTracksCollection=False):  
+#def nanoAOD_customizeMC(process, ancestor_particles=[511, 521, 531, 541, 211, 9900015]):  
+def nanoAOD_customizeMC(process, ancestor_particles=[511, 521, 531, 541, 9900015]):  
     for name, path in process.paths.iteritems():
         # replace all the non-match embedded inputs with the matched ones
         massSearchReplaceAnyInputTag(path, 'muonTrgSelector:SelectedMuons', 'selectedMuonsMCMatchEmbedded')
@@ -137,10 +130,6 @@ def nanoAOD_customizeMC(process, ancestor_particles=[511, 521, 531, 541, 9900015
 
         # make the BToMuEPiTable/count talk to the correct producer
         massSearchReplaceAnyInputTag(path, 'BToMuEPi', 'BToMuEPiMC') #adding electron channel
-
-        # make the BToMuEPiHDTable/count talk to the correct producer
-        massSearchReplaceAnyInputTag(path, 'BToMuEPiHD', 'BToMuEPiHDMC') #adding electron channel
-
         # make the HNLToMuPiTable/count talk to the correct producer
         massSearchReplaceAnyInputTag(path, 'HNLToMuPi', 'HNLToMuPiMC')
 
@@ -154,12 +143,6 @@ def nanoAOD_customizeMC(process, ancestor_particles=[511, 521, 531, 541, 9900015
 
         # modify the path to include mc-specific info
         path.insert(0, nanoSequenceMC)
-        if addTriggerMuonCollection:
-          path.replace(process.muonBParkSequence, process.muonBParkMCWithTriggerMuon)
-        else:
-          path.replace(process.muonBParkSequence, process.muonBParkMC)
+        path.replace(process.muonBParkSequence, process.muonBParkMC)
         path.replace(process.electronsBParkSequence, process.electronBParkMC)
-        if addProbeTracksCollection:
-          path.replace(process.tracksBParkSequence, process.tracksBParkMCWithTable)
-        else:
-          path.replace(process.tracksBParkSequence, process.tracksBParkMC)
+        path.replace(process.tracksBParkSequence, process.tracksBParkMC)

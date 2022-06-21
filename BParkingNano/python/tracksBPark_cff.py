@@ -3,15 +3,15 @@ from PhysicsTools.NanoAOD.common_cff import *
 
 tracksBPark = cms.EDProducer('TrackMerger',
                              beamSpot   = cms.InputTag("offlineBeamSpot"),
-                             trgMuon    = cms.InputTag('muonTrgSelector', 'trgMuons'),
+                             trgMuon    = cms.InputTag('muonTrgSelector', 'SelectedMuons'),
                              tracks     = cms.InputTag("packedPFCandidates"),
                              lostTracks = cms.InputTag("lostTracks"),
                              muons      = cms.InputTag('muonTrgSelector', 'SelectedMuons'),
                              pfElectrons= cms.InputTag("slimmedElectrons"),
                              vertices   = cms.InputTag("offlineSlimmedPrimaryVertices"),
                              #lowPtElectrons=cms.InputTag("slimmedLowPtElectrons"),
-                             #gsf2packed=cms.InputTag("lowPtGsfLinks:packedCandidates"),
-                             #gsf2lost=cms.InputTag("lowPtGsfLinks:lostTracks"),
+                             gsf2packed=cms.InputTag("lowPtGsfLinks:packedCandidates"),
+                             gsf2lost=cms.InputTag("lowPtGsfLinks:lostTracks"),
 
                              # keep the cuts as tight as possible without affecting any physics builder
                              trkPtCut = cms.double(0.6),
@@ -21,16 +21,12 @@ tracksBPark = cms.EDProducer('TrackMerger',
 
                              # clean tracks wrt trigger muons (checked that not relevant for our study)
                              do_trgmu_cleaning = cms.bool(False),
-                             dzTrg_cleaning = cms.double(-1), # initial value: 1.8
-                             #drTrg_cleaning = cms.double(0.03), # deltaR requirement between track and trigger muon  
-                             drTrg_cleaning = cms.double(-1), # keep track even in trgmu jet, deltaR requirement between track and trigger muon  
-                             # clean tracks wrt muons (checked that not relevant for our study)
                              do_mu_cleaning = cms.bool(False),
-                             # clean tracks wrt electrons (checked that not relevant for our study)
                              do_el_cleaning = cms.bool(False),
-                             # request PackedCandidate to have high purity
                              do_trk_highpurity = cms.bool(False),
-
+                             dzTrg_cleaning = cms.double(-1), # initial value: 1.8
+                             drTrg_cleaning = cms.double(0.03), # deltaR requirement between track and trigger muon  
+                            # drTrg_cleaning = cms.double(-1), # keep track even in trgmu jet, deltaR requirement between track and trigger muon  
                              dcaSig = cms.double(-100000),
                              trkNormChiMin = cms.int32(-1),
                              trkNormChiMax = cms.int32(-1)
@@ -66,8 +62,6 @@ trackBParkTable = cms.EDProducer(
         isMatchedToEle = Var("userInt('isMatchedToEle')",bool,doc="track was used to build a PF ele", precision=10),
         #isMatchedToLowPtEle = Var("userInt('isMatchedToLowPtEle')",bool,doc="track was used to build a low-pT ele", precision=10),
         nValidHits = Var("userInt('nValidHits')", int,doc="Number of valid hits on track", precision=10),
-        #dEdXStrip=Var("userFloat('dEdXStrip')", float,doc="dE/dX from strips of associated isolated track"),
-        #dEdXPixel=Var("userFloat('dEdXPixel')", float,doc="dE/dX from pixels of associated isolated track"),
         chi2 = Var("userFloat('chi2')", float, doc="chi2 of the track fit", precision=10),
         ndof = Var("userInt('ndof')", int, doc="ndof of the track fit", precision=10),
         normalisedChi2 = Var("userFloat('normalisedChi2')", float, doc="chi2/ndof of the track fit", precision=10),
@@ -79,8 +73,10 @@ trackBParkTable = cms.EDProducer(
         qualityIndex = Var("userInt('qualityIndex')", int, doc="quality index", precision=10),
         highPurityFlag = Var("userInt('highPurityFlag')", int, doc="high purity flag", precision=10),
         validFraction = Var("userFloat('validFraction')", float, doc="valid fraction", precision=10),
+        missingInnerHits = Var("userInt('missingInnerHits')", float, doc="missing hits expected from track extrapolation", precision=10),
         ),
-)
+)  
+
 
 
 tracksBParkMCMatchForTable = cms.EDProducer("MCMatcher",   # cut on deltaR, deltaPt/Pt; pick best by deltaR
@@ -90,7 +86,9 @@ tracksBParkMCMatchForTable = cms.EDProducer("MCMatcher",   # cut on deltaR, delt
     mcPdgId     = cms.vint32(321,211),                     # one or more PDG ID (321 = charged kaon, 211 = charged pion); absolute values (see below)
     checkCharge = cms.bool(False),              # True = require RECO and MC objects to have the same charge
     mcStatus    = cms.vint32(1),                # PYTHIA status code (1 = stable, 2 = shower, 3 = hard scattering)
-    maxDeltaR   = cms.double(0.15), #0.03       # Minimum deltaR for the match
+
+    maxDeltaR   = cms.double(0.15),             # Minimum deltaR for the match
+
     maxDPtRel   = cms.double(0.5),              # Minimum deltaPt/Pt for the match
     resolveAmbiguities    = cms.bool(False),     # Forbid two RECO objects to match to the same GEN object
     resolveByMatchQuality = cms.bool(True),     # False = just match input in order; True = pick lowest deltaR pair first

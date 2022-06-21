@@ -8,10 +8,10 @@
 #include "FWCore/ParameterSet/interface/ConfigurationDescriptions.h"
 #include "FWCore/ParameterSet/interface/ParameterSetDescription.h"
 #include "FWCore/Utilities/interface/InputTag.h"
-//#include "DataFormats/Common/interface/RefToPtr.h"
+#include "DataFormats/Common/interface/RefToPtr.h"
 #include "DataFormats/Common/interface/View.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
-
+#include "DataFormats/TrackReco/interface/Track.h"
 #include "DataFormats/BeamSpot/interface/BeamSpot.h"
 #include "MagneticField/Engine/interface/MagneticField.h"
 #include "MagneticField/Records/interface/IdealMagneticFieldRecord.h"
@@ -23,8 +23,10 @@
 #include "DataFormats/PatCandidates/interface/Electron.h"
 #include "DataFormats/Common/interface/AssociationVector.h"
 
-#include "../interface/ETHMuon.h"
-#include "../interface/helper.h"
+#include "PhysicsTools/BParkingNano/interface/ETHMuon.h"
+
+#include "PhysicsTools/BParkingNano/interface/helper.h"
+
 
 class TrackMerger : public edm::global::EDProducer<> {
 
@@ -36,13 +38,13 @@ public:
     beamSpotSrc_(consumes<reco::BeamSpot>(cfg.getParameter<edm::InputTag>("beamSpot"))),
     tracksToken_(consumes<pat::PackedCandidateCollection>(cfg.getParameter<edm::InputTag>("tracks"))),
     lostTracksToken_(consumes<pat::PackedCandidateCollection>(cfg.getParameter<edm::InputTag>("lostTracks"))),
-    trgMuonToken_(consumes<std::vector<pat::Muon>>(cfg.getParameter<edm::InputTag>("trgMuon"))),
+    trgMuonToken_(consumes<std::vector<pat::ETHMuon>>(cfg.getParameter<edm::InputTag>("trgMuon"))),
     muonToken_(consumes<std::vector<pat::ETHMuon>>(cfg.getParameter<edm::InputTag>("muons"))),
     eleToken_(consumes<pat::ElectronCollection>(cfg.getParameter<edm::InputTag>("pfElectrons"))),
     vertexToken_(consumes<reco::VertexCollection> (cfg.getParameter<edm::InputTag>( "vertices" ))), 
-    //lowptele_(consumes<pat::ElectronCollection>(cfg.getParameter<edm::InputTag>("lowPtElectrons"))),
-    //gsf2packed_(consumes<edm::Association<pat::PackedCandidateCollection> >(cfg.getParameter<edm::InputTag>("gsf2packed"))),
-    //gsf2lost_(consumes<edm::Association<pat::PackedCandidateCollection> >(cfg.getParameter<edm::InputTag>("gsf2lost"))),
+  //  lowptele_(consumes<pat::ElectronCollection>(cfg.getParameter<edm::InputTag>("lowPtElectrons"))),
+    gsf2packed_(consumes<edm::Association<pat::PackedCandidateCollection> >(cfg.getParameter<edm::InputTag>("gsf2packed"))),
+    gsf2lost_(consumes<edm::Association<pat::PackedCandidateCollection> >(cfg.getParameter<edm::InputTag>("gsf2lost"))),
     trkPtCut_(cfg.getParameter<double>("trkPtCut")),
     trkEtaCut_(cfg.getParameter<double>("trkEtaCut")),
     dzTrg_cleaning_(cfg.getParameter<double>("dzTrg_cleaning")),
@@ -70,13 +72,13 @@ private:
   const edm::EDGetTokenT<reco::BeamSpot> beamSpotSrc_;
   const edm::EDGetTokenT<pat::PackedCandidateCollection> tracksToken_;
   const edm::EDGetTokenT<pat::PackedCandidateCollection> lostTracksToken_;
-  const edm::EDGetTokenT<std::vector<pat::Muon>> trgMuonToken_;
+  const edm::EDGetTokenT<std::vector<pat::ETHMuon>> trgMuonToken_;
   const edm::EDGetTokenT<std::vector<pat::ETHMuon>> muonToken_;
   const edm::EDGetTokenT<pat::ElectronCollection> eleToken_;
   const edm::EDGetTokenT<reco::VertexCollection> vertexToken_;
-  //const edm::EDGetTokenT<pat::ElectronCollection> lowptele_;
-  //const edm::EDGetTokenT<edm::Association<pat::PackedCandidateCollection> > gsf2packed_;
-  //const edm::EDGetTokenT<edm::Association<pat::PackedCandidateCollection> > gsf2lost_;
+ // const edm::EDGetTokenT<pat::ElectronCollection> lowptele_;
+  const edm::EDGetTokenT<edm::Association<pat::PackedCandidateCollection> > gsf2packed_;
+  const edm::EDGetTokenT<edm::Association<pat::PackedCandidateCollection> > gsf2lost_;
 
   //selections                                                                 
   const double trkPtCut_;
@@ -113,7 +115,7 @@ void TrackMerger::produce(edm::StreamID, edm::Event &evt, edm::EventSetup const 
   evt.getByToken(tracksToken_, tracks);
   edm::Handle<pat::PackedCandidateCollection> lostTracks;
   evt.getByToken(lostTracksToken_, lostTracks);
-  edm::Handle<std::vector<pat::Muon>> trgMuons;
+  edm::Handle<std::vector<pat::ETHMuon>> trgMuons;
   evt.getByToken(trgMuonToken_, trgMuons);
 
   edm::Handle<std::vector<pat::ETHMuon>> muons;
@@ -124,12 +126,12 @@ void TrackMerger::produce(edm::StreamID, edm::Event &evt, edm::EventSetup const 
   evt.getByToken(vertexToken_, vertexHandle);
   //const reco::Vertex & PV = vertexHandle->front();
 
-  //edm::Handle<pat::ElectronCollection> lowptele;
-  //evt.getByToken(lowptele_, lowptele);
-  //edm::Handle<edm::Association<pat::PackedCandidateCollection> > gsf2packed;
-  //evt.getByToken(gsf2packed_, gsf2packed);
-  //edm::Handle<edm::Association<pat::PackedCandidateCollection> > gsf2lost;
-  //evt.getByToken(gsf2lost_, gsf2lost);
+ // edm::Handle<pat::ElectronCollection> lowptele;
+ // evt.getByToken(lowptele_, lowptele);
+  edm::Handle<edm::Association<pat::PackedCandidateCollection> > gsf2packed;
+  evt.getByToken(gsf2packed_, gsf2packed);
+  edm::Handle<edm::Association<pat::PackedCandidateCollection> > gsf2lost;
+  evt.getByToken(gsf2lost_, gsf2lost);
 
   //for lost tracks / pf discrimination
   unsigned int nTracks = tracks->size();
@@ -162,24 +164,23 @@ void TrackMerger::produce(edm::StreamID, edm::Event &evt, edm::EventSetup const 
         (trk.bestTrack()->normalizedChi2() > trkNormChiMax_ &&
          trkNormChiMax_>0)  )    continue; 
 
-    bool skipTrack=true;
+  //  bool skipTrack=true;
     float drTrg = 0.0;
     float dzTrg = 0.0;
-    if(do_trgmu_cleaning_){
-      for (const pat::Muon & mu: *trgMuons){
-        //remove tracks inside trg muons jet
-        if(reco::deltaR(trk, mu) < drTrg_cleaning_ && drTrg_cleaning_ >0) 
-          continue;
-        //if dz is negative it is deactivated
-        if((fabs(trk.vz() - mu.vz()) > dzTrg_cleaning_ && dzTrg_cleaning_ > 0))
-          continue;
-        skipTrack=false;
-        drTrg = reco::deltaR(trk, mu);
-        dzTrg = trk.vz() - mu.vz();
-        break; // at least for one trg muon to pass this cuts
-      }
-      // if track is closer to at least a triggering muon keep it
-      if (skipTrack) continue;
+    //for (const pat::Muon & mu: *trgMuons){
+    for (const pat::ETHMuon & mu: *trgMuons){
+      // add is triggering condition
+      //remove tracks inside trg muons jet
+     // if(mu.userInt("isTriggeringBPark") != 1) continue;	
+      if(reco::deltaR(trk, mu) < drTrg_cleaning_ && drTrg_cleaning_ >0) 
+        continue;
+      //if dz is negative it is deactivated
+      if((fabs(trk.vz() - mu.vz()) > dzTrg_cleaning_ && dzTrg_cleaning_ > 0))
+        continue;
+    //  skipTrack=false;
+      drTrg = reco::deltaR(trk, mu);
+      dzTrg = trk.vz() - mu.vz();
+      break; // at least for one trg muon to pass this cuts
     }
 
     // high purity requirement applied only in packedCands
@@ -233,23 +234,23 @@ void TrackMerger::produce(edm::StreamID, edm::Event &evt, edm::EventSetup const 
           }
        }
     }
-
+/*
     // clean tracks wrt to all low pT electrons
-    //edm::Ptr<pat::PackedCandidate> track;
-    //if ( iTrk < nTracks ) { track = edm::Ptr<pat::PackedCandidate>(tracks,iTrk); }
-    //else { track = edm::Ptr<pat::PackedCandidate>(lostTracks,iTrk-nTracks); }
-    //int matchedToLowPtEle = 0;
-    //for ( auto const& ele : *lowptele ) {
-    //  reco::GsfTrackRef gsf = ele.gsfTrack();
-    //  if ( iTrk < nTracks ) {
-	//edm::Ptr<pat::PackedCandidate> packed = edm::refToPtr( (*gsf2packed)[gsf] );
-	//if ( track == packed ) { matchedToLowPtEle = 1; break; }
-  //    } else {
-	//edm::Ptr<pat::PackedCandidate> lost = edm::refToPtr( (*gsf2lost)[gsf] );
-	//if ( track == lost ) { matchedToLowPtEle = 1; break; }
-  //    }
-  //  }
-
+    edm::Ptr<pat::PackedCandidate> track;
+    if ( iTrk < nTracks ) { track = edm::Ptr<pat::PackedCandidate>(tracks,iTrk); }
+    else { track = edm::Ptr<pat::PackedCandidate>(lostTracks,iTrk-nTracks); }
+    int matchedToLowPtEle = 0;
+    for ( auto const& ele : *lowptele ) {
+      reco::GsfTrackRef gsf = ele.gsfTrack();
+      if ( iTrk < nTracks ) {
+	edm::Ptr<pat::PackedCandidate> packed = edm::refToPtr( (*gsf2packed)[gsf] );
+	if ( track == packed ) { matchedToLowPtEle = 1; break; }
+  	  } else {
+	edm::Ptr<pat::PackedCandidate> lost = edm::refToPtr( (*gsf2lost)[gsf] );
+	if ( track == lost ) { matchedToLowPtEle = 1; break; }
+      }
+    }
+*/
     pat::CompositeCandidate pcand;
     pcand.setP4(trk.p4());
     pcand.setCharge(trk.charge());
@@ -280,9 +281,22 @@ void TrackMerger::produce(edm::StreamID, edm::Event &evt, edm::EventSetup const 
     pcand.addUserInt("isMatchedToSoftMuon", matchedToSoftMuon);
     pcand.addUserInt("isMatchedToMediumMuon", matchedToMediumMuon);
     pcand.addUserInt("isMatchedToEle", matchedToEle);
-    //pcand.addUserInt("isMatchedToLowPtEle", matchedToLowPtEle);
+   // pcand.addUserInt("isMatchedToLowPtEle", matchedToLowPtEle);
     pcand.addUserInt("nValidHits", trk.bestTrack()->found());
     pcand.addUserInt("keyPacked", iTrk);
+    pcand.addUserFloat("chi2", trk.bestTrack()->chi2()); 
+    pcand.addUserInt("ndof", trk.bestTrack()->ndof()); 
+    pcand.addUserFloat("normalisedChi2", trk.bestTrack()->normalizedChi2()); 
+    pcand.addUserInt("numberOfValidHits", trk.bestTrack()->numberOfValidHits()); 
+    pcand.addUserInt("numberOfLostHits", trk.bestTrack()->numberOfLostHits()); 
+    pcand.addUserInt("numberOfValidPixelHits", trk.bestTrack()->hitPattern().numberOfValidPixelHits()); 
+    pcand.addUserInt("numberOfTrackerLayers", trk.bestTrack()->hitPattern().trackerLayersWithMeasurement()); 
+    pcand.addUserInt("numberOfPixelLayers", trk.bestTrack()->hitPattern().pixelLayersWithMeasurement()); 
+    pcand.addUserInt("qualityIndex", trk.bestTrack()->qualityMask()); 
+    pcand.addUserInt("highPurityFlag", trk.bestTrack()->quality(reco::TrackBase::highPurity)); 
+    pcand.addUserInt("missingInnerHits", trk.lostInnerHits());
+    pcand.addUserFloat("validFraction", trk.bestTrack()->validFraction()); 
+
     //adding the candidate in the composite stuff for fit (need to test)
     if ( iTrk < nTracks )
       pcand.addUserCand( "cand", edm::Ptr<pat::PackedCandidate> ( tracks, iTrk ));

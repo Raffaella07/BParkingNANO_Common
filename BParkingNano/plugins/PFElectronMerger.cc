@@ -20,7 +20,7 @@
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
 #include "DataFormats/EgammaCandidates/interface/Conversion.h"
 #include "DataFormats/BeamSpot/interface/BeamSpot.h"
-#include "../interface/ConversionInfo.h"
+#include "PhysicsTools/BParkingNano/interface/ConversionInfo.h"
 
 #include "PhysicsTools/BParkingNano/interface/helper.h"
 #include <limits>
@@ -28,7 +28,7 @@
 #include "PhysicsTools/BParkingNano/interface/KinVtxFitter.h"
 #include "PhysicsTools/BParkingNano/interface/ETHMuon.h"
 
-class ElectronMerger : public edm::global::EDProducer<> {
+class PFElectronMerger : public edm::global::EDProducer<> {
 
   // perhaps we need better structure here (begin run etc)
   typedef std::vector<pat::ETHMuon> ETHMuonCollection;
@@ -37,13 +37,9 @@ class ElectronMerger : public edm::global::EDProducer<> {
 public:
   bool debug=false; 
 
-  explicit ElectronMerger(const edm::ParameterSet &cfg):
+  explicit PFElectronMerger(const edm::ParameterSet &cfg):
     triggerMuons_{consumes<ETHMuonCollection>( cfg.getParameter<edm::InputTag>("trgMuon") )},
-    lowpt_src_{ consumes<pat::ElectronCollection>( cfg.getParameter<edm::InputTag>("lowptSrc") )},
     pf_src_{ consumes<pat::ElectronCollection>( cfg.getParameter<edm::InputTag>("pfSrc") )},
-    ptBiased_src_{ consumes<edm::ValueMap<float>>( cfg.getParameter<edm::InputTag>("ptbiasedSeeding") )},
-    unBiased_src_{ consumes<edm::ValueMap<float>>( cfg.getParameter<edm::InputTag>("unbiasedSeeding") )},
-    mvaId_src_{ consumes<edm::ValueMap<float>>( cfg.getParameter<edm::InputTag>("mvaId") )},
     pf_mvaId_src_{ consumes<edm::ValueMap<float>>( cfg.getParameter<edm::InputTag>("pfmvaId") )},
     vertexSrc_{ consumes<reco::VertexCollection> ( cfg.getParameter<edm::InputTag>("vertexCollection") )},
     conversions_{ consumes<edm::View<reco::Conversion> > ( cfg.getParameter<edm::InputTag>("conversions") )},
@@ -67,7 +63,7 @@ public:
        produces<TransientTrackCollection>("SelectedTransientElectrons");  
     }
 
-  ~ElectronMerger() override {}
+  ~PFElectronMerger() override {}
   
   void produce(edm::StreamID, edm::Event&, const edm::EventSetup&) const override;
 
@@ -75,11 +71,7 @@ public:
   
 private:
   const edm::EDGetTokenT<ETHMuonCollection> triggerMuons_;
-  const edm::EDGetTokenT<pat::ElectronCollection> lowpt_src_;
   const edm::EDGetTokenT<pat::ElectronCollection> pf_src_;
-  const edm::EDGetTokenT<edm::ValueMap<float>> ptBiased_src_;
-  const edm::EDGetTokenT<edm::ValueMap<float>> unBiased_src_;
-  const edm::EDGetTokenT<edm::ValueMap<float>> mvaId_src_;
   const edm::EDGetTokenT<edm::ValueMap<float>> pf_mvaId_src_;
   const edm::EDGetTokenT<reco::VertexCollection> vertexSrc_;
   const edm::EDGetTokenT<edm::View<reco::Conversion> > conversions_;
@@ -101,21 +93,13 @@ private:
 
 };
 
-void ElectronMerger::produce(edm::StreamID, edm::Event &evt, edm::EventSetup const & iSetup) const {
+void PFElectronMerger::produce(edm::StreamID, edm::Event &evt, edm::EventSetup const & iSetup) const {
 
   //input
   edm::Handle<ETHMuonCollection> trgMuon;
   evt.getByToken(triggerMuons_, trgMuon);
-  edm::Handle<pat::ElectronCollection> lowpt;
-  evt.getByToken(lowpt_src_, lowpt);
   edm::Handle<pat::ElectronCollection> pf;
   evt.getByToken(pf_src_, pf);
-  edm::Handle<edm::ValueMap<float> > ptBiased;
-  evt.getByToken(ptBiased_src_, ptBiased);
-  edm::Handle<edm::ValueMap<float> > unBiased;
-  evt.getByToken(unBiased_src_, unBiased);
-  edm::Handle<edm::ValueMap<float> > mvaId;  
-  evt.getByToken(mvaId_src_, mvaId);
   edm::Handle<edm::ValueMap<float> > pfmvaId;  
   evt.getByToken(pf_mvaId_src_, pfmvaId);
   // 
@@ -209,121 +193,6 @@ void ElectronMerger::produce(edm::StreamID, edm::Event &evt, edm::EventSetup con
 
   unsigned int pfSelectedSize = pfEtaPhi.size();
 
-  if ( saveLowPtE_ ) {
-  size_t iele=-1;
-  /// add and clean low pT e
-  for(auto ele : *lowpt) {
-    iele++;
-
-    if (debug) std::cout << "ElectronMerger, Event " << (evt.id()).event() 
-			 << " => LPT: ele.superCluster()->rawEnergy() = " << ele.superCluster()->rawEnergy()
-			 << ", ele.correctedEcalEnergy() = " << ele.correctedEcalEnergy()
-			 << ", ele gsf track chi2 = " << ele.gsfTrack()->normalizedChi2()
-			 << ", ele.p = " << ele.p() << std::endl;
-   
-    //take modes
-   if (use_regression_for_p4_) {
-     // pt from regression, eta and phi from gsf track mode
-     reco::Candidate::PolarLorentzVector p4( ele.pt(),
-                                             ele.gsfTrack()->etaMode(),
-                                             ele.gsfTrack()->phiMode(),
-                                             ELECTRON_MASS    );
-     ele.setP4(p4);
-   }else if(use_gsf_mode_for_p4_) {
-     reco::Candidate::PolarLorentzVector p4( ele.gsfTrack()->ptMode(),
-                                             ele.gsfTrack()->etaMode(),
-                                             ele.gsfTrack()->phiMode(),
-                                             ELECTRON_MASS    );
-     ele.setP4(p4);
-   } else {
-     // Fix the mass to the proper one
-     reco::Candidate::PolarLorentzVector p4( 
-       ele.pt(),
-       ele.eta(),
-       ele.phi(),
-       ELECTRON_MASS
-       );
-     ele.setP4(p4);     
-   }
-  
-   //same cuts as in PF
-   if (ele.pt()<ptMin_) continue;
-   if (fabs(ele.eta())>etaMax_) continue;
-   // apply conversion veto?
-   if (!ele.passConversionVeto()) continue;
-
-   //assigning BDT values
-   edm::Ref<pat::ElectronCollection> ref(lowpt,iele);
-   float mva_id = float((*mvaId)[ref]);
- //  if ( unbiased_seedBDT <bdtMin_) continue; //extra cut for low pT e on BDT
-   if ( mva_id <bdtMin_) continue; //extra cut for low pT e on BDT
-
-
-   bool skipEle=true;
-   float dzTrg = 0.0;
-   for(const auto & trg : *trgMuon) {
-    if(trg.userInt("isTriggeringBPark") != 1) continue;	
-
-     if(reco::deltaR(ele, trg) < drTrg_cleaning_ && drTrg_cleaning_ > 0)
-        continue;
-     if(fabs(ele.vz() - trg.vz()) > dzTrg_cleaning_ && dzTrg_cleaning_ > 0)
-        continue;
-     skipEle=false;
-     dzTrg = ele.vz() - trg.vz();
-     break;  // one trg muon is enough 
-   }
-   // same here Do we need evts without trg muon? now we skip them
-   if (skipEle) continue;   
-   
-
-   //pf cleaning    
-   bool clean_out = false;
-   for(unsigned int iEle=0; iEle<pfSelectedSize; ++iEle) {
-
-      clean_out |= (
-	           fabs(pfVz[iEle] - ele.vz()) < dz_cleaning_ &&
-                   reco::deltaR(ele.eta(), ele.phi(), pfEtaPhi[iEle].first, pfEtaPhi[iEle].second) < dr_cleaning_   );
-
-   }
-   if(clean_out && flagAndclean_) continue;
-   else if(clean_out) ele.addUserInt("isPFoverlap", 1);
-   else ele.addUserInt("isPFoverlap", 0);
-
-   const reco::GsfTrackRef gsfTrk = ele.gsfTrack();
-   float unbiased_seedBDT = float((*unBiased)[gsfTrk]);
-   float ptbiased_seedBDT = float((*ptBiased)[gsfTrk]);
-   ele.addUserInt("isPF", 0);
-   ele.addUserInt("isLowPt", 1);
-   ele.addUserFloat("chargeMode", ele.gsfTrack()->chargeMode());
-   ele.addUserFloat("ptBiased", ptbiased_seedBDT);
-   ele.addUserFloat("unBiased", unbiased_seedBDT);
-   ele.addUserFloat("mvaId", mva_id);
-   ele.addUserFloat("pfmvaId", 20.);
-   ele.addUserFloat("dzTrg", dzTrg);
-   ele.addUserFloat("ip3d", fabs(ele.dB(pat::Electron::PV3D)));
-   ele.addUserFloat("sip3d", fabs(ele.dB(pat::Electron::PV3D)/ele.edB(pat::Electron::PV3D)));
-   ele.addUserFloat("dxy", fabs(ele.dB(pat::Electron::PV2D)));
-   ele.addUserFloat("dz", fabs(ele.dB(pat::Electron::PVDZ)));
-
-   // Attempt to match electrons to conversions in "gsfTracksOpenConversions" collection
-   ConversionInfo info;
-   ConversionInfo::match(beamSpot,conversions,ele,info);
-   info.addUserVars(ele);
-   if ( addUserVarsExtra_ ) { info.addUserVarsExtra(ele); }
-   if (debug && info.wpOpen()) { 
-     std::cout << "[ElectronMerger::produce]"
-	       << " iele: " << iele
-	       << ", convOpen: " << (info.wpOpen()?1:0)
-	       << ", convLoose: " << (info.wpLoose()?1:0)
-	       << ", convTight: " << (info.wpTight()?1:0)
-	       << ", convLead: " << int(info.matched_lead.isNonnull()?info.matched_lead.key():-1)
-	       << ", convTrail: " << int(info.matched_trail.isNonnull()?info.matched_trail.key():-1)
-	       << std::endl;
-   }
-
-   ele_out       -> emplace_back(ele);
-  }
-}
   if(sortOutputCollections_){
 
     //sorting increases sligtly the time but improves the code efficiency in the Bcandidate builder
@@ -339,30 +208,11 @@ void ElectronMerger::produce(edm::StreamID, edm::Event &evt, edm::EventSetup con
       (*theB).buildfromReg(ele.gsfTrack(), math::XYZVector(ele.corrections().combinedP4), regErrorRatio) : (*theB).buildfromGSF( ele.gsfTrack() );
     trans_ele_out -> emplace_back(eleTT);
 
-    if(ele.userInt("isPF")) continue;
-    //compute IP for electrons: need transient track
-    //from PhysicsTools/PatAlgos/plugins/LeptonUpdater.cc
-    const reco::GsfTrackRef gsfTrk = ele.gsfTrack();
-    // PVDZ
-    ele.setDB(gsfTrk->dz(PV.position()), std::hypot(gsfTrk->dzError(), PV.zError()), pat::Electron::PVDZ);
-
-    //PV2D
-    std::pair<bool, Measurement1D> result = IPTools::signedTransverseImpactParameter(eleTT, GlobalVector(gsfTrk->px(), gsfTrk->py(), gsfTrk->pz()), PV);
-    double d0_corr = result.second.value();
-    double d0_err = PV.isValid() ? result.second.error() : -1.0;
-    ele.setDB(d0_corr, d0_err, pat::Electron::PV2D);
-
-    // PV3D
-    result = IPTools::signedImpactParameter3D(eleTT, GlobalVector(gsfTrk->px(), gsfTrk->py(), gsfTrk->pz()), PV);
-    d0_corr = result.second.value();
-    d0_err = PV.isValid() ? result.second.error() : -1.0;
-    ele.setDB(d0_corr, d0_err, pat::Electron::PV3D);
-  }
-   
+  } 
   //adding label to be consistent with the muon and track naming
   evt.put(std::move(ele_out),      "SelectedElectrons");
   evt.put(std::move(trans_ele_out),"SelectedTransientElectrons");
 }
 
 #include "FWCore/Framework/interface/MakerMacros.h"
-DEFINE_FWK_MODULE(ElectronMerger);
+DEFINE_FWK_MODULE(PFElectronMerger);
