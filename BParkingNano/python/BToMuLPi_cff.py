@@ -14,7 +14,7 @@ BToMuMuPi = cms.EDProducer(
     genParticles            = cms.InputTag("finalGenParticlesBPark"),
     beamSpot                = cms.InputTag('offlineBeamSpot'), 
 
-    label = cms.string('MuMu'),
+    label = cms.string('muon'),
     isMC  = cms.bool(False),
 
     # pre-fitter preselection
@@ -79,7 +79,7 @@ BToMuMuPi = cms.EDProducer(
 	'abs(eta)<2.8'
       ])
     ),
-    trgMuonSelection_loose = cms.string('pt > 1.5 && abs(eta) < 5'),
+    trgMuonSelection_loose = cms.string('pt > 0. && abs(eta) < 5'),
     leptonSelection_loose = cms.string(' && '.join([
         'pt > 0.3',
 	'abs(eta)<2.8'
@@ -204,7 +204,7 @@ BToMuMuPiTable = cms.EDProducer(
         sv_ye           = ufloat('hnl_vtx_ey'   ),
         sv_ze           = ufloat('hnl_vtx_ez'   ),
         ## HNL (only postfit information is saved) 
-        hnl_to_trgmu        = uint('hnl_from_trgmu'   ),
+        hnl_to_trgmu        = uint('hnl_to_trgmu'   ),
         hnl_mass        = ufloat('hnl_fitted_mass'   ),
         hnl_masserr     = ufloat('hnl_fitted_massErr'),
         hnl_pt          = ufloat('hnl_fitted_pt'     ),
@@ -256,26 +256,26 @@ BToMuMuPiTable = cms.EDProducer(
         trg_mu_iso04    = ufloat('trg_mu_iso04'   ),
         sel_mu_iso03    = ufloat('lep_iso03'      ),
         sel_mu_iso04    = ufloat('lep_iso04'      ),
-        pi_iso03        = ufloat('pi_iso03'       ),
-        pi_iso04        = ufloat('pi_iso04'       ),
-        hnl_iso03       = ufloat('hnl_iso03'      ),
-        hnl_iso04       = ufloat('hnl_iso04'      ),
-        trg_mu_iso03_close  = ufloat('trg_mu_iso03_close' ), 
-        trg_mu_iso04_close  = ufloat('trg_mu_iso04_close' ),
-        sel_mu_iso03_close  = ufloat('sel_mu_iso03_close' ),
-        sel_mu_iso04_close  = ufloat('sel_mu_iso04_close' ),
-        pi_iso03_close      = ufloat('pi_iso03_close'     ),
-        pi_iso04_close      = ufloat('pi_iso04_close'     ),
-        hnl_iso03_close     = ufloat('hnl_iso03_close'    ),
-        hnl_iso04_close     = ufloat('hnl_iso04_close'    ),
-        trg_mu_iso03_rel_close  = ufloat('trg_mu_iso03_rel_close' ), 
-        trg_mu_iso04_rel_close  = ufloat('trg_mu_iso04_rel_close' ),
-        sel_mu_iso03_rel_close  = ufloat('sel_mu_iso03_rel_close' ),
-        sel_mu_iso04_rel_close  = ufloat('sel_mu_iso04_rel_close' ),
-        pi_iso03_rel_close      = ufloat('pi_iso03_rel_close'     ),
-        pi_iso04_rel_close      = ufloat('pi_iso04_rel_close'     ),
-        hnl_iso03_rel_close     = ufloat('hnl_iso03_rel_close'    ),
-        hnl_iso04_rel_close     = ufloat('hnl_iso04_rel_close'    ),
+    #   pi_iso03        = ufloat('pi_iso03'       ),
+    #   pi_iso04        = ufloat('pi_iso04'       ),
+    #   hnl_iso03       = ufloat('hnl_iso03'      ),
+    #   hnl_iso04       = ufloat('hnl_iso04'      ),
+    #   trg_mu_iso03_close  = ufloat('trg_mu_iso03_close' ), 
+    #   trg_mu_iso04_close  = ufloat('trg_mu_iso04_close' ),
+    #   sel_mu_iso03_close  = ufloat('sel_mu_iso03_close' ),
+    #   sel_mu_iso04_close  = ufloat('sel_mu_iso04_close' ),
+    #   pi_iso03_close      = ufloat('pi_iso03_close'     ),
+    #   pi_iso04_close      = ufloat('pi_iso04_close'     ),
+    #   hnl_iso03_close     = ufloat('hnl_iso03_close'    ),
+    #   hnl_iso04_close     = ufloat('hnl_iso04_close'    ),
+    #   trg_mu_iso03_rel_close  = ufloat('trg_mu_iso03_rel_close' ), 
+    #   trg_mu_iso04_rel_close  = ufloat('trg_mu_iso04_rel_close' ),
+    #   sel_mu_iso03_rel_close  = ufloat('sel_mu_iso03_rel_close' ),
+    #   sel_mu_iso04_rel_close  = ufloat('sel_mu_iso04_rel_close' ),
+    #   pi_iso03_rel_close      = ufloat('pi_iso03_rel_close'     ),
+    #   pi_iso04_rel_close      = ufloat('pi_iso04_rel_close'     ),
+    #   hnl_iso03_rel_close     = ufloat('hnl_iso03_rel_close'    ),
+    #   hnl_iso04_rel_close     = ufloat('hnl_iso04_rel_close'    ),
         ## invariant mass
         trgmu_mu_mass   = ufloat('dilepton_mass'  ),
         trgmu_pi_mass   = ufloat('trgmu_pi_mass'  ),
@@ -348,7 +348,6 @@ BToMuEPi = cms.EDProducer(
 
     trgMuons                = cms.InputTag('muonTrgSelector', 'SelectedMuons'),
     trgMuonsTransientTracks = cms.InputTag('muonTrgSelector', 'SelectedTransientMuons'), 
-
     leptons                 = cms.InputTag('electronsForAnalysis', 'SelectedElectrons'), 
     leptonsTransientTracks  = cms.InputTag('electronsForAnalysis','SelectedTransientElectrons'), 
     pions                   = cms.InputTag('tracksBPark', 'SelectedTracks'),
@@ -360,7 +359,7 @@ BToMuEPi = cms.EDProducer(
 
     isMC = cms.bool(False),
 
-    label = cms.string("MuE"),
+    label = cms.string("electron"),
  # pre-fitter preselection
     isoTracksSelection_loose = cms.string('pt > 0. && abs(eta)<5'),
     #trgMuonSelection       = cms.string('pt > 7 && abs(eta) < 1.5 '),
@@ -516,7 +515,7 @@ BToMuEPiTable = cms.EDProducer(
         sv_ze           = ufloat('hnl_vtx_ez'   ),
         ## HNL (only postfit information is saved) 
        # hnl_from_trgmu        = uint('hnl_from_trgmu'   ),
-        hnl_to_trgmu        = uint('hnl_from_trgmu'   ),
+        hnl_to_trgmu        = uint('hnl_to_trgmu'   ),
         hnl_mass        = ufloat('hnl_fitted_mass'   ),
         hnl_masserr     = ufloat('hnl_fitted_massErr'),
         hnl_pt          = ufloat('hnl_fitted_pt'     ),
