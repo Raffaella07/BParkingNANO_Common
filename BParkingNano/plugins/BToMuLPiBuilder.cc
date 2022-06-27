@@ -827,8 +827,8 @@ void BToMuLPiBuilder<Lepton>::produce(edm::StreamID, edm::Event &evt, edm::Event
           float massRelCut = 0.1;
 	  //Full candidate matching conditions
 	  if((trg_mu_isMatched==1 && sel_lep_isMatched==1 && pi_isMatched==1 && mupi_mass_reldiff<massRelCut ) // single particles matching + mass check
-	&& ( (triggerMuonMother_genIdx==hnlMother_genIdx && lep_ptr->charge()!=pi_ptr->charge() && fabs(genMuonMother_genPdgId)==9900015) // trgMu + HNL cand match
-	 || ( genMuonMother_genIdx==hnlMother_genIdx && trg_mu_ptr->charge()!=pi_ptr->charge () && fabs(genTriggerMuonMother_genPdgId)==9900015)))//lep +HNL  cand match 
+	&& ( (bidx ==0 && triggerMuonMother_genIdx==hnlMother_genIdx && lep_ptr->charge()!=pi_ptr->charge() && fabs(genMuonMother_genPdgId)==9900015) // trgMu + HNL cand match
+	 || (bidx==1 && genMuonMother_genIdx==hnlMother_genIdx && trg_mu_ptr->charge()!=pi_ptr->charge () && fabs(genTriggerMuonMother_genPdgId)==9900015)))//lep +HNL  cand match 
 	{
             isMatched = 1;
           }
