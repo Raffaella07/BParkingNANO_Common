@@ -196,7 +196,10 @@ void BToMuLPiBuilder<Lepton>::produce(edm::StreamID, edm::Event &evt, edm::Event
   
       // loop on selected muons and for a mu-pi candidate 
       // as well as a B candidate, that is HNL + trg mu
-      for(size_t lep_idx = 0; lep_idx < leptons->size(); ++lep_idx) {
+      int lep_startIdx;
+      if (lepton_type_ == "muon") lep_startIdx = trg_mu_idx+1;
+      else if (lepton_type_ == "ele") lep_startIdx = 0;
+      for(size_t lep_idx = lep_startIdx; lep_idx < leptons->size(); ++lep_idx) {
 
         edm::Ptr<Lepton> lep_ptr(leptons, lep_idx);
         //if(lep_ptr->isDSAMuon()) continue;
@@ -283,7 +286,7 @@ void BToMuLPiBuilder<Lepton>::produce(edm::StreamID, edm::Event &evt, edm::Event
         hnl_cand.setP4(trg_mu_p4 + pi_p4);
         hnl_cand.setCharge(trg_mu_ptr->charge() + pi_ptr->charge());
         
-       // if( !pre_vtx_selection_(hnl_cand) ) continue;
+        if( !pre_vtx_selection_(hnl_cand) ) continue;
 
         hnl_cand.addUserCand("trg_mu", trg_mu_ptr);
         hnl_cand.addUserCand("pi", pi_ptr);
@@ -397,9 +400,11 @@ void BToMuLPiBuilder<Lepton>::produce(edm::StreamID, edm::Event &evt, edm::Event
         b_cand[bidx].addUserFloat("p_daughters_cm", momentum_lepton_fitted_cm + momentum_pion_fitted_cm); 
 
         // displacement
-        float hnl_lxyz = sqrt(pow(trg_mu_ptr->vx() - hnl_cand.vx(), 2) + pow(trg_mu_ptr->vy() - hnl_cand.vy(), 2) + pow(trg_mu_ptr->vz() - hnl_cand.vz(), 2));
+        float hnl_lxyz;
+        if (bidx==0 ) hnl_lxyz = sqrt(pow(trg_mu_ptr->vx() - hnl_cand.vx(), 2) + pow(trg_mu_ptr->vy() - hnl_cand.vy(), 2) + pow(trg_mu_ptr->vz() - hnl_cand.vz(), 2));
+        else hnl_lxyz = sqrt(pow(lep_ptr->vx() - hnl_cand.vx(), 2) + pow(lep_ptr->vy() - hnl_cand.vy(), 2) + pow(lep_ptr->vz() - hnl_cand.vz(), 2));
         b_cand[bidx].addUserFloat("hnl_l_xyz", hnl_lxyz);
-        b_cand[bidx].addUserFloat("hnl_ct", hnl_lxyz / (hnl_cand.p4().Beta() * hnl_cand.p4().Gamma()));
+        b_cand[bidx].addUserFloat("hnl_ct", hnl_lxyz / (hnl_cand.p4().Beta() * hnl_cand.p4().Gamma()));// in cm
       
         // adding trigger muon information to the b candidate
         b_cand[bidx].addUserFloat("trg_muon_pt" , trg_mu_ptr->pt());
@@ -415,7 +420,8 @@ void BToMuLPiBuilder<Lepton>::produce(edm::StreamID, edm::Event &evt, edm::Event
         b_cand[bidx].addUserFloat("dilepton_Lxyz"  , sqrt(pow(trg_mu_ptr->vx()-lep_ptr->vx(), 2) + pow(trg_mu_ptr->vy()-lep_ptr->vy(), 2) + pow(trg_mu_ptr->vz()-lep_ptr->vz(), 2)));
         
         // difference between the z vertex position of the pion and tigger muon
-        b_cand[bidx].addUserFloat("pion_trgmuon_vzdiff", fabs(trg_mu_ptr->vz()-pi_ptr->vz()));
+	if (bidx==0 )b_cand[bidx].addUserFloat("pion_Blep_vzdiff", fabs(trg_mu_ptr->vz()-pi_ptr->vz()));
+        else b_cand[bidx].addUserFloat("pion_Blep_vzdiff", fabs(lep_ptr->vz()-pi_ptr->vz()));
 
         // fetch the id of the sel muon at the secondary vertex (use instead info saved in the muonsBPark collection?)
         //if(lepton_type_ == "muon"){
@@ -431,32 +437,59 @@ void BToMuLPiBuilder<Lepton>::produce(edm::StreamID, edm::Event &evt, edm::Event
         //}
 
         // adding dR quantities (with fitted quantities)
-        float dR_lep_pi    = reco::deltaR(fit.daughter_p4(0), fit.daughter_p4(1)); 
-        float dR_trgmu_hnl = reco::deltaR((*trg_mu_ptr), hnl_cand                     ); 
-        float dR_trgmu_lep = reco::deltaR((*trg_mu_ptr), fit.daughter_p4(0)        ); 
-        float dR_trgmu_pi  = reco::deltaR((*trg_mu_ptr), fit.daughter_p4(1)        ); 
+        float dR_lep_pi, dR_Blep_hnl, dR_Blep_lep, dR_Blep_pi; 
+	
+        dR_lep_pi    = reco::deltaR(fit.daughter_p4(0), fit.daughter_p4(1)); 
+
+	if (bidx==0){
+        dR_Blep_hnl = reco::deltaR((*trg_mu_ptr), hnl_cand                     ); 
+        dR_Blep_lep = reco::deltaR((*trg_mu_ptr), fit.daughter_p4(0)        ); 
+        dR_Blep_pi  = reco::deltaR((*trg_mu_ptr), fit.daughter_p4(1)        ); 
+	} else {
+        dR_Blep_hnl = reco::deltaR((*lep_ptr), hnl_cand                     ); 
+        dR_Blep_lep = reco::deltaR((*lep_ptr), fit.daughter_p4(0)        ); 
+        dR_Blep_pi  = reco::deltaR((*lep_ptr), fit.daughter_p4(1)        ); 
+	}
         b_cand[bidx].addUserFloat("dr_lep_pi"      , dR_lep_pi    );
-        b_cand[bidx].addUserFloat("dr_trgmu_hnl"   , dR_trgmu_hnl );
-        b_cand[bidx].addUserFloat("dr_trgmu_lep"   , dR_trgmu_lep  );
-        b_cand[bidx].addUserFloat("dr_trgmu_pi"    , dR_trgmu_pi  );
+        b_cand[bidx].addUserFloat("dr_Blep_hnl"   , dR_Blep_hnl );
+        b_cand[bidx].addUserFloat("dr_Blep_lep"   , dR_Blep_lep  );
+        b_cand[bidx].addUserFloat("dr_Blep_pi"    , dR_Blep_pi  );
 
-        float dPhi_lep_pi    = reco::deltaPhi(fit.daughter_p4(0).phi(), fit.daughter_p4(1).phi()); 
-        float dPhi_trgmu_hnl = reco::deltaPhi(trg_mu_ptr->phi(), fit_p4.phi()); 
-        float dPhi_trgmu_lep = reco::deltaPhi(trg_mu_ptr->phi(), fit.daughter_p4(0).phi()); 
-        float dPhi_trgmu_pi  = reco::deltaPhi(trg_mu_ptr->phi(), fit.daughter_p4(1).phi()); 
+        float dPhi_lep_pi, dPhi_Blep_hnl, dPhi_Blep_lep, dPhi_Blep_pi; 
+		
+        dPhi_lep_pi    = reco::deltaPhi(fit.daughter_p4(0).phi(), fit.daughter_p4(1).phi());
+
+	if (bidx==0){ 
+        dPhi_Blep_hnl = reco::deltaPhi(trg_mu_ptr->phi(), fit_p4.phi()); 
+        dPhi_Blep_lep = reco::deltaPhi(trg_mu_ptr->phi(), fit.daughter_p4(0).phi()); 
+        dPhi_Blep_pi  = reco::deltaPhi(trg_mu_ptr->phi(), fit.daughter_p4(1).phi()); 
+	}else{
+        dPhi_Blep_hnl = reco::deltaPhi(lep_ptr->phi(), fit_p4.phi()); 
+        dPhi_Blep_lep = reco::deltaPhi(lep_ptr->phi(), fit.daughter_p4(0).phi()); 
+        dPhi_Blep_pi  = reco::deltaPhi(lep_ptr->phi(), fit.daughter_p4(1).phi());
+	} 
         b_cand[bidx].addUserFloat("dphi_lep_pi"      , dPhi_lep_pi    );
-        b_cand[bidx].addUserFloat("dphi_trgmu_hnl"   , dPhi_trgmu_hnl );
-        b_cand[bidx].addUserFloat("dphi_trgmu_lep"   , dPhi_trgmu_lep );
-        b_cand[bidx].addUserFloat("dphi_trgmu_pi"    , dPhi_trgmu_pi  );
+        b_cand[bidx].addUserFloat("dphi_Blep_hnl"   , dPhi_Blep_hnl );
+        b_cand[bidx].addUserFloat("dphi_Blep_lep"   , dPhi_Blep_lep );
+        b_cand[bidx].addUserFloat("dphi_Blep_pi"    , dPhi_Blep_pi  );
 
-        float dEta_lep_pi    = fit.daughter_p4(0).eta() - fit.daughter_p4(1).eta(); 
-        float dEta_trgmu_hnl = trg_mu_ptr->eta() - fit_p4.eta(); 
-        float dEta_trgmu_lep = trg_mu_ptr->eta() - fit.daughter_p4(0).eta();
-        float dEta_trgmu_pi  = trg_mu_ptr->eta() - fit.daughter_p4(1).eta();
+        float dEta_lep_pi, dEta_Blep_hnl, dEta_Blep_lep, dEta_Blep_pi; 
+        
+	dEta_lep_pi    = fit.daughter_p4(0).eta() - fit.daughter_p4(1).eta(); 
+  
+	if(bidx==0){ 
+        dEta_Blep_hnl = trg_mu_ptr->eta() - fit_p4.eta(); 
+        dEta_Blep_lep = trg_mu_ptr->eta() - fit.daughter_p4(0).eta();
+        dEta_Blep_pi  = trg_mu_ptr->eta() - fit.daughter_p4(1).eta();
+	}else{
+        dEta_Blep_hnl = lep_ptr->eta() - fit_p4.eta(); 
+        dEta_Blep_lep = lep_ptr->eta() - fit.daughter_p4(0).eta();
+        dEta_Blep_pi  = lep_ptr->eta() - fit.daughter_p4(1).eta();
+	}
         b_cand[bidx].addUserFloat("deta_lep_pi"      , dEta_lep_pi    );
-        b_cand[bidx].addUserFloat("deta_trgmu_hnl"   , dEta_trgmu_hnl );
-        b_cand[bidx].addUserFloat("deta_trgmu_lep"   , dEta_trgmu_lep );
-        b_cand[bidx].addUserFloat("deta_trgmu_pi"    , dEta_trgmu_pi  );
+        b_cand[bidx].addUserFloat("deta_Blep_hnl"   , dEta_Blep_hnl );
+        b_cand[bidx].addUserFloat("deta_Blep_lep"   , dEta_Blep_lep );
+        b_cand[bidx].addUserFloat("deta_Blep_pi"    , dEta_Blep_pi  );
 
         // difference of the kinematics of the objects and their fitted value
         float dE_pi_fit_pi   = pi_p4.energy() - fit.daughter_p4(1).energy();
@@ -675,15 +708,19 @@ void BToMuLPiBuilder<Lepton>::produce(edm::StreamID, edm::Event &evt, edm::Event
         b_cand[bidx].addUserInt("pi_idx", pi_idx);
 
         // invariant masses
-        float dilepton_mass = (fit.daughter_p4(0) + trg_mu_p4).mass();
-        float trgmu_pi_mass = (fit.daughter_p4(1) + trg_mu_p4).mass();
+        float dilepton_mass = (lep_p4+ trg_mu_p4).mass(); //generalizing dilepton mass to new signature
+        float Blep_pi_mass;
+	if (bidx ==0)  Blep_pi_mass= (fit.daughter_p4(1) + trg_mu_p4).mass();
+	else  Blep_pi_mass= (fit.daughter_p4(1) +lep_p4).mass();
         b_cand[bidx].addUserFloat("dilepton_mass", dilepton_mass);
-        b_cand[bidx].addUserFloat("trgmu_pi_mass", trgmu_pi_mass);
+        b_cand[bidx].addUserFloat("Blep_pi_mass", Blep_pi_mass);
 
-        float dilepton_pt = (fit.daughter_p4(0) + trg_mu_p4).pt();
-        float trgmu_pi_pt = (fit.daughter_p4(1) + trg_mu_p4).pt();
+        float dilepton_pt =(lep_p4 + trg_mu_p4).pt();
+        float Blep_pi_pt;
+	if (bidx ==0)  Blep_pi_pt= (fit.daughter_p4(1) + trg_mu_p4).pt();
+	else  Blep_pi_pt= (fit.daughter_p4(1) +lep_p4).pt();
         b_cand[bidx].addUserFloat("dilepton_pt", dilepton_pt);
-        b_cand[bidx].addUserFloat("trgmu_pi_pt", trgmu_pi_pt);
+        b_cand[bidx].addUserFloat("Blep_pi_pt", Blep_pi_pt);
 
         // extra selection
       //  if( !extra_selection_(b_cand[bidx]) ) continue;        
@@ -829,8 +866,9 @@ void BToMuLPiBuilder<Lepton>::produce(edm::StreamID, edm::Event &evt, edm::Event
 	  if((trg_mu_isMatched==1 && sel_lep_isMatched==1 && pi_isMatched==1 && mupi_mass_reldiff<massRelCut ) // single particles matching + mass check
 	&& ( (bidx ==0 && triggerMuonMother_genIdx==hnlMother_genIdx && lep_ptr->charge()!=pi_ptr->charge() && fabs(genMuonMother_genPdgId)==9900015) // trgMu + HNL cand match
 	 || (bidx==1 && genMuonMother_genIdx==hnlMother_genIdx && trg_mu_ptr->charge()!=pi_ptr->charge () && fabs(genTriggerMuonMother_genPdgId)==9900015)))//lep +HNL  cand match 
-	{
+	{   
             isMatched = 1;
+	    std::cout << "idx" << bidx << "lxy gen" << gen_hnl_lxy << "reco lxy" << lxy.value() << std::endl;
           }
         }
 
