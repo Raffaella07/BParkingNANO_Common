@@ -38,12 +38,14 @@ public:
   typedef std::vector<reco::TransientTrack> TransientTrackCollection;
 
   explicit BToMuLPiBuilder(const edm::ParameterSet &cfg):
-    pi_selection_          {cfg.getParameter<std::string>("pionSelection_loose")},
+    pi_selection_          {cfg.getParameter<std::string>("pionSelection")},
     isotrk_selection_      {cfg.getParameter<std::string>("isoTracksSelection")},
-    trgmu_selection_       {cfg.getParameter<std::string>("trgMuonSelection_loose")},
-    lep_selection_         {cfg.getParameter<std::string>("leptonSelection_loose")},
+    trgmu_selection_       {cfg.getParameter<std::string>("trgMuonSelection")},
+    lep_selection_         {cfg.getParameter<std::string>("leptonSelection")},
+    trgmu_displacement_selection_         {cfg.getParameter<std::string>("trgmu_displacementSelection")},
+    lepton_displacement_selection_         {cfg.getParameter<std::string>("lepton_displacementSelection")},
     pre_vtx_selection_     {cfg.getParameter<std::string>("preVtxSelection")},
-    post_vtx_selection_    {cfg.getParameter<std::string>("postVtxSelection_loose")},
+    post_vtx_selection_    {cfg.getParameter<std::string>("postVtxSelection")},
     extra_selection_       {cfg.getParameter<std::string>("extraSelection")},
     pi_selection_dsa_      {cfg.getParameter<std::string>("pionSelection_dsa")},
     trgmu_selection_dsa_   {cfg.getParameter<std::string>("trgMuonSelection_dsa")},
@@ -87,6 +89,8 @@ private:
   const StringCutObjectSelector<pat::PackedCandidate> isotrk_selection_;
   const StringCutObjectSelector<pat::ETHMuon> trgmu_selection_; 
   const StringCutObjectSelector<Lepton> lep_selection_; 
+  const StringCutObjectSelector<pat::ETHMuon> trgmu_displacement_selection_; 
+  const StringCutObjectSelector<Lepton> lepton_displacement_selection_; 
   const StringCutObjectSelector<pat::CompositeCandidate> pre_vtx_selection_; 
   // post-fitter preselection 
   const StringCutObjectSelector<pat::CompositeCandidate> post_vtx_selection_; 
@@ -204,6 +208,7 @@ void BToMuLPiBuilder<Lepton>::produce(edm::StreamID, edm::Event &evt, edm::Event
         edm::Ptr<Lepton> lep_ptr(leptons, lep_idx);
         //if(lep_ptr->isDSAMuon()) continue;
        
+      if( !lep_selection_(*lep_ptr) ) continue;
    
         // the second muon must be _other_ than the trigger muon
       if(lep_ptr->pt()==trg_mu_ptr->pt()) { // lacking of any better idea for a comparison by pointer... 
@@ -222,7 +227,6 @@ void BToMuLPiBuilder<Lepton>::produce(edm::StreamID, edm::Event &evt, edm::Event
         }
 
         // selection on the lepton
-        if( !lep_selection_(*lep_ptr) ) continue;
 
         //if( lep_ptr->userInt("isDSAMuon")!=1 && !trgmu_selection_(*trg_mu_ptr) ) continue;
         //if( lep_ptr->userInt("isDSAMuon")==1 && !trgmu_selection_dsa_(*trg_mu_ptr) ) continue;
@@ -250,6 +254,8 @@ void BToMuLPiBuilder<Lepton>::produce(edm::StreamID, edm::Event &evt, edm::Event
 	int bidx;
 	KinVtxFitter fit;
 	for (bidx=0;bidx<2;bidx++){
+	
+        if((bidx==0 &&  !lepton_displacement_selection_(*lep_ptr)) || (bidx==1 &&  !trgmu_displacement_selection_(*trg_mu_ptr))) continue;
         pat::CompositeCandidate hnl_cand;
         // fit the mu-pi vertex
         //
@@ -708,7 +714,7 @@ void BToMuLPiBuilder<Lepton>::produce(edm::StreamID, edm::Event &evt, edm::Event
         b_cand[bidx].addUserInt("pi_idx", pi_idx);
 
         // invariant masses
-        float dilepton_mass = (lep_p4+ trg_mu_p4).mass(); //generalizing dilepton mass to new signature
+        float dilepton_mass = (lep_p4+trg_mu_p4).mass(); //generalizing dilepton mass to new signature
         float Blep_pi_mass;
 	if (bidx ==0)  Blep_pi_mass= (fit.daughter_p4(1) + trg_mu_p4).mass();
 	else  Blep_pi_mass= (fit.daughter_p4(1) +lep_p4).mass();
@@ -868,7 +874,7 @@ void BToMuLPiBuilder<Lepton>::produce(edm::StreamID, edm::Event &evt, edm::Event
 	 || (bidx==1 && genMuonMother_genIdx==hnlMother_genIdx && trg_mu_ptr->charge()!=pi_ptr->charge () && fabs(genTriggerMuonMother_genPdgId)==9900015)))//lep +HNL  cand match 
 	{   
             isMatched = 1;
-	    std::cout << "idx" << bidx << "lxy gen" << gen_hnl_lxy << "reco lxy" << lxy.value() << std::endl;
+
           }
         }
 
